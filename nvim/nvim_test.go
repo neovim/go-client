@@ -100,26 +100,29 @@ func TestAPI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		err = v.SetBufferVar(buf, "foo", "bar")
+		err = v.SetBufferVar(buf, "bvar", "bval")
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		var s string
-		err = v.BufferVar(buf, "foo", &s)
+		err = v.BufferVar(buf, "bvar", &s)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if s != "bar" {
-			t.Fatalf("expected foo=bar, got %s", s)
+		if s != "bval" {
+			t.Fatalf("expected bvar=bval, got %s", s)
 		}
-		var ps *string
-		err = v.BufferVar(buf, "foo", &ps)
+
+		err = v.DeleteBufferVar(buf, "bvar")
 		if err != nil {
 			t.Fatal(err)
 		}
-		if ps == nil || *ps != "bar" {
-			t.Fatalf("expected foo=bar, got %v", ps)
+
+		s = ""
+		err = v.BufferVar(buf, "bvar", &s)
+		if err == nil {
+			t.Errorf("expected key not found error")
 		}
 	}
 
@@ -194,25 +197,55 @@ func TestAPI(t *testing.T) {
 
 	// Vars
 	{
-		if err := v.SetVar("foo", "bar"); err != nil {
+		if err := v.SetVar("gvar", "gval"); err != nil {
 			t.Fatal(err)
 		}
-		var foo interface{}
-		if err := v.Var("foo", &foo); err != nil {
+		var value interface{}
+		if err := v.Var("gvar", &value); err != nil {
 			t.Fatal(err)
 		}
-		if foo != "bar" {
-			t.Errorf("got %v, want %q", foo, "bar")
+		if value != "gval" {
+			t.Errorf("got %v, want %q", value, "gval")
 		}
-		if err := v.SetVar("foo", ""); err != nil {
+		if err := v.SetVar("gvar", ""); err != nil {
 			t.Fatal(err)
 		}
-		foo = nil
-		if err := v.Var("foo", &foo); err != nil {
+		value = nil
+		if err := v.Var("gvar", &value); err != nil {
 			t.Fatal(err)
 		}
-		if foo != "" {
-			t.Errorf("got %v, want %q", foo, "")
+		if value != "" {
+			t.Errorf("got %v, want %q", value, "")
+		}
+	}
+
+	// Set variable to struct value
+	{
+		var expected, actual struct {
+			Str string
+			Num int
+		}
+		expected.Str = "Hello"
+		expected.Num = 42
+		if err := v.SetVar("structvar", &expected); err != nil {
+			t.Fatal(err)
+		}
+		if err := v.Var("structvar", &actual); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(&actual, &expected) {
+			t.Errorf("got %+v, want %+v", &actual, &expected)
+		}
+	}
+
+	// Eval
+	{
+		var a, b string
+		if err := v.Eval(`["hello", "world"]`, []*string{&a, &b}); err != nil {
+			t.Error(err)
+		}
+		if a != "hello" || b != "world" {
+			t.Errorf("a=%q b=%q, want a=hello b=world", a, b)
 		}
 	}
 
