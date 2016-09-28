@@ -84,11 +84,13 @@ func (d *Decoder) Decode(v interface{}) (err error) {
 	}
 	ds.unpack()
 	rv := reflect.ValueOf(v)
-	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+	if (rv.Kind() != reflect.Ptr && rv.Kind() != reflect.Slice && rv.Kind() != reflect.Map) || rv.IsNil() {
 		ds.skip()
-		return errors.New("msgpack: argument to Decode must be non-nil pointer")
+		return errors.New("msgpack: argument to Decode must be non-nil pointer slice or map")
 	}
-	rv = rv.Elem()
+	if rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
 	decoderForType(rv.Type(), nil)(ds, rv)
 	return ds.errSaved
 }

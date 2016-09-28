@@ -41,9 +41,12 @@ func ptrInt(i int) *int {
 }
 
 var decodeTests = []struct {
-	pv   func() interface{}
+	// arg is argument for Decode().
+	arg func() interface{}
+	// data is data to decode.
 	data []interface{}
-	v    interface{}
+	// expected is the expected decoded value.
+	expected interface{}
 }{
 	// int
 	{func() interface{} { return new(int) }, []interface{}{int64(1234)}, int(1234)},
@@ -81,10 +84,15 @@ var decodeTests = []struct {
 	// []string elements set, but not resized.
 	{func() interface{} { return &testDecStruct{I: []string{"hello", "world"}} }, []interface{}{mapLen(1), "I", arrayLen(1), "foo"}, testDecStruct{I: []string{"foo", ""}}},
 
-	// Slice
+	// *Slice
 	{func() interface{} { return new([]string) }, []interface{}{arrayLen(2), "foo", "bar"}, []string{"foo", "bar"}},
 	{func() interface{} { x := make([]string, 1); return &x }, []interface{}{arrayLen(2), "foo", "bar"}, []string{"foo", "bar"}},
 	{func() interface{} { x := make([]string, 3); return &x }, []interface{}{arrayLen(2), "foo", "bar"}, []string{"foo", "bar"}},
+
+	// Slice
+	{func() interface{} { return []string{"", ""} }, []interface{}{arrayLen(2), "foo", "bar"}, []string{"foo", "bar"}},
+	{func() interface{} { return []string{""} }, []interface{}{arrayLen(2), "foo", "bar"}, []string{"foo"}},
+	{func() interface{} { return []string{"", "bar"} }, []interface{}{arrayLen(1), "foo"}, []string{"foo", ""}},
 
 	// Array
 	{func() interface{} { x := [...]string{"foo", "bar", "quux"}; return &x }, []interface{}{arrayLen(2), "hello", "world"}, [...]string{"hello", "world", ""}},
@@ -92,6 +100,12 @@ var decodeTests = []struct {
 
 	// Struct array
 	{func() interface{} { return new(testDecArrayStruct) }, []interface{}{arrayLen(2), int64(22), "skidoo"}, testDecArrayStruct{22, "skidoo"}},
+
+	// Map
+	{func() interface{} { return make(map[string]string) }, []interface{}{mapLen(1), "foo", "bar"}, map[string]string{"foo": "bar"}},
+
+	// *Map
+	{func() interface{} { return new(map[string]string) }, []interface{}{mapLen(1), "foo", "bar"}, map[string]string{"foo": "bar"}},
 
 	// TODO: test errors like the following:
 	// {func() interface{} { return &testDecStruct{I: 1234} }, []interface{}{mapLen(1), "I", int64(5678)}, testDecStruct{I: 1234}},
@@ -107,9 +121,9 @@ func TestDecode(t *testing.T) {
 		dec := NewDecoder(bytes.NewReader(data))
 		buf, _ := dec.r.Peek(0)
 
-		pv := tt.pv()
-		if err := dec.Decode(pv); err != nil {
-			t.Errorf("decode(%+v, %T) returned error %v", tt.data, pv, err)
+		arg := tt.arg()
+		if err := dec.Decode(arg); err != nil {
+			t.Errorf("decode(%+v, %T) returned error %v", tt.data, arg, err)
 			continue
 		}
 
@@ -119,14 +133,18 @@ func TestDecode(t *testing.T) {
 			buf[i] = 0xff
 		}
 
-		v := reflect.ValueOf(pv).Elem().Interface()
-		if !reflect.DeepEqual(v, tt.v) {
-			t.Errorf("decode(%+v, %T) returned %#v, want %#v", tt.data, pv, v, tt.v)
+		rv := reflect.ValueOf(arg)
+		if rv.Kind() == reflect.Ptr {
+			rv = rv.Elem()
+		}
+		v := rv.Interface()
+		if !reflect.DeepEqual(v, tt.expected) {
+			t.Errorf("decode(%+v, %T) returned %#v, want %#v", tt.data, arg, v, tt.expected)
 		}
 
 		// Decode should read to EOF.
 		if _, err := dec.r.ReadByte(); err != io.EOF {
-			t.Errorf("decode(%+v, %T) did not read to EOF", tt.data, pv)
+			t.Errorf("decode(%+v, %T) did not read to EOF", tt.data, arg)
 		}
 	}
 }
