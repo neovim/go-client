@@ -173,6 +173,11 @@ func TabpageWindow(tabpage Tabpage) Window {
 	name(nvim_tabpage_get_win)
 }
 
+// TabpageNumber gets the tabpage number from the tabpage handle.
+func TabpageNumber(tabpage Tabpage) int {
+	name(nvim_tabpage_get_number)
+}
+
 // IsTabpageValid checks if a tab page is valid.
 func IsTabpageValid(tabpage Tabpage) bool {
 	name(nvim_tabpage_is_valid)
@@ -465,6 +470,11 @@ func WindowPosition(window Window) [2]int {
 // WindowTabpage gets the tab page that contains the window.
 func WindowTabpage(window Window) Tabpage {
 	name(nvim_win_get_tabpage)
+}
+
+// WindowNumber gets the window number from the window handle.
+func WindowNumber(window Window) int {
+	name(nvim_win_get_number)
 }
 
 // IsWindowValid returns true if the window is valid.

@@ -15,6 +15,7 @@
 package nvim
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -23,6 +24,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/neovim/go-client/msgpack"
 	"github.com/neovim/go-client/msgpack/rpc"
 )
 
@@ -211,6 +213,119 @@ func (v *Nvim) ChannelID() int {
 
 func (v *Nvim) call(sm string, result interface{}, args ...interface{}) error {
 	return fixError(sm, v.ep.Call(sm, result, args...))
+}
+
+// NewBatch creates a new batch.
+func (v *Nvim) NewBatch() *Batch {
+	b := &Batch{ep: v.ep}
+	b.enc = msgpack.NewEncoder(&b.buf)
+	return b
+}
+
+// Batch collects API function calls and executes them atomically.
+//
+// The function calls in the batch are executed without processing requests
+// from other clients, redrawing or allowing user interaction in between.
+// Functions that could fire autocommands or do event processing still might do
+// so. For instance invoking the :sleep command might call timer callbacks.
+//
+// Call the Execute() method to execute the commands in the batch. Result
+// parameters in the API function calls are set in the call to Execute.  If an
+// API function call fails, all results proceeding the call are set and a
+// *BatchError is returned.
+//
+// A Batch does not support concurrent calls by the application.
+type Batch struct {
+	ep      *rpc.Endpoint
+	buf     bytes.Buffer
+	enc     *msgpack.Encoder
+	sms     []string
+	results []interface{}
+	err     error
+}
+
+// Execute executes the API function calls in the batch.
+func (b *Batch) Execute() error {
+	defer func() {
+		b.buf.Reset()
+		b.sms = b.sms[:0]
+		b.results = b.results[:0]
+		b.err = nil
+	}()
+
+	if b.err != nil {
+		return b.err
+	}
+
+	result := struct {
+		Results []interface{} `msgpack:",array"`
+		Error   *struct {
+			Index   int `msgpack:",array"`
+			Type    int
+			Message string
+		}
+	}{
+		b.results,
+		nil,
+	}
+
+	err := b.ep.Call("nvim_call_atomic", &result, &batchArg{n: len(b.sms), p: b.buf.Bytes()})
+	if err != nil {
+		return err
+	}
+
+	e := result.Error
+	if e == nil {
+		return nil
+	}
+
+	if e.Index < 0 || e.Index >= len(b.sms) ||
+		(e.Type != exceptionError && e.Type != validationError) {
+		return fmt.Errorf("nvim:nvim_call_atomic %d %d %s", e.Index, e.Type, e.Message)
+	}
+	errorType := "exception"
+	if e.Type == validationError {
+		errorType = "validation"
+	}
+	return &BatchError{
+		Index: e.Index,
+		Err:   fmt.Errorf("nvim:%s %s: %s", b.sms[e.Index], errorType, e.Message),
+	}
+}
+
+func (b *Batch) call(sm string, result interface{}, args ...interface{}) {
+	if b.err != nil {
+		return
+	}
+	b.sms = append(b.sms, sm)
+	b.results = append(b.results, result)
+	b.enc.PackArrayLen(2)
+	b.enc.PackString(sm)
+	b.err = b.enc.Encode(args)
+}
+
+type batchArg struct {
+	n int
+	p []byte
+}
+
+func (a *batchArg) MarshalMsgPack(enc *msgpack.Encoder) error {
+	enc.PackArrayLen(a.n)
+	return enc.PackRaw(a.p)
+}
+
+// BatchError represents an error from a API function call in a Batch.
+type BatchError struct {
+	// Index is a zero-based index of the function call which resulted in the
+	// error.
+	Index int
+
+	// Err is the error.
+	Err error
+}
+
+func (e *BatchError) Error() string {
+	return e.Err.Error()
 }
 
 // NewPipeline creates a new pipeline.

@@ -294,3 +294,10 @@ func (e *Encoder) PackFloat(f float64) error {
 	_, err := e.w.Write(e.buf[:9])
 	return err
 }
+
+// PackRaw writes bytes directly to the MessagePack stream. It is the
+// application's responsibility to ensure that the bytes are valid.
+func (e *Encoder) PackRaw(p []byte) error {
+	_, err := e.w.Write(p)
+	return err
+}

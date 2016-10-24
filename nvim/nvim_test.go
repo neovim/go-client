@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -55,14 +56,12 @@ func helloHandler(s string) (string, error) {
 func TestAPI(t *testing.T) {
 	v, cleanup := newEmbeddedNvim(t)
 	defer cleanup()
-
 	cid := v.ChannelID()
 	if cid <= 0 {
 		t.Fatal("could not get channel id")
 	}
 
-	// Simple handler.
-	{
+	t.Run("simpleHandler", func(t *testing.T) {
 		if err := v.RegisterHandler("hello", helloHandler); err != nil {
 			t.Fatal(err)
 		}
@@ -74,10 +73,9 @@ func TestAPI(t *testing.T) {
 		if result != expected {
 			t.Errorf("hello returned %q, want %q", result, expected)
 		}
-	}
+	})
 
-	// Buffers
-	{
+	t.Run("buffer", func(t *testing.T) {
 		bufs, err := v.Buffers()
 		if err != nil {
 			t.Fatal(err)
@@ -124,10 +122,9 @@ func TestAPI(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected key not found error")
 		}
-	}
+	})
 
-	// Windows
-	{
+	t.Run("window", func(t *testing.T) {
 		wins, err := v.Windows()
 		if err != nil {
 			t.Fatal(err)
@@ -149,10 +146,9 @@ func TestAPI(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-	}
+	})
 
-	// Tabpage
-	{
+	t.Run("tabpage", func(t *testing.T) {
 		pages, err := v.Tabpages()
 		if err != nil {
 			t.Fatal(err)
@@ -174,10 +170,9 @@ func TestAPI(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-	}
+	})
 
-	// Lines
-	{
+	t.Run("lines", func(t *testing.T) {
 		buf, err := v.CurrentBuffer()
 		if err != nil {
 			t.Fatal(err)
@@ -193,10 +188,9 @@ func TestAPI(t *testing.T) {
 		if !reflect.DeepEqual(lines2, lines) {
 			t.Fatalf("lines = %+v, want %+v", lines2, lines)
 		}
-	}
+	})
 
-	// Vars
-	{
+	t.Run("var", func(t *testing.T) {
 		if err := v.SetVar("gvar", "gval"); err != nil {
 			t.Fatal(err)
 		}
@@ -217,10 +211,9 @@ func TestAPI(t *testing.T) {
 		if value != "" {
 			t.Errorf("got %v, want %q", value, "")
 		}
-	}
+	})
 
-	// Set variable to struct value
-	{
+	t.Run("structValue", func(t *testing.T) {
 		var expected, actual struct {
 			Str string
 			Num int
@@ -236,10 +229,9 @@ func TestAPI(t *testing.T) {
 		if !reflect.DeepEqual(&actual, &expected) {
 			t.Errorf("got %+v, want %+v", &actual, &expected)
 		}
-	}
+	})
 
-	// Eval
-	{
+	t.Run("eval", func(t *testing.T) {
 		var a, b string
 		if err := v.Eval(`["hello", "world"]`, []*string{&a, &b}); err != nil {
 			t.Error(err)
@@ -247,19 +239,94 @@ func TestAPI(t *testing.T) {
 		if a != "hello" || b != "world" {
 			t.Errorf("a=%q b=%q, want a=hello b=world", a, b)
 		}
-	}
+	})
 
-	// Pipeline
-	{
+	t.Run("batch", func(t *testing.T) {
+		b := v.NewBatch()
+		results := make([]int, 128)
+
+		for i := range results {
+			b.SetVar(fmt.Sprintf("batch%d", i), i)
+		}
+
+		for i := range results {
+			b.Var(fmt.Sprintf("batch%d", i), &results[i])
+		}
+
+		if err := b.Execute(); err != nil {
+			t.Fatal(err)
+		}
+
+		for i := range results {
+			if results[i] != i {
+				t.Fatalf("result[i] = %d, want %d", results[i], i)
+			}
+		}
+
+		// Reuse batch
+
+		var i int
+		b.Var("batch3", &i)
+		if err := b.Execute(); err != nil {
+			log.Fatal(err)
+		}
+		if i != 3 {
+			t.Fatalf("i = %d, want %d", i, 3)
+		}
+
+		// Check for *BatchError
+
+		const errorIndex = 3
+
+		for i := range results {
+			results[i] = -1
+		}
+
+		for i := range results {
+			if i == errorIndex {
+				b.Var("batch_bad_var", &results[i])
+			} else {
+				b.Var(fmt.Sprintf("batch%d", i), &results[i])
+			}
+		}
+		err := b.Execute()
+		if e, ok := err.(*BatchError); !ok || e.Index != errorIndex {
+			t.Errorf("unxpected error %T %v", e, e)
+		}
+		// Expect results proceeding error.
+		for i := 0; i < errorIndex; i++ {
+			if results[i] != i {
+				t.Errorf("result[i] = %d, want %d", results[i], i)
+				break
+			}
+		}
+		// No results after error.
+		for i := errorIndex; i < len(results); i++ {
+			if results[i] != -1 {
+				t.Errorf("result[i] = %d, want %d", results[i], -1)
+				break
+			}
+		}
+
+		// Execute should return marshal error for argument that cannot be marshaled.
+		b.SetVar("batch0", make(chan bool))
+		err = b.Execute()
+		if err == nil || !strings.Contains(err.Error(), "chan bool") {
+			t.Errorf("err = nil, expect error containing text 'chan bool'")
+		}
+
+	})
+
+	t.Run("pipeline", func(t *testing.T) {
 		p := v.NewPipeline()
 		results := make([]int, 128)
 
 		for i := range results {
-			p.SetVar(fmt.Sprintf("v%d", i), i)
+			p.SetVar(fmt.Sprintf("batch%d", i), i)
 		}
 
 		for i := range results {
-			p.Var(fmt.Sprintf("v%d", i), &results[i])
+			p.Var(fmt.Sprintf("batch%d", i), &results[i])
 		}
 
 		if err := p.Wait(); err != nil {
@@ -275,22 +342,21 @@ func TestAPI(t *testing.T) {
 		// Reuse pipeline
 
 		var i int
-		p.Var("v3", &i)
+		p.Var("batch3", &i)
 		if err := p.Wait(); err != nil {
 			log.Fatal(err)
 		}
 		if i != 3 {
 			t.Fatalf("i = %d, want %d", i, 3)
 		}
-	}
+	})
 
-	// Call with no args.
-	{
+	t.Run("callWithNoArgs", func(t *testing.T) {
 		var wd string
 		err := v.Call("getcwd", &wd)
 		if err != nil {
 			t.Fatal(err)
 		}
-	}
+	})
 
 }

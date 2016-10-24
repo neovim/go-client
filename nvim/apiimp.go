@@ -118,6 +118,11 @@ func (v *Nvim) BufferLineCount(buffer Buffer) (int, error) {
 }
 
 // BufferLineCount returns the number of lines in the buffer.
+func (b *Batch) BufferLineCount(buffer Buffer, result *int) {
+	b.call("nvim_buf_line_count", result, buffer)
+}
+
+// BufferLineCount returns the number of lines in the buffer.
 func (p *Pipeline) BufferLineCount(buffer Buffer, result *int) {
 	p.call("nvim_buf_line_count", result, buffer)
 }
@@ -134,6 +139,18 @@ func (v *Nvim) BufferLines(buffer Buffer, start int, end int, strict bool) ([][]
 	var result [][]byte
 	err := v.call("nvim_buf_get_lines", &result, buffer, start, end, strict)
 	return result, err
+}
+
+// BufferLines retrieves a line range from a buffer.
+//
+// Indexing is zero-based, end-exclusive. Negative indices are interpreted as
+// length+1+index, i e -1 refers to the index past the end. So to get the last
+// element set start=-2 and end=-1.
+//
+// Out-of-bounds indices are clamped to the nearest valid value, unless strict
+// = true.
+func (b *Batch) BufferLines(buffer Buffer, start int, end int, strict bool, result *[][]byte) {
+	b.call("nvim_buf_get_lines", result, buffer, start, end, strict)
 }
 
 // BufferLines retrieves a line range from a buffer.
@@ -174,6 +191,21 @@ func (v *Nvim) SetBufferLines(buffer Buffer, start int, end int, strict bool, re
 //
 // Out-of-bounds indices are clamped to the nearest valid value, unless strict
 // = true.
+func (b *Batch) SetBufferLines(buffer Buffer, start int, end int, strict bool, replacement [][]byte) {
+	b.call("nvim_buf_set_lines", nil, buffer, start, end, strict, replacement)
+}
+
+// SetBufferLines replaces a line range on a buffer.
+//
+// Indexing is zero-based, end-exclusive. Negative indices are interpreted as
+// length+1+index, ie -1 refers to the index past the end. So to change or
+// delete the last element set start=-2 and end=-1.
+//
+// To insert lines at a given index, set both start and end to the same index.
+// To delete a range of lines, set replacement to an empty array.
+//
+// Out-of-bounds indices are clamped to the nearest valid value, unless strict
+// = true.
 func (p *Pipeline) SetBufferLines(buffer Buffer, start int, end int, strict bool, replacement [][]byte) {
 	p.call("nvim_buf_set_lines", nil, buffer, start, end, strict, replacement)
 }
@@ -181,6 +213,11 @@ func (p *Pipeline) SetBufferLines(buffer Buffer, start int, end int, strict bool
 // BufferVar gets a buffer-scoped (b:) variable.
 func (v *Nvim) BufferVar(buffer Buffer, name string, result interface{}) error {
 	return v.call("nvim_buf_get_var", result, buffer, name)
+}
+
+// BufferVar gets a buffer-scoped (b:) variable.
+func (b *Batch) BufferVar(buffer Buffer, name string, result interface{}) {
+	b.call("nvim_buf_get_var", result, buffer, name)
 }
 
 // BufferVar gets a buffer-scoped (b:) variable.
@@ -194,6 +231,11 @@ func (v *Nvim) SetBufferVar(buffer Buffer, name string, value interface{}) error
 }
 
 // SetBufferVar sets a buffer-scoped (b:) variable.
+func (b *Batch) SetBufferVar(buffer Buffer, name string, value interface{}) {
+	b.call("nvim_buf_set_var", nil, buffer, name, value)
+}
+
+// SetBufferVar sets a buffer-scoped (b:) variable.
 func (p *Pipeline) SetBufferVar(buffer Buffer, name string, value interface{}) {
 	p.call("nvim_buf_set_var", nil, buffer, name, value)
 }
@@ -201,6 +243,11 @@ func (p *Pipeline) SetBufferVar(buffer Buffer, name string, value interface{}) {
 // DeleteBufferVar removes a buffer-scoped (b:) variable.
 func (v *Nvim) DeleteBufferVar(buffer Buffer, name string) error {
 	return v.call("nvim_buf_del_var", nil, buffer, name)
+}
+
+// DeleteBufferVar removes a buffer-scoped (b:) variable.
+func (b *Batch) DeleteBufferVar(buffer Buffer, name string) {
+	b.call("nvim_buf_del_var", nil, buffer, name)
 }
 
 // DeleteBufferVar removes a buffer-scoped (b:) variable.
@@ -214,6 +261,11 @@ func (v *Nvim) BufferOption(buffer Buffer, name string, result interface{}) erro
 }
 
 // BufferOption gets a buffer option value.
+func (b *Batch) BufferOption(buffer Buffer, name string, result interface{}) {
+	b.call("nvim_buf_get_option", result, buffer, name)
+}
+
+// BufferOption gets a buffer option value.
 func (p *Pipeline) BufferOption(buffer Buffer, name string, result interface{}) {
 	p.call("nvim_buf_get_option", result, buffer, name)
 }
@@ -222,6 +274,12 @@ func (p *Pipeline) BufferOption(buffer Buffer, name string, result interface{}) 
 // in the case where there's a global fallback.
 func (v *Nvim) SetBufferOption(buffer Buffer, name string, value interface{}) error {
 	return v.call("nvim_buf_set_option", nil, buffer, name, value)
+}
+
+// SetBufferOption sets a buffer option value. The value nil deletes the option
+// in the case where there's a global fallback.
+func (b *Batch) SetBufferOption(buffer Buffer, name string, value interface{}) {
+	b.call("nvim_buf_set_option", nil, buffer, name, value)
 }
 
 // SetBufferOption sets a buffer option value. The value nil deletes the option
@@ -238,6 +296,11 @@ func (v *Nvim) BufferNumber(buffer Buffer) (int, error) {
 }
 
 // BufferNumber gets a buffer's number.
+func (b *Batch) BufferNumber(buffer Buffer, result *int) {
+	b.call("nvim_buf_get_number", result, buffer)
+}
+
+// BufferNumber gets a buffer's number.
 func (p *Pipeline) BufferNumber(buffer Buffer, result *int) {
 	p.call("nvim_buf_get_number", result, buffer)
 }
@@ -250,6 +313,11 @@ func (v *Nvim) BufferName(buffer Buffer) (string, error) {
 }
 
 // BufferName gets the full file name of a buffer.
+func (b *Batch) BufferName(buffer Buffer, result *string) {
+	b.call("nvim_buf_get_name", result, buffer)
+}
+
+// BufferName gets the full file name of a buffer.
 func (p *Pipeline) BufferName(buffer Buffer, result *string) {
 	p.call("nvim_buf_get_name", result, buffer)
 }
@@ -258,6 +326,12 @@ func (p *Pipeline) BufferName(buffer Buffer, result *string) {
 // BufFilePre/BufFilePost are triggered.
 func (v *Nvim) SetBufferName(buffer Buffer, name string) error {
 	return v.call("nvim_buf_set_name", nil, buffer, name)
+}
+
+// SetBufferName sets the full file name of a buffer.
+// BufFilePre/BufFilePost are triggered.
+func (b *Batch) SetBufferName(buffer Buffer, name string) {
+	b.call("nvim_buf_set_name", nil, buffer, name)
 }
 
 // SetBufferName sets the full file name of a buffer.
@@ -274,6 +348,11 @@ func (v *Nvim) IsBufferValid(buffer Buffer) (bool, error) {
 }
 
 // IsBufferValid returns true if the buffer is valid.
+func (b *Batch) IsBufferValid(buffer Buffer, result *bool) {
+	b.call("nvim_buf_is_valid", result, buffer)
+}
+
+// IsBufferValid returns true if the buffer is valid.
 func (p *Pipeline) IsBufferValid(buffer Buffer, result *bool) {
 	p.call("nvim_buf_is_valid", result, buffer)
 }
@@ -283,6 +362,11 @@ func (v *Nvim) BufferMark(buffer Buffer, name string) ([2]int, error) {
 	var result [2]int
 	err := v.call("nvim_buf_get_mark", &result, buffer, name)
 	return result, err
+}
+
+// BufferMark returns the (row,col) of the named mark.
+func (b *Batch) BufferMark(buffer Buffer, name string, result *[2]int) {
+	b.call("nvim_buf_get_mark", result, buffer, name)
 }
 
 // BufferMark returns the (row,col) of the named mark.
@@ -342,6 +426,33 @@ func (v *Nvim) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line
 //
 // The startCol and endCol parameters specify the range of columns to
 // highlight. Use endCol = -1 to highlight to the end of the line.
+func (b *Batch) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, startCol int, endCol int, result *int) {
+	b.call("nvim_buf_add_highlight", result, buffer, srcID, hlGroup, line, startCol, endCol)
+}
+
+// AddBufferHighlight adds a highlight to buffer and returns the source id of
+// the highlight.
+//
+// AddBufferHighlight can be used for plugins which dynamically generate
+// highlights to a buffer (like a semantic highlighter or linter). The function
+// adds a single highlight to a buffer. Unlike matchaddpos() highlights follow
+// changes to line numbering (as lines are inserted/removed above the
+// highlighted line), like signs and marks do.
+//
+// The srcID is useful for batch deletion/updating of a set of highlights. When
+// called with srcID = 0, an unique source id is generated and returned.
+// Succesive calls can pass in it as srcID to add new highlights to the same
+// source group. All highlights in the same group can then be cleared with
+// ClearBufferHighlight. If the highlight never will be manually deleted pass
+// in -1 for srcID.
+//
+// If hlGroup is the empty string no highlight is added, but a new srcID is
+// still returned. This is useful for an external plugin to synchrounously
+// request an unique srcID at initialization, and later asynchronously add and
+// clear highlights in response to buffer changes.
+//
+// The startCol and endCol parameters specify the range of columns to
+// highlight. Use endCol = -1 to highlight to the end of the line.
 func (p *Pipeline) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, startCol int, endCol int, result *int) {
 	p.call("nvim_buf_add_highlight", result, buffer, srcID, hlGroup, line, startCol, endCol)
 }
@@ -366,6 +477,18 @@ func (v *Nvim) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, end
 //
 // The lineStart and lineEnd parameters specify the range of lines to clear.
 // The end of range is exclusive. Specify -1 to clear to the end of the file.
+func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) {
+	b.call("nvim_buf_clear_highlight", nil, buffer, srcID, startLine, endLine)
+}
+
+// ClearBufferHighlight clears highlights from a given source group and a range
+// of lines.
+//
+// To clear a source group in the entire buffer, pass in 1 and -1 to startLine
+// and endLine respectively.
+//
+// The lineStart and lineEnd parameters specify the range of lines to clear.
+// The end of range is exclusive. Specify -1 to clear to the end of the file.
 func (p *Pipeline) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) {
 	p.call("nvim_buf_clear_highlight", nil, buffer, srcID, startLine, endLine)
 }
@@ -375,6 +498,11 @@ func (v *Nvim) TabpageWindows(tabpage Tabpage) ([]Window, error) {
 	var result []Window
 	err := v.call("nvim_tabpage_list_wins", &result, tabpage)
 	return result, err
+}
+
+// TabpageWindows returns the windows in a tabpage.
+func (b *Batch) TabpageWindows(tabpage Tabpage, result *[]Window) {
+	b.call("nvim_tabpage_list_wins", result, tabpage)
 }
 
 // TabpageWindows returns the windows in a tabpage.
@@ -388,6 +516,11 @@ func (v *Nvim) TabpageVar(tabpage Tabpage, name string, result interface{}) erro
 }
 
 // TabpageVar gets a tab-scoped (t:) variable.
+func (b *Batch) TabpageVar(tabpage Tabpage, name string, result interface{}) {
+	b.call("nvim_tabpage_get_var", result, tabpage, name)
+}
+
+// TabpageVar gets a tab-scoped (t:) variable.
 func (p *Pipeline) TabpageVar(tabpage Tabpage, name string, result interface{}) {
 	p.call("nvim_tabpage_get_var", result, tabpage, name)
 }
@@ -398,6 +531,11 @@ func (v *Nvim) SetTabpageVar(tabpage Tabpage, name string, value interface{}) er
 }
 
 // SetTabpageVar sets a tab-scoped (t:) variable.
+func (b *Batch) SetTabpageVar(tabpage Tabpage, name string, value interface{}) {
+	b.call("nvim_tabpage_set_var", nil, tabpage, name, value)
+}
+
+// SetTabpageVar sets a tab-scoped (t:) variable.
 func (p *Pipeline) SetTabpageVar(tabpage Tabpage, name string, value interface{}) {
 	p.call("nvim_tabpage_set_var", nil, tabpage, name, value)
 }
@@ -405,6 +543,11 @@ func (p *Pipeline) SetTabpageVar(tabpage Tabpage, name string, value interface{}
 // DeleteTabpageVar removes a tab-scoped (t:) variable.
 func (v *Nvim) DeleteTabpageVar(tabpage Tabpage, name string) error {
 	return v.call("nvim_tabpage_del_var", nil, tabpage, name)
+}
+
+// DeleteTabpageVar removes a tab-scoped (t:) variable.
+func (b *Batch) DeleteTabpageVar(tabpage Tabpage, name string) {
+	b.call("nvim_tabpage_del_var", nil, tabpage, name)
 }
 
 // DeleteTabpageVar removes a tab-scoped (t:) variable.
@@ -420,8 +563,30 @@ func (v *Nvim) TabpageWindow(tabpage Tabpage) (Window, error) {
 }
 
 // TabpageWindow gets the current window in a tab page.
+func (b *Batch) TabpageWindow(tabpage Tabpage, result *Window) {
+	b.call("nvim_tabpage_get_win", result, tabpage)
+}
+
+// TabpageWindow gets the current window in a tab page.
 func (p *Pipeline) TabpageWindow(tabpage Tabpage, result *Window) {
 	p.call("nvim_tabpage_get_win", result, tabpage)
+}
+
+// TabpageNumber gets the tabpage number from the tabpage handle.
+func (v *Nvim) TabpageNumber(tabpage Tabpage) (int, error) {
+	var result int
+	err := v.call("nvim_tabpage_get_number", &result, tabpage)
+	return result, err
+}
+
+// TabpageNumber gets the tabpage number from the tabpage handle.
+func (b *Batch) TabpageNumber(tabpage Tabpage, result *int) {
+	b.call("nvim_tabpage_get_number", result, tabpage)
+}
+
+// TabpageNumber gets the tabpage number from the tabpage handle.
+func (p *Pipeline) TabpageNumber(tabpage Tabpage, result *int) {
+	p.call("nvim_tabpage_get_number", result, tabpage)
 }
 
 // IsTabpageValid checks if a tab page is valid.
@@ -429,6 +594,11 @@ func (v *Nvim) IsTabpageValid(tabpage Tabpage) (bool, error) {
 	var result bool
 	err := v.call("nvim_tabpage_is_valid", &result, tabpage)
 	return result, err
+}
+
+// IsTabpageValid checks if a tab page is valid.
+func (b *Batch) IsTabpageValid(tabpage Tabpage, result *bool) {
+	b.call("nvim_tabpage_is_valid", result, tabpage)
 }
 
 // IsTabpageValid checks if a tab page is valid.
@@ -444,6 +614,12 @@ func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) e
 
 // AttachUI registers the client as a remote UI. After this method is called,
 // the client will receive redraw notifications.
+func (b *Batch) AttachUI(width int, height int, options map[string]interface{}) {
+	b.call("nvim_ui_attach", nil, width, height, options)
+}
+
+// AttachUI registers the client as a remote UI. After this method is called,
+// the client will receive redraw notifications.
 func (p *Pipeline) AttachUI(width int, height int, options map[string]interface{}) {
 	p.call("nvim_ui_attach", nil, width, height, options)
 }
@@ -451,6 +627,11 @@ func (p *Pipeline) AttachUI(width int, height int, options map[string]interface{
 // DetachUI unregisters the client as a remote UI.
 func (v *Nvim) DetachUI() error {
 	return v.call("nvim_ui_detach", nil)
+}
+
+// DetachUI unregisters the client as a remote UI.
+func (b *Batch) DetachUI() {
+	b.call("nvim_ui_detach", nil)
 }
 
 // DetachUI unregisters the client as a remote UI.
@@ -466,6 +647,12 @@ func (v *Nvim) TryResizeUI(width int, height int) error {
 
 // TryResizeUI notifies Nvim that the client window has resized. If possible,
 // Nvim will send a redraw request to resize.
+func (b *Batch) TryResizeUI(width int, height int) {
+	b.call("nvim_ui_try_resize", nil, width, height)
+}
+
+// TryResizeUI notifies Nvim that the client window has resized. If possible,
+// Nvim will send a redraw request to resize.
 func (p *Pipeline) TryResizeUI(width int, height int) {
 	p.call("nvim_ui_try_resize", nil, width, height)
 }
@@ -476,6 +663,11 @@ func (v *Nvim) SetUIOption(name string, value interface{}) error {
 }
 
 // SetUIOption sets a UI option.
+func (b *Batch) SetUIOption(name string, value interface{}) {
+	b.call("nvim_ui_set_option", nil, name, value)
+}
+
+// SetUIOption sets a UI option.
 func (p *Pipeline) SetUIOption(name string, value interface{}) {
 	p.call("nvim_ui_set_option", nil, name, value)
 }
@@ -483,6 +675,11 @@ func (p *Pipeline) SetUIOption(name string, value interface{}) {
 // Command executes a single ex command.
 func (v *Nvim) Command(cmd string) error {
 	return v.call("nvim_command", nil, cmd)
+}
+
+// Command executes a single ex command.
+func (b *Batch) Command(cmd string) {
+	b.call("nvim_command", nil, cmd)
 }
 
 // Command executes a single ex command.
@@ -508,6 +705,17 @@ func (v *Nvim) FeedKeys(keys string, mode string, escapeCSI bool) error {
 //  n:  Do not remap keys.
 //  t:  Handle keys as if typed; otherwise they are handled as if coming from a
 //     mapping. This matters for undo, opening folds, etc.
+func (b *Batch) FeedKeys(keys string, mode string, escapeCSI bool) {
+	b.call("nvim_feedkeys", nil, keys, mode, escapeCSI)
+}
+
+// FeedKeys Pushes keys to the Nvim user input buffer. Options can be a string
+// with the following character flags:
+//
+//  m:  Remap keys. This is default.
+//  n:  Do not remap keys.
+//  t:  Handle keys as if typed; otherwise they are handled as if coming from a
+//     mapping. This matters for undo, opening folds, etc.
 func (p *Pipeline) FeedKeys(keys string, mode string, escapeCSI bool) {
 	p.call("nvim_feedkeys", nil, keys, mode, escapeCSI)
 }
@@ -521,6 +729,15 @@ func (v *Nvim) Input(keys string) (int, error) {
 	var result int
 	err := v.call("nvim_input", &result, keys)
 	return result, err
+}
+
+// Input pushes bytes to the Nvim low level input buffer.
+//
+// Unlike FeedKeys, this uses the lowest level input buffer and the call is not
+// deferred. It returns the number of bytes actually written(which can be less
+// than what was requested if the buffer is full).
+func (b *Batch) Input(keys string, result *int) {
+	b.call("nvim_input", result, keys)
 }
 
 // Input pushes bytes to the Nvim low level input buffer.
@@ -556,6 +773,19 @@ func (v *Nvim) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bo
 //  <up>  -> '\x80ku'
 //
 // The returned sequences can be used as input to feedkeys.
+func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool, result *string) {
+	b.call("nvim_replace_termcodes", result, str, fromPart, doLT, special)
+}
+
+// ReplaceTermcodes replaces any terminal code strings by byte sequences. The
+// returned sequences are Nvim's internal representation of keys, for example:
+//
+//  <esc> -> '\x1b'
+//  <cr>  -> '\r'
+//  <c-l> -> '\x0c'
+//  <up>  -> '\x80ku'
+//
+// The returned sequences can be used as input to feedkeys.
 func (p *Pipeline) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool, result *string) {
 	p.call("nvim_replace_termcodes", result, str, fromPart, doLT, special)
 }
@@ -565,6 +795,11 @@ func (v *Nvim) CommandOutput(cmd string) (string, error) {
 	var result string
 	err := v.call("nvim_command_output", &result, cmd)
 	return result, err
+}
+
+// CommandOutput executes a single ex command and returns the output.
+func (b *Batch) CommandOutput(cmd string, result *string) {
+	b.call("nvim_command_output", result, cmd)
 }
 
 // CommandOutput executes a single ex command and returns the output.
@@ -578,6 +813,14 @@ func (p *Pipeline) CommandOutput(cmd string, result *string) {
 //  :help expression
 func (v *Nvim) Eval(expr string, result interface{}) error {
 	return v.call("nvim_eval", result, expr)
+}
+
+// Eval evaluates the expression expr using the Vim internal expression
+// evaluator.
+//
+//  :help expression
+func (b *Batch) Eval(expr string, result interface{}) {
+	b.call("nvim_eval", result, expr)
 }
 
 // Eval evaluates the expression expr using the Vim internal expression
@@ -598,6 +841,12 @@ func (v *Nvim) StringWidth(s string) (int, error) {
 
 // StringWidth returns the number of display cells the string occupies. Tab is
 // counted as one cell.
+func (b *Batch) StringWidth(s string, result *int) {
+	b.call("nvim_strwidth", result, s)
+}
+
+// StringWidth returns the number of display cells the string occupies. Tab is
+// counted as one cell.
 func (p *Pipeline) StringWidth(s string, result *int) {
 	p.call("nvim_strwidth", result, s)
 }
@@ -610,6 +859,11 @@ func (v *Nvim) RuntimePaths() ([]string, error) {
 }
 
 // RuntimePaths returns a list of paths contained in the runtimepath option.
+func (b *Batch) RuntimePaths(result *[]string) {
+	b.call("nvim_list_runtime_paths", result)
+}
+
+// RuntimePaths returns a list of paths contained in the runtimepath option.
 func (p *Pipeline) RuntimePaths(result *[]string) {
 	p.call("nvim_list_runtime_paths", result)
 }
@@ -617,6 +871,11 @@ func (p *Pipeline) RuntimePaths(result *[]string) {
 // SetCurrentDirectory changes the Vim working directory.
 func (v *Nvim) SetCurrentDirectory(dir string) error {
 	return v.call("nvim_set_current_dir", nil, dir)
+}
+
+// SetCurrentDirectory changes the Vim working directory.
+func (b *Batch) SetCurrentDirectory(dir string) {
+	b.call("nvim_set_current_dir", nil, dir)
 }
 
 // SetCurrentDirectory changes the Vim working directory.
@@ -632,6 +891,11 @@ func (v *Nvim) CurrentLine() ([]byte, error) {
 }
 
 // CurrentLine gets the current line in the current buffer.
+func (b *Batch) CurrentLine(result *[]byte) {
+	b.call("nvim_get_current_line", result)
+}
+
+// CurrentLine gets the current line in the current buffer.
 func (p *Pipeline) CurrentLine(result *[]byte) {
 	p.call("nvim_get_current_line", result)
 }
@@ -639,6 +903,11 @@ func (p *Pipeline) CurrentLine(result *[]byte) {
 // SetCurrentLine sets the current line in the current buffer.
 func (v *Nvim) SetCurrentLine(line []byte) error {
 	return v.call("nvim_set_current_line", nil, line)
+}
+
+// SetCurrentLine sets the current line in the current buffer.
+func (b *Batch) SetCurrentLine(line []byte) {
+	b.call("nvim_set_current_line", nil, line)
 }
 
 // SetCurrentLine sets the current line in the current buffer.
@@ -652,6 +921,11 @@ func (v *Nvim) DeleteCurrentLine() error {
 }
 
 // DeleteCurrentLine deletes the current line in the current buffer.
+func (b *Batch) DeleteCurrentLine() {
+	b.call("nvim_del_current_line", nil)
+}
+
+// DeleteCurrentLine deletes the current line in the current buffer.
 func (p *Pipeline) DeleteCurrentLine() {
 	p.call("nvim_del_current_line", nil)
 }
@@ -659,6 +933,11 @@ func (p *Pipeline) DeleteCurrentLine() {
 // Var gets a global (g:) variable.
 func (v *Nvim) Var(name string, result interface{}) error {
 	return v.call("nvim_get_var", result, name)
+}
+
+// Var gets a global (g:) variable.
+func (b *Batch) Var(name string, result interface{}) {
+	b.call("nvim_get_var", result, name)
 }
 
 // Var gets a global (g:) variable.
@@ -672,6 +951,11 @@ func (v *Nvim) SetVar(name string, value interface{}) error {
 }
 
 // SetVar sets a global (g:) variable.
+func (b *Batch) SetVar(name string, value interface{}) {
+	b.call("nvim_set_var", nil, name, value)
+}
+
+// SetVar sets a global (g:) variable.
 func (p *Pipeline) SetVar(name string, value interface{}) {
 	p.call("nvim_set_var", nil, name, value)
 }
@@ -679,6 +963,11 @@ func (p *Pipeline) SetVar(name string, value interface{}) {
 // DeleteVar removes a global (g:) variable.
 func (v *Nvim) DeleteVar(name string) error {
 	return v.call("nvim_del_var", nil, name)
+}
+
+// DeleteVar removes a global (g:) variable.
+func (b *Batch) DeleteVar(name string) {
+	b.call("nvim_del_var", nil, name)
 }
 
 // DeleteVar removes a global (g:) variable.
@@ -692,6 +981,11 @@ func (v *Nvim) VVar(name string, result interface{}) error {
 }
 
 // VVar gets a vim (v:) variable.
+func (b *Batch) VVar(name string, result interface{}) {
+	b.call("nvim_get_vvar", result, name)
+}
+
+// VVar gets a vim (v:) variable.
 func (p *Pipeline) VVar(name string, result interface{}) {
 	p.call("nvim_get_vvar", result, name)
 }
@@ -699,6 +993,11 @@ func (p *Pipeline) VVar(name string, result interface{}) {
 // Option gets an option.
 func (v *Nvim) Option(name string, result interface{}) error {
 	return v.call("nvim_get_option", result, name)
+}
+
+// Option gets an option.
+func (b *Batch) Option(name string, result interface{}) {
+	b.call("nvim_get_option", result, name)
 }
 
 // Option gets an option.
@@ -712,6 +1011,11 @@ func (v *Nvim) SetOption(name string, value interface{}) error {
 }
 
 // SetOption sets an option.
+func (b *Batch) SetOption(name string, value interface{}) {
+	b.call("nvim_set_option", nil, name, value)
+}
+
+// SetOption sets an option.
 func (p *Pipeline) SetOption(name string, value interface{}) {
 	p.call("nvim_set_option", nil, name, value)
 }
@@ -720,6 +1024,12 @@ func (p *Pipeline) SetOption(name string, value interface{}) {
 // flushed after each newline. Incomplete lines are kept for writing later.
 func (v *Nvim) WriteOut(str string) error {
 	return v.call("nvim_out_write", nil, str)
+}
+
+// WriteOut writes a message to vim output buffer. The string is split and
+// flushed after each newline. Incomplete lines are kept for writing later.
+func (b *Batch) WriteOut(str string) {
+	b.call("nvim_out_write", nil, str)
 }
 
 // WriteOut writes a message to vim output buffer. The string is split and
@@ -736,6 +1046,12 @@ func (v *Nvim) WriteErr(str string) error {
 
 // WriteErr writes a message to vim error buffer. The string is split and
 // flushed after each newline. Incomplete lines are kept for writing later.
+func (b *Batch) WriteErr(str string) {
+	b.call("nvim_err_write", nil, str)
+}
+
+// WriteErr writes a message to vim error buffer. The string is split and
+// flushed after each newline. Incomplete lines are kept for writing later.
 func (p *Pipeline) WriteErr(str string) {
 	p.call("nvim_err_write", nil, str)
 }
@@ -743,6 +1059,11 @@ func (p *Pipeline) WriteErr(str string) {
 // WritelnErr writes prints str and a newline as an error message.
 func (v *Nvim) WritelnErr(str string) error {
 	return v.call("nvim_err_writeln", nil, str)
+}
+
+// WritelnErr writes prints str and a newline as an error message.
+func (b *Batch) WritelnErr(str string) {
+	b.call("nvim_err_writeln", nil, str)
 }
 
 // WritelnErr writes prints str and a newline as an error message.
@@ -758,6 +1079,11 @@ func (v *Nvim) Buffers() ([]Buffer, error) {
 }
 
 // Buffers returns the current list of buffers.
+func (b *Batch) Buffers(result *[]Buffer) {
+	b.call("nvim_list_bufs", result)
+}
+
+// Buffers returns the current list of buffers.
 func (p *Pipeline) Buffers(result *[]Buffer) {
 	p.call("nvim_list_bufs", result)
 }
@@ -770,6 +1096,11 @@ func (v *Nvim) CurrentBuffer() (Buffer, error) {
 }
 
 // CurrentBuffer returns the current buffer.
+func (b *Batch) CurrentBuffer(result *Buffer) {
+	b.call("nvim_get_current_buf", result)
+}
+
+// CurrentBuffer returns the current buffer.
 func (p *Pipeline) CurrentBuffer(result *Buffer) {
 	p.call("nvim_get_current_buf", result)
 }
@@ -777,6 +1108,11 @@ func (p *Pipeline) CurrentBuffer(result *Buffer) {
 // SetCurrentBuffer sets the current buffer.
 func (v *Nvim) SetCurrentBuffer(buffer Buffer) error {
 	return v.call("nvim_set_current_buf", nil, buffer)
+}
+
+// SetCurrentBuffer sets the current buffer.
+func (b *Batch) SetCurrentBuffer(buffer Buffer) {
+	b.call("nvim_set_current_buf", nil, buffer)
 }
 
 // SetCurrentBuffer sets the current buffer.
@@ -792,6 +1128,11 @@ func (v *Nvim) Windows() ([]Window, error) {
 }
 
 // Windows returns the current list of windows.
+func (b *Batch) Windows(result *[]Window) {
+	b.call("nvim_list_wins", result)
+}
+
+// Windows returns the current list of windows.
 func (p *Pipeline) Windows(result *[]Window) {
 	p.call("nvim_list_wins", result)
 }
@@ -804,6 +1145,11 @@ func (v *Nvim) CurrentWindow() (Window, error) {
 }
 
 // CurrentWindow returns the current window.
+func (b *Batch) CurrentWindow(result *Window) {
+	b.call("nvim_get_current_win", result)
+}
+
+// CurrentWindow returns the current window.
 func (p *Pipeline) CurrentWindow(result *Window) {
 	p.call("nvim_get_current_win", result)
 }
@@ -811,6 +1157,11 @@ func (p *Pipeline) CurrentWindow(result *Window) {
 // SetCurrentWindow sets the current window.
 func (v *Nvim) SetCurrentWindow(window Window) error {
 	return v.call("nvim_set_current_win", nil, window)
+}
+
+// SetCurrentWindow sets the current window.
+func (b *Batch) SetCurrentWindow(window Window) {
+	b.call("nvim_set_current_win", nil, window)
 }
 
 // SetCurrentWindow sets the current window.
@@ -826,6 +1177,11 @@ func (v *Nvim) Tabpages() ([]Tabpage, error) {
 }
 
 // Tabpages returns the current list of tabpages.
+func (b *Batch) Tabpages(result *[]Tabpage) {
+	b.call("nvim_list_tabpages", result)
+}
+
+// Tabpages returns the current list of tabpages.
 func (p *Pipeline) Tabpages(result *[]Tabpage) {
 	p.call("nvim_list_tabpages", result)
 }
@@ -835,6 +1191,11 @@ func (v *Nvim) CurrentTabpage() (Tabpage, error) {
 	var result Tabpage
 	err := v.call("nvim_get_current_tabpage", &result)
 	return result, err
+}
+
+// CurrentTabpage returns the current tabpage.
+func (b *Batch) CurrentTabpage(result *Tabpage) {
+	b.call("nvim_get_current_tabpage", result)
 }
 
 // CurrentTabpage returns the current tabpage.
@@ -848,6 +1209,11 @@ func (v *Nvim) SetCurrentTabpage(tabpage Tabpage) error {
 }
 
 // SetCurrentTabpage sets the current tabpage.
+func (b *Batch) SetCurrentTabpage(tabpage Tabpage) {
+	b.call("nvim_set_current_tabpage", nil, tabpage)
+}
+
+// SetCurrentTabpage sets the current tabpage.
 func (p *Pipeline) SetCurrentTabpage(tabpage Tabpage) {
 	p.call("nvim_set_current_tabpage", nil, tabpage)
 }
@@ -855,6 +1221,11 @@ func (p *Pipeline) SetCurrentTabpage(tabpage Tabpage) {
 // Subscribe subscribes to a Nvim event.
 func (v *Nvim) Subscribe(event string) error {
 	return v.call("nvim_subscribe", nil, event)
+}
+
+// Subscribe subscribes to a Nvim event.
+func (b *Batch) Subscribe(event string) {
+	b.call("nvim_subscribe", nil, event)
 }
 
 // Subscribe subscribes to a Nvim event.
@@ -868,6 +1239,11 @@ func (v *Nvim) Unsubscribe(event string) error {
 }
 
 // Unsubscribe unsubscribes to a Nvim event.
+func (b *Batch) Unsubscribe(event string) {
+	b.call("nvim_unsubscribe", nil, event)
+}
+
+// Unsubscribe unsubscribes to a Nvim event.
 func (p *Pipeline) Unsubscribe(event string) {
 	p.call("nvim_unsubscribe", nil, event)
 }
@@ -876,6 +1252,10 @@ func (v *Nvim) ColorByName(name string) (int, error) {
 	var result int
 	err := v.call("nvim_get_color_by_name", &result, name)
 	return result, err
+}
+
+func (b *Batch) ColorByName(name string, result *int) {
+	b.call("nvim_get_color_by_name", result, name)
 }
 
 func (p *Pipeline) ColorByName(name string, result *int) {
@@ -888,6 +1268,10 @@ func (v *Nvim) ColorMap() (map[string]interface{}, error) {
 	return result, err
 }
 
+func (b *Batch) ColorMap(result *map[string]interface{}) {
+	b.call("nvim_get_color_map", result)
+}
+
 func (p *Pipeline) ColorMap(result *map[string]interface{}) {
 	p.call("nvim_get_color_map", result)
 }
@@ -896,6 +1280,10 @@ func (v *Nvim) APIInfo() ([]interface{}, error) {
 	var result []interface{}
 	err := v.call("nvim_get_api_info", &result)
 	return result, err
+}
+
+func (b *Batch) APIInfo(result *[]interface{}) {
+	b.call("nvim_get_api_info", result)
 }
 
 func (p *Pipeline) APIInfo(result *[]interface{}) {
@@ -907,6 +1295,11 @@ func (v *Nvim) WindowBuffer(window Window) (Buffer, error) {
 	var result Buffer
 	err := v.call("nvim_win_get_buf", &result, window)
 	return result, err
+}
+
+// WindowBuffer returns the current buffer in a window.
+func (b *Batch) WindowBuffer(window Window, result *Buffer) {
+	b.call("nvim_win_get_buf", result, window)
 }
 
 // WindowBuffer returns the current buffer in a window.
@@ -922,6 +1315,11 @@ func (v *Nvim) WindowCursor(window Window) ([2]int, error) {
 }
 
 // WindowCursor returns the cursor position in the window.
+func (b *Batch) WindowCursor(window Window, result *[2]int) {
+	b.call("nvim_win_get_cursor", result, window)
+}
+
+// WindowCursor returns the cursor position in the window.
 func (p *Pipeline) WindowCursor(window Window, result *[2]int) {
 	p.call("nvim_win_get_cursor", result, window)
 }
@@ -929,6 +1327,11 @@ func (p *Pipeline) WindowCursor(window Window, result *[2]int) {
 // SetWindowCursor sets the cursor position in the window to the given position.
 func (v *Nvim) SetWindowCursor(window Window, pos [2]int) error {
 	return v.call("nvim_win_set_cursor", nil, window, pos)
+}
+
+// SetWindowCursor sets the cursor position in the window to the given position.
+func (b *Batch) SetWindowCursor(window Window, pos [2]int) {
+	b.call("nvim_win_set_cursor", nil, window, pos)
 }
 
 // SetWindowCursor sets the cursor position in the window to the given position.
@@ -944,6 +1347,11 @@ func (v *Nvim) WindowHeight(window Window) (int, error) {
 }
 
 // WindowHeight returns the window height.
+func (b *Batch) WindowHeight(window Window, result *int) {
+	b.call("nvim_win_get_height", result, window)
+}
+
+// WindowHeight returns the window height.
 func (p *Pipeline) WindowHeight(window Window, result *int) {
 	p.call("nvim_win_get_height", result, window)
 }
@@ -951,6 +1359,11 @@ func (p *Pipeline) WindowHeight(window Window, result *int) {
 // SetWindowHeight sets the window height.
 func (v *Nvim) SetWindowHeight(window Window, height int) error {
 	return v.call("nvim_win_set_height", nil, window, height)
+}
+
+// SetWindowHeight sets the window height.
+func (b *Batch) SetWindowHeight(window Window, height int) {
+	b.call("nvim_win_set_height", nil, window, height)
 }
 
 // SetWindowHeight sets the window height.
@@ -966,6 +1379,11 @@ func (v *Nvim) WindowWidth(window Window) (int, error) {
 }
 
 // WindowWidth returns the window width.
+func (b *Batch) WindowWidth(window Window, result *int) {
+	b.call("nvim_win_get_width", result, window)
+}
+
+// WindowWidth returns the window width.
 func (p *Pipeline) WindowWidth(window Window, result *int) {
 	p.call("nvim_win_get_width", result, window)
 }
@@ -973,6 +1391,11 @@ func (p *Pipeline) WindowWidth(window Window, result *int) {
 // SetWindowWidth sets the window width.
 func (v *Nvim) SetWindowWidth(window Window, width int) error {
 	return v.call("nvim_win_set_width", nil, window, width)
+}
+
+// SetWindowWidth sets the window width.
+func (b *Batch) SetWindowWidth(window Window, width int) {
+	b.call("nvim_win_set_width", nil, window, width)
 }
 
 // SetWindowWidth sets the window width.
@@ -986,6 +1409,11 @@ func (v *Nvim) WindowVar(window Window, name string, result interface{}) error {
 }
 
 // WindowVar gets a window-scoped (w:) variable.
+func (b *Batch) WindowVar(window Window, name string, result interface{}) {
+	b.call("nvim_win_get_var", result, window, name)
+}
+
+// WindowVar gets a window-scoped (w:) variable.
 func (p *Pipeline) WindowVar(window Window, name string, result interface{}) {
 	p.call("nvim_win_get_var", result, window, name)
 }
@@ -993,6 +1421,11 @@ func (p *Pipeline) WindowVar(window Window, name string, result interface{}) {
 // SetWindowVar sets a window-scoped (w:) variable.
 func (v *Nvim) SetWindowVar(window Window, name string, value interface{}) error {
 	return v.call("nvim_win_set_var", nil, window, name, value)
+}
+
+// SetWindowVar sets a window-scoped (w:) variable.
+func (b *Batch) SetWindowVar(window Window, name string, value interface{}) {
+	b.call("nvim_win_set_var", nil, window, name, value)
 }
 
 // SetWindowVar sets a window-scoped (w:) variable.
@@ -1006,6 +1439,11 @@ func (v *Nvim) DeleteWindowVar(window Window, name string) error {
 }
 
 // DeleteWindowVar removes a window-scoped (w:) variable.
+func (b *Batch) DeleteWindowVar(window Window, name string) {
+	b.call("nvim_win_del_var", nil, window, name)
+}
+
+// DeleteWindowVar removes a window-scoped (w:) variable.
 func (p *Pipeline) DeleteWindowVar(window Window, name string) {
 	p.call("nvim_win_del_var", nil, window, name)
 }
@@ -1016,6 +1454,11 @@ func (v *Nvim) WindowOption(window Window, name string, result interface{}) erro
 }
 
 // WindowOption gets a window option.
+func (b *Batch) WindowOption(window Window, name string, result interface{}) {
+	b.call("nvim_win_get_option", result, window, name)
+}
+
+// WindowOption gets a window option.
 func (p *Pipeline) WindowOption(window Window, name string, result interface{}) {
 	p.call("nvim_win_get_option", result, window, name)
 }
@@ -1023,6 +1466,11 @@ func (p *Pipeline) WindowOption(window Window, name string, result interface{}) 
 // SetWindowOption sets a window option.
 func (v *Nvim) SetWindowOption(window Window, name string, value interface{}) error {
 	return v.call("nvim_win_set_option", nil, window, name, value)
+}
+
+// SetWindowOption sets a window option.
+func (b *Batch) SetWindowOption(window Window, name string, value interface{}) {
+	b.call("nvim_win_set_option", nil, window, name, value)
 }
 
 // SetWindowOption sets a window option.
@@ -1038,6 +1486,11 @@ func (v *Nvim) WindowPosition(window Window) ([2]int, error) {
 }
 
 // WindowPosition gets the window position in display cells. First position is zero.
+func (b *Batch) WindowPosition(window Window, result *[2]int) {
+	b.call("nvim_win_get_position", result, window)
+}
+
+// WindowPosition gets the window position in display cells. First position is zero.
 func (p *Pipeline) WindowPosition(window Window, result *[2]int) {
 	p.call("nvim_win_get_position", result, window)
 }
@@ -1050,8 +1503,30 @@ func (v *Nvim) WindowTabpage(window Window) (Tabpage, error) {
 }
 
 // WindowTabpage gets the tab page that contains the window.
+func (b *Batch) WindowTabpage(window Window, result *Tabpage) {
+	b.call("nvim_win_get_tabpage", result, window)
+}
+
+// WindowTabpage gets the tab page that contains the window.
 func (p *Pipeline) WindowTabpage(window Window, result *Tabpage) {
 	p.call("nvim_win_get_tabpage", result, window)
+}
+
+// WindowNumber gets the window number from the window handle.
+func (v *Nvim) WindowNumber(window Window) (int, error) {
+	var result int
+	err := v.call("nvim_win_get_number", &result, window)
+	return result, err
+}
+
+// WindowNumber gets the window number from the window handle.
+func (b *Batch) WindowNumber(window Window, result *int) {
+	b.call("nvim_win_get_number", result, window)
+}
+
+// WindowNumber gets the window number from the window handle.
+func (p *Pipeline) WindowNumber(window Window, result *int) {
+	p.call("nvim_win_get_number", result, window)
 }
 
 // IsWindowValid returns true if the window is valid.
@@ -1059,6 +1534,11 @@ func (v *Nvim) IsWindowValid(window Window) (bool, error) {
 	var result bool
 	err := v.call("nvim_win_is_valid", &result, window)
 	return result, err
+}
+
+// IsWindowValid returns true if the window is valid.
+func (b *Batch) IsWindowValid(window Window, result *bool) {
+	b.call("nvim_win_is_valid", result, window)
 }
 
 // IsWindowValid returns true if the window is valid.
