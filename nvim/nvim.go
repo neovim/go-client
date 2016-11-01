@@ -423,6 +423,14 @@ func (p *Pipeline) Call(fname string, result interface{}, args ...interface{}) {
 	p.call("nvim_call_function", result, fname, args)
 }
 
+// Call calls a vimscript function.
+func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
+	if args == nil {
+		args = []interface{}{}
+	}
+	b.call("nvim_call_function", result, fname, args)
+}
+
 // decodeExt decodes a MsgPack encoded number to an integer.
 func decodeExt(p []byte) (int, error) {
 	switch {
