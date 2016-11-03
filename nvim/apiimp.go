@@ -608,18 +608,51 @@ func (p *Pipeline) IsTabpageValid(tabpage Tabpage, result *bool) {
 
 // AttachUI registers the client as a remote UI. After this method is called,
 // the client will receive redraw notifications.
+//
+//  :help rpc-remote-ui
+//
+// The redraw notification method has variadic arguments. Register a handler
+// for the method like this:
+//
+//  v.RegisterHandler("redraw", func(updates ...[]interface{}) {
+//      for _, update := range updates {
+//          // handle update
+//      }
+//  })
 func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) error {
 	return v.call("nvim_ui_attach", nil, width, height, options)
 }
 
 // AttachUI registers the client as a remote UI. After this method is called,
 // the client will receive redraw notifications.
+//
+//  :help rpc-remote-ui
+//
+// The redraw notification method has variadic arguments. Register a handler
+// for the method like this:
+//
+//  v.RegisterHandler("redraw", func(updates ...[]interface{}) {
+//      for _, update := range updates {
+//          // handle update
+//      }
+//  })
 func (b *Batch) AttachUI(width int, height int, options map[string]interface{}) {
 	b.call("nvim_ui_attach", nil, width, height, options)
 }
 
 // AttachUI registers the client as a remote UI. After this method is called,
 // the client will receive redraw notifications.
+//
+//  :help rpc-remote-ui
+//
+// The redraw notification method has variadic arguments. Register a handler
+// for the method like this:
+//
+//  v.RegisterHandler("redraw", func(updates ...[]interface{}) {
+//      for _, update := range updates {
+//          // handle update
+//      }
+//  })
 func (p *Pipeline) AttachUI(width int, height int, options map[string]interface{}) {
 	p.call("nvim_ui_attach", nil, width, height, options)
 }

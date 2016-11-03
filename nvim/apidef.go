@@ -185,6 +185,17 @@ func IsTabpageValid(tabpage Tabpage) bool {
 
 // AttachUI registers the client as a remote UI. After this method is called,
 // the client will receive redraw notifications.
+//
+//  :help rpc-remote-ui
+//
+// The redraw notification method has variadic arguments. Register a handler
+// for the method like this:
+//
+//  v.RegisterHandler("redraw", func(updates ...[]interface{}) {
+//      for _, update := range updates {
+//          // handle update
+//      }
+//  })
 func AttachUI(width int, height int, options map[string]interface{}) {
 	name(nvim_ui_attach)
 }
