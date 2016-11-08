@@ -73,13 +73,20 @@ type handler struct {
 	args []reflect.Value
 }
 
+type notification struct {
+	call   func([]reflect.Value) []reflect.Value
+	args   []reflect.Value
+	method string
+}
+
 // Endpoint represents a MessagePack RPC peer.
 type Endpoint struct {
-	logf   func(fmt string, args ...interface{})
-	arg    reflect.Value
-	dec    *msgpack.Decoder
-	closer io.Closer
-	done   chan struct{}
+	logf          func(fmt string, args ...interface{})
+	arg           reflect.Value
+	dec           *msgpack.Decoder
+	closer        io.Closer
+	done          chan struct{}
+	notifications chan notification
 
 	packMu sync.Mutex
 	enc    *msgpack.Encoder
@@ -365,6 +372,10 @@ func (e *Endpoint) reply(id uint64, replyErr error, reply interface{}) error {
 // Serve serves incoming requests. Serve blocks until the peer disconnects or
 // there is an error.
 func (e *Endpoint) Serve() error {
+	e.notifications = make(chan notification, 64)
+	defer close(e.notifications)
+	go e.runNotifications()
+
 	for {
 		if err := e.dec.Unpack(); err != nil {
 			if err == io.EOF {
@@ -533,12 +544,6 @@ func (e *Endpoint) createCall(h *handler) (func([]reflect.Value) []reflect.Value
 	return h.fn.CallSlice, args, nil
 }
 
-func (e *Endpoint) runCall(fn func()) {
-	if fn != nil {
-		go fn()
-	}
-}
-
 func (e *Endpoint) handleRequest(messageLen int) error {
 	if messageLen != 4 {
 		// messageType, id, method, args
@@ -575,7 +580,7 @@ func (e *Endpoint) handleRequest(messageLen int) error {
 		return err
 	}
 
-	e.runCall(func() {
+	go func() {
 		out := call(args)
 		var replyErr error
 		var replyVal interface{}
@@ -589,7 +594,7 @@ func (e *Endpoint) handleRequest(messageLen int) error {
 		if err := e.reply(id, replyErr, replyVal); err != nil {
 			e.close(err)
 		}
-	})
+	}()
 
 	return nil
 }
@@ -619,15 +624,20 @@ func (e *Endpoint) handleNotification(messageLen int) error {
 		return err
 	}
 
-	e.runCall(func() {
-		out := call(args)
+	e.notifications <- notification{call: call, args: args, method: method}
+	return nil
+}
+
+// runNotifications runs notifications in a single goroutine to ensure that the
+// notifications are processed in order by the application.
+func (e *Endpoint) runNotifications() {
+	for n := range e.notifications {
+		out := n.call(n.args)
 		if len(out) > 0 {
 			replyErr, _ := out[len(out)-1].Interface().(error)
 			if replyErr != nil {
-				e.logf("msgpack/rpc: service method %s returned %v", method, replyErr)
+				e.logf("msgpack/rpc: service method %s returned %v", n.method, replyErr)
 			}
 		}
-	})
-
-	return nil
+	}
 }
