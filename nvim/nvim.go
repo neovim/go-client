@@ -338,6 +338,8 @@ func (v *Nvim) NewPipeline() *Pipeline {
 // wait for the calls to complete.
 //
 // Pipelines do not support concurrent calls by the application.
+//
+// Deprecated: Use Batch instead.
 type Pipeline struct {
 	ep    *rpc.Endpoint
 	n     int
