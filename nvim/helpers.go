@@ -95,14 +95,6 @@ func (r *bufferReader) Read(p []byte) (int, error) {
 		return 0, r.err
 	}
 	if r.lines == nil {
-		/*
-			if r.b == 0 {
-				r.b, r.err = r.v.CurrentBuffer()
-				if r.err != nil {
-					return 0, r.err
-				}
-			}
-		*/
 		r.lines, r.err = r.v.BufferLines(r.b, 0, -1, true)
 		if r.err != nil {
 			return 0, r.err
