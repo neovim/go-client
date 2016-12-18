@@ -32,7 +32,7 @@ tool](https://golang.org/cmd/go/) and add this plugin to Vim:
     let g:loaded_hello = 1
 
     function! s:Requirehello(host) abort
-        return rpcstart('insert path to executable here')
+      return jobstart(['junk'], {'rpc': v:true})
     endfunction
 
     call remote#host#Register('hello', 'x', function('s:Requirehello'))
