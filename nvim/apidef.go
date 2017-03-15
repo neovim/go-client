@@ -62,6 +62,11 @@ func BufferVar(buffer Buffer, name string) interface{} {
 	name(nvim_buf_get_var)
 }
 
+// BufferChangedTick gets a changed tick of a buffer.
+func BufferChangedTick(buffer Buffer) int {
+	name(nvim_buf_get_changedtick)
+}
+
 // SetBufferVar sets a buffer-scoped (b:) variable.
 func SetBufferVar(buffer Buffer, name string, value interface{}) {
 	name(nvim_buf_set_var)
