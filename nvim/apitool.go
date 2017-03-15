@@ -363,6 +363,12 @@ var compareTemplate = template.Must(template.New("").Funcs(template.FuncMap{
     {{- print " {"}} name({{.Name}}){{with .DeprecatedSince}}; deprecatedSince({{.}});{{end}}{{print " }"}}
 {{end}}`))
 
+// specialAPIs lists API calls that are implemented by hand.
+var specialAPIs = map[string]bool{
+	"nvim_call_atomic":   true,
+	"nvim_call_function": true,
+}
+
 func compareFunctions(functions []*Function) error {
 	info, err := readAPIInfo()
 	if err != nil {
@@ -389,7 +395,7 @@ func compareFunctions(functions []*Function) error {
 			continue
 		}
 		if b.Name < a.Name {
-			if b.DeprecatedSince == 0 {
+			if b.DeprecatedSince == 0 && !specialAPIs[b.Name] {
 				data.Missing = append(data.Missing, b)
 			}
 			j++
