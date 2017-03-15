@@ -225,6 +225,23 @@ func (p *Pipeline) BufferVar(buffer Buffer, name string, result interface{}) {
 	p.call("nvim_buf_get_var", result, buffer, name)
 }
 
+// BufferChangedTick gets a changed tick of a buffer.
+func (v *Nvim) BufferChangedTick(buffer Buffer) (int, error) {
+	var result int
+	err := v.call("nvim_buf_get_changedtick", &result, buffer)
+	return result, err
+}
+
+// BufferChangedTick gets a changed tick of a buffer.
+func (b *Batch) BufferChangedTick(buffer Buffer, result *int) {
+	b.call("nvim_buf_get_changedtick", result, buffer)
+}
+
+// BufferChangedTick gets a changed tick of a buffer.
+func (p *Pipeline) BufferChangedTick(buffer Buffer, result *int) {
+	p.call("nvim_buf_get_changedtick", result, buffer)
+}
+
 // SetBufferVar sets a buffer-scoped (b:) variable.
 func (v *Nvim) SetBufferVar(buffer Buffer, name string, value interface{}) error {
 	return v.call("nvim_buf_set_var", nil, buffer, name, value)
