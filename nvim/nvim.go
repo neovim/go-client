@@ -293,9 +293,14 @@ func (b *Batch) Execute() error {
 	}
 }
 
+var emptyArgs = []interface{}{}
+
 func (b *Batch) call(sm string, result interface{}, args ...interface{}) {
 	if b.err != nil {
 		return
+	}
+	if args == nil {
+		args = emptyArgs
 	}
 	b.sms = append(b.sms, sm)
 	b.results = append(b.results, result)

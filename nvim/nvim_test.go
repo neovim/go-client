@@ -315,6 +315,13 @@ func TestAPI(t *testing.T) {
 			t.Errorf("err = nil, expect error containing text 'chan bool'")
 		}
 
+		// Test call with empty argument list.
+		var buf Buffer
+		b.CurrentBuffer(&buf)
+		err = b.Execute()
+		if err != nil {
+			t.Errorf("GetCurrentBuffer returns err %s: %#v", err, err)
+		}
 	})
 
 	t.Run("pipeline", func(t *testing.T) {
