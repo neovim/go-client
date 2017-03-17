@@ -324,40 +324,6 @@ func TestAPI(t *testing.T) {
 		}
 	})
 
-	t.Run("pipeline", func(t *testing.T) {
-		p := v.NewPipeline()
-		results := make([]int, 128)
-
-		for i := range results {
-			p.SetVar(fmt.Sprintf("batch%d", i), i)
-		}
-
-		for i := range results {
-			p.Var(fmt.Sprintf("batch%d", i), &results[i])
-		}
-
-		if err := p.Wait(); err != nil {
-			t.Fatal(err)
-		}
-
-		for i := range results {
-			if results[i] != i {
-				t.Fatalf("result = %d, want %d", results[i], i)
-			}
-		}
-
-		// Reuse pipeline
-
-		var i int
-		p.Var("batch3", &i)
-		if err := p.Wait(); err != nil {
-			log.Fatal(err)
-		}
-		if i != 3 {
-			t.Fatalf("i = %d, want %d", i, 3)
-		}
-	})
-
 	t.Run("callWithNoArgs", func(t *testing.T) {
 		var wd string
 		err := v.Call("getcwd", &wd)

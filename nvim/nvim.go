@@ -333,66 +333,6 @@ func (e *BatchError) Error() string {
 	return e.Err.Error()
 }
 
-// NewPipeline creates a new pipeline.
-func (v *Nvim) NewPipeline() *Pipeline {
-	return &Pipeline{ep: v.ep}
-}
-
-// Pipeline pipelines calls to Nvim. The underlying calls to Nvim execute and
-// update result arguments asynchronous to the coller. Call the Wait method to
-// wait for the calls to complete.
-//
-// Pipelines do not support concurrent calls by the application.
-//
-// Deprecated: Use Batch instead.
-type Pipeline struct {
-	ep    *rpc.Endpoint
-	n     int
-	done  chan *rpc.Call
-	chans []chan *rpc.Call
-}
-
-const doneChunkSize = 32
-
-func (p *Pipeline) call(sm string, result interface{}, args ...interface{}) {
-	if p.n%doneChunkSize == 0 {
-		done := make(chan *rpc.Call, doneChunkSize)
-		p.done = done
-		p.chans = append(p.chans, done)
-	}
-	p.n++
-	p.ep.Go(sm, p.done, result, args...)
-}
-
-// Wait waits for all calls in the pipeline to complete. If there is more than
-// one call in the pipeline, then Wait returns errors using type ErrorList.
-func (p *Pipeline) Wait() error {
-	var el ErrorList
-	var done chan *rpc.Call
-	useList := p.n > 1
-	for i := 0; i < p.n; i++ {
-		if i%doneChunkSize == 0 {
-			done = p.chans[0]
-			p.chans = p.chans[1:]
-		}
-		c := <-done
-		if c.Err != nil {
-			el = append(el, fixError(c.Method, c.Err))
-		}
-	}
-	p.n = 0
-	p.done = nil
-	p.chans = nil
-	switch {
-	case len(el) == 0:
-		return nil
-	case useList:
-		return el
-	default:
-		return el[0]
-	}
-}
-
 func fixError(sm string, err error) error {
 	if e, ok := err.(rpc.Error); ok {
 		if a, ok := e.Value.([]interface{}); ok && len(a) == 2 {
@@ -420,14 +360,6 @@ func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error
 		args = []interface{}{}
 	}
 	return v.call("nvim_call_function", result, fname, args)
-}
-
-// Call calls a vimscript function.
-func (p *Pipeline) Call(fname string, result interface{}, args ...interface{}) {
-	if args == nil {
-		args = []interface{}{}
-	}
-	p.call("nvim_call_function", result, fname, args)
 }
 
 // Call calls a vimscript function.

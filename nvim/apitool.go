@@ -240,10 +240,6 @@ func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} res
     b.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
 }
 
-{{.Doc}}
-func (p *Pipeline) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result interface{}) {
-    p.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
-}
 {{else if .ReturnType}}
 {{.Doc}}
 func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{.ReturnType}}, error) {
@@ -255,10 +251,6 @@ func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{
 func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result *{{.ReturnType}}) {
     b.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
 }
-{{.Doc}}
-func (p *Pipeline) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result *{{.ReturnType}}) {
-    p.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
-}
 {{else}}
 {{.Doc}}
 func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) error {
@@ -267,10 +259,6 @@ func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) err
 {{.Doc}}
 func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) {
     b.call("{{.Name}}", nil, {{range .Parameters}}{{.Name}},{{end}})
-}
-{{.Doc}}
-func (p *Pipeline) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) {
-    p.call("{{.Name}}", nil, {{range .Parameters}}{{.Name}},{{end}})
 }
 {{end}}
 {{end}}
