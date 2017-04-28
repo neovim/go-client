@@ -107,6 +107,11 @@ var decodeTests = []struct {
 	// *Map
 	{func() interface{} { return new(map[string]string) }, []interface{}{mapLen(1), "foo", "bar"}, map[string]string{"foo": "bar"}},
 
+	// Extensions
+	{func() interface{} { return new(interface{}) }, []interface{}{extension{0, "hello"}}, extensionValue{0, []byte("hello")}},
+	{func() interface{} { return new(interface{}) }, []interface{}{extension{1, "hello"}}, testExtension1{[]byte("hello")}},
+	{func() interface{} { return new(testExtension1) }, []interface{}{extension{1, "hello"}}, testExtension1{[]byte("hello")}},
+
 	// TODO: test errors like the following:
 	// {func() interface{} { return &testDecStruct{I: 1234} }, []interface{}{mapLen(1), "I", int64(5678)}, testDecStruct{I: 1234}},
 }
@@ -120,6 +125,8 @@ func TestDecode(t *testing.T) {
 		}
 		dec := NewDecoder(bytes.NewReader(data))
 		buf, _ := dec.r.Peek(0)
+
+		dec.SetExtensions(testExtensionMap)
 
 		arg := tt.arg()
 		if err := dec.Decode(arg); err != nil {

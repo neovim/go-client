@@ -56,7 +56,7 @@ func (v *Nvim) Close() error {
 //
 // The application must call Serve() to handle RPC requests and responses.
 //
-//  :help msgpack-rpc-connecting
+//  :help rpc-connecting
 func New(r io.Reader, w io.Writer, c io.Closer, logf func(string, ...interface{})) (*Nvim, error) {
 	ep, err := rpc.NewEndpoint(r, w, c, rpc.WithLogf(logf), withExtensions())
 	if err != nil {
