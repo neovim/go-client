@@ -604,12 +604,14 @@ func decodeNoReflect(ds *decodeState) (x interface{}) {
 	case Extension:
 		if f := ds.extensions[ds.Extension()]; f != nil {
 			v, err := f(ds.Bytes())
-			if e, ok := err.(*DecodeConvertError); ok {
-				if ds.errSaved != nil {
-					ds.errSaved = e
+			if err != nil {
+				if e, ok := err.(*DecodeConvertError); ok {
+					if ds.errSaved != nil {
+						ds.errSaved = e
+					}
+				} else {
+					abort(err)
 				}
-			} else {
-				abort(err)
 			}
 			return v
 		}
