@@ -72,7 +72,7 @@ type EmbedOptions struct {
 	Args []string
 
 	// Dir specifies the working directory of the command. The working
-	// directory in the current process is sued if Dir is "".
+	// directory in the current process is used if Dir is "".
 	Dir string
 
 	// Env specifies the environment of the Nvim process. The current process
