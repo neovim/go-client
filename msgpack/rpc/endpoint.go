@@ -624,7 +624,9 @@ func (e *Endpoint) handleNotification(messageLen int) error {
 		return err
 	}
 
-	e.notifications <- notification{call: call, args: args, method: method}
+	go func() {
+		e.notifications <- notification{call: call, args: args, method: method}
+	}()
 	return nil
 }
 
