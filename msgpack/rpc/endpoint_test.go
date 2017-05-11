@@ -15,6 +15,7 @@
 package rpc
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"reflect"
@@ -87,18 +88,25 @@ func TestEndpoint(t *testing.T) {
 
 	// Notification.
 
-	notifCh := make(chan string, 1)
+	notifCh := make(chan string)
 	if err := server.Register("n1", func(s string) { notifCh <- s }); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := client.Notify("n1", "hello"); err != nil {
-		t.Fatal(err)
-	}
-
-	s := <-notifCh
-	if s != "hello" {
-		t.Fatal("no nello")
+	const n = 10
+	for i := 0; i < i; i++ {
+		for j := 0; j < n; j++ {
+			if err := client.Notify("n1", fmt.Sprintf("notif %d,%d", i, j)); err != nil {
+				t.Fatal(err)
+			}
+		}
+		for j := 0; j < n; j++ {
+			got := <-notifCh
+			want := fmt.Sprintf("notif %d,%d", i, j)
+			if got != want {
+				t.Fatalf("got %q, want %q", got, want)
+			}
+		}
 	}
 }
 
