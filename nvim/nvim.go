@@ -367,7 +367,7 @@ func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	if args == nil {
 		args = []interface{}{}
 	}
-	b.call("nvim_call_function", result, fname, args)
+	b.call("nvim_call_atomic", result, fname, args)
 }
 
 // decodeExt decodes a MsgPack encoded number to an integer.
