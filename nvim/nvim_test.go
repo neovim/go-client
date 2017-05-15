@@ -332,4 +332,24 @@ func TestAPI(t *testing.T) {
 		}
 	})
 
+	t.Run("mode", func(t *testing.T) {
+		m, err := v.Mode()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if m.Mode != "n" {
+			t.Errorf("Mode() returned %s, want n", m.Mode)
+		}
+	})
+
+	t.Run("exeuteLua", func(t *testing.T) {
+		var n int
+		err := v.ExecuteLua("local a, b = ... return a + b", &n, 1, 2)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n != 3 {
+			t.Errorf("Mode() returned %v, want 3", n)
+		}
+	})
 }

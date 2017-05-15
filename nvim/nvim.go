@@ -370,7 +370,23 @@ func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	b.call("nvim_call_function", result, fname, args)
 }
 
-// decodeExt decodes a MsgPack encoded number to an integer.
+// ExecuteLua executes a Lua block.
+func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) error {
+	if args == nil {
+		args = []interface{}{}
+	}
+	return v.call("nvim_execute_lua", result, code, args)
+}
+
+// ExecuteLua executes a Lua block.
+func (b *Batch) ExecuteLua(code string, result interface{}, args ...interface{}) {
+	if args == nil {
+		args = []interface{}{}
+	}
+	b.call("nvim_execute_lua", result, code, args)
+}
+
+// decodeExt decodes a MsgPack encoded number to go int value.
 func decodeExt(p []byte) (int, error) {
 	switch {
 	case len(p) == 1 && p[0] <= 0x7f:
@@ -397,4 +413,24 @@ func decodeExt(p []byte) (int, error) {
 // encodeExt encodes n to MsgPack format.
 func encodeExt(n int) []byte {
 	return []byte{0xd2, byte(n >> 24), byte(n >> 16), byte(n >> 8), byte(n)}
+}
+
+func unmarshalExt(dec *msgpack.Decoder, id int, v interface{}) (int, error) {
+	if dec.Type() != msgpack.Extension || dec.Extension() != id {
+		err := &msgpack.DecodeConvertError{
+			SrcType:  dec.Type(),
+			DestType: reflect.TypeOf(v).Elem(),
+		}
+		dec.Skip()
+		return 0, err
+	}
+	return decodeExt(dec.BytesNoCopy())
+}
+
+type Mode struct {
+	// Mode is the current mode.
+	Mode string `msgpack:"mode"`
+
+	// Blocking is true if Nvim is waiting for input.
+	Blocking bool `msgpack:"blocking"`
 }
