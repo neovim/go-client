@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"reflect"
 	"sync"
@@ -35,19 +34,48 @@ import (
 type Nvim struct {
 	ep *rpc.Endpoint
 
-	mu        sync.Mutex
-	channelID int
+	channelIDMu sync.Mutex
+	channelID   int
+
+	// cmd is the child process, if any.
+	cmd *exec.Cmd
+
+	// readMu prevents concurrent calls to read on the child process stdout pipe and
+	// calls to cmd.Wait().
+	readMu sync.Mutex
 }
 
 // Serve serves incoming requests. Serve blocks until Nvim disconnects or there
 // is an error.
 func (v *Nvim) Serve() error {
+	v.readMu.Lock()
+	defer v.readMu.Unlock()
 	return v.ep.Serve()
 }
 
 // Close releases the resources used the client.
 func (v *Nvim) Close() error {
-	return v.ep.Close()
+
+	if v.cmd != nil && v.cmd.Process != nil {
+		// The child process should exit cleanly on call to v.ep.Close(). Kill
+		// the process if it does not exit as expected.
+		t := time.AfterFunc(5*time.Second, func() { v.cmd.Process.Kill() })
+		defer t.Stop()
+	}
+
+	err := v.ep.Close()
+
+	if v.cmd != nil {
+		v.readMu.Lock()
+		defer v.readMu.Unlock()
+
+		errWait := v.cmd.Wait()
+		if err == nil {
+			err = errWait
+		}
+	}
+
+	return err
 }
 
 // New creates an Nvim client. When connecting to Nvim over stdio, use stdin as
@@ -86,85 +114,38 @@ type EmbedOptions struct {
 	Logf func(string, ...interface{})
 }
 
-type embedCloser struct {
-	w io.WriteCloser
-	p *os.Process
-}
-
-func (c *embedCloser) Close() error {
-	err := c.w.Close()
-
-	t := time.AfterFunc(5*time.Second, func() { c.p.Kill() })
-	defer t.Stop()
-
-	state, e := c.p.Wait()
-	if e != nil {
-		err = e
-	}
-
-	if err != nil || !state.Success() {
-		err = fmt.Errorf("%s", state)
-	}
-
-	return err
-}
-
 // NewEmbedded starts an embedded instance of Nvim using the specified options.
 func NewEmbedded(options *EmbedOptions) (*Nvim, error) {
-	var closeOnExit []io.Closer
-	defer func() {
-		for _, c := range closeOnExit {
-			c.Close()
-		}
-	}()
 	if options == nil {
 		options = &EmbedOptions{}
 	}
 
 	path := options.Path
 	if path == "" {
-		var err error
-		path, err = exec.LookPath("nvim")
-		if err != nil {
-			return nil, err
-		}
+		path = "nvim"
 	}
 
-	outr, outw, err := os.Pipe()
-	if err != nil {
-		return nil, err
-	}
-	closeOnExit = append(closeOnExit, outr, outw)
+	cmd := exec.Command(path, append([]string{"--embed"}, options.Args...)...)
+	cmd.Env = options.Env
+	cmd.Dir = options.Dir
 
-	inr, inw, err := os.Pipe()
-	if err != nil {
-		return nil, err
-	}
-	closeOnExit = append(closeOnExit, inr, inw)
-
-	c := &embedCloser{
-		w: inw,
-	}
-
-	v, err := New(outr, inw, c, options.Logf)
-	if err != nil {
-		return nil, err
-	}
-	closeOnExit = append(closeOnExit, v.ep)
-
-	c.p, err = os.StartProcess(path,
-		append([]string{path, "--embed"}, options.Args...),
-		&os.ProcAttr{
-			Env:   options.Env,
-			Files: []*os.File{inr, outw},
-		})
+	inw, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, err
 	}
 
-	outw.Close()
-	inr.Close()
-	closeOnExit = nil
+	outr, err := cmd.StdoutPipe()
+	if err != nil {
+		inw.Close()
+		return nil, err
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return nil, err
+	}
+
+	v, _ := New(outr, inw, inw, options.Logf)
 	return v, nil
 }
 
@@ -195,8 +176,8 @@ func (v *Nvim) RegisterHandler(method string, fn interface{}) error {
 
 // ChannelID returns Nvim's channel id for this client.
 func (v *Nvim) ChannelID() int {
-	v.mu.Lock()
-	defer v.mu.Unlock()
+	v.channelIDMu.Lock()
+	defer v.channelIDMu.Unlock()
 	if v.channelID != 0 {
 		return v.channelID
 	}
