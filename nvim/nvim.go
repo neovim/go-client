@@ -20,7 +20,9 @@ import (
 	"io"
 	"os/exec"
 	"reflect"
+	"runtime"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/neovim/go-client/msgpack"
@@ -128,6 +130,9 @@ func NewEmbedded(options *EmbedOptions) (*Nvim, error) {
 	cmd := exec.Command(path, append([]string{"--embed"}, options.Args...)...)
 	cmd.Env = options.Env
 	cmd.Dir = options.Dir
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	}
 
 	inw, err := cmd.StdinPipe()
 	if err != nil {
