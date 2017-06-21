@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"reflect"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/neovim/go-client/msgpack"
@@ -28,6 +29,8 @@ import (
 )
 
 //go:generate go run apitool.go -generate apiimp.go
+
+var embedProcAttr *syscall.SysProcAttr
 
 // Nvim represents a remote instance of Nvim. It is safe to call Nvim methods
 // concurrently.
@@ -128,6 +131,7 @@ func NewEmbedded(options *EmbedOptions) (*Nvim, error) {
 	cmd := exec.Command(path, append([]string{"--embed"}, options.Args...)...)
 	cmd.Env = options.Env
 	cmd.Dir = options.Dir
+	cmd.SysProcAttr = embedProcAttr
 
 	inw, err := cmd.StdinPipe()
 	if err != nil {
