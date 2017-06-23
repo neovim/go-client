@@ -112,9 +112,9 @@ func pack(vs ...interface{}) ([]byte, error) {
 		case float64:
 			err = enc.PackFloat(v)
 		case arrayLen:
-			err = enc.PackArrayLen(int(v))
+			err = enc.PackArrayLen(int64(v))
 		case mapLen:
-			err = enc.PackMapLen(int(v))
+			err = enc.PackMapLen(int64(v))
 		case string:
 			err = enc.PackString(v)
 		case []byte:

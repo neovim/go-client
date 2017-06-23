@@ -173,7 +173,7 @@ func (e *Encoder) PackUint(v uint64) error {
 	return err
 }
 
-func (e *Encoder) packArrayMapLen(fixMin int, fc *numCodes, v int) error {
+func (e *Encoder) packArrayMapLen(fixMin int64, fc *numCodes, v int64) error {
 	if v < 0 || v > math.MaxUint32 {
 		return errors.New("msgpack: illegal array or map size")
 	}
@@ -190,13 +190,13 @@ func (e *Encoder) packArrayMapLen(fixMin int, fc *numCodes, v int) error {
 
 // PackArrayLen write an Array length to the MessagePack stream. The
 // application must write n objects to the stream following this call.
-func (e *Encoder) PackArrayLen(n int) error {
+func (e *Encoder) PackArrayLen(n int64) error {
 	return e.packArrayMapLen(fixArrayCodeMin, arrayLenEncodings, n)
 }
 
 // PackMapLen write an Map length to the MessagePack stream. The application
 // must write n key-value pairs to the stream following this call.
-func (e *Encoder) PackMapLen(n int) error {
+func (e *Encoder) PackMapLen(n int64) error {
 	return e.packArrayMapLen(fixMapCodeMin, mapLenEncodings, n)
 }
 
@@ -235,7 +235,7 @@ func (e *Encoder) PackExtension(kind int, data []byte) error {
 	return err
 }
 
-func (e *Encoder) packStringLen(n int) error {
+func (e *Encoder) packStringLen(n int64) error {
 	var b []byte
 	if n < 32 {
 		e.buf[0] = byte(fixStringCodeMin + n)
@@ -251,7 +251,7 @@ func (e *Encoder) packStringLen(n int) error {
 
 // PackString writes a String value to the MessagePack stream.
 func (e *Encoder) PackString(v string) error {
-	if err := e.packStringLen(len(v)); err != nil {
+	if err := e.packStringLen(int64(len(v))); err != nil {
 		return err
 	}
 	_, err := e.writeString(v)
@@ -260,7 +260,7 @@ func (e *Encoder) PackString(v string) error {
 
 // PackStringBytes writes a String value to the MessagePack stream.
 func (e *Encoder) PackStringBytes(v []byte) error {
-	if err := e.packStringLen(len(v)); err != nil {
+	if err := e.packStringLen(int64(len(v))); err != nil {
 		return err
 	}
 	_, err := e.w.Write(v)
@@ -269,10 +269,11 @@ func (e *Encoder) PackStringBytes(v []byte) error {
 
 // PackBinary writes a Binary value to the MessagePack stream.
 func (e *Encoder) PackBinary(v []byte) error {
-	if len(v) > math.MaxUint32 {
+	n := uint64(len(v))
+	if n > math.MaxUint32 {
 		return errors.New("msgpack: long string or binary")
 	}
-	if _, err := e.w.Write(e.encodeNum(binaryLenEncodings, uint64(len(v)))); err != nil {
+	if _, err := e.w.Write(e.encodeNum(binaryLenEncodings, n)); err != nil {
 		return err
 	}
 	_, err := e.w.Write(v)

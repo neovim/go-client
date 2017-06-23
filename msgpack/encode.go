@@ -215,7 +215,7 @@ func (enc *mapEncoder) encode(e *Encoder, v reflect.Value) {
 		nilEncoder(e, v)
 		return
 	}
-	if err := e.PackMapLen(v.Len()); err != nil {
+	if err := e.PackMapLen(int64(v.Len())); err != nil {
 		abort(err)
 	}
 	for _, k := range v.MapKeys() {
@@ -232,7 +232,7 @@ func (b *encodeBuilder) mapEncoder(t reflect.Type) encodeFunc {
 type sliceArrayEncoder struct{ elem encodeFunc }
 
 func (enc sliceArrayEncoder) encodeArray(e *Encoder, v reflect.Value) {
-	if err := e.PackArrayLen(v.Len()); err != nil {
+	if err := e.PackArrayLen(int64(v.Len())); err != nil {
 		abort(err)
 	}
 	for i := 0; i < v.Len(); i++ {
@@ -309,7 +309,7 @@ type fieldEnc struct {
 type structEncoder []*fieldEnc
 
 func (enc structEncoder) encode(e *Encoder, v reflect.Value) {
-	n := 0
+	var n int64
 	for _, fe := range enc {
 		fv := fieldByIndex(v, fe.index)
 		if !fv.IsValid() || (fe.empty != nil && fe.empty(fv)) {
@@ -333,7 +333,7 @@ func (enc structEncoder) encode(e *Encoder, v reflect.Value) {
 }
 
 func (enc structEncoder) encodeArray(e *Encoder, v reflect.Value) {
-	if err := e.PackArrayLen(len(enc)); err != nil {
+	if err := e.PackArrayLen(int64(len(enc))); err != nil {
 		abort(err)
 	}
 	for _, fe := range enc {

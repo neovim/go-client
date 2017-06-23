@@ -300,7 +300,7 @@ type batchArg struct {
 }
 
 func (a *batchArg) MarshalMsgPack(enc *msgpack.Encoder) error {
-	enc.PackArrayLen(a.n)
+	enc.PackArrayLen(int64(a.n))
 	return enc.PackRaw(a.p)
 }
 
