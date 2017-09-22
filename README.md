@@ -3,7 +3,7 @@
 
 Neovim/go-client is a [Neovim](https://neovim.io/) client and plugin host for [Go](https://golang.org/).
 
-This example plugin adds the Hello command to Nvim:
+This example plugin adds the Hello command to Nvim.
 
     package main
 
@@ -23,8 +23,10 @@ This example plugin adds the Hello command to Nvim:
         })
     }
 
-To add this plugin to Nvim, build the program with the [go
-tool](https://golang.org/cmd/go/) and add this plugin to Vim:
+Build the program with the [go tool](https://golang.org/cmd/go/) to an
+executable named `hello`. Ensure that the executable is on your path.
+
+Add the following plugin to Nvim:
 
     if exists('g:loaded_hello')
       finish
@@ -32,7 +34,8 @@ tool](https://golang.org/cmd/go/) and add this plugin to Vim:
     let g:loaded_hello = 1
 
     function! s:Requirehello(host) abort
-      return jobstart(['junk'], {'rpc': v:true})
+      " 'hello' is the binary created by compiling the program above.
+      return jobstart(['hello'], {'rpc': v:true})
     endfunction
 
     call remote#host#Register('hello', 'x', function('s:Requirehello'))
@@ -43,3 +46,7 @@ tool](https://golang.org/cmd/go/) and add this plugin to Vim:
         \ ])
 
     " vim:ts=4:sw=4:et
+
+Start Nvim and run the following command:
+
+    :echo Hello('world')
