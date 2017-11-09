@@ -212,3 +212,15 @@ func TestExtraArgs(t *testing.T) {
 	}
 
 }
+
+func TestBadFunction(t *testing.T) {
+	_, server, cleanup := clientServer(t)
+	defer cleanup()
+
+	err := server.Register("a", func(hello string) int {
+		return 1
+	})
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}

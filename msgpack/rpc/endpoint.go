@@ -207,7 +207,7 @@ func (e *Endpoint) Register(method string, fn interface{}, args ...interface{}) 
 		}
 	}
 
-	if t.NumOut() > 2 || (t.NumOut() > 1 && t.Out(t.NumOut()-1) != errorType) {
+	if t.NumOut() > 2 || (t.NumOut() > 0 && t.Out(t.NumOut()-1) != errorType) {
 		return errors.New("msgpack/rpc: handler return must be (), (error) or (valueType, error)")
 	}
 
