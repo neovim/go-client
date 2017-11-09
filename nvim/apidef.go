@@ -128,7 +128,7 @@ func BufferMark(buffer Buffer, name string) [2]int {
 //
 // The srcID is useful for batch deletion/updating of a set of highlights. When
 // called with srcID = 0, an unique source id is generated and returned.
-// Succesive calls can pass in it as srcID to add new highlights to the same
+// Successive calls can pass in it as srcID to add new highlights to the same
 // source group. All highlights in the same group can then be cleared with
 // ClearBufferHighlight. If the highlight never will be manually deleted pass
 // in -1 for srcID.

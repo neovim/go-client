@@ -106,7 +106,7 @@ type Endpoint struct {
 	notifications     []*notification
 }
 
-// New returns a new endpoint with the specified options.
+// NewEndpoint returns a new endpoint with the specified options.
 func NewEndpoint(r io.Reader, w io.Writer, c io.Closer, options ...Option) (*Endpoint, error) {
 	bw := bufio.NewWriter(w)
 	e := &Endpoint{
@@ -511,7 +511,6 @@ func (e *Endpoint) createCall(h *handler) (func([]reflect.Value) []reflect.Value
 	}
 
 	if !t.IsVariadic() {
-
 		// Skip extra arguments
 
 		n := srcLen - srcIndex

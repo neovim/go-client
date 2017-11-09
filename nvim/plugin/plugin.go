@@ -360,10 +360,8 @@ func (p *Plugin) RegisterForTests() error {
 			return err
 		}
 	}
-	if err := p.Nvim.Call("remote#host#Register", nil, host, "x", p.Nvim.ChannelID()); err != nil {
-		return err
-	}
-	return nil
+	err := p.Nvim.Call("remote#host#Register", nil, host, "x", p.Nvim.ChannelID())
+	return err
 }
 
 func eval(eval string, f interface{}) string {
