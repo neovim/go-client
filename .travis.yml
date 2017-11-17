@@ -5,8 +5,9 @@ before_install:
   - eval "$(curl -Ss https://raw.githubusercontent.com/neovim/bot-ci/master/scripts/travis-setup.sh) nightly-x64"
 
 go:
-  - 1.7
-  - 1.8
+  - 1.7.x
+  - 1.8.x
+  - 1.9.x
   - tip
 
 script:
