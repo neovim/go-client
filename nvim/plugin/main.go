@@ -16,9 +16,14 @@
 package plugin
 
 import (
+	"bufio"
+	"errors"
 	"flag"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/neovim/go-client/nvim"
 )
@@ -42,6 +47,7 @@ import (
 // plugin manifest to stdout insead of running the application as a plugin.
 func Main(registerHandlers func(p *Plugin) error) {
 	pluginHost := flag.String("manifest", "", "Write plugin manifest for `host` to stdout")
+	vimFilePath := flag.String("location", "", "if this option is enable, manifest is automatically written `.vim file`")
 	flag.Parse()
 
 	if *pluginHost != "" {
@@ -51,6 +57,17 @@ func Main(registerHandlers func(p *Plugin) error) {
 			log.Fatal(err)
 		}
 		os.Stdout.Write(p.Manifest(*pluginHost))
+	}
+
+	if *vimFilePath != "" && *pluginHost != "" {
+		log.SetFlags(0)
+		p := New(nil)
+		if err := registerHandlers(p); err != nil {
+			log.Fatal(err)
+		}
+		if err := replaceManigest(*vimFilePath, p.Manifest(*pluginHost)); err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
 
@@ -69,4 +86,56 @@ func Main(registerHandlers func(p *Plugin) error) {
 	if err := v.Serve(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func replaceManigest(path string, newManifest []byte) error {
+	lines := strings.Split(string(newManifest), "\n")
+	if len(lines) == 0 {
+		return errors.New("no manifest")
+	}
+
+	head := lines[0]
+
+	if _, err := os.Stat(path); err != nil {
+		return fmt.Errorf("no such file: %s", path)
+	}
+
+	fp, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+
+	scanner := bufio.NewScanner(fp)
+	flg := true
+	temporaryScript := make([]string, 0)
+	for scanner.Scan() {
+		if scanner.Text() == head {
+			flg = false
+		}
+		if scanner.Text() == "\\ ])" {
+			flg = true
+		}
+		if flg {
+			if scanner.Text() != "\\ ])" {
+				temporaryScript = append(temporaryScript, scanner.Text())
+			}
+		}
+	}
+
+	newManifestLines := strings.Split(string(newManifest), "\n")
+	temporaryScript = append(temporaryScript, newManifestLines...)
+	var script []byte
+	for i, t := range temporaryScript {
+		script = append(script, []byte(t)...)
+		if i != len(temporaryScript)-1 {
+			script = append(script, []byte("\n")...)
+		}
+	}
+
+	if err := ioutil.WriteFile(path, []byte(script), 0666); err != nil {
+		return err
+	}
+
+	return nil
 }
