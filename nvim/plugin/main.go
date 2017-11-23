@@ -65,7 +65,7 @@ func Main(registerHandlers func(p *Plugin) error) {
 		if err := registerHandlers(p); err != nil {
 			log.Fatal(err)
 		}
-		if err := replaceManigest(*vimFilePath, p.Manifest(*pluginHost)); err != nil {
+		if err := replaceManifest(*vimFilePath, p.Manifest(*pluginHost)); err != nil {
 			log.Fatal(err)
 		}
 		return
@@ -88,7 +88,7 @@ func Main(registerHandlers func(p *Plugin) error) {
 	}
 }
 
-func replaceManigest(path string, newManifest []byte) error {
+func replaceManifest(path string, newManifest []byte) error {
 	lines := strings.Split(string(newManifest), "\n")
 	if len(lines) == 0 {
 		return errors.New("no manifest")
