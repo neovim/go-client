@@ -61,7 +61,7 @@ func Main(registerHandlers func(p *Plugin) error) {
 		os.Stdout.Write(p.Manifest(*pluginHost))
 	}
 
-	if *vimFilePath != "" && *pluginHost != "" {
+	if *vimFilePath != "" {
 		log.SetFlags(0)
 		p := New(nil)
 		if err := registerHandlers(p); err != nil {
@@ -70,6 +70,9 @@ func Main(registerHandlers func(p *Plugin) error) {
 		if err := replaceManifest(*vimFilePath, p.Manifest(*pluginHost)); err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	if *pluginHost != "" || *vimFilePath != "" {
 		return
 	}
 
