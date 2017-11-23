@@ -45,6 +45,8 @@ import (
 //
 // If the --manifest=host command line flag is specified, then Main prints the
 // plugin manifest to stdout insead of running the application as a plugin.
+// If the --location=vimfile command line flag is specified, then plugin
+// manifest will be automatically written to .vim file.
 func Main(registerHandlers func(p *Plugin) error) {
 	pluginHost := flag.String("manifest", "", "Write plugin manifest for `host` to stdout")
 	vimFilePath := flag.String("location", "", "if this option is enable, manifest is automatically written `.vim file`")
