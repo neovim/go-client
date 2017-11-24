@@ -52,16 +52,11 @@ func Main(registerHandlers func(p *Plugin) error) {
 	vimFilePath := flag.String("location", "", "Manifest is automatically written to `.vim file`")
 	flag.Parse()
 
-	if *pluginHost != "" {
-		log.SetFlags(0)
-		p := New(nil)
-		if err := registerHandlers(p); err != nil {
-			log.Fatal(err)
-		}
-		os.Stdout.Write(p.Manifest(*pluginHost))
+	if *pluginHost == "" && *vimFilePath != "" {
+		return
 	}
 
-	if *vimFilePath != "" {
+	if *pluginHost != "" && *vimFilePath != "" {
 		log.SetFlags(0)
 		p := New(nil)
 		if err := registerHandlers(p); err != nil {
@@ -72,7 +67,13 @@ func Main(registerHandlers func(p *Plugin) error) {
 		}
 	}
 
-	if *pluginHost != "" || *vimFilePath != "" {
+	if *pluginHost != "" {
+		log.SetFlags(0)
+		p := New(nil)
+		if err := registerHandlers(p); err != nil {
+			log.Fatal(err)
+		}
+		os.Stdout.Write(p.Manifest(*pluginHost))
 		return
 	}
 
@@ -112,30 +113,34 @@ func replaceManifest(path string, newManifest []byte) error {
 	defer fp.Close()
 
 	scanner := bufio.NewScanner(fp)
-	flg := true
+	isOk := true
+	isOverwrite := false
 	temporaryScript := make([]string, 0)
 	for scanner.Scan() {
+		if isOk && head != scanner.Text() {
+			temporaryScript = append(temporaryScript, scanner.Text())
+		}
 		if scanner.Text() == head {
-			flg = false
+			isOk = false
+			newManifestLines := strings.Split(string(newManifest), "\n")
+			newManifestLines = newManifestLines[:len(newManifestLines)-1]
+			temporaryScript = append(temporaryScript, newManifestLines...)
+			isOverwrite = true
 		}
 		if scanner.Text() == "\\ ])" {
-			flg = true
-		}
-		if flg {
-			if scanner.Text() != "\\ ])" {
-				temporaryScript = append(temporaryScript, scanner.Text())
-			}
+			isOk = true
 		}
 	}
 
-	newManifestLines := strings.Split(string(newManifest), "\n")
-	temporaryScript = append(temporaryScript, newManifestLines...)
+	if !isOverwrite {
+		newManifestLines := strings.Split(string(newManifest), "\n")
+		temporaryScript = append(temporaryScript, newManifestLines...)
+	}
+
 	var script []byte
-	for i, t := range temporaryScript {
+	for _, t := range temporaryScript {
 		script = append(script, []byte(t)...)
-		if i != len(temporaryScript)-1 {
-			script = append(script, []byte("\n")...)
-		}
+		script = append(script, []byte("\n")...)
 	}
 
 	if err := ioutil.WriteFile(path, []byte(script), 0666); err != nil {
