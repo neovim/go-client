@@ -49,7 +49,7 @@ import (
 // manifest will be automatically written to .vim file.
 func Main(registerHandlers func(p *Plugin) error) {
 	pluginHost := flag.String("manifest", "", "Write plugin manifest for `host` to stdout")
-	vimFilePath := flag.String("location", "", "if this option is enable, manifest is automatically written `.vim file`")
+	vimFilePath := flag.String("location", "", "Manifest is automatically written to `.vim file`")
 	flag.Parse()
 
 	if *pluginHost != "" {
