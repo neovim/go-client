@@ -67,6 +67,11 @@ func BufferChangedTick(buffer Buffer) int {
 	name(nvim_buf_get_changedtick)
 }
 
+// BufferGetKeymap gets a list of dictionaries describing buffer-local mappings.
+func BufferGetKeymap(buffer Buffer, mode string) []map[string]interface{} {
+	name(nvim_buf_get_keymap)
+}
+
 // SetBufferVar sets a buffer-scoped (b:) variable.
 func SetBufferVar(buffer Buffer, name string, value interface{}) {
 	name(nvim_buf_set_var)
@@ -421,6 +426,11 @@ func ColorMap() map[string]interface{} {
 func Mode() Mode {
 	name(nvim_get_mode)
 	returnPtr()
+}
+
+// Keymap gets a list of dictionaries describing global (non-buffer) mappings.
+func Keymap(mode string) []map[string]interface{} {
+	name(nvim_get_keymap)
 }
 
 func APIInfo() []interface{} {
