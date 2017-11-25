@@ -16,14 +16,11 @@
 package plugin
 
 import (
-	"bufio"
-	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
+	"regexp"
 
 	"github.com/neovim/go-client/nvim"
 )
@@ -52,28 +49,19 @@ func Main(registerHandlers func(p *Plugin) error) {
 	vimFilePath := flag.String("location", "", "Manifest is automatically written to `.vim file`")
 	flag.Parse()
 
-	if *pluginHost == "" && *vimFilePath != "" {
-		return
-	}
-
-	if *pluginHost != "" && *vimFilePath != "" {
-		log.SetFlags(0)
-		p := New(nil)
-		if err := registerHandlers(p); err != nil {
-			log.Fatal(err)
-		}
-		if err := replaceManifest(*vimFilePath, p.Manifest(*pluginHost)); err != nil {
-			log.Fatal(err)
-		}
-	}
-
 	if *pluginHost != "" {
 		log.SetFlags(0)
 		p := New(nil)
 		if err := registerHandlers(p); err != nil {
 			log.Fatal(err)
 		}
-		os.Stdout.Write(p.Manifest(*pluginHost))
+		if *vimFilePath != "" {
+			if err := replaceManifest(*vimFilePath, *pluginHost, p.Manifest(*pluginHost)); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			os.Stdout.Write(p.Manifest(*pluginHost))
+		}
 		return
 	}
 
@@ -94,58 +82,25 @@ func Main(registerHandlers func(p *Plugin) error) {
 	}
 }
 
-func replaceManifest(path string, newManifest []byte) error {
-	lines := strings.Split(string(newManifest), "\n")
-	if len(lines) == 0 {
-		return errors.New("no manifest")
-	}
-
-	head := lines[0]
-
-	if _, err := os.Stat(path); err != nil {
-		return fmt.Errorf("no such file: %s", path)
-	}
-
-	fp, err := os.Open(path)
+func replaceManifest(path, host string, manifest []byte) error {
+	input, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(err)
-	}
-	defer fp.Close()
-
-	scanner := bufio.NewScanner(fp)
-	isOk := true
-	isOverwrite := false
-	temporaryScript := make([]string, 0)
-	for scanner.Scan() {
-		if isOk && head != scanner.Text() {
-			temporaryScript = append(temporaryScript, scanner.Text())
-		}
-		if scanner.Text() == head {
-			isOk = false
-			newManifestLines := strings.Split(string(newManifest), "\n")
-			newManifestLines = newManifestLines[:len(newManifestLines)-1]
-			temporaryScript = append(temporaryScript, newManifestLines...)
-			isOverwrite = true
-		}
-		if scanner.Text() == "\\ ])" {
-			isOk = true
-		}
-	}
-
-	if !isOverwrite {
-		newManifestLines := strings.Split(string(newManifest), "\n")
-		temporaryScript = append(temporaryScript, newManifestLines...)
-	}
-
-	var script []byte
-	for _, t := range temporaryScript {
-		script = append(script, []byte(t)...)
-		script = append(script, []byte("\n")...)
-	}
-
-	if err := ioutil.WriteFile(path, []byte(script), 0666); err != nil {
 		return err
 	}
+	output := overwriteManifest(host, input, manifest)
+	return ioutil.WriteFile(path, output, 0666)
+}
 
-	return nil
+func overwriteManifest(host string, input, manifest []byte) []byte {
+	p := regexp.MustCompile(`(?ms)^call remote#host#RegisterPlugin\('` + regexp.QuoteMeta(host) + `'.*?^\\ ]\)\n`)
+	match := p.FindIndex(input)
+	var output []byte
+	if match == nil {
+		output = append(input, manifest...)
+	} else {
+		output = append([]byte{}, input[:match[0]]...)
+		output = append(output, manifest...)
+		output = append(output, input[match[1]:]...)
+	}
+	return output
 }
