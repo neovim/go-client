@@ -92,7 +92,7 @@ func overwriteManifest(path, host string, manifest []byte) error {
 }
 
 func replaceManifest(host string, input, manifest []byte) []byte {
-	p := regexp.MustCompile(`(?ms)^call remote#host#RegisterPlugin\('` + regexp.QuoteMeta(host) + `'.*?^\\ ]\)\n`)
+	p := regexp.MustCompile(`(?ms)^call remote#host#RegisterPlugin\('` + regexp.QuoteMeta(host) + `'.*?^\\ ]\)$`)
 	match := p.FindIndex(input)
 	var output []byte
 	if match == nil {
