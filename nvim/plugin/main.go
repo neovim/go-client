@@ -56,7 +56,7 @@ func Main(registerHandlers func(p *Plugin) error) {
 			log.Fatal(err)
 		}
 		if *vimFilePath != "" {
-			if err := replaceManifest(*vimFilePath, *pluginHost, p.Manifest(*pluginHost)); err != nil {
+			if err := overwriteManifest(*vimFilePath, *pluginHost, p.Manifest(*pluginHost)); err != nil {
 				log.Fatal(err)
 			}
 		} else {
@@ -82,16 +82,16 @@ func Main(registerHandlers func(p *Plugin) error) {
 	}
 }
 
-func replaceManifest(path, host string, manifest []byte) error {
+func overwriteManifest(path, host string, manifest []byte) error {
 	input, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	output := overwriteManifest(host, input, manifest)
+	output := replaceManifest(host, input, manifest)
 	return ioutil.WriteFile(path, output, 0666)
 }
 
-func overwriteManifest(host string, input, manifest []byte) []byte {
+func replaceManifest(host string, input, manifest []byte) []byte {
 	p := regexp.MustCompile(`(?ms)^call remote#host#RegisterPlugin\('` + regexp.QuoteMeta(host) + `'.*?^\\ ]\)\n`)
 	match := p.FindIndex(input)
 	var output []byte

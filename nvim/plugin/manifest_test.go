@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestOverwriteManifest(t *testing.T) {
+func TestReplaceManifest(t *testing.T) {
 
 	t.Run("not written manifest yet", func(t *testing.T) {
 		vimFileContent := `if exists('g:loaded_hello')
@@ -24,10 +24,10 @@ endfunction
 \ ])
 `
 		host := "hello.nvim"
-		output := overwriteManifest(host, []byte(vimFileContent), []byte(manifest))
+		output := replaceManifest(host, []byte(vimFileContent), []byte(manifest))
 		expected := []byte(vimFileContent + manifest)
 		if !bytes.Equal(output, expected) {
-			t.Error("failed")
+			t.Error("want %s, but get %s", string(expected), string(output))
 		}
 	})
 
@@ -51,7 +51,7 @@ call remote#host#RegisterPlugin('hello.nvim', '0', [
 \ ])
 `
 		host := "hello.nvim"
-		output := overwriteManifest(host, []byte(vimFileContent), []byte(manifest))
+		output := replaceManifest(host, []byte(vimFileContent), []byte(manifest))
 		expected := `if exists('g:loaded_hello')
   finish
 endif
@@ -67,7 +67,7 @@ call remote#host#RegisterPlugin('hello.nvim', '0', [
 \ ])
 `
 		if !bytes.Equal(output, []byte(expected)) {
-			t.Error("failed")
+			t.Error("want %s, but get %s", expected, string(output))
 		}
 	})
 }
