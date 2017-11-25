@@ -27,7 +27,7 @@ endfunction
 		output := replaceManifest(host, []byte(vimFileContent), []byte(manifest))
 		expected := []byte(vimFileContent + manifest)
 		if !bytes.Equal(output, expected) {
-			t.Error("want %s, but get %s", string(expected), string(output))
+			t.Errorf("want %s, but get %s", string(expected), string(output))
 		}
 	})
 
@@ -67,7 +67,7 @@ call remote#host#RegisterPlugin('hello.nvim', '0', [
 \ ])
 `
 		if !bytes.Equal(output, []byte(expected)) {
-			t.Error("want %s, but get %s", expected, string(output))
+			t.Errorf("want %s, but get %s", expected, string(output))
 		}
 	})
 }
