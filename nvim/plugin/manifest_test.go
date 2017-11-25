@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -18,10 +19,7 @@ func TestReplaceManifest(t *testing.T) {
 			`  return jobstart(['hello.nvim'], { 'rpc': v:true })`,
 			`endfunction`,
 		}
-		var vimFileContent string
-		for _, l := range vimFileContentLines {
-			vimFileContent = vimFileContent + l + "\n"
-		}
+		vimFileContent := strings.Join(vimFileContentLines, "\n")
 
 		manifestLines := []string{
 			`call remote#host#RegisterPlugin('hello.nvim', '0', [`,
@@ -30,10 +28,7 @@ func TestReplaceManifest(t *testing.T) {
 			`\ {'type': 'function', 'name': 'Hello', 'sync': 1, 'opts': {}},`,
 			`\ ])`,
 		}
-		var manifest string
-		for _, l := range manifestLines {
-			manifest = manifest + l + "\n"
-		}
+		manifest := strings.Join(manifestLines, "\n")
 
 		host := "hello.nvim"
 		output := replaceManifest(host, []byte(vimFileContent), []byte(manifest))
@@ -57,10 +52,7 @@ func TestReplaceManifest(t *testing.T) {
 			`\ {'type': 'function', 'name': 'Hello', 'sync': 1, 'opts': {}},`,
 			`\ ])`,
 		}
-		var vimFileContent string
-		for _, l := range vimFileContentLines {
-			vimFileContent = vimFileContent + l + "\n"
-		}
+		vimFileContent := strings.Join(vimFileContentLines, "\n")
 
 		manifestLines := []string{
 			`call remote#host#RegisterPlugin('hello.nvim', '0', [`,
@@ -69,10 +61,7 @@ func TestReplaceManifest(t *testing.T) {
 			`\ {'type': 'function', 'name': 'Hello', 'sync': 1, 'opts': {}},`,
 			`\ ])`,
 		}
-		var manifest string
-		for _, l := range manifestLines {
-			manifest = manifest + l + "\n"
-		}
+		manifest := strings.Join(manifestLines, "\n")
 
 		host := "hello.nvim"
 		output := replaceManifest(host, []byte(vimFileContent), []byte(manifest))
@@ -92,10 +81,7 @@ func TestReplaceManifest(t *testing.T) {
 			`\ {'type': 'function', 'name': 'Hello', 'sync': 1, 'opts': {}},`,
 			`\ ])`,
 		}
-		var expected string
-		for _, l := range expectedLines {
-			expected = expected + l + "\n"
-		}
+		expected := strings.Join(expectedLines, "\n")
 
 		if !bytes.Equal(output, []byte(expected)) {
 			t.Errorf("want %s, but get %s", expected, string(output))
