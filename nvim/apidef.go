@@ -234,6 +234,16 @@ func Command(cmd string) {
 	name(nvim_command)
 }
 
+// HlByName gets a highlight definition by name.
+func HlByName(name string, rgb bool) map[string]interface{} {
+	name(nvim_get_hl_by_name)
+}
+
+// HlByID gets a highlight definition by id.
+func HlByID(hlID int, rgb bool) map[string]interface{} {
+	name(nvim_get_hl_by_id)
+}
+
 // FeedKeys Pushes keys to the Nvim user input buffer. Options can be a string
 // with the following character flags:
 //
