@@ -16,6 +16,7 @@
 package plugin
 
 import (
+	"bytes"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -55,12 +56,13 @@ func Main(registerHandlers func(p *Plugin) error) {
 		if err := registerHandlers(p); err != nil {
 			log.Fatal(err)
 		}
+		manifest := p.Manifest(*pluginHost)
 		if *vimFilePath != "" {
-			if err := overwriteManifest(*vimFilePath, *pluginHost, p.Manifest(*pluginHost)); err != nil {
+			if err := overwriteManifest(*vimFilePath, *pluginHost, manifest); err != nil {
 				log.Fatal(err)
 			}
 		} else {
-			os.Stdout.Write(p.Manifest(*pluginHost))
+			os.Stdout.Write(manifest)
 		}
 		return
 	}
@@ -96,8 +98,15 @@ func replaceManifest(host string, input, manifest []byte) []byte {
 	match := p.FindIndex(input)
 	var output []byte
 	if match == nil {
+		if len(input) > 0 && input[len(input)-1] != '\n' {
+			input = append(input, '\n')
+		}
 		output = append(input, manifest...)
 	} else {
+		if match[1] != len(input) {
+			// No need for trailing \n if in middle of file.
+			manifest = bytes.TrimSuffix(manifest, []byte{'\n'})
+		}
 		output = append([]byte{}, input[:match[0]]...)
 		output = append(output, manifest...)
 		output = append(output, input[match[1]:]...)
