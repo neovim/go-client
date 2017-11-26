@@ -17,8 +17,10 @@ package plugin
 
 import (
 	"flag"
+	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 
 	"github.com/neovim/go-client/nvim"
 )
@@ -40,8 +42,11 @@ import (
 //
 // If the --manifest=host command line flag is specified, then Main prints the
 // plugin manifest to stdout insead of running the application as a plugin.
+// If the --location=vimfile command line flag is specified, then plugin
+// manifest will be automatically written to .vim file.
 func Main(registerHandlers func(p *Plugin) error) {
 	pluginHost := flag.String("manifest", "", "Write plugin manifest for `host` to stdout")
+	vimFilePath := flag.String("location", "", "Manifest is automatically written to `.vim file`")
 	flag.Parse()
 
 	if *pluginHost != "" {
@@ -50,7 +55,13 @@ func Main(registerHandlers func(p *Plugin) error) {
 		if err := registerHandlers(p); err != nil {
 			log.Fatal(err)
 		}
-		os.Stdout.Write(p.Manifest(*pluginHost))
+		if *vimFilePath != "" {
+			if err := overwriteManifest(*vimFilePath, *pluginHost, p.Manifest(*pluginHost)); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			os.Stdout.Write(p.Manifest(*pluginHost))
+		}
 		return
 	}
 
@@ -69,4 +80,27 @@ func Main(registerHandlers func(p *Plugin) error) {
 	if err := v.Serve(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func overwriteManifest(path, host string, manifest []byte) error {
+	input, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	output := replaceManifest(host, input, manifest)
+	return ioutil.WriteFile(path, output, 0666)
+}
+
+func replaceManifest(host string, input, manifest []byte) []byte {
+	p := regexp.MustCompile(`(?ms)^call remote#host#RegisterPlugin\('` + regexp.QuoteMeta(host) + `'.*?^\\ ]\)$`)
+	match := p.FindIndex(input)
+	var output []byte
+	if match == nil {
+		output = append(input, manifest...)
+	} else {
+		output = append([]byte{}, input[:match[0]]...)
+		output = append(output, manifest...)
+		output = append(output, input[match[1]:]...)
+	}
+	return output
 }
