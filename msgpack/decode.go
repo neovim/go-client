@@ -423,11 +423,23 @@ func (b *decodeBuilder) mapDecoder(t reflect.Type) decodeFunc {
 type fieldDec struct {
 	index []int
 	f     decodeFunc
+	empty reflect.Value
+}
+
+func (fd *fieldDec) setEmpty(v reflect.Value) {
+	if !fd.empty.IsValid() {
+		return
+	}
+	fv := fieldByIndex(v, fd.index)
+	fv.Set(fd.empty)
 }
 
 type structArrayDecoder []*fieldDec
 
 func (dec structArrayDecoder) decode(ds *decodeState, v reflect.Value) {
+	for _, fd := range dec {
+		fd.setEmpty(v)
+	}
 	if ds.Type() != ArrayLen {
 		ds.saveErrorAndSkip(v, nil)
 		return
@@ -448,6 +460,9 @@ func (dec structArrayDecoder) decode(ds *decodeState, v reflect.Value) {
 type structDecoder map[string]*fieldDec
 
 func (dec structDecoder) decode(ds *decodeState, v reflect.Value) {
+	for _, fd := range dec {
+		fd.setEmpty(v)
+	}
 	if ds.Type() != MapLen {
 		ds.saveErrorAndSkip(v, nil)
 		return
@@ -491,6 +506,7 @@ func (b *decodeBuilder) structDecoder(t reflect.Type) decodeFunc {
 		dec[field.name] = &fieldDec{
 			index: field.index,
 			f:     decoderForType(field.typ, b),
+			empty: field.empty,
 		}
 	}
 	return dec.decode

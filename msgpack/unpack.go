@@ -25,6 +25,7 @@ import (
 // Type represents the type of value in the MsgPack stream.
 type Type int
 
+// MsgPack types.
 const (
 	Invalid Type = iota
 	Nil

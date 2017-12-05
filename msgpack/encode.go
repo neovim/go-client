@@ -45,6 +45,9 @@ import (
 // Anonymous struct fields are marshaled as if their inner exported fields
 // were fields in the outer struct.
 //
+// The struct field tag "empty" specifies a default value when decoding and the
+// empty value for the "omitempty" option.
+//
 // Pointer values encode as the value pointed to. A nil pointer encodes as the
 // MessagePack nil value.
 //
@@ -348,7 +351,7 @@ func (b *encodeBuilder) structEncoder(t reflect.Type) encodeFunc {
 	for i, f := range fields {
 		var empty func(reflect.Value) bool
 		if f.omitEmpty {
-			empty = emptyFunc(f.typ)
+			empty = emptyFunc(f)
 		}
 		enc[i] = &fieldEnc{
 			name:  f.name,
@@ -362,8 +365,11 @@ func (b *encodeBuilder) structEncoder(t reflect.Type) encodeFunc {
 	return enc.encode
 }
 
-func emptyFunc(t reflect.Type) func(reflect.Value) bool {
-	switch t.Kind() {
+func emptyFunc(f *field) func(reflect.Value) bool {
+	if f.empty.IsValid() {
+		return func(v reflect.Value) bool { return v.Interface() == f.empty.Interface() }
+	}
+	switch f.typ.Kind() {
 	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
 		return lenEmpty
 	case reflect.Bool:

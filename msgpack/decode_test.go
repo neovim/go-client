@@ -23,12 +23,21 @@ import (
 
 type testDecStruct struct {
 	I  interface{}
+	B  bool
 	S  string
 	N  int
 	U  uint
 	F  float64
 	Sl []string
 	M  map[string]interface{}
+}
+
+type testDecEmptyStruct struct {
+	B   bool   `empty:"true"`
+	S   string `empty:"blank"`
+	N   int    `empty:"1234"`
+	N8  int8   `empty:"45"`
+	N32 int32  `empty:"6789"`
 }
 
 type testDecArrayStruct struct {
@@ -111,6 +120,10 @@ var decodeTests = []struct {
 	{func() interface{} { return new(interface{}) }, []interface{}{extension{0, "hello"}}, extensionValue{0, []byte("hello")}},
 	{func() interface{} { return new(interface{}) }, []interface{}{extension{1, "hello"}}, testExtension1{[]byte("hello")}},
 	{func() interface{} { return new(testExtension1) }, []interface{}{extension{1, "hello"}}, testExtension1{[]byte("hello")}},
+
+	// Empty
+	{func() interface{} { return &testDecEmptyStruct{} }, []interface{}{mapLen(0)}, testDecEmptyStruct{B: true, S: "blank", N: 1234, N8: 45, N32: 6789}},
+	{func() interface{} { return &testDecEmptyStruct{} }, []interface{}{mapLen(1), "S", "not blank"}, testDecEmptyStruct{B: true, S: "not blank", N: 1234, N8: 45, N32: 6789}},
 
 	// TODO: test errors like the following:
 	// {func() interface{} { return &testDecStruct{I: 1234} }, []interface{}{mapLen(1), "I", int64(5678)}, testDecStruct{I: 1234}},

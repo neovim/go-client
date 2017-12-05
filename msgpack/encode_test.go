@@ -103,12 +103,15 @@ var encodeTests = []struct {
 	{struct {
 		B  bool `msgpack:"b,omitempty"`
 		Bo bool `msgpack:"bo,omitempty"`
+		Be bool `msgpack:"be,omitempty" empty:"true"`
 
 		S  string `msgpack:"s,omitempty"`
 		So string `msgpack:"so,omitempty"`
+		Se string `msgpack:"se,omitempty" empty:"blank"`
 
 		I  int `msgpack:"i,omitempty"`
 		Io int `msgpack:"io,omitempty"`
+		Ie int `msgpack:"ie,omitempty" empty:"-1"`
 
 		U  uint `msgpack:"u,omitempty"`
 		Uo uint `msgpack:"uo,omitempty"`
@@ -129,8 +132,11 @@ var encodeTests = []struct {
 		Po *int `msgpack:"po,omitempty"`
 	}{
 		B:  false,
+		Be: true,
 		S:  "1",
+		Se: "blank",
 		I:  2,
+		Ie: -1,
 		U:  3,
 		F:  4.0,
 		D:  5.0,
