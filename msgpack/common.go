@@ -17,6 +17,7 @@ package msgpack
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -86,9 +87,11 @@ type field struct {
 	array     bool
 	index     []int
 	typ       reflect.Type
+	empty     reflect.Value
 }
 
 func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]bool, depth map[string]int, index []int) []*field {
+	// Break recursion.
 	if visited[t] {
 		return fields
 	}
@@ -97,6 +100,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 	for i := 0; i < t.NumField(); i++ {
 		sf := t.Field(i)
 		if sf.PkgPath != "" && !sf.Anonymous {
+			// Skip field if not exported and not anonymous.
 			continue
 		}
 
@@ -118,6 +122,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		}
 
 		if name == "-" {
+			// Skip field when field tag starts with "-".
 			continue
 		}
 
@@ -126,43 +131,78 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 			ft = ft.Elem()
 		}
 
-		if name != "" || !sf.Anonymous || ft.Kind() != reflect.Struct {
-			if name == "" {
-				name = sf.Name
-			}
-
-			// Remove name collisions
-			d, found := depth[name]
-			if !found {
-				d = 65535
-			}
-			if len(index) == d {
-				j := 0
-				for i := 0; i < len(fields); i++ {
-					if name != fields[i].name {
-						fields[j] = fields[i]
-						j++
-					}
-				}
-				fields = fields[:j]
-				continue
-			}
-			depth[name] = len(index)
-
-			f := &field{
-				name:      name,
-				omitEmpty: omitEmpty,
-				array:     array,
-				index:     make([]int, len(index)+1),
-				typ:       sf.Type,
-			}
-			copy(f.index, index)
-			f.index[len(index)] = i
-			fields = append(fields, f)
+		if name == "" && sf.Anonymous && ft.Kind() == reflect.Struct {
+			// Flatten anonymous struct field.
+			fields = collectFields(fields, ft, visited, depth, append(index, i))
 			continue
 		}
 
-		fields = collectFields(fields, ft, visited, depth, append(index, i))
+		if name == "" {
+			name = sf.Name
+		}
+
+		// Check for name collisions.
+		d, found := depth[name]
+		if !found {
+			d = 65535
+		}
+		if len(index) == d {
+			// There is another field with same name and same depth.
+			// Remove that field and skip this field.
+			j := 0
+			for i := 0; i < len(fields); i++ {
+				if name != fields[i].name {
+					fields[j] = fields[i]
+					j++
+				}
+			}
+			fields = fields[:j]
+			continue
+		}
+		depth[name] = len(index)
+
+		f := &field{
+			name:      name,
+			omitEmpty: omitEmpty,
+			array:     array,
+			index:     make([]int, len(index)+1),
+			typ:       sf.Type,
+		}
+		copy(f.index, index)
+		f.index[len(index)] = i
+
+		// Parse empty field tag.
+
+		if e := sf.Tag.Get("empty"); e != "" {
+			switch sf.Type.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				bits := 0
+				if sf.Type.Kind() != reflect.Int {
+					bits = sf.Type.Bits()
+				}
+				v, err := strconv.ParseInt(e, 10, bits)
+				if err != nil {
+					panic(fmt.Errorf("msgpack: error parsing field empty field %s.%s: %v", t.Name(), sf.Name, err))
+				}
+				f.empty = reflect.New(sf.Type).Elem()
+				f.empty.SetInt(v)
+			case reflect.Bool:
+				v, err := strconv.ParseBool(e)
+				if err != nil {
+					panic(fmt.Errorf("msgpack: error parsing field empty field %s.%s: %v", t.Name(), sf.Name, err))
+				}
+				f.empty = reflect.New(sf.Type).Elem()
+				f.empty.SetBool(v)
+			case reflect.String:
+				f.empty = reflect.New(sf.Type).Elem()
+				f.empty.SetString(e)
+			default:
+				panic(fmt.Errorf("msgpack: unsupported empty field %s.%s", t.Name(), sf.Name))
+			}
+		}
+
+		fields = append(fields, f)
+
 	}
 	return fields
 }
