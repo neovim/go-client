@@ -15,6 +15,7 @@
 package nvim
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -53,6 +54,10 @@ func helloHandler(s string) (string, error) {
 	return "Hello, " + s, nil
 }
 
+func errorHandler() error {
+	return errors.New("ouch")
+}
+
 func TestAPI(t *testing.T) {
 	v, cleanup := newEmbeddedNvim(t)
 	defer cleanup()
@@ -65,13 +70,23 @@ func TestAPI(t *testing.T) {
 		if err := v.RegisterHandler("hello", helloHandler); err != nil {
 			t.Fatal(err)
 		}
+		if err := v.RegisterHandler("error", errorHandler); err != nil {
+			t.Fatal(err)
+		}
 		var result string
 		if err := v.Call("rpcrequest", &result, cid, "hello", "world"); err != nil {
 			t.Fatal(err)
 		}
-		expected := "Hello, world"
-		if result != expected {
+		if expected := "Hello, world"; result != expected {
 			t.Errorf("hello returned %q, want %q", result, expected)
+		}
+
+		// Test errors.
+		if err := v.Call("execute", &result, fmt.Sprintf("silent! call rpcrequest(%d, 'error')", cid)); err != nil {
+			t.Fatal(err)
+		}
+		if expected := "\nouch"; result != expected {
+			t.Errorf("got error %q, want %q", result, expected)
 		}
 	})
 
