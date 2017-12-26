@@ -28,28 +28,17 @@ func newEmbeddedPlugin(t *testing.T) (*plugin.Plugin, func()) {
 	if v := os.Getenv("VIM"); v != "" {
 		env = append(env, "VIM="+v)
 	}
-	v, err := nvim.NewEmbedded(&nvim.EmbedOptions{
-		Args: []string{"-u", "NONE", "-n"},
-		Env:  env,
-		Logf: t.Logf,
-	})
+	v, err := nvim.NewChildProcess(
+		nvim.ChildProcessArgs("-u", "NONE", "-n", "--embed"),
+		nvim.ChildProcessEnv(env),
+		nvim.ChildProcessLogf(t.Logf))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	done := make(chan error, 1)
-	go func() {
-		done <- v.Serve()
-	}()
-
 	return plugin.New(v), func() {
-		e1 := v.Close()
-		e2 := <-done
-		if e1 != nil {
-			t.Fatal(e1)
-		}
-		if e2 != nil {
-			t.Fatal(e2)
+		if err := v.Close(); err != nil {
+			t.Fatal(err)
 		}
 	}
 }

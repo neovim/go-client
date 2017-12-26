@@ -30,7 +30,7 @@ var readerData = []string{
 }
 
 func TestBufferReader(t *testing.T) {
-	v, cleanup := newEmbeddedNvim(t)
+	v, cleanup := newChildProcess(t)
 	defer cleanup()
 	b, err := v.CurrentBuffer()
 	if err != nil {
