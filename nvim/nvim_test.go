@@ -21,14 +21,14 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
-func newEmbeddedNvim(t *testing.T) (*Nvim, func()) {
-	v, err := NewEmbedded(&EmbedOptions{
-		Args: []string{"-u", "NONE", "-n"},
-		Env:  []string{},
-		Logf: t.Logf,
-	})
+func newChildProcess(t *testing.T) (*Nvim, func()) {
+	v, err := NewChildProcess(
+		ChildProcessArgs("-u", "NONE", "-n", "--embed"),
+		ChildProcessEnv([]string{}),
+		ChildProcessLogf(t.Logf))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,13 +39,8 @@ func newEmbeddedNvim(t *testing.T) (*Nvim, func()) {
 	}()
 
 	return v, func() {
-		e1 := v.Close()
-		e2 := <-done
-		if e1 != nil {
-			t.Fatal(e1)
-		}
-		if e2 != nil {
-			t.Fatal(e2)
+		if err := v.Close(); err != nil {
+			t.Fatal(err)
 		}
 	}
 }
@@ -59,7 +54,8 @@ func errorHandler() error {
 }
 
 func TestAPI(t *testing.T) {
-	v, cleanup := newEmbeddedNvim(t)
+
+	v, cleanup := newChildProcess(t)
 	defer cleanup()
 	cid := v.ChannelID()
 	if cid <= 0 {
@@ -369,4 +365,76 @@ func TestAPI(t *testing.T) {
 			}
 		})
 	*/
+}
+
+func TestDial(t *testing.T) {
+	v1, cleanup := newChildProcess(t)
+	defer cleanup()
+
+	var addr string
+	if err := v1.Eval("$NVIM_LISTEN_ADDRESS", &addr); err != nil {
+		t.Fatal(err)
+	}
+
+	v2, err := Dial(addr, DialLogf(t.Logf))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer v2.Close()
+
+	if err := v2.SetVar("dial_test", "Hello"); err != nil {
+		t.Fatal(err)
+	}
+
+	var result string
+	if err := v1.Var("dial_test", &result); err != nil {
+		t.Fatal(err)
+	}
+
+	if expected := "Hello"; result != expected {
+		t.Fatalf("got %s, want %s", result, expected)
+	}
+
+	if err := v2.Close(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func TestEmbedded(t *testing.T) {
+	v, err := NewEmbedded(&EmbedOptions{
+		Args: []string{"-u", "NONE", "-n"},
+		Env:  []string{},
+		Logf: t.Logf,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer v.Close()
+
+	done := make(chan error, 1)
+	go func() {
+		done <- v.Serve()
+	}()
+
+	var n int
+	if err := v.Eval("1+2", &n); err != nil {
+		log.Fatal(err)
+	}
+
+	if want := 3; n != want {
+		log.Fatalf("got %d, want %d", n, want)
+	}
+
+	if err := v.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("timeout waiting for serve to exit")
+	}
 }
