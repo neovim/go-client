@@ -315,7 +315,9 @@ var nvimTypes = map[string]string{
 	"[][]byte":  "ArrayOf(String)",
 	"[]string":  "ArrayOf(String)",
 
-	"Mode": "Dictionary",
+	"Mode":       "Dictionary",
+	"*HLAttrs":   "Dictionary",
+	"[]*Mapping": "ArrayOf(Dictionary)",
 }
 
 func convertToNvimTypes(f *Function) *Function {

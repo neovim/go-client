@@ -119,7 +119,7 @@ func (v *Nvim) Close() error {
 // The application must call Serve() to handle RPC requests and responses.
 //
 // New is a low-level function. Most applications should use NewChildProcess,
-// Dial or the ./plugin pacakge.
+// Dial or the ./plugin package.
 //
 //  :help rpc-connecting
 func New(r io.Reader, w io.Writer, c io.Closer, logf func(string, ...interface{})) (*Nvim, error) {
@@ -154,7 +154,7 @@ func ChildProcessArgs(args ...string) ChildProcessOption {
 	}}
 }
 
-// ChildProcessCommand specifies the command to run.  NewChildProcess runs
+// ChildProcessCommand specifies the command to run. NewChildProcess runs
 // "nvim" by default.
 func ChildProcessCommand(command string) ChildProcessOption {
 	return ChildProcessOption{func(cpos *childProcessOptions) {
@@ -194,7 +194,8 @@ func ChildProcessServe(serve bool) ChildProcessOption {
 	}}
 }
 
-// ChildProcessLogf specifies function for logging output. The log.Printf function is used by default.
+// ChildProcessLogf specifies function for logging output. The log.Printf
+// function is used by default.
 func ChildProcessLogf(logf func(string, ...interface{})) ChildProcessOption {
 	return ChildProcessOption{func(cpos *childProcessOptions) {
 		cpos.logf = logf
@@ -289,7 +290,7 @@ func NewEmbedded(options *EmbedOptions) (*Nvim, error) {
 		ChildProcessServe(false))
 }
 
-// DialOption specifies an option for creating a child process.
+// DialOption specifies an option for dialing to Nvim.
 type DialOption struct {
 	f func(*dialOptions)
 }
@@ -302,7 +303,7 @@ type dialOptions struct {
 }
 
 // DialContext specifies the context to use when starting the command.
-// The background context is used by defaullt.
+// The background context is used by default.
 func DialContext(ctx context.Context) DialOption {
 	return DialOption{func(dos *dialOptions) {
 		dos.ctx = ctx
@@ -310,7 +311,7 @@ func DialContext(ctx context.Context) DialOption {
 }
 
 // DialNetDial specifies a function used to dial a network connection. A
-// default net.Dialer DialContext method is used by defaullt.
+// default net.Dialer DialContext method is used by default.
 func DialNetDial(f func(ctx context.Context, network, address string) (net.Conn, error)) DialOption {
 	return DialOption{func(dos *dialOptions) {
 		dos.netDial = f
@@ -637,4 +638,44 @@ type Mode struct {
 
 	// Blocking is true if Nvim is waiting for input.
 	Blocking bool `msgpack:"blocking"`
+}
+
+type HLAttrs struct {
+	Bold       bool `msgpack:"bold,omitempty"`
+	Underline  bool `msgpack:"underline,omitempty"`
+	Undercurl  bool `msgpack:"undercurl,omitempty"`
+	Italic     bool `msgpack:"italic,omitempty"`
+	Reverse    bool `msgpack:"reverse,omitempty"`
+	Foreground int  `msgpack:"foreground,omitempty" empty:"-1"`
+	Background int  `msgpack:"background,omitempty" empty:"-1"`
+	Special    int  `msgpack:"special,omitempty" empty:"-1"`
+}
+
+type Mapping struct {
+	// LHS is the {lhs} of the mapping.
+	LHS string `msgpack:"lhs"`
+
+	// RHS is the {hrs} of the mapping as typed.
+	RHS string `msgpack:"rhs"`
+
+	// Silent is 1 for a |:map-silent| mapping, else 0.
+	Silent int `msgpack:"silent"`
+
+	// Noremap is 1 if the {rhs} of the mapping is not remappable.
+	NoRemap int `msgpack:"noremap"`
+
+	// Expr is  1 for an expression mapping.
+	Expr int `msgpack:"expr"`
+
+	// Buffer for a local mapping.
+	Buffer int `msgpack:"buffer"`
+
+	// SID is the script local ID, used for <sid> mappings.
+	SID int `msgpack:"sid"`
+
+	// Nowait is 1 if map does not wait for other, longer mappings.
+	NoWait int `msgpack:"nowait"`
+
+	// Mode specifies modes for which the mapping is defined.
+	Mode string `msgpack:"string"`
 }

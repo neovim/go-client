@@ -67,6 +67,11 @@ func BufferChangedTick(buffer Buffer) int {
 	name(nvim_buf_get_changedtick)
 }
 
+// BufferKeymap gets a list of buffer-local mappings.
+func BufferKeyMap(buffer Buffer, mode string) []*Mapping {
+	name(nvim_buf_get_keymap)
+}
+
 // SetBufferVar sets a buffer-scoped (b:) variable.
 func SetBufferVar(buffer Buffer, name string, value interface{}) {
 	name(nvim_buf_set_var)
@@ -134,7 +139,7 @@ func BufferMark(buffer Buffer, name string) [2]int {
 // in -1 for srcID.
 //
 // If hlGroup is the empty string no highlight is added, but a new srcID is
-// still returned. This is useful for an external plugin to synchrounously
+// still returned. This is useful for an external plugin to synchronously
 // request an unique srcID at initialization, and later asynchronously add and
 // clear highlights in response to buffer changes.
 //
@@ -227,6 +232,16 @@ func SetUIOption(name string, value interface{}) {
 // Command executes a single ex command.
 func Command(cmd string) {
 	name(nvim_command)
+}
+
+// HLByID gets a highlight definition by id.
+func HLByID(id int, rgb bool) *HLAttrs {
+	name(nvim_get_hl_by_id)
+}
+
+// HLByName gets a highlight definition by name.
+func HLByName(name string, rgb bool) *HLAttrs {
+	name(nvim_get_hl_by_name)
 }
 
 // FeedKeys Pushes keys to the Nvim user input buffer. Options can be a string
@@ -412,8 +427,7 @@ func ColorByName(name string) int {
 	name(nvim_get_color_by_name)
 }
 
-func ColorMap() map[string]interface{} {
-	// TODO: should this functino return map[string]int?
+func ColorMap() map[string]int {
 	name(nvim_get_color_map)
 }
 
@@ -421,6 +435,10 @@ func ColorMap() map[string]interface{} {
 func Mode() Mode {
 	name(nvim_get_mode)
 	returnPtr()
+}
+
+func KeyMap(mode string) []*Mapping {
+	name(nvim_get_keymap)
 }
 
 func APIInfo() []interface{} {
