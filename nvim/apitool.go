@@ -308,12 +308,13 @@ var nvimTypes = map[string]string{
 
 	"map[string]interface{}": "Dictionary",
 
-	"[2]int":    "ArrayOf(Integer, 2)",
-	"[]Buffer":  "ArrayOf(Buffer)",
-	"[]Tabpage": "ArrayOf(Tabpage)",
-	"[]Window":  "ArrayOf(Window)",
-	"[][]byte":  "ArrayOf(String)",
-	"[]string":  "ArrayOf(String)",
+	"[2]int":                   "ArrayOf(Integer, 2)",
+	"[]Buffer":                 "ArrayOf(Buffer)",
+	"[]Tabpage":                "ArrayOf(Tabpage)",
+	"[]Window":                 "ArrayOf(Window)",
+	"[][]byte":                 "ArrayOf(String)",
+	"[]string":                 "ArrayOf(String)",
+	"[]map[string]interface{}": "ArrayOf(Dictionary)",
 
 	"Mode": "Dictionary",
 }
