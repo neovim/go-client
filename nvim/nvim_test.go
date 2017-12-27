@@ -343,28 +343,56 @@ func TestAPI(t *testing.T) {
 		}
 	})
 
-	/*
-		t.Run("mode", func(t *testing.T) {
-			m, err := v.Mode()
-			if err != nil {
-				t.Fatal(err)
-			}
-			if m.Mode != "n" {
-				t.Errorf("Mode() returned %s, want n", m.Mode)
-			}
-		})
+	t.Run("mode", func(t *testing.T) {
+		m, err := v.Mode()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if m.Mode != "n" {
+			t.Errorf("Mode() returned %s, want n", m.Mode)
+		}
+	})
 
-		t.Run("exeuteLua", func(t *testing.T) {
-			var n int
-			err := v.ExecuteLua("local a, b = ... return a + b", &n, 1, 2)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if n != 3 {
-				t.Errorf("Mode() returned %v, want 3", n)
-			}
-		})
-	*/
+	t.Run("exeuteLua", func(t *testing.T) {
+		var n int
+		err := v.ExecuteLua("local a, b = ... return a + b", &n, 1, 2)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n != 3 {
+			t.Errorf("Mode() returned %v, want 3", n)
+		}
+	})
+
+	t.Run("hl", func(t *testing.T) {
+		cm, err := v.ColorMap()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if err := v.Command("hi NewHighlight cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold"); err != nil {
+			t.Fatal(err)
+		}
+
+		cterm := &HLAttrs{Underline: true, Foreground: -1, Background: 10, Special: -1}
+		gui := &HLAttrs{Bold: true, Foreground: cm["Red"], Background: cm["Yellow"], Special: cm["Blue"]}
+
+		var id int
+		if err := v.Eval("hlID('NewHighlight')", &id); err != nil {
+			t.Fatal(err)
+		}
+		hl, err := v.HLByID(id, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(hl, cterm) {
+			t.Errorf("HLByID(id, false)\n got %+v,\nwant %+v", hl, cterm)
+		}
+		hl, err = v.HLByID(id, true)
+		if !reflect.DeepEqual(hl, gui) {
+			t.Errorf("HLByID(id, true)\n got %+v,\nwant %+v", hl, gui)
+		}
+	})
 }
 
 func TestDial(t *testing.T) {

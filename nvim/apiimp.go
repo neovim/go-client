@@ -175,6 +175,18 @@ func (b *Batch) BufferChangedTick(buffer Buffer, result *int) {
 	b.call("nvim_buf_get_changedtick", result, buffer)
 }
 
+// BufferKeymap gets a list of buffer-local mappings.
+func (v *Nvim) BufferKeyMap(buffer Buffer, mode string) ([]*Mapping, error) {
+	var result []*Mapping
+	err := v.call("nvim_buf_get_keymap", &result, buffer, mode)
+	return result, err
+}
+
+// BufferKeymap gets a list of buffer-local mappings.
+func (b *Batch) BufferKeyMap(buffer Buffer, mode string, result *[]*Mapping) {
+	b.call("nvim_buf_get_keymap", result, buffer, mode)
+}
+
 // SetBufferVar sets a buffer-scoped (b:) variable.
 func (v *Nvim) SetBufferVar(buffer Buffer, name string, value interface{}) error {
 	return v.call("nvim_buf_set_var", nil, buffer, name, value)
@@ -292,13 +304,13 @@ func (b *Batch) BufferMark(buffer Buffer, name string, result *[2]int) {
 //
 // The srcID is useful for batch deletion/updating of a set of highlights. When
 // called with srcID = 0, an unique source id is generated and returned.
-// Succesive calls can pass in it as srcID to add new highlights to the same
+// Successive calls can pass in it as srcID to add new highlights to the same
 // source group. All highlights in the same group can then be cleared with
 // ClearBufferHighlight. If the highlight never will be manually deleted pass
 // in -1 for srcID.
 //
 // If hlGroup is the empty string no highlight is added, but a new srcID is
-// still returned. This is useful for an external plugin to synchrounously
+// still returned. This is useful for an external plugin to synchronously
 // request an unique srcID at initialization, and later asynchronously add and
 // clear highlights in response to buffer changes.
 //
@@ -321,13 +333,13 @@ func (v *Nvim) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line
 //
 // The srcID is useful for batch deletion/updating of a set of highlights. When
 // called with srcID = 0, an unique source id is generated and returned.
-// Succesive calls can pass in it as srcID to add new highlights to the same
+// Successive calls can pass in it as srcID to add new highlights to the same
 // source group. All highlights in the same group can then be cleared with
 // ClearBufferHighlight. If the highlight never will be manually deleted pass
 // in -1 for srcID.
 //
 // If hlGroup is the empty string no highlight is added, but a new srcID is
-// still returned. This is useful for an external plugin to synchrounously
+// still returned. This is useful for an external plugin to synchronously
 // request an unique srcID at initialization, and later asynchronously add and
 // clear highlights in response to buffer changes.
 //
@@ -513,6 +525,30 @@ func (v *Nvim) Command(cmd string) error {
 // Command executes a single ex command.
 func (b *Batch) Command(cmd string) {
 	b.call("nvim_command", nil, cmd)
+}
+
+// HLByID gets a highlight definition by id.
+func (v *Nvim) HLByID(id int, rgb bool) (*HLAttrs, error) {
+	var result *HLAttrs
+	err := v.call("nvim_get_hl_by_id", &result, id, rgb)
+	return result, err
+}
+
+// HLByID gets a highlight definition by id.
+func (b *Batch) HLByID(id int, rgb bool, result **HLAttrs) {
+	b.call("nvim_get_hl_by_id", result, id, rgb)
+}
+
+// HLByName gets a highlight definition by name.
+func (v *Nvim) HLByName(name string, rgb bool) (*HLAttrs, error) {
+	var result *HLAttrs
+	err := v.call("nvim_get_hl_by_name", &result, name, rgb)
+	return result, err
+}
+
+// HLByName gets a highlight definition by name.
+func (b *Batch) HLByName(name string, rgb bool, result **HLAttrs) {
+	b.call("nvim_get_hl_by_name", result, name, rgb)
 }
 
 // FeedKeys Pushes keys to the Nvim user input buffer. Options can be a string
@@ -907,13 +943,13 @@ func (b *Batch) ColorByName(name string, result *int) {
 	b.call("nvim_get_color_by_name", result, name)
 }
 
-func (v *Nvim) ColorMap() (map[string]interface{}, error) {
-	var result map[string]interface{}
+func (v *Nvim) ColorMap() (map[string]int, error) {
+	var result map[string]int
 	err := v.call("nvim_get_color_map", &result)
 	return result, err
 }
 
-func (b *Batch) ColorMap(result *map[string]interface{}) {
+func (b *Batch) ColorMap(result *map[string]int) {
 	b.call("nvim_get_color_map", result)
 }
 
@@ -927,6 +963,16 @@ func (v *Nvim) Mode() (*Mode, error) {
 // Mode gets Nvim's current mode.
 func (b *Batch) Mode(result *Mode) {
 	b.call("nvim_get_mode", result)
+}
+
+func (v *Nvim) KeyMap(mode string) ([]*Mapping, error) {
+	var result []*Mapping
+	err := v.call("nvim_get_keymap", &result, mode)
+	return result, err
+}
+
+func (b *Batch) KeyMap(mode string, result *[]*Mapping) {
+	b.call("nvim_get_keymap", result, mode)
 }
 
 func (v *Nvim) APIInfo() ([]interface{}, error) {
