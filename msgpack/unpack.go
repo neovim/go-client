@@ -209,7 +209,7 @@ func (d *Decoder) Unpack() error {
 	} else {
 		d.peek = false
 		d.p = make([]byte, nn)
-		_, err := d.r.Read(d.p)
+		_, err := io.ReadFull(d.r, d.p)
 		if err != nil {
 			return d.fatal(err)
 		}
