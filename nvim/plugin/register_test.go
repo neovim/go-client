@@ -63,7 +63,7 @@ func TestRegister(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		expected := "\nHello, John Doe"
+		expected := "Hello, John Doe"
 		if result != expected {
 			t.Errorf("Hello returned %q, want %q", result, expected)
 		}
