@@ -575,7 +575,7 @@ func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	b.call("nvim_call_function", result, fname, args)
 }
 
-// CallDict calls a vimscript Distionary function.
+// CallDict calls a vimscript Dictionary function.
 func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) error {
 	if args == nil {
 		args = []interface{}{}
@@ -583,7 +583,7 @@ func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, ar
 	return v.call("nvim_call_dict_function", result, fname, dict, args)
 }
 
-// CallDict calls a vimscript Distionary function.
+// CallDict calls a vimscript Dictionary function.
 func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) {
 	if args == nil {
 		args = []interface{}{}
