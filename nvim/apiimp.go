@@ -1105,15 +1105,15 @@ func (b *Batch) ChannelInfo(channel int, result *Channel) {
 	b.call("nvim_get_chan_info", result, channel)
 }
 
-// ListChannels get information about all open channels.
-func (v *Nvim) ListChannels() ([]Channel, error) {
-	var result []Channel
+// Channels get information about all open channels.
+func (v *Nvim) Channels() ([]*Channel, error) {
+	var result []*Channel
 	err := v.call("nvim_list_chans", &result)
 	return result, err
 }
 
-// ListChannels get information about all open channels.
-func (b *Batch) ListChannels(result *[]Channel) {
+// Channels get information about all open channels.
+func (b *Batch) Channels(result *[]*Channel) {
 	b.call("nvim_list_chans", result)
 }
 
@@ -1129,37 +1129,39 @@ func (b *Batch) ParseExpression(expr string, flags string, highlight bool, resul
 	b.call("nvim_parse_expression", result, expr, flags, highlight)
 }
 
-// ListUIs gets a list of dictionaries representing attached UIs.
-func (v *Nvim) ListUIs() ([]interface{}, error) {
-	var result []interface{}
+// UIs gets a list of dictionaries representing attached UIs.
+func (v *Nvim) UIs() ([]*UI, error) {
+	var result []*UI
 	err := v.call("nvim_list_uis", &result)
 	return result, err
 }
 
-// ListUIs gets a list of dictionaries representing attached UIs.
-func (b *Batch) ListUIs(result *[]interface{}) {
+// UIs gets a list of dictionaries representing attached UIs.
+func (b *Batch) UIs(result *[]*UI) {
 	b.call("nvim_list_uis", result)
 }
 
 // ProcChildren gets the immediate children of process `pid`.
-func (v *Nvim) ProcChildren(pid int) ([]interface{}, error) {
-	var result []interface{}
+func (v *Nvim) ProcChildren(pid int) ([]*Process, error) {
+	var result []*Process
 	err := v.call("nvim_get_proc_children", &result, pid)
 	return result, err
 }
 
 // ProcChildren gets the immediate children of process `pid`.
-func (b *Batch) ProcChildren(pid int, result *[]interface{}) {
+func (b *Batch) ProcChildren(pid int, result *[]*Process) {
 	b.call("nvim_get_proc_children", result, pid)
 }
 
 // Proc gets info describing process `pid`.
-func (v *Nvim) Proc(pid int, result interface{}) error {
-	return v.call("nvim_get_proc", result, pid)
+func (v *Nvim) Proc(pid int) (Process, error) {
+	var result Process
+	err := v.call("nvim_get_proc", &result, pid)
+	return result, err
 }
 
 // Proc gets info describing process `pid`.
-func (b *Batch) Proc(pid int, result interface{}) {
+func (b *Batch) Proc(pid int, result *Process) {
 	b.call("nvim_get_proc", result, pid)
 }
 
