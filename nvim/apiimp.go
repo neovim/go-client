@@ -123,6 +123,50 @@ func (b *Batch) BufferLines(buffer Buffer, start int, end int, strict bool, resu
 	b.call("nvim_buf_get_lines", result, buffer, start, end, strict)
 }
 
+// AttachBuffer activate updates from this buffer to the current channel.
+//
+// If sendBuffer is true, initial notification should contain the whole buffer.
+// If false, the first notification will be a `nvim_buf_lines_event`.
+// Otherwise, the first notification will be a `nvim_buf_changedtick_event`
+//
+// opts is optional parameters. Currently not used.
+//
+// returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
+func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}) (bool, error) {
+	var result bool
+	err := v.call("nvim_buf_attach", &result, buffer, sendBuffer, opts)
+	return result, err
+}
+
+// AttachBuffer activate updates from this buffer to the current channel.
+//
+// If sendBuffer is true, initial notification should contain the whole buffer.
+// If false, the first notification will be a `nvim_buf_lines_event`.
+// Otherwise, the first notification will be a `nvim_buf_changedtick_event`
+//
+// opts is optional parameters. Currently not used.
+//
+// returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
+func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}, result *bool) {
+	b.call("nvim_buf_attach", result, buffer, sendBuffer, opts)
+}
+
+// DetachBuffer deactivate updates from this buffer to the current channel.
+//
+// returns whether the updates couldn't be disabled because the buffer isn't loaded.
+func (v *Nvim) DetachBuffer(buffer Buffer) (bool, error) {
+	var result bool
+	err := v.call("nvim_buf_detach", &result, buffer)
+	return result, err
+}
+
+// DetachBuffer deactivate updates from this buffer to the current channel.
+//
+// returns whether the updates couldn't be disabled because the buffer isn't loaded.
+func (b *Batch) DetachBuffer(buffer Buffer, result *bool) {
+	b.call("nvim_buf_detach", result, buffer)
+}
+
 // SetBufferLines replaces a line range on a buffer.
 //
 // Indexing is zero-based, end-exclusive. Negative indices are interpreted as
@@ -185,6 +229,22 @@ func (v *Nvim) BufferKeyMap(buffer Buffer, mode string) ([]*Mapping, error) {
 // BufferKeymap gets a list of buffer-local mappings.
 func (b *Batch) BufferKeyMap(buffer Buffer, mode string, result *[]*Mapping) {
 	b.call("nvim_buf_get_keymap", result, buffer, mode)
+}
+
+// BufferCommands gets a map of buffer-local user-commands.
+//
+// opts is optional parameters. Currently not used.
+func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[string]interface{}, error) {
+	var result map[string]interface{}
+	err := v.call("nvim_buf_get_commands", &result, buffer, opts)
+	return result, err
+}
+
+// BufferCommands gets a map of buffer-local user-commands.
+//
+// opts is optional parameters. Currently not used.
+func (b *Batch) BufferCommands(buffer Buffer, opts map[string]interface{}, result *map[string]interface{}) {
+	b.call("nvim_buf_get_commands", result, buffer, opts)
 }
 
 // SetBufferVar sets a buffer-scoped (b:) variable.
@@ -267,6 +327,20 @@ func (v *Nvim) SetBufferName(buffer Buffer, name string) error {
 // BufFilePre/BufFilePost are triggered.
 func (b *Batch) SetBufferName(buffer Buffer, name string) {
 	b.call("nvim_buf_set_name", nil, buffer, name)
+}
+
+// IsBufferLoaded Checks if a buffer is valid and loaded.
+// See api-buffer for more info about unloaded buffers.
+func (v *Nvim) IsBufferLoaded(buffer Buffer) (bool, error) {
+	var result bool
+	err := v.call("nvim_buf_is_loaded", &result, buffer)
+	return result, err
+}
+
+// IsBufferLoaded Checks if a buffer is valid and loaded.
+// See api-buffer for more info about unloaded buffers.
+func (b *Batch) IsBufferLoaded(buffer Buffer, result *bool) {
+	b.call("nvim_buf_is_loaded", result, buffer)
 }
 
 // IsBufferValid returns true if the buffer is valid.
@@ -975,6 +1049,24 @@ func (b *Batch) KeyMap(mode string, result *[]*Mapping) {
 	b.call("nvim_get_keymap", result, mode)
 }
 
+// Commands gets a map of global (non-buffer-local) Ex commands.
+// Currently only user-commands are supported, not builtin Ex commands.
+//
+// opts is optional parameters. Currently only supports {"builtin":false}.
+func (v *Nvim) Commands(opts map[string]interface{}) (map[string]interface{}, error) {
+	var result map[string]interface{}
+	err := v.call("nvim_get_commands", &result, opts)
+	return result, err
+}
+
+// Commands gets a map of global (non-buffer-local) Ex commands.
+// Currently only user-commands are supported, not builtin Ex commands.
+//
+// opts is optional parameters. Currently only supports {"builtin":false}.
+func (b *Batch) Commands(opts map[string]interface{}, result *map[string]interface{}) {
+	b.call("nvim_get_commands", result, opts)
+}
+
 func (v *Nvim) APIInfo() ([]interface{}, error) {
 	var result []interface{}
 	err := v.call("nvim_get_api_info", &result)
@@ -983,6 +1075,92 @@ func (v *Nvim) APIInfo() ([]interface{}, error) {
 
 func (b *Batch) APIInfo(result *[]interface{}) {
 	b.call("nvim_get_api_info", result)
+}
+
+// SetClientInfo identify the client for nvim.
+//
+// Can be called more than once, but subsequent calls will remove earlier info, which should be resent if it is still valid.
+// (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info)
+func (v *Nvim) SetClientInfo(name string, version map[string]interface{}, typ string, methods map[string]interface{}, attributes map[string]interface{}) error {
+	return v.call("nvim_set_client_info", nil, name, version, typ, methods, attributes)
+}
+
+// SetClientInfo identify the client for nvim.
+//
+// Can be called more than once, but subsequent calls will remove earlier info, which should be resent if it is still valid.
+// (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info)
+func (b *Batch) SetClientInfo(name string, version map[string]interface{}, typ string, methods map[string]interface{}, attributes map[string]interface{}) {
+	b.call("nvim_set_client_info", nil, name, version, typ, methods, attributes)
+}
+
+// Get information about a channel.
+func (v *Nvim) ChannelInfo(channel int) (Channel, error) {
+	var result Channel
+	err := v.call("nvim_get_chan_info", &result, channel)
+	return result, err
+}
+
+// Get information about a channel.
+func (b *Batch) ChannelInfo(channel int, result *Channel) {
+	b.call("nvim_get_chan_info", result, channel)
+}
+
+// ListChannels get information about all open channels.
+func (v *Nvim) ListChannels() ([]Channel, error) {
+	var result []Channel
+	err := v.call("nvim_list_chans", &result)
+	return result, err
+}
+
+// ListChannels get information about all open channels.
+func (b *Batch) ListChannels(result *[]Channel) {
+	b.call("nvim_list_chans", result)
+}
+
+// ParseExpression parse a VimL expression.
+func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (map[string]interface{}, error) {
+	var result map[string]interface{}
+	err := v.call("nvim_parse_expression", &result, expr, flags, highlight)
+	return result, err
+}
+
+// ParseExpression parse a VimL expression.
+func (b *Batch) ParseExpression(expr string, flags string, highlight bool, result *map[string]interface{}) {
+	b.call("nvim_parse_expression", result, expr, flags, highlight)
+}
+
+// ListUIs gets a list of dictionaries representing attached UIs.
+func (v *Nvim) ListUIs() ([]interface{}, error) {
+	var result []interface{}
+	err := v.call("nvim_list_uis", &result)
+	return result, err
+}
+
+// ListUIs gets a list of dictionaries representing attached UIs.
+func (b *Batch) ListUIs(result *[]interface{}) {
+	b.call("nvim_list_uis", result)
+}
+
+// ProcChildren gets the immediate children of process `pid`.
+func (v *Nvim) ProcChildren(pid int) ([]interface{}, error) {
+	var result []interface{}
+	err := v.call("nvim_get_proc_children", &result, pid)
+	return result, err
+}
+
+// ProcChildren gets the immediate children of process `pid`.
+func (b *Batch) ProcChildren(pid int, result *[]interface{}) {
+	b.call("nvim_get_proc_children", result, pid)
+}
+
+// Proc gets info describing process `pid`.
+func (v *Nvim) Proc(pid int, result interface{}) error {
+	return v.call("nvim_get_proc", result, pid)
+}
+
+// Proc gets info describing process `pid`.
+func (b *Batch) Proc(pid int, result interface{}) {
+	b.call("nvim_get_proc", result, pid)
 }
 
 // WindowBuffer returns the current buffer in a window.
