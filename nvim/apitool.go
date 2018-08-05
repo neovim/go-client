@@ -318,6 +318,8 @@ var nvimTypes = map[string]string{
 
 	"Mode":       "Dictionary",
 	"*HLAttrs":   "Dictionary",
+	"Channel":    "Dictionary",
+	"[]Channel":  "Array",
 	"[]*Mapping": "ArrayOf(Dictionary)",
 }
 

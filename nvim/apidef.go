@@ -42,6 +42,26 @@ func BufferLines(buffer Buffer, start int, end int, strict bool) [][]byte {
 	name(nvim_buf_get_lines)
 }
 
+// AttachBuffer activate updates from this buffer to the current channel.
+//
+// If sendBuffer is true, initial notification should contain the whole buffer.
+// If false, the first notification will be a `nvim_buf_lines_event`.
+// Otherwise, the first notification will be a `nvim_buf_changedtick_event`
+//
+// opts is optional parameters. Currently not used.
+//
+// returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
+func AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}) bool {
+	name(nvim_buf_attach)
+}
+
+// DetachBuffer deactivate updates from this buffer to the current channel.
+//
+// returns whether the updates couldn't be disabled because the buffer isn't loaded.
+func DetachBuffer(buffer Buffer) bool {
+	name(nvim_buf_detach)
+}
+
 // SetBufferLines replaces a line range on a buffer.
 //
 // Indexing is zero-based, end-exclusive. Negative indices are interpreted as
@@ -70,6 +90,13 @@ func BufferChangedTick(buffer Buffer) int {
 // BufferKeymap gets a list of buffer-local mappings.
 func BufferKeyMap(buffer Buffer, mode string) []*Mapping {
 	name(nvim_buf_get_keymap)
+}
+
+// BufferCommands gets a map of buffer-local user-commands.
+//
+// opts is optional parameters. Currently not used.
+func BufferCommands(buffer Buffer, opts map[string]interface{}) map[string]interface{} {
+	name(nvim_buf_get_commands)
 }
 
 // SetBufferVar sets a buffer-scoped (b:) variable.
@@ -110,6 +137,12 @@ func BufferName(buffer Buffer) string {
 // BufFilePre/BufFilePost are triggered.
 func SetBufferName(buffer Buffer, name string) {
 	name(nvim_buf_set_name)
+}
+
+// IsBufferLoaded Checks if a buffer is valid and loaded.
+// See api-buffer for more info about unloaded buffers.
+func IsBufferLoaded(buffer Buffer) bool {
+	name(nvim_buf_is_loaded)
 }
 
 // IsBufferValid returns true if the buffer is valid.
@@ -441,8 +474,54 @@ func KeyMap(mode string) []*Mapping {
 	name(nvim_get_keymap)
 }
 
+// Commands gets a map of global (non-buffer-local) Ex commands.
+// Currently only user-commands are supported, not builtin Ex commands.
+//
+// opts is optional parameters. Currently only supports {"builtin":false}.
+func Commands(opts map[string]interface{}) map[string]interface{} {
+	name(nvim_get_commands)
+}
+
 func APIInfo() []interface{} {
 	name(nvim_get_api_info)
+}
+
+// SetClientInfo identify the client for nvim.
+//
+// Can be called more than once, but subsequent calls will remove earlier info, which should be resent if it is still valid.
+// (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info)
+func SetClientInfo(name string, version map[string]interface{}, typ string, methods map[string]interface{}, attributes map[string]interface{}) {
+	name(nvim_set_client_info)
+}
+
+// Get information about a channel.
+func ChannelInfo(channel int) Channel {
+	name(nvim_get_chan_info)
+}
+
+// ListChannels get information about all open channels.
+func ListChannels() []Channel {
+	name(nvim_list_chans)
+}
+
+// ParseExpression parse a VimL expression.
+func ParseExpression(expr string, flags string, highlight bool) map[string]interface{} {
+	name(nvim_parse_expression)
+}
+
+// ListUIs gets a list of dictionaries representing attached UIs.
+func ListUIs() []interface{} {
+	name(nvim_list_uis)
+}
+
+// ProcChildren gets the immediate children of process `pid`.
+func ProcChildren(pid int) []interface{} {
+	name(nvim_get_proc_children)
+}
+
+// Proc gets info describing process `pid`.
+func Proc(pid int) interface{} {
+	name(nvim_get_proc)
 }
 
 // WindowBuffer returns the current buffer in a window.
