@@ -679,3 +679,12 @@ type Mapping struct {
 	// Mode specifies modes for which the mapping is defined.
 	Mode string `msgpack:"string"`
 }
+
+type Channel struct {
+	ID     int           `msgpack:"id,omitempty"`
+	Stream string        `msgpack:"stream,omitempty"`
+	Mode   string        `msgpack:"mode,omitempty"`
+	Pty    string        `msgpack:"pty,omitempty"`
+	Buffer string        `msgpack:"buffer,omitempty"`
+	Client []interface{} `msgpack:"client,omitempty"`
+}
