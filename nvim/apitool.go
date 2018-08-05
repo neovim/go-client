@@ -354,9 +354,10 @@ var compareTemplate = template.Must(template.New("").Funcs(template.FuncMap{
 
 // specialAPIs lists API calls that are implemented by hand.
 var specialAPIs = map[string]bool{
-	"nvim_call_atomic":   true,
-	"nvim_call_function": true,
-	"nvim_execute_lua":   true,
+	"nvim_call_atomic":        true,
+	"nvim_call_function":      true,
+	"nvim_call_dict_function": true,
+	"nvim_execute_lua":        true,
 }
 
 func compareFunctions(functions []*Function) error {

@@ -575,6 +575,22 @@ func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	b.call("nvim_call_function", result, fname, args)
 }
 
+// CallDict calls a vimscript Distionary function.
+func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) error {
+	if args == nil {
+		args = []interface{}{}
+	}
+	return v.call("nvim_call_dict_function", result, fname, dict, args)
+}
+
+// CallDict calls a vimscript Distionary function.
+func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) {
+	if args == nil {
+		args = []interface{}{}
+	}
+	b.call("nvim_call_dict_function", result, fname, dict, args)
+}
+
 // ExecuteLua executes a Lua block.
 func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) error {
 	if args == nil {
