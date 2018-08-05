@@ -510,17 +510,17 @@ func ParseExpression(expr string, flags string, highlight bool) map[string]inter
 }
 
 // UIs gets a list of dictionaries representing attached UIs.
-func UIs() []interface{} {
+func UIs() []*UI {
 	name(nvim_list_uis)
 }
 
 // ProcChildren gets the immediate children of process `pid`.
-func ProcChildren(pid int) []interface{} {
+func ProcChildren(pid int) []*Process {
 	name(nvim_get_proc_children)
 }
 
 // Proc gets info describing process `pid`.
-func Proc(pid int) interface{} {
+func Proc(pid int) Process {
 	name(nvim_get_proc)
 }
 
