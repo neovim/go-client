@@ -697,11 +697,17 @@ type Mapping struct {
 }
 
 type Channel struct {
-	ID     int     `msgpack:"id,omitempty"`
-	Stream string  `msgpack:"stream,omitempty"`
-	Mode   string  `msgpack:"mode,omitempty"`
-	Pty    string  `msgpack:"pty,omitempty"`
-	Buffer string  `msgpack:"buffer,omitempty"`
+	// ID is channel id.
+	ID int `msgpack:"id,omitempty"`
+	// Stream is the stream underlying the channel.
+	Stream string `msgpack:"stream,omitempty"`
+	// Mode is the how data received on the channel is interpreted.
+	Mode string `msgpack:"mode,omitempty"`
+	// Pty is the name of pseudoterminal, if one is used (optional).
+	Pty string `msgpack:"pty,omitempty"`
+	// Buffer is the buffer with connected terminal instance (optional).
+	Buffer string `msgpack:"buffer,omitempty"`
+	// Client is the information about the client on the other end of the RPC channel, if it has added it using nvim_set_client_info (optional).
 	Client *Client `msgpack:"client,omitempty"`
 }
 
@@ -719,9 +725,12 @@ type Client struct {
 }
 
 type Process struct {
+	// Name is the name of process command.
 	Name string `msgpack:"name,omitempty"`
-	PID  int    `msgpack:"pid,omitempty"`
-	PPID int    `msgpack:"ppid,omitempty"`
+	// PID is the process ID.
+	PID int `msgpack:"pid,omitempty"`
+	// PPID is the parent process ID.
+	PPID int `msgpack:"ppid,omitempty"`
 }
 
 type UI struct {
