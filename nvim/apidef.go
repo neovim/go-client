@@ -495,7 +495,7 @@ func SetClientInfo(name string, version map[string]interface{}, typ string, meth
 }
 
 // Get information about a channel.
-func ChannelInfo(channel int) Channel {
+func ChannelInfo(channel int) *Channel {
 	name(nvim_get_chan_info)
 }
 
