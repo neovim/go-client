@@ -1094,14 +1094,14 @@ func (b *Batch) SetClientInfo(name string, version map[string]interface{}, typ s
 }
 
 // Get information about a channel.
-func (v *Nvim) ChannelInfo(channel int) (Channel, error) {
-	var result Channel
+func (v *Nvim) ChannelInfo(channel int) (*Channel, error) {
+	var result *Channel
 	err := v.call("nvim_get_chan_info", &result, channel)
 	return result, err
 }
 
 // Get information about a channel.
-func (b *Batch) ChannelInfo(channel int, result *Channel) {
+func (b *Batch) ChannelInfo(channel int, result **Channel) {
 	b.call("nvim_get_chan_info", result, channel)
 }
 
