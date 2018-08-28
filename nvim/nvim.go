@@ -697,12 +697,25 @@ type Mapping struct {
 }
 
 type Channel struct {
-	ID     int           `msgpack:"id,omitempty"`
-	Stream string        `msgpack:"stream,omitempty"`
-	Mode   string        `msgpack:"mode,omitempty"`
-	Pty    string        `msgpack:"pty,omitempty"`
-	Buffer string        `msgpack:"buffer,omitempty"`
-	Client []interface{} `msgpack:"client,omitempty"`
+	ID     int     `msgpack:"id,omitempty"`
+	Stream string  `msgpack:"stream,omitempty"`
+	Mode   string  `msgpack:"mode,omitempty"`
+	Pty    string  `msgpack:"pty,omitempty"`
+	Buffer string  `msgpack:"buffer,omitempty"`
+	Client *Client `msgpack:"client,omitempty"`
+}
+
+type Client struct {
+	// Name is short name for the connected client.
+	Name string `msgpack:"name,omitempty"`
+	// Version describes the version, with the following possible keys (all optional).
+	Version map[string]interface{} `msgpack:"version,omitempty"`
+	// Type is client type. A client library should use "remote" if the library user hasn't specified other value.
+	Type string `msgpack:"type,omitempty"`
+	// Methods builtin methods in the client.
+	Methods map[string]interface{} `msgpack:"methods,omitempty"`
+	// Attributes is informal attributes describing the client.
+	Attributes map[string]interface{} `msgpack:"attributes,omitempty"`
 }
 
 type Process struct {
