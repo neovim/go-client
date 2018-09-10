@@ -5,23 +5,25 @@ Neovim/go-client is a [Neovim](https://neovim.io/) client and plugin host for [G
 
 This example plugin adds the Hello command to Nvim.
 
-    package main
+```go
+package main
 
-    import (
-        "strings"
-        "github.com/neovim/go-client/nvim/plugin"
-    )
+import (
+    "strings"
+    "github.com/neovim/go-client/nvim/plugin"
+)
 
-    func hello(args []string) (string, error) {
-        return "Hello " + strings.Join(args, " "), nil
-    }
+func hello(args []string) (string, error) {
+    return "Hello " + strings.Join(args, " "), nil
+}
 
-    func main() {
-        plugin.Main(func(p *plugin.Plugin) error {
-            p.HandleFunction(&plugin.FunctionOptions{Name: "Hello"}, hello)
-            return nil
-        })
-    }
+func main() {
+    plugin.Main(func(p *plugin.Plugin) error {
+        p.HandleFunction(&plugin.FunctionOptions{Name: "Hello"}, hello)
+        return nil
+    })
+}
+```
 
 Build the program with the [go tool](https://golang.org/cmd/go/) to an
 executable named `hello`. Ensure that the executable is on your path.
