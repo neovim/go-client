@@ -197,6 +197,34 @@ func (b *Batch) SetBufferLines(buffer Buffer, start int, end int, strict bool, r
 	b.call("nvim_buf_set_lines", nil, buffer, start, end, strict, replacement)
 }
 
+// BufferOffset returns the byte offset for a line.
+//
+// Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
+// 'fileformat' and 'fileencoding' are ignored. The line index just after the
+// last line gives the total byte-count of the buffer. A final EOL byte is
+// counted if it would be written, see 'eol'.
+//
+// Unlike |line2byte()|, throws error for out-of-bounds indexing.
+// Returns -1 for unloaded buffer.
+func (v *Nvim) BufferOffset(buffer Buffer, index int) (int, error) {
+	var result int
+	err := v.call("nvim_buf_get_offset", &result, buffer, index)
+	return result, err
+}
+
+// BufferOffset returns the byte offset for a line.
+//
+// Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
+// 'fileformat' and 'fileencoding' are ignored. The line index just after the
+// last line gives the total byte-count of the buffer. A final EOL byte is
+// counted if it would be written, see 'eol'.
+//
+// Unlike |line2byte()|, throws error for out-of-bounds indexing.
+// Returns -1 for unloaded buffer.
+func (b *Batch) BufferOffset(buffer Buffer, index int, result *int) {
+	b.call("nvim_buf_get_offset", result, buffer, index)
+}
+
 // BufferVar gets a buffer-scoped (b:) variable.
 func (v *Nvim) BufferVar(buffer Buffer, name string, result interface{}) error {
 	return v.call("nvim_buf_get_var", result, buffer, name)
@@ -423,6 +451,22 @@ func (b *Batch) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, lin
 	b.call("nvim_buf_add_highlight", result, buffer, srcID, hlGroup, line, startCol, endCol)
 }
 
+// ClearBufferNamespace clears namespaced objects, highlights and virtual text, from a line range.
+//
+// To clear the namespace in the entire buffer, pass in 0 and -1 to
+// line_start and line_end respectively.
+func (v *Nvim) ClearBufferNamespace(buffer Buffer, nsID int, line_start int, line_end int) error {
+	return v.call("nvim_buf_clear_namespace", nil, buffer, nsID, line_start, line_end)
+}
+
+// ClearBufferNamespace clears namespaced objects, highlights and virtual text, from a line range.
+//
+// To clear the namespace in the entire buffer, pass in 0 and -1 to
+// line_start and line_end respectively.
+func (b *Batch) ClearBufferNamespace(buffer Buffer, nsID int, line_start int, line_end int) {
+	b.call("nvim_buf_clear_namespace", nil, buffer, nsID, line_start, line_end)
+}
+
 // ClearBufferHighlight clears highlights from a given source group and a range
 // of lines.
 //
@@ -445,6 +489,54 @@ func (v *Nvim) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, end
 // The end of range is exclusive. Specify -1 to clear to the end of the file.
 func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) {
 	b.call("nvim_buf_clear_highlight", nil, buffer, srcID, startLine, endLine)
+}
+
+// SetBufferVirtualText sets the virtual text (annotation) for a buffer line.
+//
+// By default (and currently the only option) the text will be placed after
+// the buffer text. Virtual text will never cause reflow, rather virtual
+// text will be truncated at the end of the screen line. The virtual text will
+// begin after one cell to the right of the ordinary text, this will contain
+// the lcs-eol char if set, otherwise just be a space.
+//
+// Namespaces are used to support batch deletion/updating of virtual text.
+// To create a namespace, use |nvim_create_namespace|. Virtual text is
+// cleared using ClearBufferNamespace. The same `nsID` can be used for
+// both virtual text and highlights added by AddBufferHighlight, both
+// can then be cleared with a single call to ClearBufferNamespace. If the
+// virtual text never will be cleared by an API call, pass `ns_id = -1`.
+//
+// As a shorthand, `nsID = 0` can be used to create a new namespace for the
+// virtual text, the allocated id is then returned.
+//
+// The opts is the optional parameters. Currently not used.
+func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []interface{}, opts map[string]interface{}) (int, error) {
+	var result int
+	err := v.call("nvim_buf_set_virtual_text", &result, buffer, nsID, line, chunks, opts)
+	return result, err
+}
+
+// SetBufferVirtualText sets the virtual text (annotation) for a buffer line.
+//
+// By default (and currently the only option) the text will be placed after
+// the buffer text. Virtual text will never cause reflow, rather virtual
+// text will be truncated at the end of the screen line. The virtual text will
+// begin after one cell to the right of the ordinary text, this will contain
+// the lcs-eol char if set, otherwise just be a space.
+//
+// Namespaces are used to support batch deletion/updating of virtual text.
+// To create a namespace, use |nvim_create_namespace|. Virtual text is
+// cleared using ClearBufferNamespace. The same `nsID` can be used for
+// both virtual text and highlights added by AddBufferHighlight, both
+// can then be cleared with a single call to ClearBufferNamespace. If the
+// virtual text never will be cleared by an API call, pass `ns_id = -1`.
+//
+// As a shorthand, `nsID = 0` can be used to create a new namespace for the
+// virtual text, the allocated id is then returned.
+//
+// The opts is the optional parameters. Currently not used.
+func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []interface{}, opts map[string]interface{}, result *int) {
+	b.call("nvim_buf_set_virtual_text", result, buffer, nsID, line, chunks, opts)
 }
 
 // TabpageWindows returns the windows in a tabpage.
@@ -987,6 +1079,52 @@ func (b *Batch) SetCurrentTabpage(tabpage Tabpage) {
 	b.call("nvim_set_current_tabpage", nil, tabpage)
 }
 
+// CreateNamespace creates a new namespace, or get one with an exisiting name
+//
+// Namespaces are currently used for buffer highlighting and virtual text, see
+// AddBufferHighlight and SetBufferVirtualText.
+//
+// Namespaces can have a name of be anonymous. If `name` is a non-empty string,
+// and a namespace already exists with that name,the existing namespace id is
+// returned. If an empty string is used, a new anonymous namespace is returned.
+//
+// The returns the namespace ID.
+func (v *Nvim) CreateNamespace(name string) (int, error) {
+	var result int
+	err := v.call("nvim_create_namespace", &result, name)
+	return result, err
+}
+
+// CreateNamespace creates a new namespace, or get one with an exisiting name
+//
+// Namespaces are currently used for buffer highlighting and virtual text, see
+// AddBufferHighlight and SetBufferVirtualText.
+//
+// Namespaces can have a name of be anonymous. If `name` is a non-empty string,
+// and a namespace already exists with that name,the existing namespace id is
+// returned. If an empty string is used, a new anonymous namespace is returned.
+//
+// The returns the namespace ID.
+func (b *Batch) CreateNamespace(name string, result *int) {
+	b.call("nvim_create_namespace", result, name)
+}
+
+// Namespaces gets existing named namespaces
+//
+// The return dict that maps from names to namespace ids.
+func (v *Nvim) Namespaces() (map[string]interface{}, error) {
+	var result map[string]interface{}
+	err := v.call("nvim_get_namespaces", &result)
+	return result, err
+}
+
+// Namespaces gets existing named namespaces
+//
+// The return dict that maps from names to namespace ids.
+func (b *Batch) Namespaces(result *map[string]interface{}) {
+	b.call("nvim_get_namespaces", result)
+}
+
 // Subscribe subscribes to a Nvim event.
 func (v *Nvim) Subscribe(event string) error {
 	return v.call("nvim_subscribe", nil, event)
@@ -1175,6 +1313,16 @@ func (v *Nvim) WindowBuffer(window Window) (Buffer, error) {
 // WindowBuffer returns the current buffer in a window.
 func (b *Batch) WindowBuffer(window Window, result *Buffer) {
 	b.call("nvim_win_get_buf", result, window)
+}
+
+// SetBufferToWindow sets the current buffer in a window, without side-effects.
+func (v *Nvim) SetBufferToWindow(window Window, buffer Buffer) error {
+	return v.call("nvim_win_set_buf", nil, window, buffer)
+}
+
+// SetBufferToWindow sets the current buffer in a window, without side-effects.
+func (b *Batch) SetBufferToWindow(window Window, buffer Buffer) {
+	b.call("nvim_win_set_buf", nil, window, buffer)
 }
 
 // WindowCursor returns the cursor position in the window.
