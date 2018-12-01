@@ -62,9 +62,86 @@ type Mapping struct {
 	Mode string `msgpack:"string"`
 }
 
+type VersionType string
+
+const (
+	// VersionMajor major version. (defaults to 0 if not set, for no release yet)
+	VersionMajor VersionType = "major"
+	// VersionMinor minor version.
+	VersionMinor VersionType = "minor"
+	// VersionPatch patch number.
+	VersionPatch VersionType = "patch"
+	// VersionPrerelease string describing a prerelease, like "dev" or "beta1".
+	VersionPrerelease VersionType = "prerelease"
+	// VersionCommit hash or similar identifier of commit.
+	VersionCommit VersionType = "commit"
+)
+
+// Version type of describing the version, with the following.
+type Version map[VersionType]string
+
+// ClientType type of client type.
+type ClientType string
+
+const (
+	RemoteClient   ClientType = "remote"
+	UIClient       ClientType = "ui"
+	EmbedderClient ClientType = "embedder"
+	HostClient     ClientType = "host"
+	PluginClient   ClientType = "plugin"
+)
+
+type MethodsType string
+
+const (
+	// Async is if true, send as a notification. If false or unspecified, use a blocking request.
+	MethodsAsync MethodsType = "async"
+	// Nargs is the number of arguments. Could be a single integer or an array two integers, minimum and maximum inclusive.
+	MethodsNargs MethodsType = "nargs"
+)
+
+// Methods builtin methods in the client.
+//
+// For a host, this does not include plugin methods which will be discovered later.
+// The key should be the method name, the values are dicts with the following (optional) keys. See below.
+//
+// Further keys might be added in later versions of nvim and unknown keys are thus ignored.
+// Clients must only use keys defined in this or later versions of nvim.
+type Methods map[MethodsType]string
+
+type AttributesType string
+
+const (
+	// AttributesWebsite Website of client (for instance github repository)
+	AttributesWebsite AttributesType = "website"
+	// AttributesLicense Informal description of the license, such as "Apache 2", "GPLv3" or "MIT"
+	AttributesLicense AttributesType = "license"
+	// AttributesLogo URI or path to image, preferably small logo or icon. .png or .svg format is preferred.
+	AttributesLogo AttributesType = "logo"
+)
+
+// Attributes informal attributes describing the client. Clients might define their own keys, but the following are suggested.
+type Attributes map[AttributesType]string
+
+// Client represents a identify the client for nvim.
+//
+// Can be called more than once, but subsequent calls will remove earlier info, which should be resent if it is still valid.
+// (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info)
+type Client struct {
+	// Name is short name for the connected client.
+	Name string `msgpack:"name,omitempty"`
+	// Version describes the version, with the following possible keys (all optional).
+	Version Version `msgpack:"version,omitempty"`
+	// Type is the client type. Must be one of the ClientType type values.
+	Type ClientType `msgpack:"type,omitempty"`
+	// Methods builtin methods in the client.
+	Methods Methods `msgpack:"methods,omitempty"`
+	// Attributes is informal attributes describing the client.
+	Attributes Attributes `msgpack:"attributes,omitempty"`
+}
+
+// Channel information about a channel.
 type Channel struct {
-	// ID is channel id.
-	ID int `msgpack:"id,omitempty"`
 	// Stream is the stream underlying the channel.
 	Stream string `msgpack:"stream,omitempty"`
 	// Mode is the how data received on the channel is interpreted.
@@ -72,22 +149,9 @@ type Channel struct {
 	// Pty is the name of pseudoterminal, if one is used (optional).
 	Pty string `msgpack:"pty,omitempty"`
 	// Buffer is the buffer with connected terminal instance (optional).
-	Buffer string `msgpack:"buffer,omitempty"`
+	Buffer Buffer `msgpack:"buffer,omitempty"`
 	// Client is the information about the client on the other end of the RPC channel, if it has added it using nvim_set_client_info (optional).
 	Client *Client `msgpack:"client,omitempty"`
-}
-
-type Client struct {
-	// Name is short name for the connected client.
-	Name string `msgpack:"name,omitempty"`
-	// Version describes the version, with the following possible keys (all optional).
-	Version map[string]interface{} `msgpack:"version,omitempty"`
-	// Type is client type. A client library should use "remote" if the library user hasn't specified other value.
-	Type string `msgpack:"type,omitempty"`
-	// Methods builtin methods in the client.
-	Methods map[string]interface{} `msgpack:"methods,omitempty"`
-	// Attributes is informal attributes describing the client.
-	Attributes map[string]interface{} `msgpack:"attributes,omitempty"`
 }
 
 type Process struct {
