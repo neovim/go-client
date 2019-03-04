@@ -95,7 +95,7 @@ func BufferKeyMap(buffer Buffer, mode string) []*Mapping {
 // BufferCommands gets a map of buffer-local user-commands.
 //
 // opts is optional parameters. Currently not used.
-func BufferCommands(buffer Buffer, opts map[string]interface{}) map[string]interface{} {
+func BufferCommands(buffer Buffer, opts map[string]interface{}) map[string]*Command {
 	name(nvim_buf_get_commands)
 }
 
@@ -478,7 +478,7 @@ func KeyMap(mode string) []*Mapping {
 // Currently only user-commands are supported, not builtin Ex commands.
 //
 // opts is optional parameters. Currently only supports {"builtin":false}.
-func Commands(opts map[string]interface{}) map[string]interface{} {
+func Commands(opts map[string]interface{}) map[string]*Command {
 	name(nvim_get_commands)
 }
 

@@ -185,3 +185,19 @@ type UI struct {
 	// ChannelID channel id of remote UI (not present for TUI)
 	ChannelID int `msgpack:"chan,omitempty"`
 }
+
+// Command represents a Neovim Ex command.
+type Command struct {
+	Bang        bool   `msgpack:"bang"`
+	Complete    string `msgpack:"complete,omitempty"`
+	Nargs       string `msgpack:"nargs"`
+	Range       string `msgpack:"range,omitempty"`
+	Name        string `msgpack:"name"`
+	ScriptID    int    `msgpack:"script_id"`
+	Bar         bool   `msgpack:"bar"`
+	Register    bool   `msgpack:"register"`
+	Addr        string `msgpack:"addr,omitempty"`
+	Count       string `msgpack:"count,omitempty"`
+	CompleteArg string `msgpack:"complete_arg,omitempty"`
+	Definition  string `msgpack:"definition"`
+}
