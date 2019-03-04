@@ -234,8 +234,8 @@ func (b *Batch) BufferKeyMap(buffer Buffer, mode string, result *[]*Mapping) {
 // BufferCommands gets a map of buffer-local user-commands.
 //
 // opts is optional parameters. Currently not used.
-func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[string]interface{}, error) {
-	var result map[string]interface{}
+func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[string]*Command, error) {
+	var result map[string]*Command
 	err := v.call("nvim_buf_get_commands", &result, buffer, opts)
 	return result, err
 }
@@ -243,7 +243,7 @@ func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[s
 // BufferCommands gets a map of buffer-local user-commands.
 //
 // opts is optional parameters. Currently not used.
-func (b *Batch) BufferCommands(buffer Buffer, opts map[string]interface{}, result *map[string]interface{}) {
+func (b *Batch) BufferCommands(buffer Buffer, opts map[string]interface{}, result *map[string]*Command) {
 	b.call("nvim_buf_get_commands", result, buffer, opts)
 }
 
@@ -1053,8 +1053,8 @@ func (b *Batch) KeyMap(mode string, result *[]*Mapping) {
 // Currently only user-commands are supported, not builtin Ex commands.
 //
 // opts is optional parameters. Currently only supports {"builtin":false}.
-func (v *Nvim) Commands(opts map[string]interface{}) (map[string]interface{}, error) {
-	var result map[string]interface{}
+func (v *Nvim) Commands(opts map[string]interface{}) (map[string]*Command, error) {
+	var result map[string]*Command
 	err := v.call("nvim_get_commands", &result, opts)
 	return result, err
 }
@@ -1063,7 +1063,7 @@ func (v *Nvim) Commands(opts map[string]interface{}) (map[string]interface{}, er
 // Currently only user-commands are supported, not builtin Ex commands.
 //
 // opts is optional parameters. Currently only supports {"builtin":false}.
-func (b *Batch) Commands(opts map[string]interface{}, result *map[string]interface{}) {
+func (b *Batch) Commands(opts map[string]interface{}, result *map[string]*Command) {
 	b.call("nvim_get_commands", result, opts)
 }
 
