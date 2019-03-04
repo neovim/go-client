@@ -62,23 +62,19 @@ type Mapping struct {
 	Mode string `msgpack:"string"`
 }
 
-type VersionType string
-
-const (
-	// VersionMajor major version. (defaults to 0 if not set, for no release yet)
-	VersionMajor VersionType = "major"
-	// VersionMinor minor version.
-	VersionMinor VersionType = "minor"
-	// VersionPatch patch number.
-	VersionPatch VersionType = "patch"
-	// VersionPrerelease string describing a prerelease, like "dev" or "beta1".
-	VersionPrerelease VersionType = "prerelease"
-	// VersionCommit hash or similar identifier of commit.
-	VersionCommit VersionType = "commit"
-)
-
-// Version type of describing the version, with the following.
-type Version map[VersionType]string
+// Version represents a version of client for nvim.
+type Version struct {
+	// Major major version. (defaults to 0 if not set, for no release yet)
+	Major int `msgpack:"foreground,omitempty" empty:"0"`
+	// Minor minor version.
+	Minor int `msgpack:"minor,omitempty"`
+	// Patch patch number.
+	Patch int `msgpack:"patch,omitempty"`
+	// Prerelease string describing a prerelease, like "dev" or "beta1".
+	Prerelease string `msgpack:"prerelease,omitempty"`
+	// Commit hash or similar identifier of commit.
+	Commit string `msgpack:"commit,omitempty"`
+}
 
 // ClientType type of client type.
 type ClientType string
