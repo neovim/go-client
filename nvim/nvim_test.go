@@ -26,7 +26,7 @@ import (
 
 func newChildProcess(t *testing.T) (*Nvim, func()) {
 	v, err := NewChildProcess(
-		ChildProcessArgs("-u", "NONE", "-n", "--embed"),
+		ChildProcessArgs("-u", "NONE", "-n", "--embed", "--headless"),
 		ChildProcessEnv([]string{}),
 		ChildProcessLogf(t.Logf))
 	if err != nil {
