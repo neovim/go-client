@@ -567,6 +567,14 @@ func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error
 	return v.call("nvim_call_function", result, fname, args)
 }
 
+// Invoke makes a RPC request.
+func (v *Nvim) Invoke(procedure string, result interface{}, args ...interface{}) error {
+	if args == nil {
+		args = []interface{}{}
+	}
+	return v.ep.Call(procedure, result, args...)
+}
+
 // Call calls a vimscript function.
 func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	if args == nil {
