@@ -1160,3 +1160,16 @@ func (v *Nvim) IsWindowValid(window Window) (bool, error) {
 func (b *Batch) IsWindowValid(window Window, result *bool) {
 	b.call("nvim_win_is_valid", result, window)
 }
+
+// Invoke makes a RPC request.
+func (v *Nvim) Invoke(procedure string, result interface{}, args ...interface{}) error {
+	if args == nil {
+		args = []interface{}{}
+	}
+	return v.ep.Call(procedure, result, args...)
+}
+
+// Invoke makes a RPC request atomically as a part of batch request.
+func (b *Batch) Invoke(procedure string, result interface{}, args ...interface{}) {
+	b.call(procedure, result, args...)
+}
