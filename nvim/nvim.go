@@ -559,12 +559,22 @@ func (el ErrorList) Error() string {
 	return el[0].Error()
 }
 
+// Request makes a RPC request.
+func (v *Nvim) Request(procedure string, result interface{}, args ...interface{}) error {
+	return v.call(procedure, result, args...)
+}
+
 // Call calls a vimscript function.
 func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error {
 	if args == nil {
 		args = []interface{}{}
 	}
 	return v.call("nvim_call_function", result, fname, args)
+}
+
+// Request makes a RPC request atomically as a part of batch request.
+func (b *Batch) Request(procedure string, result interface{}, args ...interface{}) {
+	b.call(procedure, result, args...)
 }
 
 // Call calls a vimscript function.
