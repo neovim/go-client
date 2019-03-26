@@ -76,24 +76,20 @@ type Version struct {
 	Commit string `msgpack:"commit,omitempty"`
 }
 
-// ClientType type of client type.
+// ClientType type of client information.
 type ClientType string
 
 const (
-	RemoteClient   ClientType = "remote"
-	UIClient       ClientType = "ui"
-	EmbedderClient ClientType = "embedder"
-	HostClient     ClientType = "host"
-	PluginClient   ClientType = "plugin"
-)
-
-type MethodsType string
-
-const (
-	// Async is if true, send as a notification. If false or unspecified, use a blocking request.
-	MethodsAsync MethodsType = "async"
-	// Nargs is the number of arguments. Could be a single integer or an array two integers, minimum and maximum inclusive.
-	MethodsNargs MethodsType = "nargs"
+	// RemoteClientType for the client library.
+	RemoteClientType ClientType = "remote"
+	// UIClientType for the gui frontend.
+	UIClientType ClientType = "ui"
+	// EmbedderClientType for the application using nvim as a component, for instance IDE/editor implementing a vim mode.
+	EmbedderClientType ClientType = "embedder"
+	// HostClientType for the plugin host. Typically started by nvim.
+	HostClientType ClientType = "host"
+	// PluginClientType for the single plugin. Started by nvim.
+	PluginClientType ClientType = "plugin"
 )
 
 // Methods builtin methods in the client.
@@ -103,21 +99,35 @@ const (
 //
 // Further keys might be added in later versions of nvim and unknown keys are thus ignored.
 // Clients must only use keys defined in this or later versions of nvim.
-type Methods map[MethodsType]string
+type Method struct {
+	// Async is defines whether the uses notification request or blocking request.
+	//
+	// If true, send as a notification.
+	// If false, send as a blocking request.
+	Async bool `msgpack:"async"`
+	// NArgs is the number of method arguments.
+	NArgs MethodNArgs `msgpack:"nargs"`
+}
 
-type AttributesType string
+// MethodNArgs is the number of arguments. Could be a single integer or an array two integers, minimum and maximum inclusive.
+type MethodNArgs struct {
+	// Min is the minimum number of method arguments.
+	Min int `msgpack:",array"`
+	// Max is the maximum number of method arguments.
+	Max int `msgpack:",array"`
+}
+
+// ClientInfoAttributes informal attributes describing the client. Clients might define their own keys, but the following are suggested.
+type ClientInfoAttributes map[string]string
 
 const (
-	// AttributesWebsite Website of client (for instance github repository)
-	AttributesWebsite AttributesType = "website"
-	// AttributesLicense Informal description of the license, such as "Apache 2", "GPLv3" or "MIT"
-	AttributesLicense AttributesType = "license"
-	// AttributesLogo URI or path to image, preferably small logo or icon. .png or .svg format is preferred.
-	AttributesLogo AttributesType = "logo"
+	// AttributeKeyWebsite Website of client (for instance github repository).
+	AttributeKeyWebsite = "website"
+	// AttributeKeyLicense Informal description of the license, such as "Apache 2", "GPLv3" or "MIT".
+	AttributeKeyLicense = "license"
+	// AttributeKey URI or path to image, preferably small logo or icon. .png or .svg format is preferred.
+	AttributeKeyLogo = "logo"
 )
-
-// Attributes informal attributes describing the client. Clients might define their own keys, but the following are suggested.
-type Attributes map[AttributesType]string
 
 // Client represents a identify the client for nvim.
 //
@@ -131,9 +141,9 @@ type Client struct {
 	// Type is the client type. Must be one of the ClientType type values.
 	Type ClientType `msgpack:"type,omitempty"`
 	// Methods builtin methods in the client.
-	Methods Methods `msgpack:"methods,omitempty"`
+	Methods map[string]*Method `msgpack:"methods,omitempty"`
 	// Attributes is informal attributes describing the client.
-	Attributes Attributes `msgpack:"attributes,omitempty"`
+	Attributes ClientInfoAttributes `msgpack:"attributes,omitempty"`
 }
 
 // Channel information about a channel.
