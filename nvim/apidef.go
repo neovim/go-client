@@ -490,7 +490,7 @@ func APIInfo() []interface{} {
 //
 // Can be called more than once, but subsequent calls will remove earlier info, which should be resent if it is still valid.
 // (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info)
-func SetClientInfo(name string, version *Version, typ string, methods map[string]*Method, attributes ClientInfoAttributes) {
+func SetClientInfo(name string, version *ClientVersion, typ string, methods map[string]*ClientMethod, attributes ClientAttributes) {
 	name(nvim_set_client_info)
 }
 

@@ -310,9 +310,9 @@ var nvimTypes = map[string]string{
 	"map[string]interface{}": "Dictionary",
 	"map[string]int":         "Dictionary",
 	"map[string]*Command":    "Dictionary",
-	"Version":                "Dictionary",
-	"Methods":                "Dictionary",
-	"Attributes":             "Dictionary",
+	"*ClientVersion":          "Dictionary",
+	"ClientMethods":          "Dictionary",
+	"ClientAttributes":       "Dictionary",
 
 	"[2]int":    "ArrayOf(Integer, 2)",
 	"[]Buffer":  "ArrayOf(Buffer)",
