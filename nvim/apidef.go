@@ -122,7 +122,7 @@ func SetBufferOption(buffer Buffer, name string, value interface{}) {
 
 // BufferNumber gets a buffer's number.
 //
-// Deprecated: use int(buffer) to get the buffer's number as an integer.
+// Deprecated: Use int(buffer) to get the buffer's number as an integer.
 func BufferNumber(buffer Buffer) int {
 	name(nvim_buf_get_number)
 	deprecatedSince(2)
