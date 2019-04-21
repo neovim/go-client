@@ -1081,7 +1081,7 @@ func (b *Batch) APIInfo(result *[]interface{}) {
 //
 // Can be called more than once, but subsequent calls will remove earlier info, which should be resent if it is still valid.
 // (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info)
-func (v *Nvim) SetClientInfo(name string, version *Version, typ string, methods map[string]*Method, attributes ClientInfoAttributes) error {
+func (v *Nvim) SetClientInfo(name string, version *ClientVersion, typ string, methods map[string]*ClientMethod, attributes ClientAttributes) error {
 	return v.call("nvim_set_client_info", nil, name, version, typ, methods, attributes)
 }
 
@@ -1089,7 +1089,7 @@ func (v *Nvim) SetClientInfo(name string, version *Version, typ string, methods 
 //
 // Can be called more than once, but subsequent calls will remove earlier info, which should be resent if it is still valid.
 // (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info)
-func (b *Batch) SetClientInfo(name string, version *Version, typ string, methods map[string]*Method, attributes ClientInfoAttributes) {
+func (b *Batch) SetClientInfo(name string, version *ClientVersion, typ string, methods map[string]*ClientMethod, attributes ClientAttributes) {
 	b.call("nvim_set_client_info", nil, name, version, typ, methods, attributes)
 }
 
