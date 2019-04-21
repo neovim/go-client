@@ -291,7 +291,7 @@ func (b *Batch) SetBufferOption(buffer Buffer, name string, value interface{}) {
 
 // BufferNumber gets a buffer's number.
 //
-// Deprecated: use int(buffer) to get the buffer's number as an integer.
+// Deprecated: Use int(buffer) to get the buffer's number as an integer.
 func (v *Nvim) BufferNumber(buffer Buffer) (int, error) {
 	var result int
 	err := v.call("nvim_buf_get_number", &result, buffer)
@@ -300,7 +300,7 @@ func (v *Nvim) BufferNumber(buffer Buffer) (int, error) {
 
 // BufferNumber gets a buffer's number.
 //
-// Deprecated: use int(buffer) to get the buffer's number as an integer.
+// Deprecated: Use int(buffer) to get the buffer's number as an integer.
 func (b *Batch) BufferNumber(buffer Buffer, result *int) {
 	b.call("nvim_buf_get_number", result, buffer)
 }
