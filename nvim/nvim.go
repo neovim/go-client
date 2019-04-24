@@ -585,6 +585,22 @@ func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	b.call("nvim_call_function", result, fname, args)
 }
 
+// CallDict calls a vimscript Dictionary function.
+func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) error {
+	if args == nil {
+		args = []interface{}{}
+	}
+	return v.call("nvim_call_dict_function", result, fname, dict, args)
+}
+
+// CallDict calls a vimscript Dictionary function.
+func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) {
+	if args == nil {
+		args = []interface{}{}
+	}
+	b.call("nvim_call_dict_function", result, fname, dict, args)
+}
+
 // ExecuteLua executes a Lua block.
 func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) error {
 	if args == nil {
@@ -640,52 +656,4 @@ func unmarshalExt(dec *msgpack.Decoder, id int, v interface{}) (int, error) {
 		return 0, err
 	}
 	return decodeExt(dec.BytesNoCopy())
-}
-
-type Mode struct {
-	// Mode is the current mode.
-	Mode string `msgpack:"mode"`
-
-	// Blocking is true if Nvim is waiting for input.
-	Blocking bool `msgpack:"blocking"`
-}
-
-type HLAttrs struct {
-	Bold       bool `msgpack:"bold,omitempty"`
-	Underline  bool `msgpack:"underline,omitempty"`
-	Undercurl  bool `msgpack:"undercurl,omitempty"`
-	Italic     bool `msgpack:"italic,omitempty"`
-	Reverse    bool `msgpack:"reverse,omitempty"`
-	Foreground int  `msgpack:"foreground,omitempty" empty:"-1"`
-	Background int  `msgpack:"background,omitempty" empty:"-1"`
-	Special    int  `msgpack:"special,omitempty" empty:"-1"`
-}
-
-type Mapping struct {
-	// LHS is the {lhs} of the mapping.
-	LHS string `msgpack:"lhs"`
-
-	// RHS is the {hrs} of the mapping as typed.
-	RHS string `msgpack:"rhs"`
-
-	// Silent is 1 for a |:map-silent| mapping, else 0.
-	Silent int `msgpack:"silent"`
-
-	// Noremap is 1 if the {rhs} of the mapping is not remappable.
-	NoRemap int `msgpack:"noremap"`
-
-	// Expr is  1 for an expression mapping.
-	Expr int `msgpack:"expr"`
-
-	// Buffer for a local mapping.
-	Buffer int `msgpack:"buffer"`
-
-	// SID is the script local ID, used for <sid> mappings.
-	SID int `msgpack:"sid"`
-
-	// Nowait is 1 if map does not wait for other, longer mappings.
-	NoWait int `msgpack:"nowait"`
-
-	// Mode specifies modes for which the mapping is defined.
-	Mode string `msgpack:"string"`
 }
