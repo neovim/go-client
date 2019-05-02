@@ -1,6 +1,7 @@
 package nvim
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
@@ -377,6 +378,93 @@ func TestAPI(t *testing.T) {
 		hl, err = v.HLByID(id, true)
 		if !reflect.DeepEqual(hl, gui) {
 			t.Errorf("HLByID(id, true)\n got %+v,\nwant %+v", hl, gui)
+		}
+	})
+
+	t.Run("buf_attach", func(t *testing.T) {
+		buffer, err := v.CurrentBuffer()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields([]byte(nil))); err != nil {
+			t.Fatal(err)
+		}
+
+		type ChangedtickEvent struct {
+			Buffer     Buffer
+			Changetick int64
+		}
+		type BufLinesEvent struct {
+			Buffer      Buffer
+			Changetick  int64
+			FirstLine   int64
+			LastLine    int64
+			LineData    string
+			IsMultipart bool
+		}
+
+		changedtickChan := make(chan *ChangedtickEvent)
+		v.RegisterHandler("nvim_buf_changedtick_event", func(changedtickEvent ...interface{}) {
+			ev := &ChangedtickEvent{
+				Buffer:     changedtickEvent[0].(Buffer),
+				Changetick: changedtickEvent[1].(int64),
+			}
+			changedtickChan <- ev
+		})
+
+		bufLinesChan := make(chan *BufLinesEvent)
+		v.RegisterHandler("nvim_buf_lines_event", func(bufLinesEvent ...interface{}) {
+			ev := &BufLinesEvent{
+				Buffer:      bufLinesEvent[0].(Buffer),
+				Changetick:  bufLinesEvent[1].(int64),
+				FirstLine:   bufLinesEvent[2].(int64),
+				LastLine:    bufLinesEvent[3].(int64),
+				LineData:    fmt.Sprint(bufLinesEvent[4]),
+				IsMultipart: bufLinesEvent[5].(bool),
+			}
+			bufLinesChan <- ev
+		})
+
+		ok, err := v.AttachBuffer(buffer, false, make(map[string]interface{}))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !ok {
+			t.Fatal(errors.New("could not attach buffer"))
+		}
+
+		changedtickExpected := &ChangedtickEvent{
+			Buffer:     1,
+			Changetick: 4,
+		}
+		bufLinesEventExpected := &BufLinesEvent{
+			Buffer:      1,
+			Changetick:  5,
+			FirstLine:   0,
+			LastLine:    1,
+			LineData:    "[test]",
+			IsMultipart: false,
+		}
+
+		go func() {
+			for {
+				select {
+				default:
+				case changedtick := <-changedtickChan:
+					if !reflect.DeepEqual(changedtick, changedtickExpected) {
+						t.Fatalf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
+					}
+				case bufLines := <-bufLinesChan:
+					if expected := bufLinesEventExpected; !reflect.DeepEqual(bufLines, expected) {
+						t.Fatalf("bufLines = %+v, want %+v", bufLines, expected)
+					}
+				}
+			}
+		}()
+
+		test := []byte("test")
+		if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(test)); err != nil {
+			t.Fatal(err)
 		}
 	})
 }
