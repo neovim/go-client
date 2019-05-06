@@ -464,13 +464,11 @@ func TestAPI(t *testing.T) {
 					if !reflect.DeepEqual(changedtick, changedtickExpected) {
 						errc <- fmt.Errorf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
 					}
-					t.Log("changedtick")
 					atomic.AddInt64(&numEvent, 1)
 				case bufLines := <-bufLinesChan:
 					if expected := bufLinesEventExpected; !reflect.DeepEqual(bufLines, expected) {
 						errc <- fmt.Errorf("bufLines = %+v, want %+v", bufLines, expected)
 					}
-					t.Log("bufLines")
 					atomic.AddInt64(&numEvent, 1)
 				}
 			}
