@@ -7,6 +7,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -386,7 +387,9 @@ func TestAPI(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields([]byte(nil))); err != nil {
+
+		// clear curret buffer text
+		if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
 			t.Fatal(err)
 		}
 
@@ -446,25 +449,47 @@ func TestAPI(t *testing.T) {
 			IsMultipart: false,
 		}
 
+		var numEvent int64 // add and load should be atomically
+		errc := make(chan error)
+		done := make(chan struct{})
 		go func() {
 			for {
 				select {
 				default:
+					if atomic.LoadInt64(&numEvent) == 2 { // end buf_attach test when handle 2 event
+						done <- struct{}{}
+						return
+					}
 				case changedtick := <-changedtickChan:
 					if !reflect.DeepEqual(changedtick, changedtickExpected) {
-						t.Fatalf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
+						errc <- fmt.Errorf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
 					}
+					t.Log("changedtick")
+					atomic.AddInt64(&numEvent, 1)
 				case bufLines := <-bufLinesChan:
 					if expected := bufLinesEventExpected; !reflect.DeepEqual(bufLines, expected) {
-						t.Fatalf("bufLines = %+v, want %+v", bufLines, expected)
+						errc <- fmt.Errorf("bufLines = %+v, want %+v", bufLines, expected)
 					}
+					t.Log("bufLines")
+					atomic.AddInt64(&numEvent, 1)
 				}
 			}
+		}()
+
+		go func() {
+			<-done
+			close(errc)
 		}()
 
 		test := []byte("test")
 		if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(test)); err != nil {
 			t.Fatal(err)
+		}
+
+		for err := range errc {
+			if err != nil {
+				t.Fatal(err)
+			}
 		}
 	})
 }
