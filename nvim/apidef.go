@@ -63,6 +63,19 @@ func SetBufferLines(buffer Buffer, start int, end int, strict bool, replacement 
 	name(nvim_buf_set_lines)
 }
 
+// BufferOffset returns the byte offset for a line.
+//
+// Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
+// 'fileformat' and 'fileencoding' are ignored. The line index just after the
+// last line gives the total byte-count of the buffer. A final EOL byte is
+// counted if it would be written, see 'eol'.
+//
+// Unlike |line2byte()|, throws error for out-of-bounds indexing.
+// Returns -1 for unloaded buffer.
+func BufferOffset(buffer Buffer, index int) int {
+	name(nvim_buf_get_offset)
+}
+
 // BufferVar gets a buffer-scoped (b:) variable.
 func BufferVar(buffer Buffer, name string) interface{} {
 	name(nvim_buf_get_var)
@@ -168,6 +181,14 @@ func AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, star
 	name(nvim_buf_add_highlight)
 }
 
+// ClearBufferNamespace clears namespaced objects, highlights and virtual text, from a line range.
+//
+// To clear the namespace in the entire buffer, pass in 0 and -1 to
+// line_start and line_end respectively.
+func ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lineEnd int) {
+	name(nvim_buf_clear_namespace)
+}
+
 // ClearBufferHighlight clears highlights from a given source group and a range
 // of lines.
 //
@@ -176,8 +197,33 @@ func AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, star
 //
 // The lineStart and lineEnd parameters specify the range of lines to clear.
 // The end of range is exclusive. Specify -1 to clear to the end of the file.
+//
+// Deprecated: Use ClearBufferNamespace() instead.
 func ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) {
 	name(nvim_buf_clear_highlight)
+}
+
+// Set the virtual text (annotation) for a buffer line.
+//
+// By default (and currently the only option) the text will be placed after
+// the buffer text. Virtual text will never cause reflow, rather virtual
+// text will be truncated at the end of the screen line. The virtual text will
+// begin one cell (|lcs-eol| or space) after the ordinary text.
+//
+// Namespaces are used to support batch deletion/updating of virtual text.
+// To create a namespace, use CreateNamespace(). Virtual text is
+// cleared using ClearBufferNamespace(). The same `nsID` can be used for
+// both virtual text and highlights added by AddBufferHighlight(), both
+// can then be cleared with a single call to ClearBufferNamespace(). If the
+// virtual text never will be cleared by an API call, pass `nsID = -1`.
+//
+// As a shorthand, `nsID = 0` can be used to create a new namespace for the virtual text, the allocated id is then returned.
+//
+// The `opts` is optional parameters. Currently not used.
+//
+// The returns the nsID that was used.
+func SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []interface{}, opts map[string]interface{}) int {
+	name(nvim_buf_set_virtual_text)
 }
 
 // TabpageWindows returns the windows in a tabpage.
@@ -248,6 +294,14 @@ func SetUIOption(name string, value interface{}) {
 	name(nvim_ui_set_option)
 }
 
+// TryResizeUIGrid tell Nvim to resize a grid. Triggers a grid_resize event with the requested
+// grid size or the maximum size if it exceeds size limits.
+//
+// On invalid grid handle, fails with error.
+func TryResizeUIGrid(grid, width, height int) {
+	name(nvim_ui_try_resize_grid)
+}
+
 // Command executes a single ex command.
 func Command(cmd string) {
 	name(nvim_command)
@@ -281,6 +335,14 @@ func FeedKeys(keys string, mode string, escapeCSI bool) {
 // than what was requested if the buffer is full).
 func Input(keys string) int {
 	name(nvim_input)
+}
+
+// InputMouse send mouse event from GUI.
+//
+// The call is non-blocking. It doesn't wait on any resulting action, but
+// queues the event to be processed soon by the event loop.
+func InputMouse(button, action, modifier string, grid, row, col int) {
+	name(nvim_input_mouse)
 }
 
 // ReplaceTermcodes replaces any terminal code strings by byte sequences. The
@@ -360,6 +422,11 @@ func VVar(name string) interface{} {
 	name(nvim_get_vvar)
 }
 
+// SetVVar sets a v: variable, if it is not readonly.
+func SetVVar(name string, value interface{}) {
+	name(nvim_set_vvar)
+}
+
 // Option gets an option.
 func Option(name string) interface{} {
 	name(nvim_get_option)
@@ -417,6 +484,38 @@ func SetCurrentWindow(window Window) {
 	name(nvim_set_current_win)
 }
 
+// CreateBuffer creates a new, empty, unnamed buffer.
+func CreateBuffer(listed, scratch bool) Buffer {
+	name(nvim_create_buf)
+}
+
+// OpenWindow open a new window.
+//
+// Currently this is used to open floating and external windows.
+// Floats are windows that are drawn above the split layout, at some anchor
+// position in some other window. Floats can be draw internally or by external
+// GUI with the |ui-multigrid| extension. External windows are only supported
+// with multigrid GUIs, and are displayed as separate top-level windows.
+//
+// Exactly one of `external` and `relative` must be specified.
+//
+// With editor positioning row=0, col=0 refers to the top-left corner of the
+// screen-grid and row=Lines-1, Columns-1 refers to the bottom-right corner.
+// Floating point values are allowed, but the builtin implementation (used by
+// TUI and GUIs without multigrid support) will always round down to nearest
+// integer.
+//
+// Out-of-bounds values, and configurations that make the float not fit inside
+// the main editor, are allowed. The builtin implementation will truncate
+// values so floats are completely within the main screen grid. External GUIs
+// could let floats hover outside of the main window like a tooltip, but
+// this should not be used to specify arbitrary WM screen positions.
+//
+// The returns the window handle or 0 when error.
+func OpenWindow(buffer Buffer, enter bool, config map[string]interface{}) Window {
+	name(nvim_open_win)
+}
+
 // Tabpages returns the current list of tabpages.
 func Tabpages() []Tabpage {
 	name(nvim_list_tabpages)
@@ -430,6 +529,27 @@ func CurrentTabpage() Tabpage {
 // SetCurrentTabpage sets the current tabpage.
 func SetCurrentTabpage(tabpage Tabpage) {
 	name(nvim_set_current_tabpage)
+}
+
+// CreateNamespace creates a new namespace, or gets an existing one.
+//
+// Namespaces are used for buffer highlights and virtual text, see
+// AddBufferHighlight() and SetBufferVirtualText().
+//
+// Namespaces can be named or anonymous. If `name` matches an existing
+// namespace, the associated id is returned. If `name` is an empty string
+// a new, anonymous namespace is created.
+//
+// The returns the namespace ID.
+func CreateNamespace(name string) int {
+	name(nvim_create_namespace)
+}
+
+// Namespaces gets existing named namespaces
+//
+// The return dict that maps from names to namespace ids.
+func Namespaces() map[string]int {
+	name(nvim_get_namespaces)
 }
 
 // Subscribe subscribes to a Nvim event.
@@ -510,9 +630,26 @@ func Proc(pid int) Process {
 	name(nvim_get_proc)
 }
 
+// SelectPopupmenuItem selects an item in the completion popupmenu.
+//
+// If |ins-completion| is not active this API call is silently ignored.
+// Useful for an external UI using |ui-popupmenu| to control the popupmenu
+// with the mouse. Can also be used in a mapping; use <cmd> |:map-cmd| to
+// ensure the mapping doesn't end completion mode.
+//
+// The `opts` optional parameters. Reserved for future use.
+func SelectPopupmenuItem(item int, insert, finish bool, opts map[string]interface{}) {
+	name(nvim_select_popupmenu_item)
+}
+
 // WindowBuffer returns the current buffer in a window.
 func WindowBuffer(window Window) Buffer {
 	name(nvim_win_get_buf)
+}
+
+// SetBufferToWindow sets the current buffer in a window, without side-effects.
+func SetBufferToWindow(window Window, buffer Buffer) {
+	name(nvim_win_set_buf)
 }
 
 // WindowCursor returns the cursor position in the window.
@@ -588,4 +725,34 @@ func WindowNumber(window Window) int {
 // IsWindowValid returns true if the window is valid.
 func IsWindowValid(window Window) bool {
 	name(nvim_win_is_valid)
+}
+
+// SetWindowConfig configure window position. Currently this is only used to configure
+// floating and external windows (including changing a split window to these
+// types).
+//
+// See documentation at |nvim_open_win()|, for the meaning of parameters.
+//
+// When reconfiguring a floating window, absent option keys will not be
+// changed. The following restriction apply: `row`, `col` and `relative`
+// must be reconfigured together. Only changing a subset of these is an error.
+func SetWindowConfig(window Window, config map[string]interface{}) {
+	name(nvim_win_set_config)
+}
+
+// WindowConfig return window configuration.
+//
+// Return a dictionary containing the same config that can be given to
+// |nvim_open_win()|.
+//
+// `relative` will be an empty string for normal windows.
+func WindowConfig(window Window) map[string]interface{} {
+	name(nvim_win_get_config)
+}
+
+// CloseWindow close a window.
+//
+// This is equivalent to |:close| with count except that it takes a window id.
+func CloseWindow(window Window, force bool) {
+	name(nvim_win_close)
 }
