@@ -495,7 +495,7 @@ func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, en
 	b.call("nvim_buf_clear_highlight", nil, buffer, srcID, startLine, endLine)
 }
 
-// Set the virtual text (annotation) for a buffer line.
+// SetBufferVirtualText sets the virtual text (annotation) for a buffer line.
 //
 // By default (and currently the only option) the text will be placed after
 // the buffer text. Virtual text will never cause reflow, rather virtual
@@ -514,13 +514,13 @@ func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, en
 // The `opts` is optional parameters. Currently not used.
 //
 // The returns the nsID that was used.
-func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []interface{}, opts map[string]interface{}) (int, error) {
+func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}) (int, error) {
 	var result int
 	err := v.call("nvim_buf_set_virtual_text", &result, buffer, nsID, line, chunks, opts)
 	return result, err
 }
 
-// Set the virtual text (annotation) for a buffer line.
+// SetBufferVirtualText sets the virtual text (annotation) for a buffer line.
 //
 // By default (and currently the only option) the text will be placed after
 // the buffer text. Virtual text will never cause reflow, rather virtual
@@ -539,7 +539,7 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 // The `opts` is optional parameters. Currently not used.
 //
 // The returns the nsID that was used.
-func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []interface{}, opts map[string]interface{}, result *int) {
+func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}, result *int) {
 	b.call("nvim_buf_set_virtual_text", result, buffer, nsID, line, chunks, opts)
 }
 
