@@ -482,6 +482,39 @@ func TestAPI(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("virtual_text", func(t *testing.T) {
+		clearBuffer(t, v, 0) // clear curret buffer text
+
+		nsID, err := v.CreateNamespace("test_virtual_text")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		lines := []byte("ping")
+		if err := v.SetBufferLines(0, 0, -1, true, bytes.Fields(lines)); err != nil {
+			t.Fatal(err)
+		}
+
+		chunks := []VirtualTextChunk{
+			{
+				Text:    "pong",
+				HLGroup: "String",
+			},
+		}
+		nsID2, err := v.SetBufferVirtualText(0, nsID, 0, chunks, make(map[string]interface{}))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got := nsID2; got != nsID {
+			t.Fatalf("namespaceID: got %d, want %d", got, nsID)
+		}
+
+		if err := v.ClearBufferNamespace(0, nsID, 0, -1); err != nil {
+			t.Fatal(err)
+		}
+	})
 }
 
 func TestDial(t *testing.T) {
