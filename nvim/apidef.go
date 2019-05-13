@@ -203,7 +203,7 @@ func ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) 
 	name(nvim_buf_clear_highlight)
 }
 
-// Set the virtual text (annotation) for a buffer line.
+// SetBufferVirtualText sets the virtual text (annotation) for a buffer line.
 //
 // By default (and currently the only option) the text will be placed after
 // the buffer text. Virtual text will never cause reflow, rather virtual
@@ -222,7 +222,7 @@ func ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) 
 // The `opts` is optional parameters. Currently not used.
 //
 // The returns the nsID that was used.
-func SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []interface{}, opts map[string]interface{}) int {
+func SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}) int {
 	name(nvim_buf_set_virtual_text)
 }
 
