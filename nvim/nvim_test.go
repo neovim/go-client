@@ -383,15 +383,7 @@ func TestAPI(t *testing.T) {
 	})
 
 	t.Run("buf_attach", func(t *testing.T) {
-		buffer, err := v.CurrentBuffer()
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		// clear curret buffer text
-		if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
-			t.Fatal(err)
-		}
+		clearBuffer(t, v, 0) // clear curret buffer text
 
 		type ChangedtickEvent struct {
 			Buffer     Buffer
@@ -428,7 +420,7 @@ func TestAPI(t *testing.T) {
 			bufLinesChan <- ev
 		})
 
-		ok, err := v.AttachBuffer(buffer, false, make(map[string]interface{}))
+		ok, err := v.AttachBuffer(0, false, make(map[string]interface{})) // first 0 arg refers to the current buffer
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -480,7 +472,7 @@ func TestAPI(t *testing.T) {
 		}()
 
 		test := []byte("test")
-		if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(test)); err != nil {
+		if err := v.SetBufferLines(0, 0, -1, true, bytes.Fields(test)); err != nil { // first 0 arg refers to the current buffer
 			t.Fatal(err)
 		}
 
@@ -561,5 +553,12 @@ func TestEmbedded(t *testing.T) {
 		}
 	case <-time.After(10 * time.Second):
 		t.Fatal("timeout waiting for serve to exit")
+	}
+}
+
+// clearBuffer clear the buffer text.
+func clearBuffer(t *testing.T, v *Nvim, buffer Buffer) {
+	if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
+		t.Fatal(err)
 	}
 }
