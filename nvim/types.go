@@ -229,3 +229,9 @@ type Command struct {
 	CompleteArg string `msgpack:"complete_arg,omitempty"`
 	Definition  string `msgpack:"definition"`
 }
+
+// VirtualTextChunk represents a virtual text chunk.
+type VirtualTextChunk struct {
+	Text    string `msgpack:",array"`
+	HLGroup string `msgpack:",array"`
+}

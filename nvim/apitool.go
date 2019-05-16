@@ -308,13 +308,14 @@ var nvimTypes = map[string]string{
 	"[][]byte":  "ArrayOf(String)",
 	"[]string":  "ArrayOf(String)",
 
-	"Mode":       "Dictionary",
-	"*HLAttrs":   "Dictionary",
-	"*Channel":   "Dictionary",
-	"[]*Channel": "Array",
-	"[]*Mapping": "ArrayOf(Dictionary)",
-	"[]*Process": "Array",
-	"[]*UI":      "Array",
+	"Mode":               "Dictionary",
+	"*HLAttrs":           "Dictionary",
+	"*Channel":           "Dictionary",
+	"[]*Channel":         "Array",
+	"[]*Mapping":         "ArrayOf(Dictionary)",
+	"[]*Process":         "Array",
+	"[]*UI":              "Array",
+	"[]VirtualTextChunk": "Array",
 }
 
 func convertToNvimTypes(f *Function) *Function {
