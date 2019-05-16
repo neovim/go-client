@@ -4,14 +4,17 @@ sudo: false
 before_install:
   - eval "$(curl -Ss https://raw.githubusercontent.com/neovim/bot-ci/master/scripts/travis-setup.sh) nightly-x64"
 
-go:
-  - 1.7.x
-  - 1.8.x
-  - 1.9.x
-  - 1.10.x
-  - 1.11.x
-  - 1.12.x
-  - tip
+matrix:
+  include:
+  - go: 1.7.x
+  - go: 1.8.x
+  - go: 1.9.x
+  - go: 1.10.x
+  - go: 1.11.x
+  - go: 1.12.x
+    env: GO111MODULE=on
+  - go: tip
+    env: GO111MODULE=on
 
 script:
   - go get -t -v ./...
