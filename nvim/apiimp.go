@@ -275,19 +275,19 @@ func (b *Batch) SetBufferKeyMap(buffer Buffer, mode string, lhs string, rhs stri
 	b.call("nvim_buf_set_keymap", nil, buffer, mode, lhs, rhs, opts)
 }
 
-// DelBufferKeyMap unmaps a buffer-local mapping for the given mode.
+// DeleteBufferKeyMap unmaps a buffer-local mapping for the given mode.
 //
 // see
 //  :help nvim_del_keymap()
-func (v *Nvim) DelBufferKeyMap(buffer Buffer, mode string, lhs string) error {
+func (v *Nvim) DeleteBufferKeyMap(buffer Buffer, mode string, lhs string) error {
 	return v.call("nvim_buf_del_keymap", nil, buffer, mode, lhs)
 }
 
-// DelBufferKeyMap unmaps a buffer-local mapping for the given mode.
+// DeleteBufferKeyMap unmaps a buffer-local mapping for the given mode.
 //
 // see
 //  :help nvim_del_keymap()
-func (b *Batch) DelBufferKeyMap(buffer Buffer, mode string, lhs string) {
+func (b *Batch) DeleteBufferKeyMap(buffer Buffer, mode string, lhs string) {
 	b.call("nvim_buf_del_keymap", nil, buffer, mode, lhs)
 }
 
@@ -1381,23 +1381,23 @@ func (b *Batch) SetKeyMap(mode string, lhs string, rhs string, opts map[string]b
 	b.call("nvim_set_keymap", nil, mode, lhs, rhs, opts)
 }
 
-// DelKeyMap unmaps a global mapping for the given mode.
+// DeleteKeyMap unmaps a global mapping for the given mode.
 //
-// To unmap a buffer-local mapping, use DelBufferKeyMap().
+// To unmap a buffer-local mapping, use DeleteBufferKeyMap().
 //
 // see
 //  :help nvim_set_keymap()
-func (v *Nvim) DelKeyMap(mode string, lhs string) error {
+func (v *Nvim) DeleteKeyMap(mode string, lhs string) error {
 	return v.call("nvim_del_keymap", nil, mode, lhs)
 }
 
-// DelKeyMap unmaps a global mapping for the given mode.
+// DeleteKeyMap unmaps a global mapping for the given mode.
 //
-// To unmap a buffer-local mapping, use DelBufferKeyMap().
+// To unmap a buffer-local mapping, use DeleteBufferKeyMap().
 //
 // see
 //  :help nvim_set_keymap()
-func (b *Batch) DelKeyMap(mode string, lhs string) {
+func (b *Batch) DeleteKeyMap(mode string, lhs string) {
 	b.call("nvim_del_keymap", nil, mode, lhs)
 }
 
