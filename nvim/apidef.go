@@ -91,6 +91,22 @@ func BufferKeyMap(buffer Buffer, mode string) []*Mapping {
 	name(nvim_buf_get_keymap)
 }
 
+// SetBufferKeyMap sets a buffer-local mapping for the given mode.
+//
+// see
+//  :help nvim_set_keymap()
+func SetBufferKeyMap(buffer Buffer, mode, lhs, rhs string, opts map[string]bool) {
+	name(nvim_buf_set_keymap)
+}
+
+// DelBufferKeyMap unmaps a buffer-local mapping for the given mode.
+//
+// see
+//  :help nvim_del_keymap()
+func DelBufferKeyMap(buffer Buffer, mode, lhs string) {
+	name(nvim_buf_del_keymap)
+}
+
 // BufferCommands gets a map of buffer-local user-commands.
 //
 // opts is optional parameters. Currently not used.
@@ -578,6 +594,40 @@ func Mode() Mode {
 
 func KeyMap(mode string) []*Mapping {
 	name(nvim_get_keymap)
+}
+
+// SetKeyMap sets a global |mapping| for the given mode.
+//
+// To set a buffer-local mapping, use SetBufferKeyMap().
+//
+// Unlike :map, leading/trailing whitespace is accepted as part of the {lhs}
+// or {rhs}.
+// Empty {rhs} is <Nop>. keycodes are replaced as usual.
+//
+//  mode
+// mode short-name (map command prefix: "n", "i", "v", "x", …) or "!" for :map!, or empty string for :map.
+//
+//  lhs
+// Left-hand-side {lhs} of the mapping.
+//
+//  rhs
+// Right-hand-side {rhs} of the mapping.
+//
+//   opts
+// Optional parameters map. Accepts all :map-arguments as keys excluding <buffer> but including noremap.
+// Values are Booleans. Unknown key is an error.
+func SetKeyMap(mode, lhs, rhs string, opts map[string]bool) {
+	name(nvim_set_keymap)
+}
+
+// DelKeyMap unmaps a global mapping for the given mode.
+//
+// To unmap a buffer-local mapping, use DelBufferKeyMap().
+//
+// see
+//  :help nvim_set_keymap()
+func DelKeyMap(mode, lhs string) {
+	name(nvim_del_keymap)
 }
 
 // Commands gets a map of global (non-buffer-local) Ex commands.
