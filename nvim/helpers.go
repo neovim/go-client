@@ -36,6 +36,9 @@ type QuickfixError struct {
 
 	// Valid is non-zero if this is a recognized error message.
 	Valid int `msgpack:"valid,omitempty"`
+
+	// Module name of a module. If given it will be used in quickfix error window instead of the filename.
+	Module string `msgpack:"module,omitempty"`
 }
 
 // CommandCompletionArgs represents the arguments to a custom command line
