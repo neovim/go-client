@@ -69,7 +69,7 @@ func TestAPI(t *testing.T) {
 		if err := v.Call("execute", &result, fmt.Sprintf("silent! call rpcrequest(%d, 'error')", cid)); err != nil {
 			t.Fatal(err)
 		}
-		if expected := "\nouch"; result != expected {
+		if expected := "\nError invoking 'error' on channel 1:\nouch"; result != expected {
 			t.Errorf("got error %q, want %q", result, expected)
 		}
 	})
