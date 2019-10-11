@@ -235,3 +235,60 @@ type VirtualTextChunk struct {
 	Text    string `msgpack:",array"`
 	HLGroup string `msgpack:",array"`
 }
+
+// OpenWindowConfig represents a configs of OpenWindow.
+//
+// Relative is the specifies the type of positioning method used for the floating window.
+// The positioning method keys names:
+//
+//  editor: The global editor grid.
+//  win: Window given by the `win` field, or current window by default.
+//  cursor: Cursor position in current window.
+//
+// Win is the Window for relative="win".
+//
+// Anchor is the decides which corner of the float to place at row and col.
+//
+//  NW: northwest (default)
+//  NE: northeast
+//  SW: southwest
+//  SE: southeast
+//
+// Width is the window width (in character cells). Minimum of 1.
+//
+// Height is the window height (in character cells). Minimum of 1.
+//
+// BufPos places float relative to buffer text only when relative="win". Takes a tuple of zero-indexed [line, column].
+// Row and Col if given are applied relative to this position, else they default to Row=1 and Col=0 (thus like a tooltip near the buffer text).
+//
+// Row is the row position in units of "screen cell height", may be fractional.
+//
+// Col is the column position in units of "screen cell width", may be fractional.
+//
+// Focusable whether the enable focus by user actions (wincmds, mouse events).
+// Defaults to true. Non-focusable windows can be entered by SetCurrentWindow.
+//
+// External is the GUI should display the window as an external top-level window.
+// Currently accepts no other positioning configuration together with this.
+//
+// Style is the Configure the appearance of the window.
+// Currently only takes one non-empty value:
+//
+//  minimal:
+//    Nvim will display the window with many UI options disabled.
+//    This is useful when displaying a temporary float where the text should not be edited.
+//    Disables 'number', 'relativenumber', 'cursorline', 'cursorcolumn','foldcolumn', 'spell' and 'list' options. 'signcolumn' is changed to `auto`.
+//    The end-of-buffer region is hidden by setting `eob` flag of 'fillchars' to a space char, and clearing the EndOfBuffer region in 'winhighlight'.
+type OpenWindowConfig struct {
+	Relative  string `msgpack:"relative,omitempty"`
+	Win       Window `msgpack:"win,omitempty"`
+	Anchor    string `msgpack:"anchor,omitempty" empty:"NW"`
+	Width     int    `msgpack:"width" empty:"1"`
+	Height    int    `msgpack:"height" empty:"1"`
+	BufPos    [2]int `msgpack:"bufpos,omitempty"`
+	Row       int    `msgpack:"row,omitempty"`
+	Col       int    `msgpack:"col,omitempty"`
+	Focusable bool   `msgpack:"focusable,omitempty" empty:"true"`
+	External  bool   `msgpack:"external,omitempty"`
+	Style     string `msgpack:"style,omitempty"`
+}
