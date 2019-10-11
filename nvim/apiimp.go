@@ -1135,59 +1135,63 @@ func (b *Batch) CreateBuffer(listed bool, scratch bool, result *Buffer) {
 	b.call("nvim_create_buf", result, listed, scratch)
 }
 
-// OpenWindow open a new window.
+// OpenWindow opens a new window.
 //
 // Currently this is used to open floating and external windows.
 // Floats are windows that are drawn above the split layout, at some anchor
-// position in some other window. Floats can be draw internally or by external
+// position in some other window. Floats can be drawn internally or by external
 // GUI with the |ui-multigrid| extension. External windows are only supported
 // with multigrid GUIs, and are displayed as separate top-level windows.
 //
-// Exactly one of `external` and `relative` must be specified.
+// For a general overview of floats, see |api-floatwin|.
 //
-// With editor positioning row=0, col=0 refers to the top-left corner of the
-// screen-grid and row=Lines-1, Columns-1 refers to the bottom-right corner.
-// Floating point values are allowed, but the builtin implementation (used by
-// TUI and GUIs without multigrid support) will always round down to nearest
-// integer.
+// Exactly one of External and Relative must be specified. The Width and
+// Height of the new window must be specified.
+//
+// With relative=editor (row=0,col=0) refers to the top-left corner of the
+// screen-grid and (row=Lines-1,col=Columns-1) refers to the bottom-right
+// corner. Fractional values are allowed, but the builtin implementation
+// (used by non-multigrid UIs) will always round down to nearest integer.
 //
 // Out-of-bounds values, and configurations that make the float not fit inside
-// the main editor, are allowed. The builtin implementation will truncate
-// values so floats are completely within the main screen grid. External GUIs
+// the main editor, are allowed. The builtin implementation truncates values
+// so floats are fully within the main screen grid. External GUIs
 // could let floats hover outside of the main window like a tooltip, but
 // this should not be used to specify arbitrary WM screen positions.
 //
 // The returns the window handle or 0 when error.
-func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config map[string]interface{}) (Window, error) {
+func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *OpenWindowConfig) (Window, error) {
 	var result Window
 	err := v.call("nvim_open_win", &result, buffer, enter, config)
 	return result, err
 }
 
-// OpenWindow open a new window.
+// OpenWindow opens a new window.
 //
 // Currently this is used to open floating and external windows.
 // Floats are windows that are drawn above the split layout, at some anchor
-// position in some other window. Floats can be draw internally or by external
+// position in some other window. Floats can be drawn internally or by external
 // GUI with the |ui-multigrid| extension. External windows are only supported
 // with multigrid GUIs, and are displayed as separate top-level windows.
 //
-// Exactly one of `external` and `relative` must be specified.
+// For a general overview of floats, see |api-floatwin|.
 //
-// With editor positioning row=0, col=0 refers to the top-left corner of the
-// screen-grid and row=Lines-1, Columns-1 refers to the bottom-right corner.
-// Floating point values are allowed, but the builtin implementation (used by
-// TUI and GUIs without multigrid support) will always round down to nearest
-// integer.
+// Exactly one of External and Relative must be specified. The Width and
+// Height of the new window must be specified.
+//
+// With relative=editor (row=0,col=0) refers to the top-left corner of the
+// screen-grid and (row=Lines-1,col=Columns-1) refers to the bottom-right
+// corner. Fractional values are allowed, but the builtin implementation
+// (used by non-multigrid UIs) will always round down to nearest integer.
 //
 // Out-of-bounds values, and configurations that make the float not fit inside
-// the main editor, are allowed. The builtin implementation will truncate
-// values so floats are completely within the main screen grid. External GUIs
+// the main editor, are allowed. The builtin implementation truncates values
+// so floats are fully within the main screen grid. External GUIs
 // could let floats hover outside of the main window like a tooltip, but
 // this should not be used to specify arbitrary WM screen positions.
 //
 // The returns the window handle or 0 when error.
-func (b *Batch) OpenWindow(buffer Buffer, enter bool, config map[string]interface{}, result *Window) {
+func (b *Batch) OpenWindow(buffer Buffer, enter bool, config *OpenWindowConfig, result *Window) {
 	b.call("nvim_open_win", result, buffer, enter, config)
 }
 
@@ -1350,7 +1354,7 @@ func (b *Batch) KeyMap(mode string, result *[]*Mapping) {
 //  rhs
 // Right-hand-side {rhs} of the mapping.
 //
-//   opts
+//  opts
 // Optional parameters map. Accepts all :map-arguments as keys excluding <buffer> but including noremap.
 // Values are Booleans. Unknown key is an error.
 func (v *Nvim) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bool) error {
@@ -1374,7 +1378,7 @@ func (v *Nvim) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bo
 //  rhs
 // Right-hand-side {rhs} of the mapping.
 //
-//   opts
+//  opts
 // Optional parameters map. Accepts all :map-arguments as keys excluding <buffer> but including noremap.
 // Values are Booleans. Unknown key is an error.
 func (b *Batch) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bool) {
