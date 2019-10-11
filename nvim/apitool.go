@@ -301,6 +301,7 @@ var nvimTypes = map[string]string{
 	"*ClientVersion":           "Dictionary",
 	"ClientMethods":            "Dictionary",
 	"ClientAttributes":         "Dictionary",
+	"*OpenWindowConfig":        "Dictionary",
 
 	"[2]int":    "ArrayOf(Integer, 2)",
 	"[]Buffer":  "ArrayOf(Buffer)",
