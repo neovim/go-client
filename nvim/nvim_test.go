@@ -515,6 +515,93 @@ func TestAPI(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
+
+	t.Run("floating_window", func(t *testing.T) {
+		clearBuffer(t, v, 0) // clear curret buffer text
+		curwin, err := v.CurrentWindow()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		wantWidth := 40
+		wantHeight := 20
+
+		cfg := &OpenWindowConfig{
+			Relative:  "cursor",
+			Anchor:    "NW",
+			Width:     wantWidth,
+			Height:    wantHeight,
+			Row:       1,
+			Col:       0,
+			Focusable: true,
+			Style:     "minimal",
+		}
+		w, err := v.OpenWindow(Buffer(0), true, cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if curwin == w {
+			t.Fatal("same window number: floating window not focused")
+		}
+
+		gotWidth, err := v.WindowWidth(w)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if gotWidth != wantWidth {
+			t.Fatalf("got %d width but want %d", gotWidth, wantWidth)
+		}
+
+		gotHeight, err := v.WindowHeight(w)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if gotHeight != wantHeight {
+			t.Fatalf("got %d height but want %d", gotHeight, wantHeight)
+		}
+
+		batch := v.NewBatch()
+		var (
+			numberOpt         bool
+			relativenumberOpt bool
+			cursorlineOpt     bool
+			cursorcolumnOpt   bool
+			spellOpt          bool
+			listOpt           bool
+			signcolumnOpt     string
+		)
+		batch.WindowOption(w, "number", &numberOpt)
+		batch.WindowOption(w, "relativenumber", &relativenumberOpt)
+		batch.WindowOption(w, "cursorline", &cursorlineOpt)
+		batch.WindowOption(w, "cursorcolumn", &cursorcolumnOpt)
+		batch.WindowOption(w, "spell", &spellOpt)
+		batch.WindowOption(w, "list", &listOpt)
+		batch.WindowOption(w, "signcolumn", &signcolumnOpt)
+		if err := batch.Execute(); err != nil {
+			t.Fatal(err)
+		}
+		if numberOpt {
+			t.Fatal("style is minimal; expected the number window option to disabled")
+		}
+		if relativenumberOpt {
+			t.Fatal("style is minimal; expected the relativenumber window option to disabled")
+		}
+		if cursorlineOpt {
+			t.Fatal("style is minimal; expected the cursorline window option to disabled")
+		}
+		if cursorcolumnOpt {
+			t.Fatal("style is minimal; expected the cursorcolumn window option to disabled")
+		}
+		if spellOpt {
+			t.Fatal("style is minimal; expected the spell window option to disabled")
+		}
+		if listOpt {
+			t.Fatal("style is minimal; expected the list window option to disabled")
+		}
+		if signcolumnOpt != "auto" {
+			t.Fatalf("style is minimal; got %q but expected the signcolumn window option to \"auto\"", signcolumnOpt)
+		}
+	})
 }
 
 func TestDial(t *testing.T) {
