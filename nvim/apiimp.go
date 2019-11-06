@@ -1160,7 +1160,7 @@ func (b *Batch) CreateBuffer(listed bool, scratch bool, result *Buffer) {
 // this should not be used to specify arbitrary WM screen positions.
 //
 // The returns the window handle or 0 when error.
-func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *OpenWindowConfig) (Window, error) {
+func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *WindowConfig) (Window, error) {
 	var result Window
 	err := v.call("nvim_open_win", &result, buffer, enter, config)
 	return result, err
@@ -1191,7 +1191,7 @@ func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *OpenWindowConfig) (
 // this should not be used to specify arbitrary WM screen positions.
 //
 // The returns the window handle or 0 when error.
-func (b *Batch) OpenWindow(buffer Buffer, enter bool, config *OpenWindowConfig, result *Window) {
+func (b *Batch) OpenWindow(buffer Buffer, enter bool, config *WindowConfig, result *Window) {
 	b.call("nvim_open_win", result, buffer, enter, config)
 }
 
