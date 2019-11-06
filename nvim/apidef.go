@@ -530,7 +530,7 @@ func CreateBuffer(listed, scratch bool) Buffer {
 // this should not be used to specify arbitrary WM screen positions.
 //
 // The returns the window handle or 0 when error.
-func OpenWindow(buffer Buffer, enter bool, config *OpenWindowConfig) Window {
+func OpenWindow(buffer Buffer, enter bool, config *WindowConfig) Window {
 	name(nvim_open_win)
 }
 

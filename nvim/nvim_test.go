@@ -526,7 +526,7 @@ func TestAPI(t *testing.T) {
 		wantWidth := 40
 		wantHeight := 20
 
-		cfg := &OpenWindowConfig{
+		cfg := &WindowConfig{
 			Relative:  "cursor",
 			Anchor:    "NW",
 			Width:     wantWidth,

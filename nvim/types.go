@@ -236,7 +236,7 @@ type VirtualTextChunk struct {
 	HLGroup string `msgpack:",array"`
 }
 
-// OpenWindowConfig represents a configs of OpenWindow.
+// WindowConfig represents a configs of OpenWindow.
 //
 // Relative is the specifies the type of positioning method used for the floating window.
 // The positioning method keys names:
@@ -279,7 +279,7 @@ type VirtualTextChunk struct {
 //    This is useful when displaying a temporary float where the text should not be edited.
 //    Disables 'number', 'relativenumber', 'cursorline', 'cursorcolumn','foldcolumn', 'spell' and 'list' options. 'signcolumn' is changed to `auto`.
 //    The end-of-buffer region is hidden by setting `eob` flag of 'fillchars' to a space char, and clearing the EndOfBuffer region in 'winhighlight'.
-type OpenWindowConfig struct {
+type WindowConfig struct {
 	Relative  string `msgpack:"relative,omitempty"`
 	Win       Window `msgpack:"win,omitempty"`
 	Anchor    string `msgpack:"anchor,omitempty" empty:"NW"`
