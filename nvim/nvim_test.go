@@ -580,26 +580,8 @@ func TestAPI(t *testing.T) {
 		if err := batch.Execute(); err != nil {
 			t.Fatal(err)
 		}
-		if numberOpt {
-			t.Fatal("style is minimal; expected the number window option to disabled")
-		}
-		if relativenumberOpt {
-			t.Fatal("style is minimal; expected the relativenumber window option to disabled")
-		}
-		if cursorlineOpt {
-			t.Fatal("style is minimal; expected the cursorline window option to disabled")
-		}
-		if cursorcolumnOpt {
-			t.Fatal("style is minimal; expected the cursorcolumn window option to disabled")
-		}
-		if spellOpt {
-			t.Fatal("style is minimal; expected the spell window option to disabled")
-		}
-		if listOpt {
-			t.Fatal("style is minimal; expected the list window option to disabled")
-		}
-		if signcolumnOpt != "auto" {
-			t.Fatalf("style is minimal; got %q but expected the signcolumn window option to \"auto\"", signcolumnOpt)
+		if numberOpt || relativenumberOpt || cursorlineOpt || cursorcolumnOpt || spellOpt || listOpt || signcolumnOpt != "auto" {
+			t.Fatal("expected minimal style")
 		}
 	})
 }
