@@ -569,6 +569,7 @@ func TestAPI(t *testing.T) {
 			spellOpt          bool
 			listOpt           bool
 			signcolumnOpt     string
+			colorcolumnOpt    string
 		)
 		batch.WindowOption(w, "number", &numberOpt)
 		batch.WindowOption(w, "relativenumber", &relativenumberOpt)
@@ -577,10 +578,11 @@ func TestAPI(t *testing.T) {
 		batch.WindowOption(w, "spell", &spellOpt)
 		batch.WindowOption(w, "list", &listOpt)
 		batch.WindowOption(w, "signcolumn", &signcolumnOpt)
+		batch.WindowOption(w, "colorcolumn", &colorcolumnOpt)
 		if err := batch.Execute(); err != nil {
 			t.Fatal(err)
 		}
-		if numberOpt || relativenumberOpt || cursorlineOpt || cursorcolumnOpt || spellOpt || listOpt || signcolumnOpt != "auto" {
+		if numberOpt || relativenumberOpt || cursorlineOpt || cursorcolumnOpt || spellOpt || listOpt || signcolumnOpt != "auto" || colorcolumnOpt != "" {
 			t.Fatal("expected minimal style")
 		}
 	})
