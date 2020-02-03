@@ -292,3 +292,10 @@ type WindowConfig struct {
 	External  bool   `msgpack:"external,omitempty"`
 	Style     string `msgpack:"style,omitempty"`
 }
+
+// ExtMarks represents a BufferExtmarks returns type.
+type ExtMarks struct {
+	ExtmarkID int `msgpack:",array"`
+	Row       int
+	Col       int
+}

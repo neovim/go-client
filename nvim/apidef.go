@@ -170,6 +170,49 @@ func BufferMark(buffer Buffer, name string) [2]int {
 	name(nvim_buf_get_mark)
 }
 
+// BufferExtmarkByID returns position for a given extmark id.
+func BufferExtmarkByID(buffer Buffer, nsID int, id int) []int {
+	name(nvim_buf_get_extmark_by_id)
+}
+
+// BufferExtmarks gets extmarks in "traversal order" from a charwise region defined by
+// buffer positions (inclusive, 0-indexed).
+//
+// Region can be given as (row,col) tuples, or valid extmark ids (whose
+// positions define the bounds). 0 and -1 are understood as (0,0) and (-1,-1)
+// respectively, thus the following are equivalent:
+//
+//   BufferExtmarks(0, myNS, 0, -1, {})
+//   BufferExtmarks(0, myNS, [0,0], [-1,-1], {})
+//
+// If `end` is less than `start`, traversal works backwards. (Useful
+// with `limit`, to get the first marks prior to a given position.)
+//
+// The `opts` is additional options. Supports the key:
+//   limit: (int) Maximum number of marks to return.
+func BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}) []ExtMarks {
+	name(nvim_buf_get_extmarks)
+}
+
+// SetBufferExtmark creates or updates an extmark.
+//
+// To create a new extmark, pass id=0. The extmark id will be returned.
+// To move an existing mark, pass its id.
+//
+// It is also allowed to create a new mark by passing in a previously unused
+// id, but the caller must then keep track of existing and unused ids itself.
+// (Useful over RPC, to avoid waiting for the return value.)
+//
+// Currently opts arg not used.
+func SetBufferExtmark(buffer Buffer, nsID int, extmarkID int, line int, col int, opts map[string]interface{}) int {
+	name(nvim_buf_set_extmark)
+}
+
+// DeleteBufferExtmark removes an extmark.
+func DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int) bool {
+	name(nvim_buf_del_extmark)
+}
+
 // AddBufferHighlight adds a highlight to buffer and returns the source id of
 // the highlight.
 //
@@ -240,6 +283,20 @@ func ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) 
 // The returns the nsID that was used.
 func SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}) int {
 	name(nvim_buf_set_virtual_text)
+}
+
+// BufferVirtualText gets the virtual text (annotation) for a buffer line.
+//
+// The virtual text is returned as list of lists, whereas the inner lists have
+// either one or two elements. The first element is the actual text, the
+// optional second element is the highlight group.
+//
+// The format is exactly the same as given to SetBufferVirtualText.
+//
+// If there is no virtual text associated with the given line, an empty list
+// is returned.
+func BufferVirtualText(buffer Buffer, lnum int) []VirtualTextChunk {
+	name(nvim_buf_get_virtual_text)
 }
 
 // TabpageWindows returns the windows in a tabpage.
@@ -318,6 +375,19 @@ func TryResizeUIGrid(grid, width, height int) {
 	name(nvim_ui_try_resize_grid)
 }
 
+// SetPumHeight tells Nvim the number of elements displaying in the popumenu, to decide
+// <PageUp> and <PageDown> movement.
+//
+// height is popupmenu height, must be greater than zero.
+func SetPumHeight(height int) {
+	name(nvim_ui_pum_set_height)
+}
+
+// Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
+func Exec(src string, output bool) string {
+	name(nvim_exec)
+}
+
 // Command executes a single ex command.
 func Command(cmd string) {
 	name(nvim_command)
@@ -326,6 +396,11 @@ func Command(cmd string) {
 // HLByID gets a highlight definition by id.
 func HLByID(id int, rgb bool) *HLAttrs {
 	name(nvim_get_hl_by_id)
+}
+
+// HLIDByName gets a highlight group by name.
+func HLIDByName(name string) int {
+	name(nvim_get_hl_id_by_name)
 }
 
 // HLByName gets a highlight definition by name.
@@ -375,8 +450,11 @@ func ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool) string
 }
 
 // CommandOutput executes a single ex command and returns the output.
+//
+// Deprecated: Use Exec() instead.
 func CommandOutput(cmd string) string {
 	name(nvim_command_output)
+	deprecatedSince(7)
 }
 
 // Eval evaluates the expression expr using the Vim internal expression
@@ -570,6 +648,49 @@ func Namespaces() map[string]int {
 	name(nvim_get_namespaces)
 }
 
+// Paste pastes at cursor, in any mode.
+//
+// Invokes the `vim.paste` handler, which handles each mode appropriately.
+// Sets redo/undo. Faster than Input(). Lines break at LF ("\n").
+//
+// Errors ('nomodifiable', `vim.paste()` failure, …) are reflected in `err`
+// but do not affect the return value (which is strictly decided by
+// `vim.paste()`).  On error, subsequent calls are ignored ("drained") until
+// the next paste is initiated (phase 1 or -1).
+//
+//  data
+// multiline input. May be binary (containing NUL bytes).
+//  crlf
+// also break lines at CR and CRLF.
+//  phase
+// -1 is paste in a single call (i.e. without streaming).
+//
+// To "stream" a paste, call Paste sequentially with these `phase` values:
+//  1: starts the paste (exactly once)
+//  2: continues the paste (zero or more times)
+//  3: ends the paste (exactly once)
+func Paste(data string, crlf bool, phase int) bool {
+	name(nvim_paste)
+}
+
+// Put puts text at cursor, in any mode.
+//
+// Compare :put and p which are always linewise.
+//
+// lines is readfile() style list of lines.
+//
+// type is edit behavior: any getregtype() result, or:
+//   "b": blockwise-visual mode (may include width, e.g. "b3")
+//   "c": characterwise mode
+//   "l": linewise mode
+//   "" : guess by contents, see setreg()
+// after is insert after cursor (like `p`), or before (like `P`).
+//
+// follow is place cursor at end of inserted text.
+func Put(lines []string, typ string, after bool, follow bool) {
+	name(nvim_put)
+}
+
 // Subscribe subscribes to a Nvim event.
 func Subscribe(event string) {
 	name(nvim_subscribe)
@@ -586,6 +707,24 @@ func ColorByName(name string) int {
 
 func ColorMap() map[string]int {
 	name(nvim_get_color_map)
+}
+
+// Context gets a map of the current editor state.
+// This API still under development.
+//
+// The `opts` is optional parameters.
+//
+//  types
+// List of context-types to gather: "regs", "jumps", "bufs", "gvars", "funcs", "sfuncs".
+// empty for all context.
+func Context(opts map[string][]string) map[string]interface{} {
+	name(nvim_get_context)
+}
+
+// LoadContext sets the current editor state from the given context map.
+// This API still under development.
+func LoadContext(dict map[string]interface{}) interface{} {
+	name(nvim_load_context)
 }
 
 // Mode gets Nvim's current mode.

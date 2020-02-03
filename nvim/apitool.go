@@ -310,6 +310,7 @@ var nvimTypes = map[string]string{
 	"[]*Channel":         "Array",
 	"[]*Process":         "Array",
 	"[]*UI":              "Array",
+	"[]ExtMarks":         "Array",
 	"[]VirtualTextChunk": "Array",
 
 	"[2]int":     "ArrayOf(Integer, 2)",
