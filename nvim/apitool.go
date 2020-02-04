@@ -358,6 +358,7 @@ var specialAPIs = map[string]bool{
 	"nvim_call_function":      true,
 	"nvim_call_dict_function": true,
 	"nvim_execute_lua":        true,
+	"nvim_exec_lua":           true,
 }
 
 func compareFunctions(functions []*Function) error {

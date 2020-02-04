@@ -587,7 +587,25 @@ func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, a
 	b.call("nvim_call_dict_function", result, fname, dict, args)
 }
 
+// ExecLua executes a Lua block.
+func (v *Nvim) ExecLua(code string, result interface{}, args ...interface{}) error {
+	if args == nil {
+		args = []interface{}{}
+	}
+	return v.call("nvim_exec_lua", result, code, args)
+}
+
+// ExecLua executes a Lua block.
+func (b *Batch) ExecLua(code string, result interface{}, args ...interface{}) {
+	if args == nil {
+		args = []interface{}{}
+	}
+	b.call("nvim_exec_lua", result, code, args)
+}
+
 // ExecuteLua executes a Lua block.
+//
+// Deprecated: Use ExecLua() instead.
 func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) error {
 	if args == nil {
 		args = []interface{}{}
@@ -596,6 +614,8 @@ func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) 
 }
 
 // ExecuteLua executes a Lua block.
+//
+// Deprecated: Use ExecLua() instead.
 func (b *Batch) ExecuteLua(code string, result interface{}, args ...interface{}) {
 	if args == nil {
 		args = []interface{}{}
