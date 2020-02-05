@@ -484,7 +484,7 @@ func TestAPI(t *testing.T) {
 	})
 
 	t.Run("virtual_text", func(t *testing.T) {
-		clearBuffer(t, v, 0) // clear curret buffer text
+		clearBuffer(t, v, Buffer(0)) // clear curret buffer text
 
 		nsID, err := v.CreateNamespace("test_virtual_text")
 		if err != nil {
@@ -492,7 +492,7 @@ func TestAPI(t *testing.T) {
 		}
 
 		lines := []byte("ping")
-		if err := v.SetBufferLines(0, 0, -1, true, bytes.Fields(lines)); err != nil {
+		if err := v.SetBufferLines(Buffer(0), 0, -1, true, bytes.Fields(lines)); err != nil {
 			t.Fatal(err)
 		}
 
@@ -502,7 +502,7 @@ func TestAPI(t *testing.T) {
 				HLGroup: "String",
 			},
 		}
-		nsID2, err := v.SetBufferVirtualText(0, nsID, 0, chunks, make(map[string]interface{}))
+		nsID2, err := v.SetBufferVirtualText(Buffer(0), nsID, 0, chunks, make(map[string]interface{}))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -511,7 +511,15 @@ func TestAPI(t *testing.T) {
 			t.Fatalf("namespaceID: got %d, want %d", got, nsID)
 		}
 
-		if err := v.ClearBufferNamespace(0, nsID, 0, -1); err != nil {
+		chunks2, err := v.BufferVirtualText(Buffer(0), 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(chunks, chunks2) {
+			t.Fatalf("BufferVirtualText = %+v, want %+v", chunks, chunks2)
+		}
+
+		if err := v.ClearBufferNamespace(Buffer(0), nsID, 0, -1); err != nil {
 			t.Fatal(err)
 		}
 	})
