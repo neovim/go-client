@@ -594,6 +594,21 @@ func TestAPI(t *testing.T) {
 			t.Fatal("expected minimal style")
 		}
 	})
+
+	t.Run("context", func(t *testing.T) {
+		ctxt, err := v.Context(make(map[string][]string))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var result interface{}
+		if err := v.LoadContext(ctxt, &result); err != nil {
+			t.Fatal(err)
+		}
+		if result != nil {
+			t.Fatal("expected result to nil")
+		}
+	})
 }
 
 func TestDial(t *testing.T) {
