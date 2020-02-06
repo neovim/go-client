@@ -341,9 +341,9 @@ func TestAPI(t *testing.T) {
 		}
 	})
 
-	t.Run("exeuteLua", func(t *testing.T) {
+	t.Run("execLua", func(t *testing.T) {
 		var n int
-		err := v.ExecuteLua("local a, b = ... return a + b", &n, 1, 2)
+		err := v.ExecLua("local a, b = ... return a + b", &n, 1, 2)
 		if err != nil {
 			t.Fatal(err)
 		}
