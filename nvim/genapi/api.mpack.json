@@ -1,0 +1,3583 @@
+{
+  "nvim__buf_add_decoration": {
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "ns_id"
+      ],
+      [
+        "String",
+        "hl_group"
+      ],
+      [
+        "Integer",
+        "start_row"
+      ],
+      [
+        "Integer",
+        "start_col"
+      ],
+      [
+        "Integer",
+        "end_row"
+      ],
+      [
+        "Integer",
+        "end_col"
+      ],
+      [
+        "Array",
+        "virt_text"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim__buf_add_decoration({buffer}, {ns_id}, {hl_group}, {start_row}, {start_col}, {end_row}, {end_col}, {virt_text}, {err})",
+    "c_decl": "Integer nvim__buf_add_decoration(Buffer  buffer, Integer ns_id, String  hl_group, Integer start_row, Integer start_col, Integer end_row, Integer end_col, Array   virt_text, Error * err);"
+  },
+  "nvim__buf_redraw_range": {
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "first"
+      ],
+      [
+        "Integer",
+        "last"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim__buf_redraw_range({buffer}, {first}, {last}, {err})",
+    "c_decl": "void nvim__buf_redraw_range(Buffer  buffer, Integer first, Integer last, Error * err);"
+  },
+  "nvim__buf_set_luahl": {
+    "doc": [
+      "Unstabilized interface for defining syntax hl in lua.",
+      "This is not yet safe for general use, lua callbacks will need\nto be restricted, like textlock and probably other stuff.",
+      "The API on_line/nvim__put_attr is quite raw and not intended\nto be the final shape. Ideally this should operate on chunks\nlarger than a single line to reduce interpreter overhead, and\ngenerate annotation objects (bufhl/virttext) on the fly but\nusing the same representation."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "DictionaryOf(LuaRef)",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim__buf_set_luahl({buffer}, {opts}, {err})",
+    "c_decl": "void nvim__buf_set_luahl(Buffer               buffer, DictionaryOf(LuaRef) opts, Error *              err);"
+  },
+  "nvim__buf_stats": {
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim__buf_stats({buffer}, {err})",
+    "c_decl": "Dictionary nvim__buf_stats(Buffer  buffer, Error * err);"
+  },
+  "nvim__get_lib_dir": {
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim__get_lib_dir()",
+    "c_decl": "String nvim__get_lib_dir(void);"
+  },
+  "nvim__id": {
+    "doc": [
+      "Returns object given as argument.",
+      "This API function is used for testing. One should not rely on\nits presence in plugins."
+    ],
+    "parameters": [
+      [
+        "Object",
+        "obj"
+      ]
+    ],
+    "parameters_doc": {
+      "obj": "Object to return."
+    },
+    "return": [
+      "its argument."
+    ],
+    "signature": "nvim__id({obj})",
+    "c_decl": "Object nvim__id(Object obj);"
+  },
+  "nvim__id_array": {
+    "doc": [
+      "Returns array given as argument.",
+      "This API function is used for testing. One should not rely on\nits presence in plugins."
+    ],
+    "parameters": [
+      [
+        "Array",
+        "arr"
+      ]
+    ],
+    "parameters_doc": {
+      "arr": "Array to return."
+    },
+    "return": [
+      "its argument."
+    ],
+    "signature": "nvim__id_array({arr})",
+    "c_decl": "Array nvim__id_array(Array arr);"
+  },
+  "nvim__id_dictionary": {
+    "doc": [
+      "Returns dictionary given as argument.",
+      "This API function is used for testing. One should not rely on\nits presence in plugins."
+    ],
+    "parameters": [
+      [
+        "Dictionary",
+        "dct"
+      ]
+    ],
+    "parameters_doc": {
+      "dct": "Dictionary to return."
+    },
+    "return": [
+      "its argument."
+    ],
+    "signature": "nvim__id_dictionary({dct})",
+    "c_decl": "Dictionary nvim__id_dictionary(Dictionary dct);"
+  },
+  "nvim__id_float": {
+    "doc": [
+      "Returns floating-point value given as argument.",
+      "This API function is used for testing. One should not rely on\nits presence in plugins."
+    ],
+    "parameters": [
+      [
+        "Float",
+        "flt"
+      ]
+    ],
+    "parameters_doc": {
+      "flt": "Value to return."
+    },
+    "return": [
+      "its argument."
+    ],
+    "signature": "nvim__id_float({flt})",
+    "c_decl": "Float nvim__id_float(Float flt);"
+  },
+  "nvim__inspect_cell": {
+    "parameters": [
+      [
+        "Integer",
+        "grid"
+      ],
+      [
+        "Integer",
+        "row"
+      ],
+      [
+        "Integer",
+        "col"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim__inspect_cell({grid}, {row}, {col}, {err})",
+    "c_decl": "Array nvim__inspect_cell(Integer grid, Integer row, Integer col, Error * err);"
+  },
+  "nvim__put_attr": {
+    "doc": [
+      "Set attrs in nvim__buf_set_lua_hl callbacks",
+      "TODO(bfredl): This is rather pedestrian. The final interface\nshould probably be derived from a reformed bufhl/virttext\ninterface with full support for multi-line ranges etc"
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "id"
+      ],
+      [
+        "Integer",
+        "start_row"
+      ],
+      [
+        "Integer",
+        "start_col"
+      ],
+      [
+        "Integer",
+        "end_row"
+      ],
+      [
+        "Integer",
+        "end_col"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim__put_attr({id}, {start_row}, {start_col}, {end_row}, {end_col})",
+    "c_decl": "void nvim__put_attr(Integer id, Integer start_row, Integer start_col, Integer end_row, Integer end_col);"
+  },
+  "nvim__stats": {
+    "doc": [
+      "Gets internal stats."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Map of various internal stats."
+    ],
+    "signature": "nvim__stats()",
+    "c_decl": "Dictionary nvim__stats(void);"
+  },
+  "nvim_buf_add_highlight": {
+    "doc": [
+      "Adds a highlight to buffer.",
+      "Useful for plugins that dynamically generate highlights to a\nbuffer (like a semantic highlighter or linter). The function\nadds a single highlight to a buffer. Unlike |matchaddpos()|\nhighlights follow changes to line numbering (as lines are\ninserted/removed above the highlighted line), like signs and\nmarks do.",
+      "Namespaces are used for batch deletion/updating of a set of\nhighlights. To create a namespace, use |nvim_create_namespace|\nwhich returns a namespace id. Pass it in to this function as\n`ns_id` to add highlights to the namespace. All highlights in\nthe same namespace can then be cleared with single call to\n|nvim_buf_clear_namespace|. If the highlight never will be\ndeleted by an API call, pass `ns_id = -1` .",
+      "As a shorthand, `ns_id = 0` can be used to create a new\nnamespace for the highlight, the allocated id is then\nreturned. If `hl_group` is the empty string no highlight is\nadded, but a new `ns_id` is still returned. This is supported\nfor backwards compatibility, new code should use\n|nvim_create_namespace| to create a new empty namespace."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "src_id"
+      ],
+      [
+        "String",
+        "hl_group"
+      ],
+      [
+        "Integer",
+        "line"
+      ],
+      [
+        "Integer",
+        "col_start"
+      ],
+      [
+        "Integer",
+        "col_end"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "col_end": "End of (byte-indexed) column range to\n                 highlight, or -1 to highlight to end of line",
+      "col_start": "Start of (byte-indexed) column range to\n                 highlight",
+      "hl_group": "Name of the highlight group to use",
+      "line": "Line to highlight (zero-indexed)",
+      "ns_id": "namespace to use or -1 for ungrouped\n                 highlight"
+    },
+    "return": [
+      "The ns_id that was used"
+    ],
+    "signature": "nvim_buf_add_highlight({buffer}, {src_id}, {hl_group}, {line}, {col_start}, {col_end}, {err})",
+    "c_decl": "Integer nvim_buf_add_highlight(Buffer  buffer, Integer src_id, String  hl_group, Integer line, Integer col_start, Integer col_end, Error * err);"
+  },
+  "nvim_buf_attach": {
+    "doc": [
+      "Activates buffer-update events on a channel, or as Lua\ncallbacks.",
+      "Example (Lua): capture buffer updates in a global `events` variable (use \"print(vim.inspect(events))\" to see its\ncontents): \u003e\n  events = {}\n  vim.api.nvim_buf_attach(0, false, {\n    on_lines=function(...) table.insert(events, {...}) end})\n\n\u003c"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Boolean",
+        "send_buffer"
+      ],
+      [
+        "DictionaryOf(LuaRef)",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "opts": "Optional parameters.\n                   • on_lines: Lua callback invoked on change.\n                     Return`true`to detach. Args:\n                     • buffer handle                     • \n                     • b:changedtick                     • \n                     • first line that changed (zero-indexed)                     • \n                     • last line that was changed                     • \n                     • last line in the updated range                     • \n                     • byte count of previous contents                     • \n                     • deleted_codepoints (if `utf_sizes` is\n                       true)                     • \n                     • deleted_codeunits (if `utf_sizes` is\n                       true)                     • \n                   • \n                   • on_changedtick: Lua callback invoked on\n                     changedtick increment without text\n                     change. Args:\n                     • buffer handle                     • \n                     • b:changedtick                     • \n                   • \n                   • on_detach: Lua callback invoked on\n                     detach. Args:\n                     • buffer handle                     • \n                   • \n                   • utf_sizes: include UTF-32 and UTF-16 size\n                     of the replaced region, as args to\n                     `on_lines` .                   •",
+      "send_buffer": "True if the initial notification should\n                   contain the whole buffer: first\n                   notification will be `nvim_buf_lines_event`\n                   . Else the first notification will be\n                   `nvim_buf_changedtick_event` . Not for Lua\n                   callbacks."
+    },
+    "return": [
+      "False if attach failed (invalid parameter, or buffer isn't\n    loaded); otherwise True. TODO: LUA_API_NO_EVAL"
+    ],
+    "seealso": [
+      "|nvim_buf_detach()|",
+      "|api-buffer-updates-lua|"
+    ],
+    "signature": "nvim_buf_attach({buffer}, {send_buffer}, {opts}, {err})",
+    "c_decl": "Boolean nvim_buf_attach(Buffer               buffer, Boolean              send_buffer, DictionaryOf(LuaRef) opts, Error *              err);"
+  },
+  "nvim_buf_clear_namespace": {
+    "doc": [
+      "Clears namespaced objects (highlights, extmarks, virtual text)\nfrom a region.",
+      "Lines are 0-indexed. |api-indexing| To clear the namespace in\nthe entire buffer, specify line_start=0 and line_end=-1."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "ns_id"
+      ],
+      [
+        "Integer",
+        "line_start"
+      ],
+      [
+        "Integer",
+        "line_end"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "line_end": "End of range of lines to clear (exclusive)\n                  or -1 to clear to end of buffer.",
+      "line_start": "Start of range of lines to clear",
+      "ns_id": "Namespace to clear, or -1 to clear all\n                  namespaces."
+    },
+    "signature": "nvim_buf_clear_namespace({buffer}, {ns_id}, {line_start}, {line_end}, {err})",
+    "c_decl": "void nvim_buf_clear_namespace(Buffer  buffer, Integer ns_id, Integer line_start, Integer line_end, Error * err);"
+  },
+  "nvim_buf_del_extmark": {
+    "doc": [
+      "Removes an extmark."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "ns_id"
+      ],
+      [
+        "Integer",
+        "id"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "id": "Extmark id",
+      "ns_id": "Namespace id from |nvim_create_namespace()|"
+    },
+    "return": [
+      "true if the extmark was found, else false"
+    ],
+    "signature": "nvim_buf_del_extmark({buffer}, {ns_id}, {id}, {err})",
+    "c_decl": "Boolean nvim_buf_del_extmark(Buffer  buffer, Integer ns_id, Integer id, Error * err);"
+  },
+  "nvim_buf_del_keymap": {
+    "doc": [
+      "Unmaps a buffer-local |mapping| for the given mode."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "mode"
+      ],
+      [
+        "String",
+        "lhs"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer"
+    },
+    "seealso": [
+      "|nvim_del_keymap()|"
+    ],
+    "signature": "nvim_buf_del_keymap({buffer}, {mode}, {lhs}, {err})",
+    "c_decl": "void nvim_buf_del_keymap(Buffer  buffer, String  mode, String  lhs, Error * err);"
+  },
+  "nvim_buf_del_var": {
+    "doc": [
+      "Removes a buffer-scoped (b:) variable"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "name": "Variable name"
+    },
+    "signature": "nvim_buf_del_var({buffer}, {name}, {err})",
+    "c_decl": "void nvim_buf_del_var(Buffer  buffer, String  name, Error * err);"
+  },
+  "nvim_buf_detach": {
+    "doc": [
+      "Deactivates buffer-update events on the channel."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer"
+    },
+    "return": [
+      "False if detach failed (because the buffer isn't loaded);\n    otherwise True."
+    ],
+    "seealso": [
+      "|nvim_buf_attach()|",
+      "|api-lua-detach| for detaching Lua callbacks"
+    ],
+    "signature": "nvim_buf_detach({buffer}, {err})",
+    "c_decl": "Boolean nvim_buf_detach(Buffer  buffer, Error * err);"
+  },
+  "nvim_buf_get_changedtick": {
+    "doc": [
+      "Gets a changed tick of a buffer"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer"
+    },
+    "return": [
+      "`b:changedtick` value."
+    ],
+    "signature": "nvim_buf_get_changedtick({buffer}, {err})",
+    "c_decl": "Integer nvim_buf_get_changedtick(Buffer  buffer, Error * err);"
+  },
+  "nvim_buf_get_commands": {
+    "doc": [
+      "Gets a map of buffer-local |user-commands|."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "opts": "Optional parameters. Currently not used."
+    },
+    "return": [
+      "Map of maps describing commands."
+    ],
+    "signature": "nvim_buf_get_commands({buffer}, {opts}, {err})",
+    "c_decl": "Dictionary nvim_buf_get_commands(Buffer     buffer, Dictionary opts, Error *    err);"
+  },
+  "nvim_buf_get_extmark_by_id": {
+    "doc": [
+      "Returns position for a given extmark id"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "ns_id"
+      ],
+      [
+        "Integer",
+        "id"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "id": "Extmark id",
+      "ns_id": "Namespace id from |nvim_create_namespace()|"
+    },
+    "return": [
+      "(row, col) tuple or empty list () if extmark id was absent"
+    ],
+    "signature": "nvim_buf_get_extmark_by_id({buffer}, {ns_id}, {id}, {err})",
+    "c_decl": "ArrayOf(Integer) nvim_buf_get_extmark_by_id(Buffer  buffer, Integer ns_id, Integer id, Error * err);"
+  },
+  "nvim_buf_get_extmarks": {
+    "doc": [
+      "Gets extmarks in \"traversal order\" from a |charwise| region\ndefined by buffer positions (inclusive, 0-indexed\n|api-indexing|).",
+      "Region can be given as (row,col) tuples, or valid extmark ids\n(whose positions define the bounds). 0 and -1 are understood\nas (0,0) and (-1,-1) respectively, thus the following are\nequivalent:",
+      "\u003e\n  nvim_buf_get_extmarks(0, my_ns, 0, -1, {})\n  nvim_buf_get_extmarks(0, my_ns, [0,0], [-1,-1], {})\n\n\u003c",
+      "If `end` is less than `start` , traversal works backwards.\n(Useful with `limit` , to get the first marks prior to a given\nposition.)",
+      "Example:",
+      "\u003e\n  local a   = vim.api\n  local pos = a.nvim_win_get_cursor(0)\n  local ns  = a.nvim_create_namespace('my-plugin')\n  -- Create new extmark at line 1, column 1.\n  local m1  = a.nvim_buf_set_extmark(0, ns, 0, 0, 0, {})\n  -- Create new extmark at line 3, column 1.\n  local m2  = a.nvim_buf_set_extmark(0, ns, 0, 2, 0, {})\n  -- Get extmarks only from line 3.\n  local ms  = a.nvim_buf_get_extmarks(0, ns, {2,0}, {2,0}, {})\n  -- Get all marks in this buffer + namespace.\n  local all = a.nvim_buf_get_extmarks(0, ns, 0, -1, {})\n  print(vim.inspect(ms))\n\n\u003c"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "ns_id"
+      ],
+      [
+        "Object",
+        "start"
+      ],
+      [
+        "Object",
+        "end"
+      ],
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "end": "End of range, given as (row, col) or valid\n              extmark id (whose position defines the bound)",
+      "ns_id": "Namespace id from |nvim_create_namespace()|",
+      "opts": "Optional parameters. Keys:\n              • limit: Maximum number of marks to return              •",
+      "start": "Start of range, given as (row, col) or valid\n              extmark id (whose position defines the bound)"
+    },
+    "return": [
+      "List of [extmark_id, row, col] tuples in \"traversal\n    order\"."
+    ],
+    "signature": "nvim_buf_get_extmarks({buffer}, {ns_id}, {start}, {end}, {opts}, {err})",
+    "c_decl": "Array nvim_buf_get_extmarks(Buffer     buffer, Integer    ns_id, Object     start, Object     end, Dictionary opts, Error *    err);"
+  },
+  "nvim_buf_get_keymap": {
+    "doc": [
+      "Gets a list of buffer-local |mapping| definitions."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "mode"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "mode": "Mode short-name (\"n\", \"i\", \"v\", ...)"
+    },
+    "return": [
+      "Array of maparg()-like dictionaries describing mappings.\n    The \"buffer\" key holds the associated buffer handle."
+    ],
+    "signature": "nvim_buf_get_keymap({buffer}, {mode}, {err})",
+    "c_decl": "ArrayOf(Dictionary) nvim_buf_get_keymap(Buffer  buffer, String  mode, Error * err);"
+  },
+  "nvim_buf_get_lines": {
+    "doc": [
+      "Gets a line-range from the buffer.",
+      "Indexing is zero-based, end-exclusive. Negative indices are\ninterpreted as length+1+index: -1 refers to the index past the\nend. So to get the last element use start=-2 and end=-1.",
+      "Out-of-bounds indices are clamped to the nearest valid value,\nunless `strict_indexing` is set."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "start"
+      ],
+      [
+        "Integer",
+        "end"
+      ],
+      [
+        "Boolean",
+        "strict_indexing"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "end": "Last line index (exclusive)",
+      "start": "First line index",
+      "strict_indexing": "Whether out-of-bounds should be an\n                       error."
+    },
+    "return": [
+      "Array of lines, or empty array for unloaded buffer."
+    ],
+    "signature": "nvim_buf_get_lines({buffer}, {start}, {end}, {strict_indexing}, {err})",
+    "c_decl": "ArrayOf(String) nvim_buf_get_lines(Buffer  buffer, Integer start, Integer end, Boolean strict_indexing, Error * err);"
+  },
+  "nvim_buf_get_mark": {
+    "doc": [
+      "Return a tuple (row,col) representing the position of the\nnamed mark.",
+      "Marks are (1,0)-indexed. |api-indexing|"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "name": "Mark name"
+    },
+    "return": [
+      "(row, col) tuple"
+    ],
+    "signature": "nvim_buf_get_mark({buffer}, {name}, {err})",
+    "c_decl": "ArrayOf(Integer, 2) nvim_buf_get_mark(Buffer  buffer, String  name, Error * err);"
+  },
+  "nvim_buf_get_name": {
+    "doc": [
+      "Gets the full file name for the buffer"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer"
+    },
+    "return": [
+      "Buffer name"
+    ],
+    "signature": "nvim_buf_get_name({buffer}, {err})",
+    "c_decl": "String nvim_buf_get_name(Buffer  buffer, Error * err);"
+  },
+  "nvim_buf_get_offset": {
+    "doc": [
+      "Returns the byte offset of a line (0-indexed). |api-indexing|",
+      "Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is\none byte. 'fileformat' and 'fileencoding' are ignored. The\nline index just after the last line gives the total byte-count\nof the buffer. A final EOL byte is counted if it would be\nwritten, see 'eol'.",
+      "Unlike |line2byte()|, throws error for out-of-bounds indexing.\nReturns -1 for unloaded buffer."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "index"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "index": "Line index"
+    },
+    "return": [
+      "Integer byte offset, or -1 for unloaded buffer."
+    ],
+    "signature": "nvim_buf_get_offset({buffer}, {index}, {err})",
+    "c_decl": "Integer nvim_buf_get_offset(Buffer  buffer, Integer index, Error * err);"
+  },
+  "nvim_buf_get_option": {
+    "doc": [
+      "Gets a buffer option value"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "name": "Option name"
+    },
+    "return": [
+      "Option value"
+    ],
+    "signature": "nvim_buf_get_option({buffer}, {name}, {err})",
+    "c_decl": "Object nvim_buf_get_option(Buffer  buffer, String  name, Error * err);"
+  },
+  "nvim_buf_get_var": {
+    "doc": [
+      "Gets a buffer-scoped (b:) variable."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "name": "Variable name"
+    },
+    "return": [
+      "Variable value"
+    ],
+    "signature": "nvim_buf_get_var({buffer}, {name}, {err})",
+    "c_decl": "Object nvim_buf_get_var(Buffer  buffer, String  name, Error * err);"
+  },
+  "nvim_buf_get_virtual_text": {
+    "doc": [
+      "Get the virtual text (annotation) for a buffer line.",
+      "The virtual text is returned as list of lists, whereas the\ninner lists have either one or two elements. The first element\nis the actual text, the optional second element is the\nhighlight group.",
+      "The format is exactly the same as given to\nnvim_buf_set_virtual_text().",
+      "If there is no virtual text associated with the given line, an\nempty list is returned."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "line"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "line": "Line to get the virtual text from (zero-indexed)"
+    },
+    "return": [
+      "List of virtual text chunks"
+    ],
+    "signature": "nvim_buf_get_virtual_text({buffer}, {line}, {err})",
+    "c_decl": "Array nvim_buf_get_virtual_text(Buffer  buffer, Integer line, Error * err);"
+  },
+  "nvim_buf_is_loaded": {
+    "doc": [
+      "Checks if a buffer is valid and loaded. See |api-buffer| for\nmore info about unloaded buffers."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer"
+    },
+    "return": [
+      "true if the buffer is valid and loaded, false otherwise."
+    ],
+    "signature": "nvim_buf_is_loaded({buffer})",
+    "c_decl": "Boolean nvim_buf_is_loaded(Buffer buffer);"
+  },
+  "nvim_buf_is_valid": {
+    "doc": [
+      "Checks if a buffer is valid.",
+      "Note:\n    Even if a buffer is valid it may have been unloaded. See\n    |api-buffer| for more info about unloaded buffers.\n"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer"
+    },
+    "return": [
+      "true if the buffer is valid, false otherwise."
+    ],
+    "signature": "nvim_buf_is_valid({buffer})",
+    "c_decl": "Boolean nvim_buf_is_valid(Buffer buffer);"
+  },
+  "nvim_buf_line_count": {
+    "doc": [
+      "Gets the buffer line count"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer"
+    },
+    "return": [
+      "Line count, or 0 for unloaded buffer. |api-buffer|"
+    ],
+    "signature": "nvim_buf_line_count({buffer}, {err})",
+    "c_decl": "Integer nvim_buf_line_count(Buffer  buffer, Error * err);"
+  },
+  "nvim_buf_set_extmark": {
+    "doc": [
+      "Creates or updates an extmark.",
+      "To create a new extmark, pass id=0. The extmark id will be\nreturned. It is also allowed to create a new mark by passing\nin a previously unused id, but the caller must then keep track\nof existing and unused ids itself. (Useful over RPC, to avoid\nwaiting for the return value.)"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "ns_id"
+      ],
+      [
+        "Integer",
+        "id"
+      ],
+      [
+        "Integer",
+        "line"
+      ],
+      [
+        "Integer",
+        "col"
+      ],
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "col": "Column where to place the mark",
+      "id": "Extmark id, or 0 to create new",
+      "line": "Line number where to place the mark",
+      "ns_id": "Namespace id from |nvim_create_namespace()|",
+      "opts": "Optional parameters. Currently not used."
+    },
+    "return": [
+      "Id of the created/updated extmark"
+    ],
+    "signature": "nvim_buf_set_extmark({buffer}, {ns_id}, {id}, {line}, {col}, {opts}, {err})",
+    "c_decl": "Integer nvim_buf_set_extmark(Buffer     buffer, Integer    ns_id, Integer    id, Integer    line, Integer    col, Dictionary opts, Error *    err);"
+  },
+  "nvim_buf_set_keymap": {
+    "doc": [
+      "Sets a buffer-local |mapping| for the given mode."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "mode"
+      ],
+      [
+        "String",
+        "lhs"
+      ],
+      [
+        "String",
+        "rhs"
+      ],
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer"
+    },
+    "seealso": [
+      "|nvim_set_keymap()|"
+    ],
+    "signature": "nvim_buf_set_keymap({buffer}, {mode}, {lhs}, {rhs}, {opts}, {err})",
+    "c_decl": "void nvim_buf_set_keymap(Buffer     buffer, String     mode, String     lhs, String     rhs, Dictionary opts, Error *    err);"
+  },
+  "nvim_buf_set_lines": {
+    "doc": [
+      "Sets (replaces) a line-range in the buffer.",
+      "Indexing is zero-based, end-exclusive. Negative indices are\ninterpreted as length+1+index: -1 refers to the index past the\nend. So to change or delete the last element use start=-2 and\nend=-1.",
+      "To insert lines at a given index, set `start` and `end` to the\nsame index. To delete a range of lines, set `replacement` to\nan empty array.",
+      "Out-of-bounds indices are clamped to the nearest valid value,\nunless `strict_indexing` is set."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "start"
+      ],
+      [
+        "Integer",
+        "end"
+      ],
+      [
+        "Boolean",
+        "strict_indexing"
+      ],
+      [
+        "ArrayOf(String)",
+        "replacement"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "end": "Last line index (exclusive)",
+      "replacement": "Array of lines to use as replacement",
+      "start": "First line index",
+      "strict_indexing": "Whether out-of-bounds should be an\n                       error."
+    },
+    "signature": "nvim_buf_set_lines({buffer}, {start}, {end}, {strict_indexing}, {replacement}, {err})",
+    "c_decl": "void nvim_buf_set_lines(Buffer          buffer, Integer         start, Integer         end, Boolean         strict_indexing, ArrayOf(String) replacement, Error *         err);"
+  },
+  "nvim_buf_set_name": {
+    "doc": [
+      "Sets the full file name for a buffer"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "name": "Buffer name"
+    },
+    "signature": "nvim_buf_set_name({buffer}, {name}, {err})",
+    "c_decl": "void nvim_buf_set_name(Buffer  buffer, String  name, Error * err);"
+  },
+  "nvim_buf_set_option": {
+    "doc": [
+      "Sets a buffer option value. Passing 'nil' as value deletes the\noption (only works if there's a global fallback)"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "name": "Option name",
+      "value": "Option value"
+    },
+    "signature": "nvim_buf_set_option({buffer}, {name}, {value}, {err})",
+    "c_decl": "void nvim_buf_set_option(Buffer  buffer, String  name, Object  value, Error * err);"
+  },
+  "nvim_buf_set_var": {
+    "doc": [
+      "Sets a buffer-scoped (b:) variable"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "name": "Variable name",
+      "value": "Variable value"
+    },
+    "signature": "nvim_buf_set_var({buffer}, {name}, {value}, {err})",
+    "c_decl": "void nvim_buf_set_var(Buffer  buffer, String  name, Object  value, Error * err);"
+  },
+  "nvim_buf_set_virtual_text": {
+    "doc": [
+      "Set the virtual text (annotation) for a buffer line.",
+      "By default (and currently the only option) the text will be\nplaced after the buffer text. Virtual text will never cause\nreflow, rather virtual text will be truncated at the end of\nthe screen line. The virtual text will begin one cell\n(|lcs-eol| or space) after the ordinary text.",
+      "Namespaces are used to support batch deletion/updating of\nvirtual text. To create a namespace, use\n|nvim_create_namespace|. Virtual text is cleared using\n|nvim_buf_clear_namespace|. The same `ns_id` can be used for\nboth virtual text and highlights added by\n|nvim_buf_add_highlight|, both can then be cleared with a\nsingle call to |nvim_buf_clear_namespace|. If the virtual text\nnever will be cleared by an API call, pass `ns_id = -1` .",
+      "As a shorthand, `ns_id = 0` can be used to create a new\nnamespace for the virtual text, the allocated id is then\nreturned."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Integer",
+        "src_id"
+      ],
+      [
+        "Integer",
+        "line"
+      ],
+      [
+        "Array",
+        "chunks"
+      ],
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle, or 0 for current buffer",
+      "chunks": "A list of [text, hl_group] arrays, each\n              representing a text chunk with specified\n              highlight. `hl_group` element can be omitted for\n              no highlight.",
+      "line": "Line to annotate with virtual text\n              (zero-indexed)",
+      "ns_id": "Namespace to use or 0 to create a namespace, or\n              -1 for a ungrouped annotation",
+      "opts": "Optional parameters. Currently not used."
+    },
+    "return": [
+      "The ns_id that was used"
+    ],
+    "signature": "nvim_buf_set_virtual_text({buffer}, {src_id}, {line}, {chunks}, {opts}, {err})",
+    "c_decl": "Integer nvim_buf_set_virtual_text(Buffer     buffer, Integer    src_id, Integer    line, Array      chunks, Dictionary opts, Error *    err);"
+  },
+  "nvim_call_atomic": {
+    "doc": [
+      "Calls many API methods atomically.",
+      "This has two main usages:\n1. To perform several requests from an async context\n   atomically, i.e. without interleaving redraws, RPC requests\n   from other clients, or user interactions (however API\n   methods may trigger autocommands or event processing which\n   have such side-effects, e.g. |:sleep| may wake timers).1. \n2. To minimize RPC overhead (roundtrips) of a sequence of many\n   requests.2. \n"
+    ],
+    "parameters": [
+      [
+        "Array",
+        "calls"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "calls": "an array of calls, where each call is described\n             by an array with two elements: the request name,\n             and an array of arguments."
+    },
+    "return": [
+      "Array of two elements. The first is an array of return\n    values. The second is NIL if all calls succeeded. If a\n    call resulted in an error, it is a three-element array\n    with the zero-based index of the call which resulted in an\n    error, the error type and the error message. If an error\n    occurred, the values from all preceding calls will still\n    be returned."
+    ],
+    "signature": "nvim_call_atomic({calls}, {err})",
+    "c_decl": "Array nvim_call_atomic(Array   calls, Error * err);"
+  },
+  "nvim_call_dict_function": {
+    "doc": [
+      "Calls a VimL |Dictionary-function| with the given arguments.",
+      "On execution error: fails with VimL error, does not update\nv:errmsg."
+    ],
+    "parameters": [
+      [
+        "Object",
+        "dict"
+      ],
+      [
+        "String",
+        "fn"
+      ],
+      [
+        "Array",
+        "args"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "args": "Function arguments packed in an Array",
+      "dict": "Dictionary, or String evaluating to a VimL |self|\n            dict",
+      "fn": "Name of the function defined on the VimL dict"
+    },
+    "return": [
+      "Result of the function call"
+    ],
+    "signature": "nvim_call_dict_function({dict}, {fn}, {args}, {err})",
+    "c_decl": "Object nvim_call_dict_function(Object  dict, String  fn, Array   args, Error * err);"
+  },
+  "nvim_call_function": {
+    "doc": [
+      "Calls a VimL function with the given arguments.",
+      "On execution error: fails with VimL error, does not update\nv:errmsg."
+    ],
+    "parameters": [
+      [
+        "String",
+        "fn"
+      ],
+      [
+        "Array",
+        "args"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "args": "Function arguments packed in an Array",
+      "fn": "Function to call"
+    },
+    "return": [
+      "Result of the function call"
+    ],
+    "signature": "nvim_call_function({fn}, {args}, {err})",
+    "c_decl": "Object nvim_call_function(String  fn, Array   args, Error * err);"
+  },
+  "nvim_command": {
+    "doc": [
+      "Executes an ex-command.",
+      "On execution error: fails with VimL error, does not update\nv:errmsg."
+    ],
+    "parameters": [
+      [
+        "String",
+        "command"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "command": "Ex-command string"
+    },
+    "seealso": [
+      "|nvim_exec()|"
+    ],
+    "signature": "nvim_command({command}, {err})",
+    "c_decl": "void nvim_command(String  command, Error * err);"
+  },
+  "nvim_create_buf": {
+    "doc": [
+      "Creates a new, empty, unnamed buffer."
+    ],
+    "parameters": [
+      [
+        "Boolean",
+        "listed"
+      ],
+      [
+        "Boolean",
+        "scratch"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "listed": "Sets 'buflisted'",
+      "scratch": "Creates a \"throwaway\" |scratch-buffer| for\n               temporary work (always 'nomodified')"
+    },
+    "return": [
+      "Buffer handle, or 0 on error"
+    ],
+    "seealso": [
+      "buf_open_scratch"
+    ],
+    "signature": "nvim_create_buf({listed}, {scratch}, {err})",
+    "c_decl": "Buffer nvim_create_buf(Boolean listed, Boolean scratch, Error * err);"
+  },
+  "nvim_create_namespace": {
+    "doc": [
+      "Creates a new namespace, or gets an existing one.",
+      "Namespaces are used for buffer highlights and virtual text,\nsee |nvim_buf_add_highlight()| and\n|nvim_buf_set_virtual_text()|.",
+      "Namespaces can be named or anonymous. If `name` matches an\nexisting namespace, the associated id is returned. If `name`\nis an empty string a new, anonymous namespace is created."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Namespace name or empty string"
+    },
+    "return": [
+      "Namespace id"
+    ],
+    "signature": "nvim_create_namespace({name})",
+    "c_decl": "Integer nvim_create_namespace(String name);"
+  },
+  "nvim_del_current_line": {
+    "doc": [
+      "Deletes the current line."
+    ],
+    "parameters": [
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim_del_current_line({err})",
+    "c_decl": "void nvim_del_current_line(Error * err);"
+  },
+  "nvim_del_keymap": {
+    "doc": [
+      "Unmaps a global |mapping| for the given mode.",
+      "To unmap a buffer-local mapping, use |nvim_buf_del_keymap()|."
+    ],
+    "parameters": [
+      [
+        "String",
+        "mode"
+      ],
+      [
+        "String",
+        "lhs"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "seealso": [
+      "|nvim_set_keymap()|"
+    ],
+    "signature": "nvim_del_keymap({mode}, {lhs}, {err})",
+    "c_decl": "void nvim_del_keymap(String  mode, String  lhs, Error * err);"
+  },
+  "nvim_del_var": {
+    "doc": [
+      "Removes a global (g:) variable."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name"
+    },
+    "signature": "nvim_del_var({name}, {err})",
+    "c_decl": "void nvim_del_var(String  name, Error * err);"
+  },
+  "nvim_err_write": {
+    "doc": [
+      "Writes a message to the Vim error buffer. Does not append\n\"\\n\", the message is buffered (won't display) until a linefeed\nis written."
+    ],
+    "parameters": [
+      [
+        "String",
+        "str"
+      ]
+    ],
+    "parameters_doc": {
+      "str": "Message"
+    },
+    "signature": "nvim_err_write({str})",
+    "c_decl": "void nvim_err_write(String str);"
+  },
+  "nvim_err_writeln": {
+    "doc": [
+      "Writes a message to the Vim error buffer. Appends \"\\n\", so the\nbuffer is flushed (and displayed)."
+    ],
+    "parameters": [
+      [
+        "String",
+        "str"
+      ]
+    ],
+    "parameters_doc": {
+      "str": "Message"
+    },
+    "seealso": [
+      "nvim_err_write()"
+    ],
+    "signature": "nvim_err_writeln({str})",
+    "c_decl": "void nvim_err_writeln(String str);"
+  },
+  "nvim_eval": {
+    "doc": [
+      "Evaluates a VimL |expression|. Dictionaries and Lists are\nrecursively expanded.",
+      "On execution error: fails with VimL error, does not update\nv:errmsg."
+    ],
+    "parameters": [
+      [
+        "String",
+        "expr"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "expr": "VimL expression string"
+    },
+    "return": [
+      "Evaluation result or expanded object"
+    ],
+    "signature": "nvim_eval({expr}, {err})",
+    "c_decl": "Object nvim_eval(String  expr, Error * err);"
+  },
+  "nvim_exec": {
+    "doc": [
+      "Executes Vimscript (multiline block of Ex-commands), like\nanonymous |:source|.",
+      "Unlike |nvim_command()| this function supports heredocs,\nscript-scope (s:), etc.",
+      "On execution error: fails with VimL error, does not update\nv:errmsg."
+    ],
+    "parameters": [
+      [
+        "String",
+        "src"
+      ],
+      [
+        "Boolean",
+        "output"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "output": "Capture and return all (non-error, non-shell\n              |:!|) output",
+      "src": "Vimscript code"
+    },
+    "return": [
+      "Output (non-error, non-shell |:!|) if `output` is true,\n    else empty string."
+    ],
+    "seealso": [
+      "|execute()|",
+      "|nvim_command()|"
+    ],
+    "signature": "nvim_exec({src}, {output}, {err})",
+    "c_decl": "String nvim_exec(String  src, Boolean output, Error * err);"
+  },
+  "nvim_exec_lua": {
+    "doc": [
+      "Execute Lua code. Parameters (if any) are available as `...`\ninside the chunk. The chunk can return a value.",
+      "Only statements are executed. To evaluate an expression,\nprefix it with `return` : return my_function(...)"
+    ],
+    "parameters": [
+      [
+        "String",
+        "code"
+      ],
+      [
+        "Array",
+        "args"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "args": "Arguments to the code",
+      "code": "Lua code to execute"
+    },
+    "return": [
+      "Return value of Lua code if present or NIL."
+    ],
+    "signature": "nvim_exec_lua({code}, {args}, {err})",
+    "c_decl": "Object nvim_exec_lua(String  code, Array   args, Error * err);"
+  },
+  "nvim_feedkeys": {
+    "doc": [
+      "Sends input-keys to Nvim, subject to various quirks controlled\nby `mode` flags. This is a blocking call, unlike\n|nvim_input()|.",
+      "On execution error: does not fail, but updates v:errmsg."
+    ],
+    "parameters": [
+      [
+        "String",
+        "keys"
+      ],
+      [
+        "String",
+        "mode"
+      ],
+      [
+        "Boolean",
+        "escape_csi"
+      ]
+    ],
+    "parameters_doc": {
+      "escape_csi": "If true, escape K_SPECIAL/CSI bytes in\n                  `keys`",
+      "keys": "to be typed",
+      "mode": "behavior flags, see |feedkeys()|"
+    },
+    "seealso": [
+      "feedkeys()",
+      "vim_strsave_escape_csi"
+    ],
+    "signature": "nvim_feedkeys({keys}, {mode}, {escape_csi})",
+    "c_decl": "void nvim_feedkeys(String  keys, String  mode, Boolean escape_csi);"
+  },
+  "nvim_get_api_info": {
+    "annotations": [
+      "{fast}"
+    ],
+    "doc": [
+      "Returns a 2-tuple (Array), where item 0 is the current channel\nid and item 1 is the |api-metadata| map (Dictionary)."
+    ],
+    "parameters_doc": {},
+    "return": [
+      "2-tuple [{channel-id}, {api-metadata}]"
+    ],
+    "signature": "nvim_get_api_info()",
+    "c_decl": "Array nvim_get_api_info();"
+  },
+  "nvim_get_chan_info": {
+    "doc": [
+      "Get information about a channel."
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "chan"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Dictionary describing a channel, with these keys:\n    • \"stream\" the stream underlying the channel\n      • \"stdio\" stdin and stdout of this Nvim instance      • \n      • \"stderr\" stderr of this Nvim instance      • \n      • \"socket\" TCP/IP socket or named pipe      • \n      • \"job\" job with communication over its stdio      • \n    • \n    • \"mode\" how data received on the channel is interpreted\n      • \"bytes\" send and receive raw bytes      • \n      • \"terminal\" a |terminal| instance interprets ASCII\n        sequences      • \n      • \"rpc\" |RPC| communication on the channel is active      • \n    • \n    • \"pty\" Name of pseudoterminal, if one is used (optional).\n      On a POSIX system, this will be a device path like\n      /dev/pts/1. Even if the name is unknown, the key will\n      still be present to indicate a pty is used. This is\n      currently the case when using winpty on windows.    • \n    • \"buffer\" buffer with connected |terminal| instance\n      (optional)    • \n    • \"client\" information about the client on the other end\n      of the RPC channel, if it has added it using\n      |nvim_set_client_info()|. (optional)    • \n"
+    ],
+    "signature": "nvim_get_chan_info({chan}, {err})",
+    "c_decl": "Dictionary nvim_get_chan_info(Integer chan, Error * err);"
+  },
+  "nvim_get_color_by_name": {
+    "doc": [
+      "Returns the 24-bit RGB value of a |nvim_get_color_map()| color\nname or \"#rrggbb\" hexadecimal string.",
+      "Example: \u003e\n    :echo nvim_get_color_by_name(\"Pink\")\n    :echo nvim_get_color_by_name(\"#cbcbcb\")\n\n\u003c"
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Color name or \"#rrggbb\" string"
+    },
+    "return": [
+      "24-bit RGB value, or -1 for invalid argument."
+    ],
+    "signature": "nvim_get_color_by_name({name})",
+    "c_decl": "Integer nvim_get_color_by_name(String name);"
+  },
+  "nvim_get_color_map": {
+    "doc": [
+      "Returns a map of color names and RGB values.",
+      "Keys are color names (e.g. \"Aqua\") and values are 24-bit RGB\ncolor values (e.g. 65535)."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Map of color names and RGB values."
+    ],
+    "signature": "nvim_get_color_map()",
+    "c_decl": "Dictionary nvim_get_color_map(void);"
+  },
+  "nvim_get_commands": {
+    "doc": [
+      "Gets a map of global (non-buffer-local) Ex commands.",
+      "Currently only |user-commands| are supported, not builtin Ex\ncommands."
+    ],
+    "parameters": [
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "opts": "Optional parameters. Currently only supports\n            {\"builtin\":false}"
+    },
+    "return": [
+      "Map of maps describing commands."
+    ],
+    "signature": "nvim_get_commands({opts}, {err})",
+    "c_decl": "Dictionary nvim_get_commands(Dictionary opts, Error *    err);"
+  },
+  "nvim_get_context": {
+    "doc": [
+      "Gets a map of the current editor state."
+    ],
+    "parameters": [
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "opts": "Optional parameters.\n            • types: List of |context-types| (\"regs\", \"jumps\",\n              \"bufs\", \"gvars\", …) to gather, or empty for\n              \"all\".            •"
+    },
+    "return": [
+      "map of global |context|."
+    ],
+    "signature": "nvim_get_context({opts}, {err})",
+    "c_decl": "Dictionary nvim_get_context(Dictionary opts, Error *    err);"
+  },
+  "nvim_get_current_buf": {
+    "doc": [
+      "Gets the current buffer."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Buffer handle"
+    ],
+    "signature": "nvim_get_current_buf()",
+    "c_decl": "Buffer nvim_get_current_buf(void);"
+  },
+  "nvim_get_current_line": {
+    "doc": [
+      "Gets the current line."
+    ],
+    "parameters": [
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Current line string"
+    ],
+    "signature": "nvim_get_current_line({err})",
+    "c_decl": "String nvim_get_current_line(Error * err);"
+  },
+  "nvim_get_current_tabpage": {
+    "doc": [
+      "Gets the current tabpage."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Tabpage handle"
+    ],
+    "signature": "nvim_get_current_tabpage()",
+    "c_decl": "Tabpage nvim_get_current_tabpage(void);"
+  },
+  "nvim_get_current_win": {
+    "doc": [
+      "Gets the current window."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Window handle"
+    ],
+    "signature": "nvim_get_current_win()",
+    "c_decl": "Window nvim_get_current_win(void);"
+  },
+  "nvim_get_hl_by_id": {
+    "doc": [
+      "Gets a highlight definition by id. |hlID()|"
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "hl_id"
+      ],
+      [
+        "Boolean",
+        "rgb"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "hl_id": "Highlight id as returned by |hlID()|",
+      "rgb": "Export RGB colors"
+    },
+    "return": [
+      "Highlight definition map"
+    ],
+    "seealso": [
+      "nvim_get_hl_by_name"
+    ],
+    "signature": "nvim_get_hl_by_id({hl_id}, {rgb}, {err})",
+    "c_decl": "Dictionary nvim_get_hl_by_id(Integer hl_id, Boolean rgb, Error * err);"
+  },
+  "nvim_get_hl_by_name": {
+    "doc": [
+      "Gets a highlight definition by name."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Boolean",
+        "rgb"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Highlight group name",
+      "rgb": "Export RGB colors"
+    },
+    "return": [
+      "Highlight definition map"
+    ],
+    "seealso": [
+      "nvim_get_hl_by_id"
+    ],
+    "signature": "nvim_get_hl_by_name({name}, {rgb}, {err})",
+    "c_decl": "Dictionary nvim_get_hl_by_name(String  name, Boolean rgb, Error * err);"
+  },
+  "nvim_get_hl_id_by_name": {
+    "doc": [
+      "Gets a highlight group by name",
+      "similar to |hlID()|, but allocates a new ID if not present."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim_get_hl_id_by_name({name})",
+    "c_decl": "Integer nvim_get_hl_id_by_name(String name);"
+  },
+  "nvim_get_keymap": {
+    "doc": [
+      "Gets a list of global (non-buffer-local) |mapping|\ndefinitions."
+    ],
+    "parameters": [
+      [
+        "String",
+        "mode"
+      ]
+    ],
+    "parameters_doc": {
+      "mode": "Mode short-name (\"n\", \"i\", \"v\", ...)"
+    },
+    "return": [
+      "Array of maparg()-like dictionaries describing mappings.\n    The \"buffer\" key is always zero."
+    ],
+    "signature": "nvim_get_keymap({mode})",
+    "c_decl": "ArrayOf(Dictionary) nvim_get_keymap(String mode);"
+  },
+  "nvim_get_mode": {
+    "annotations": [
+      "{fast}"
+    ],
+    "doc": [
+      "Gets the current mode. |mode()| \"blocking\" is true if Nvim is\nwaiting for input."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Dictionary { \"mode\": String, \"blocking\": Boolean }"
+    ],
+    "signature": "nvim_get_mode()",
+    "c_decl": "Dictionary nvim_get_mode(void);"
+  },
+  "nvim_get_namespaces": {
+    "doc": [
+      "Gets existing, non-anonymous namespaces."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "dict that maps from names to namespace ids."
+    ],
+    "signature": "nvim_get_namespaces()",
+    "c_decl": "Dictionary nvim_get_namespaces(void);"
+  },
+  "nvim_get_option": {
+    "doc": [
+      "Gets an option value string."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Option name"
+    },
+    "return": [
+      "Option value (global)"
+    ],
+    "signature": "nvim_get_option({name}, {err})",
+    "c_decl": "Object nvim_get_option(String  name, Error * err);"
+  },
+  "nvim_get_proc": {
+    "doc": [
+      "Gets info describing process `pid` ."
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "pid"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Map of process properties, or NIL if process not found."
+    ],
+    "signature": "nvim_get_proc({pid}, {err})",
+    "c_decl": "Object nvim_get_proc(Integer pid, Error * err);"
+  },
+  "nvim_get_proc_children": {
+    "doc": [
+      "Gets the immediate children of process `pid` ."
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "pid"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Array of child process ids, empty if process not found."
+    ],
+    "signature": "nvim_get_proc_children({pid}, {err})",
+    "c_decl": "Array nvim_get_proc_children(Integer pid, Error * err);"
+  },
+  "nvim_get_runtime_file": {
+    "doc": [
+      "Find files in runtime directories",
+      "'name' can contain wildcards. For example\nnvim_get_runtime_file(\"colors/*.vim\", true) will return all\ncolor scheme files.",
+      "It is not an error to not find any files. An empty array is\nreturned then."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Boolean",
+        "all"
+      ]
+    ],
+    "parameters_doc": {
+      "all": "whether to return all matches or only the first",
+      "name": "pattern of files to search for"
+    },
+    "return": [
+      "list of absolute paths to the found files"
+    ],
+    "signature": "nvim_get_runtime_file({name}, {all})",
+    "c_decl": "ArrayOf(String) nvim_get_runtime_file(String  name, Boolean all);"
+  },
+  "nvim_get_var": {
+    "doc": [
+      "Gets a global (g:) variable."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name"
+    },
+    "return": [
+      "Variable value"
+    ],
+    "signature": "nvim_get_var({name}, {err})",
+    "c_decl": "Object nvim_get_var(String  name, Error * err);"
+  },
+  "nvim_get_vvar": {
+    "doc": [
+      "Gets a v: variable."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name"
+    },
+    "return": [
+      "Variable value"
+    ],
+    "signature": "nvim_get_vvar({name}, {err})",
+    "c_decl": "Object nvim_get_vvar(String  name, Error * err);"
+  },
+  "nvim_input": {
+    "annotations": [
+      "{fast}"
+    ],
+    "doc": [
+      "Queues raw user-input. Unlike |nvim_feedkeys()|, this uses a\nlow-level input buffer and the call is non-blocking (input is\nprocessed asynchronously by the eventloop).",
+      "On execution error: does not fail, but updates v:errmsg.",
+      "Note:\n    |keycodes| like \u003cCR\u003e are translated, so \"\u003c\" is special. To\n    input a literal \"\u003c\", send \u003cLT\u003e.\nNote:\n    For mouse events use |nvim_input_mouse()|. The pseudokey\n    form \"\u003cLeftMouse\u003e\u003ccol,row\u003e\" is deprecated since\n    |api-level| 6.\n"
+    ],
+    "parameters": [
+      [
+        "String",
+        "keys"
+      ]
+    ],
+    "parameters_doc": {
+      "keys": "to be typed"
+    },
+    "return": [
+      "Number of bytes actually written (can be fewer than\n    requested if the buffer becomes full)."
+    ],
+    "signature": "nvim_input({keys})",
+    "c_decl": "Integer nvim_input(String keys);"
+  },
+  "nvim_input_mouse": {
+    "annotations": [
+      "{fast}"
+    ],
+    "doc": [
+      "Send mouse event from GUI.",
+      "Non-blocking: does not wait on any result, but queues the\nevent to be processed soon by the event loop.",
+      "Note:\n    Currently this doesn't support \"scripting\" multiple mouse\n    events by calling it multiple times in a loop: the\n    intermediate mouse positions will be ignored. It should be\n    used to implement real-time mouse input in a GUI. The\n    deprecated pseudokey form (\"\u003cLeftMouse\u003e\u003ccol,row\u003e\") of\n    |nvim_input()| has the same limitiation.\n"
+    ],
+    "parameters": [
+      [
+        "String",
+        "button"
+      ],
+      [
+        "String",
+        "action"
+      ],
+      [
+        "String",
+        "modifier"
+      ],
+      [
+        "Integer",
+        "grid"
+      ],
+      [
+        "Integer",
+        "row"
+      ],
+      [
+        "Integer",
+        "col"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "action": "For ordinary buttons, one of \"press\", \"drag\",\n                \"release\". For the wheel, one of \"up\", \"down\",\n                \"left\", \"right\".",
+      "button": "Mouse button: one of \"left\", \"right\",\n                \"middle\", \"wheel\".",
+      "col": "Mouse column-position (zero-based, like redraw\n                events)",
+      "grid": "Grid number if the client uses |ui-multigrid|,\n                else 0.",
+      "modifier": "String of modifiers each represented by a\n                single char. The same specifiers are used as\n                for a key press, except that the \"-\" separator\n                is optional, so \"C-A-\", \"c-a\" and \"CA\" can all\n                be used to specify Ctrl+Alt+click.",
+      "row": "Mouse row-position (zero-based, like redraw\n                events)"
+    },
+    "signature": "nvim_input_mouse({button}, {action}, {modifier}, {grid}, {row}, {col}, {err})",
+    "c_decl": "void nvim_input_mouse(String  button, String  action, String  modifier, Integer grid, Integer row, Integer col, Error * err);"
+  },
+  "nvim_list_bufs": {
+    "doc": [
+      "Gets the current list of buffer handles",
+      "Includes unlisted (unloaded/deleted) buffers, like `:ls!` .\nUse |nvim_buf_is_loaded()| to check if a buffer is loaded."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "List of buffer handles"
+    ],
+    "signature": "nvim_list_bufs()",
+    "c_decl": "ArrayOf(Buffer) nvim_list_bufs(void);"
+  },
+  "nvim_list_chans": {
+    "doc": [
+      "Get information about all open channels."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Array of Dictionaries, each describing a channel with the\n    format specified at |nvim_get_chan_info()|."
+    ],
+    "signature": "nvim_list_chans()",
+    "c_decl": "Array nvim_list_chans(void);"
+  },
+  "nvim_list_runtime_paths": {
+    "doc": [
+      "Gets the paths contained in 'runtimepath'."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "List of paths"
+    ],
+    "signature": "nvim_list_runtime_paths()",
+    "c_decl": "ArrayOf(String) nvim_list_runtime_paths(void);"
+  },
+  "nvim_list_tabpages": {
+    "doc": [
+      "Gets the current list of tabpage handles."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "List of tabpage handles"
+    ],
+    "signature": "nvim_list_tabpages()",
+    "c_decl": "ArrayOf(Tabpage) nvim_list_tabpages(void);"
+  },
+  "nvim_list_uis": {
+    "doc": [
+      "Gets a list of dictionaries representing attached UIs."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "Array of UI dictionaries, each with these keys:\n    • \"height\" Requested height of the UI    • \n    • \"width\" Requested width of the UI    • \n    • \"rgb\" true if the UI uses RGB colors (false implies\n      |cterm-colors|)    • \n    • \"ext_...\" Requested UI extensions, see |ui-option|    • \n    • \"chan\" Channel id of remote UI (not present for TUI)    • \n"
+    ],
+    "signature": "nvim_list_uis()",
+    "c_decl": "Array nvim_list_uis(void);"
+  },
+  "nvim_list_wins": {
+    "doc": [
+      "Gets the current list of window handles."
+    ],
+    "parameters": [
+      [
+        "void",
+        ""
+      ]
+    ],
+    "parameters_doc": {},
+    "return": [
+      "List of window handles"
+    ],
+    "signature": "nvim_list_wins()",
+    "c_decl": "ArrayOf(Window) nvim_list_wins(void);"
+  },
+  "nvim_load_context": {
+    "doc": [
+      "Sets the current editor state from the given |context| map."
+    ],
+    "parameters": [
+      [
+        "Dictionary",
+        "dict"
+      ]
+    ],
+    "parameters_doc": {
+      "dict": "|Context| map."
+    },
+    "signature": "nvim_load_context({dict})",
+    "c_decl": "Object nvim_load_context(Dictionary dict);"
+  },
+  "nvim_open_win": {
+    "doc": [
+      "Open a new window.",
+      "Currently this is used to open floating and external windows.\nFloats are windows that are drawn above the split layout, at\nsome anchor position in some other window. Floats can be drawn\ninternally or by external GUI with the |ui-multigrid|\nextension. External windows are only supported with multigrid\nGUIs, and are displayed as separate top-level windows.",
+      "For a general overview of floats, see |api-floatwin|.",
+      "Exactly one of `external` and `relative` must be specified.\nThe `width` and `height` of the new window must be specified.",
+      "With relative=editor (row=0,col=0) refers to the top-left\ncorner of the screen-grid and (row=Lines-1,col=Columns-1)\nrefers to the bottom-right corner. Fractional values are\nallowed, but the builtin implementation (used by non-multigrid\nUIs) will always round down to nearest integer.",
+      "Out-of-bounds values, and configurations that make the float\nnot fit inside the main editor, are allowed. The builtin\nimplementation truncates values so floats are fully within the\nmain screen grid. External GUIs could let floats hover outside\nof the main window like a tooltip, but this should not be used\nto specify arbitrary WM screen positions.",
+      "Example (Lua): window-relative float \u003e\n    vim.api.nvim_open_win(0, false,\n      {relative='win', row=3, col=3, width=12, height=3})\n\n\u003c",
+      "Example (Lua): buffer-relative float (travels as buffer is\nscrolled) \u003e\n    vim.api.nvim_open_win(0, false,\n      {relative='win', width=12, height=3, bufpos={100,10}})\n\n\u003c"
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Boolean",
+        "enter"
+      ],
+      [
+        "Dictionary",
+        "config"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer to display, or 0 for current buffer",
+      "config": "Map defining the window configuration. Keys:\n              • `relative`: Sets the window layout to \"floating\", placed\n                at (row,col) coordinates relative to:\n                • \"editor\" The global editor grid                • \n                • \"win\" Window given by the `win` field, or\n                  current window.                • \n                • \"cursor\" Cursor position in current window.                • \n              • \n              • `win` : |window-ID| for relative=\"win\".              • \n              • `anchor`: Decides which corner of the float to place\n                at (row,col):\n                • \"NW\" northwest (default)                • \n                • \"NE\" northeast                • \n                • \"SW\" southwest                • \n                • \"SE\" southeast                • \n              • \n              • `width` : Window width (in character cells).\n                Minimum of 1.              • \n              • `height` : Window height (in character cells).\n                Minimum of 1.              • \n              • `bufpos` : Places float relative to buffer\n                text (only when relative=\"win\"). Takes a tuple\n                of zero-indexed [line, column]. `row` and\n                `col` if given are applied relative to this\n                position, else they default to `row=1` and\n                `col=0` (thus like a tooltip near the buffer\n                text).              • \n              • `row` : Row position in units of \"screen cell\n                height\", may be fractional.              • \n              • `col` : Column position in units of \"screen\n                cell width\", may be fractional.              • \n              • `focusable` : Enable focus by user actions\n                (wincmds, mouse events). Defaults to true.\n                Non-focusable windows can be entered by\n                |nvim_set_current_win()|.              • \n              • `external` : GUI should display the window as\n                an external top-level window. Currently\n                accepts no other positioning configuration\n                together with this.              • \n              • `style`: Configure the appearance of the window.\n                Currently only takes one non-empty value:\n                • \"minimal\" Nvim will display the window with\n                  many UI options disabled. This is useful\n                  when displaying a temporary float where the\n                  text should not be edited. Disables\n                  'number', 'relativenumber', 'cursorline',\n                  'cursorcolumn', 'foldcolumn', 'spell' and\n                  'list' options. 'signcolumn' is changed to\n                  `auto` and 'colorcolumn' is cleared. The\n                  end-of-buffer region is hidden by setting\n                  `eob` flag of 'fillchars' to a space char,\n                  and clearing the |EndOfBuffer| region in\n                  'winhighlight'.                • \n              •",
+      "enter": "Enter the window (make it the current window)"
+    },
+    "return": [
+      "Window handle, or 0 on error"
+    ],
+    "signature": "nvim_open_win({buffer}, {enter}, {config}, {err})",
+    "c_decl": "Window nvim_open_win(Buffer     buffer, Boolean    enter, Dictionary config, Error *    err);"
+  },
+  "nvim_out_write": {
+    "doc": [
+      "Writes a message to the Vim output buffer. Does not append\n\"\\n\", the message is buffered (won't display) until a linefeed\nis written."
+    ],
+    "parameters": [
+      [
+        "String",
+        "str"
+      ]
+    ],
+    "parameters_doc": {
+      "str": "Message"
+    },
+    "signature": "nvim_out_write({str})",
+    "c_decl": "void nvim_out_write(String str);"
+  },
+  "nvim_parse_expression": {
+    "annotations": [
+      "{fast}"
+    ],
+    "doc": [
+      "Parse a VimL expression."
+    ],
+    "parameters": [
+      [
+        "String",
+        "expr"
+      ],
+      [
+        "String",
+        "flags"
+      ],
+      [
+        "Boolean",
+        "highlight"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "expr": "Expression to parse. Always treated as a\n                 single line.",
+      "flags": "Flags:\n                 • \"m\" if multiple expressions in a row are\n                   allowed (only the first one will be\n                   parsed),                 • \n                 • \"E\" if EOC tokens are not allowed\n                   (determines whether they will stop parsing\n                   process or be recognized as an\n                   operator/space, though also yielding an\n                   error).                 • \n                 • \"l\" when needing to start parsing with\n                   lvalues for \":let\" or \":for\". Common flag\n                   sets:                 • \n                 • \"m\" to parse like for \":echo\".                 • \n                 • \"E\" to parse like for \"\u003cC-r\u003e=\".                 • \n                 • empty string for \":call\".                 • \n                 • \"lm\" to parse for \":let\".                 •",
+      "highlight": "If true, return value will also include\n                 \"highlight\" key containing array of 4-tuples\n                 (arrays) (Integer, Integer, Integer, String),\n                 where first three numbers define the\n                 highlighted region and represent line,\n                 starting column and ending column (latter\n                 exclusive: one should highlight region\n                 [start_col, end_col))."
+    },
+    "return": [
+      "\n    • AST: top-level dictionary with these keys:\n      • \"error\": Dictionary with error, present only if parser\n        saw some error. Contains the following keys:\n        • \"message\": String, error message in printf format,\n          translated. Must contain exactly one \"%.*s\".        • \n        • \"arg\": String, error message argument.        • \n      • \n      • \"len\": Amount of bytes successfully parsed. With flags\n        equal to \"\" that should be equal to the length of expr\n        string. (“Sucessfully parsed” here means “participated\n        in AST creation”, not “till the first error”.)      • \n      • \"ast\": AST, either nil or a dictionary with these\n        keys:\n        • \"type\": node type, one of the value names from\n          ExprASTNodeType stringified without \"kExprNode\"\n          prefix.        • \n        • \"start\": a pair [line, column] describing where node\n          is \"started\" where \"line\" is always 0 (will not be 0\n          if you will be using nvim_parse_viml() on e.g.\n          \":let\", but that is not present yet). Both elements\n          are Integers.        • \n        • \"len\": “length” of the node. This and \"start\" are\n          there for debugging purposes primary (debugging\n          parser and providing debug information).        • \n        • \"children\": a list of nodes described in top/\"ast\".\n          There always is zero, one or two children, key will\n          not be present if node has no children. Maximum\n          number of children may be found in node_maxchildren\n          array.        • \n      • \n    • \n    • Local values (present only for certain nodes):\n      • \"scope\": a single Integer, specifies scope for\n        \"Option\" and \"PlainIdentifier\" nodes. For \"Option\" it\n        is one of ExprOptScope values, for \"PlainIdentifier\"\n        it is one of ExprVarScope values.      • \n      • \"ident\": identifier (without scope, if any), present\n        for \"Option\", \"PlainIdentifier\", \"PlainKey\" and\n        \"Environment\" nodes.      • \n      • \"name\": Integer, register name (one character) or -1.\n        Only present for \"Register\" nodes.      • \n      • \"cmp_type\": String, comparison type, one of the value\n        names from ExprComparisonType, stringified without\n        \"kExprCmp\" prefix. Only present for \"Comparison\"\n        nodes.      • \n      • \"ccs_strategy\": String, case comparison strategy, one\n        of the value names from ExprCaseCompareStrategy,\n        stringified without \"kCCStrategy\" prefix. Only present\n        for \"Comparison\" nodes.      • \n      • \"augmentation\": String, augmentation type for\n        \"Assignment\" nodes. Is either an empty string, \"Add\",\n        \"Subtract\" or \"Concat\" for \"=\", \"+=\", \"-=\" or \".=\"\n        respectively.      • \n      • \"invert\": Boolean, true if result of comparison needs\n        to be inverted. Only present for \"Comparison\" nodes.      • \n      • \"ivalue\": Integer, integer value for \"Integer\" nodes.      • \n      • \"fvalue\": Float, floating-point value for \"Float\"\n        nodes.      • \n      • \"svalue\": String, value for \"SingleQuotedString\" and\n        \"DoubleQuotedString\" nodes.      • \n    • \n"
+    ],
+    "signature": "nvim_parse_expression({expr}, {flags}, {highlight}, {err})",
+    "c_decl": "Dictionary nvim_parse_expression(String  expr, String  flags, Boolean highlight, Error * err);"
+  },
+  "nvim_paste": {
+    "doc": [
+      "Pastes at cursor, in any mode.",
+      "Invokes the `vim.paste` handler, which handles each mode\nappropriately. Sets redo/undo. Faster than |nvim_input()|.\nLines break at LF (\"\\n\").",
+      "Errors ('nomodifiable', `vim.paste()` failure, …) are\nreflected in `err` but do not affect the return value (which\nis strictly decided by `vim.paste()` ). On error, subsequent\ncalls are ignored (\"drained\") until the next paste is\ninitiated (phase 1 or -1)."
+    ],
+    "parameters": [
+      [
+        "String",
+        "data"
+      ],
+      [
+        "Boolean",
+        "crlf"
+      ],
+      [
+        "Integer",
+        "phase"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "crlf": "Also break lines at CR and CRLF.",
+      "data": "Multiline input. May be binary (containing NUL\n             bytes).",
+      "phase": "-1: paste in a single call (i.e. without\n             streaming). To \"stream\" a paste, call `nvim_paste` sequentially with these `phase` values:\n             • 1: starts the paste (exactly once)             • \n             • 2: continues the paste (zero or more times)             • \n             • 3: ends the paste (exactly once)             •"
+    },
+    "return": [
+      "\n    • true: Client may continue pasting.    • \n    • false: Client must cancel the paste.    • \n"
+    ],
+    "signature": "nvim_paste({data}, {crlf}, {phase}, {err})",
+    "c_decl": "Boolean nvim_paste(String  data, Boolean crlf, Integer phase, Error * err);"
+  },
+  "nvim_put": {
+    "doc": [
+      "Puts text at cursor, in any mode.",
+      "Compare |:put| and |p| which are always linewise."
+    ],
+    "parameters": [
+      [
+        "ArrayOf(String)",
+        "lines"
+      ],
+      [
+        "String",
+        "type"
+      ],
+      [
+        "Boolean",
+        "after"
+      ],
+      [
+        "Boolean",
+        "follow"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "after": "Insert after cursor (like |p|), or before (like\n              |P|).",
+      "follow": "Place cursor at end of inserted text.",
+      "lines": "|readfile()|-style list of lines.\n              |channel-lines|",
+      "type": "Edit behavior: any |getregtype()| result, or:\n              • \"b\" |blockwise-visual| mode (may include\n                width, e.g. \"b3\")              • \n              • \"c\" |charwise| mode              • \n              • \"l\" |linewise| mode              • \n              • \"\" guess by contents, see |setreg()|              •"
+    },
+    "signature": "nvim_put({lines}, {type}, {after}, {follow}, {err})",
+    "c_decl": "void nvim_put(ArrayOf(String) lines, String          type, Boolean         after, Boolean         follow, Error *         err);"
+  },
+  "nvim_replace_termcodes": {
+    "doc": [
+      "Replaces terminal codes and |keycodes| (\u003cCR\u003e, \u003cEsc\u003e, ...) in a\nstring with the internal representation."
+    ],
+    "parameters": [
+      [
+        "String",
+        "str"
+      ],
+      [
+        "Boolean",
+        "from_part"
+      ],
+      [
+        "Boolean",
+        "do_lt"
+      ],
+      [
+        "Boolean",
+        "special"
+      ]
+    ],
+    "parameters_doc": {
+      "do_lt": "Also translate \u003clt\u003e. Ignored if `special` is\n                 false.",
+      "from_part": "Legacy Vim parameter. Usually true.",
+      "special": "Replace |keycodes|, e.g. \u003cCR\u003e becomes a \"\\n\"\n                 char.",
+      "str": "String to be converted."
+    },
+    "seealso": [
+      "replace_termcodes",
+      "cpoptions"
+    ],
+    "signature": "nvim_replace_termcodes({str}, {from_part}, {do_lt}, {special})",
+    "c_decl": "String nvim_replace_termcodes(String  str, Boolean from_part, Boolean do_lt, Boolean special);"
+  },
+  "nvim_select_popupmenu_item": {
+    "doc": [
+      "Selects an item in the completion popupmenu.",
+      "If |ins-completion| is not active this API call is silently\nignored. Useful for an external UI using |ui-popupmenu| to\ncontrol the popupmenu with the mouse. Can also be used in a\nmapping; use \u003ccmd\u003e |:map-cmd| to ensure the mapping doesn't\nend completion mode."
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "item"
+      ],
+      [
+        "Boolean",
+        "insert"
+      ],
+      [
+        "Boolean",
+        "finish"
+      ],
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "finish": "Finish the completion and dismiss the popupmenu.\n              Implies `insert` .",
+      "insert": "Whether the selection should be inserted in the\n              buffer.",
+      "item": "Index (zero-based) of the item to select. Value\n              of -1 selects nothing and restores the original\n              text.",
+      "opts": "Optional parameters. Reserved for future use."
+    },
+    "signature": "nvim_select_popupmenu_item({item}, {insert}, {finish}, {opts}, {err})",
+    "c_decl": "void nvim_select_popupmenu_item(Integer    item, Boolean    insert, Boolean    finish, Dictionary opts, Error *    err);"
+  },
+  "nvim_set_client_info": {
+    "doc": [
+      "Self-identifies the client.",
+      "The client/plugin/application should call this after\nconnecting, to provide hints about its identity and purpose,\nfor debugging and orchestration.",
+      "Can be called more than once; the caller should merge old info\nif appropriate. Example: library first identifies the channel,\nthen a plugin using that library later identifies itself.",
+      "Note:\n    \"Something is better than nothing\". You don't need to\n    include all the fields.\n"
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Dictionary",
+        "version"
+      ],
+      [
+        "String",
+        "type"
+      ],
+      [
+        "Dictionary",
+        "methods"
+      ],
+      [
+        "Dictionary",
+        "attributes"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "attributes": "Arbitrary string:string map of informal\n                  client properties. Suggested keys:\n                  • \"website\": Client homepage URL (e.g.\n                    GitHub repository)                  • \n                  • \"license\": License description (\"Apache\n                    2\", \"GPLv3\", \"MIT\", …)                  • \n                  • \"logo\": URI or path to image, preferably\n                    small logo or icon. .png or .svg format is\n                    preferred.                  •",
+      "methods": "Builtin methods in the client. For a host,\n                  this does not include plugin methods which\n                  will be discovered later. The key should be\n                  the method name, the values are dicts with\n                  these (optional) keys (more keys may be\n                  added in future versions of Nvim, thus\n                  unknown keys are ignored. Clients must only\n                  use keys defined in this or later versions\n                  of Nvim):\n                  • \"async\" if true, send as a notification.\n                    If false or unspecified, use a blocking\n                    request                  • \n                  • \"nargs\" Number of arguments. Could be a\n                    single integer or an array of two\n                    integers, minimum and maximum inclusive.                  •",
+      "name": "Short name for the connected client",
+      "type": "Must be one of the following values. Client\n                  libraries should default to \"remote\" unless\n                  overridden by the user.\n                  • \"remote\" remote client connected to Nvim.                  • \n                  • \"ui\" gui frontend                  • \n                  • \"embedder\" application using Nvim as a\n                    component (for example, IDE/editor\n                    implementing a vim mode).                  • \n                  • \"host\" plugin host, typically started by\n                    nvim                  • \n                  • \"plugin\" single plugin, started by nvim                  •",
+      "version": "Dictionary describing the version, with\n                  these (optional) keys:\n                  • \"major\" major version (defaults to 0 if\n                    not set, for no release yet)                  • \n                  • \"minor\" minor version                  • \n                  • \"patch\" patch number                  • \n                  • \"prerelease\" string describing a\n                    prerelease, like \"dev\" or \"beta1\"                  • \n                  • \"commit\" hash or similar identifier of\n                    commit                  •"
+    },
+    "signature": "nvim_set_client_info({name}, {version}, {type}, {methods}, {attributes}, {err})",
+    "c_decl": "void nvim_set_client_info(String     name, Dictionary version, String     type, Dictionary methods, Dictionary attributes, Error *    err);"
+  },
+  "nvim_set_current_buf": {
+    "doc": [
+      "Sets the current buffer."
+    ],
+    "parameters": [
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle"
+    },
+    "signature": "nvim_set_current_buf({buffer}, {err})",
+    "c_decl": "void nvim_set_current_buf(Buffer  buffer, Error * err);"
+  },
+  "nvim_set_current_dir": {
+    "doc": [
+      "Changes the global working directory."
+    ],
+    "parameters": [
+      [
+        "String",
+        "dir"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "dir": "Directory path"
+    },
+    "signature": "nvim_set_current_dir({dir}, {err})",
+    "c_decl": "void nvim_set_current_dir(String  dir, Error * err);"
+  },
+  "nvim_set_current_line": {
+    "doc": [
+      "Sets the current line."
+    ],
+    "parameters": [
+      [
+        "String",
+        "line"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "line": "Line contents"
+    },
+    "signature": "nvim_set_current_line({line}, {err})",
+    "c_decl": "void nvim_set_current_line(String  line, Error * err);"
+  },
+  "nvim_set_current_tabpage": {
+    "doc": [
+      "Sets the current tabpage."
+    ],
+    "parameters": [
+      [
+        "Tabpage",
+        "tabpage"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "tabpage": "Tabpage handle"
+    },
+    "signature": "nvim_set_current_tabpage({tabpage}, {err})",
+    "c_decl": "void nvim_set_current_tabpage(Tabpage tabpage, Error * err);"
+  },
+  "nvim_set_current_win": {
+    "doc": [
+      "Sets the current window."
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle"
+    },
+    "signature": "nvim_set_current_win({window}, {err})",
+    "c_decl": "void nvim_set_current_win(Window  window, Error * err);"
+  },
+  "nvim_set_keymap": {
+    "doc": [
+      "Sets a global |mapping| for the given mode.",
+      "To set a buffer-local mapping, use |nvim_buf_set_keymap()|.",
+      "Unlike |:map|, leading/trailing whitespace is accepted as part\nof the {lhs} or {rhs}. Empty {rhs} is |\u003cNop\u003e|. |keycodes| are\nreplaced as usual.",
+      "Example: \u003e\n    call nvim_set_keymap('n', ' \u003cNL\u003e', '', {'nowait': v:true})\n\n\u003c",
+      "is equivalent to: \u003e\n    nmap \u003cnowait\u003e \u003cSpace\u003e\u003cNL\u003e \u003cNop\u003e\n\n\u003c"
+    ],
+    "parameters": [
+      [
+        "String",
+        "mode"
+      ],
+      [
+        "String",
+        "lhs"
+      ],
+      [
+        "String",
+        "rhs"
+      ],
+      [
+        "Dictionary",
+        "opts"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "lhs": "Left-hand-side |{lhs}| of the mapping.",
+      "mode": "Mode short-name (map command prefix: \"n\", \"i\",\n            \"v\", \"x\", …) or \"!\" for |:map!|, or empty string\n            for |:map|.",
+      "opts": "Optional parameters map. Accepts all\n            |:map-arguments| as keys excluding |\u003cbuffer\u003e| but\n            including |noremap|. Values are Booleans. Unknown\n            key is an error.",
+      "rhs": "Right-hand-side |{rhs}| of the mapping."
+    },
+    "signature": "nvim_set_keymap({mode}, {lhs}, {rhs}, {opts}, {err})",
+    "c_decl": "void nvim_set_keymap(String     mode, String     lhs, String     rhs, Dictionary opts, Error *    err);"
+  },
+  "nvim_set_option": {
+    "doc": [
+      "Sets an option value."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Option name",
+      "value": "New option value"
+    },
+    "signature": "nvim_set_option({name}, {value}, {err})",
+    "c_decl": "void nvim_set_option(String  name, Object  value, Error * err);"
+  },
+  "nvim_set_var": {
+    "doc": [
+      "Sets a global (g:) variable."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name",
+      "value": "Variable value"
+    },
+    "signature": "nvim_set_var({name}, {value}, {err})",
+    "c_decl": "void nvim_set_var(String  name, Object  value, Error * err);"
+  },
+  "nvim_set_vvar": {
+    "doc": [
+      "Sets a v: variable, if it is not readonly."
+    ],
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name",
+      "value": "Variable value"
+    },
+    "signature": "nvim_set_vvar({name}, {value}, {err})",
+    "c_decl": "void nvim_set_vvar(String  name, Object  value, Error * err);"
+  },
+  "nvim_strwidth": {
+    "doc": [
+      "Calculates the number of display cells occupied by `text` .\n\u003cTab\u003e counts as one cell."
+    ],
+    "parameters": [
+      [
+        "String",
+        "text"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "text": "Some text"
+    },
+    "return": [
+      "Number of cells"
+    ],
+    "signature": "nvim_strwidth({text}, {err})",
+    "c_decl": "Integer nvim_strwidth(String  text, Error * err);"
+  },
+  "nvim_subscribe": {
+    "doc": [
+      "Subscribes to event broadcasts."
+    ],
+    "parameters": [
+      [
+        "String",
+        "event"
+      ]
+    ],
+    "parameters_doc": {
+      "event": "Event type string"
+    },
+    "signature": "nvim_subscribe({event})",
+    "c_decl": "void nvim_subscribe(String event);"
+  },
+  "nvim_tabpage_del_var": {
+    "doc": [
+      "Removes a tab-scoped (t:) variable"
+    ],
+    "parameters": [
+      [
+        "Tabpage",
+        "tabpage"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name",
+      "tabpage": "Tabpage handle, or 0 for current tabpage"
+    },
+    "signature": "nvim_tabpage_del_var({tabpage}, {name}, {err})",
+    "c_decl": "void nvim_tabpage_del_var(Tabpage tabpage, String  name, Error * err);"
+  },
+  "nvim_tabpage_get_number": {
+    "doc": [
+      "Gets the tabpage number"
+    ],
+    "parameters": [
+      [
+        "Tabpage",
+        "tabpage"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "tabpage": "Tabpage handle, or 0 for current tabpage"
+    },
+    "return": [
+      "Tabpage number"
+    ],
+    "signature": "nvim_tabpage_get_number({tabpage}, {err})",
+    "c_decl": "Integer nvim_tabpage_get_number(Tabpage tabpage, Error * err);"
+  },
+  "nvim_tabpage_get_var": {
+    "doc": [
+      "Gets a tab-scoped (t:) variable"
+    ],
+    "parameters": [
+      [
+        "Tabpage",
+        "tabpage"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name",
+      "tabpage": "Tabpage handle, or 0 for current tabpage"
+    },
+    "return": [
+      "Variable value"
+    ],
+    "signature": "nvim_tabpage_get_var({tabpage}, {name}, {err})",
+    "c_decl": "Object nvim_tabpage_get_var(Tabpage tabpage, String  name, Error * err);"
+  },
+  "nvim_tabpage_get_win": {
+    "doc": [
+      "Gets the current window in a tabpage"
+    ],
+    "parameters": [
+      [
+        "Tabpage",
+        "tabpage"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "tabpage": "Tabpage handle, or 0 for current tabpage"
+    },
+    "return": [
+      "Window handle"
+    ],
+    "signature": "nvim_tabpage_get_win({tabpage}, {err})",
+    "c_decl": "Window nvim_tabpage_get_win(Tabpage tabpage, Error * err);"
+  },
+  "nvim_tabpage_is_valid": {
+    "doc": [
+      "Checks if a tabpage is valid"
+    ],
+    "parameters": [
+      [
+        "Tabpage",
+        "tabpage"
+      ]
+    ],
+    "parameters_doc": {
+      "tabpage": "Tabpage handle, or 0 for current tabpage"
+    },
+    "return": [
+      "true if the tabpage is valid, false otherwise"
+    ],
+    "signature": "nvim_tabpage_is_valid({tabpage})",
+    "c_decl": "Boolean nvim_tabpage_is_valid(Tabpage tabpage);"
+  },
+  "nvim_tabpage_list_wins": {
+    "doc": [
+      "Gets the windows in a tabpage"
+    ],
+    "parameters": [
+      [
+        "Tabpage",
+        "tabpage"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "tabpage": "Tabpage handle, or 0 for current tabpage"
+    },
+    "return": [
+      "List of windows in `tabpage`"
+    ],
+    "signature": "nvim_tabpage_list_wins({tabpage}, {err})",
+    "c_decl": "ArrayOf(Window) nvim_tabpage_list_wins(Tabpage tabpage, Error * err);"
+  },
+  "nvim_tabpage_set_var": {
+    "doc": [
+      "Sets a tab-scoped (t:) variable"
+    ],
+    "parameters": [
+      [
+        "Tabpage",
+        "tabpage"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name",
+      "tabpage": "Tabpage handle, or 0 for current tabpage",
+      "value": "Variable value"
+    },
+    "signature": "nvim_tabpage_set_var({tabpage}, {name}, {value}, {err})",
+    "c_decl": "void nvim_tabpage_set_var(Tabpage tabpage, String  name, Object  value, Error * err);"
+  },
+  "nvim_ui_attach": {
+    "doc": [
+      "Activates UI events on the channel.",
+      "Entry point of all UI clients. Allows |--embed| to continue\nstartup. Implies that the client is ready to show the UI. Adds\nthe client to the list of UIs. |nvim_list_uis()|",
+      "Note:\n    If multiple UI clients are attached, the global screen\n    dimensions degrade to the smallest client. E.g. if client\n    A requests 80x40 but client B requests 200x100, the global\n    screen has size 80x40.\n"
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "width"
+      ],
+      [
+        "Integer",
+        "height"
+      ],
+      [
+        "Dictionary",
+        "options"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "height": "Requested screen rows",
+      "options": "|ui-option| map",
+      "width": "Requested screen columns"
+    },
+    "signature": "nvim_ui_attach({width}, {height}, {options}, {err})",
+    "c_decl": "void nvim_ui_attach(Integer    width, Integer    height, Dictionary options, Error *    err);"
+  },
+  "nvim_ui_detach": {
+    "doc": [
+      "Deactivates UI events on the channel.",
+      "Removes the client from the list of UIs. |nvim_list_uis()|"
+    ],
+    "parameters": [
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim_ui_detach({err})",
+    "c_decl": "void nvim_ui_detach(Error * err);"
+  },
+  "nvim_ui_pum_set_height": {
+    "doc": [
+      "Tells Nvim the number of elements displaying in the popumenu,\nto decide \u003cPageUp\u003e and \u003cPageDown\u003e movement."
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "height"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "height": "Popupmenu height, must be greater than zero."
+    },
+    "signature": "nvim_ui_pum_set_height({height}, {err})",
+    "c_decl": "void nvim_ui_pum_set_height(Integer height, Error * err);"
+  },
+  "nvim_ui_set_option": {
+    "parameters": [
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "error"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim_ui_set_option({name}, {value}, {error})",
+    "c_decl": "void nvim_ui_set_option(String  name, Object  value, Error * error);"
+  },
+  "nvim_ui_try_resize": {
+    "parameters": [
+      [
+        "Integer",
+        "width"
+      ],
+      [
+        "Integer",
+        "height"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {},
+    "signature": "nvim_ui_try_resize({width}, {height}, {err})",
+    "c_decl": "void nvim_ui_try_resize(Integer width, Integer height, Error * err);"
+  },
+  "nvim_ui_try_resize_grid": {
+    "doc": [
+      "Tell Nvim to resize a grid. Triggers a grid_resize event with\nthe requested grid size or the maximum size if it exceeds size\nlimits.",
+      "On invalid grid handle, fails with error."
+    ],
+    "parameters": [
+      [
+        "Integer",
+        "grid"
+      ],
+      [
+        "Integer",
+        "width"
+      ],
+      [
+        "Integer",
+        "height"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "grid": "The handle of the grid to be changed.",
+      "height": "The new requested height.",
+      "width": "The new requested width."
+    },
+    "signature": "nvim_ui_try_resize_grid({grid}, {width}, {height}, {err})",
+    "c_decl": "void nvim_ui_try_resize_grid(Integer grid, Integer width, Integer height, Error * err);"
+  },
+  "nvim_unsubscribe": {
+    "doc": [
+      "Unsubscribes to event broadcasts."
+    ],
+    "parameters": [
+      [
+        "String",
+        "event"
+      ]
+    ],
+    "parameters_doc": {
+      "event": "Event type string"
+    },
+    "signature": "nvim_unsubscribe({event})",
+    "c_decl": "void nvim_unsubscribe(String event);"
+  },
+  "nvim_win_close": {
+    "doc": [
+      "Closes the window (like |:close| with a |window-ID|)."
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Boolean",
+        "force"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "force": "Behave like `:close!` The last window of a\n              buffer with unwritten changes can be closed. The\n              buffer will become hidden, even if 'hidden' is\n              not set.",
+      "window": "Window handle, or 0 for current window"
+    },
+    "signature": "nvim_win_close({window}, {force}, {err})",
+    "c_decl": "void nvim_win_close(Window  window, Boolean force, Error * err);"
+  },
+  "nvim_win_del_var": {
+    "doc": [
+      "Removes a window-scoped (w:) variable"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name",
+      "window": "Window handle, or 0 for current window"
+    },
+    "signature": "nvim_win_del_var({window}, {name}, {err})",
+    "c_decl": "void nvim_win_del_var(Window  window, String  name, Error * err);"
+  },
+  "nvim_win_get_buf": {
+    "doc": [
+      "Gets the current buffer in a window"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "Buffer handle"
+    ],
+    "signature": "nvim_win_get_buf({window}, {err})",
+    "c_decl": "Buffer nvim_win_get_buf(Window  window, Error * err);"
+  },
+  "nvim_win_get_config": {
+    "doc": [
+      "Gets window configuration.",
+      "The returned value may be given to |nvim_open_win()|.",
+      "`relative` is empty for normal windows."
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "Map defining the window configuration, see\n    |nvim_open_win()|"
+    ],
+    "signature": "nvim_win_get_config({window}, {err})",
+    "c_decl": "Dictionary nvim_win_get_config(Window  window, Error * err);"
+  },
+  "nvim_win_get_cursor": {
+    "doc": [
+      "Gets the (1,0)-indexed cursor position in the window.\n|api-indexing|"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "(row, col) tuple"
+    ],
+    "signature": "nvim_win_get_cursor({window}, {err})",
+    "c_decl": "ArrayOf(Integer, 2) nvim_win_get_cursor(Window  window, Error * err);"
+  },
+  "nvim_win_get_height": {
+    "doc": [
+      "Gets the window height"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "Height as a count of rows"
+    ],
+    "signature": "nvim_win_get_height({window}, {err})",
+    "c_decl": "Integer nvim_win_get_height(Window  window, Error * err);"
+  },
+  "nvim_win_get_number": {
+    "doc": [
+      "Gets the window number"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "Window number"
+    ],
+    "signature": "nvim_win_get_number({window}, {err})",
+    "c_decl": "Integer nvim_win_get_number(Window  window, Error * err);"
+  },
+  "nvim_win_get_option": {
+    "doc": [
+      "Gets a window option value"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Option name",
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "Option value"
+    ],
+    "signature": "nvim_win_get_option({window}, {name}, {err})",
+    "c_decl": "Object nvim_win_get_option(Window  window, String  name, Error * err);"
+  },
+  "nvim_win_get_position": {
+    "doc": [
+      "Gets the window position in display cells. First position is\nzero."
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "(row, col) tuple with the window position"
+    ],
+    "signature": "nvim_win_get_position({window}, {err})",
+    "c_decl": "ArrayOf(Integer, 2) nvim_win_get_position(Window  window, Error * err);"
+  },
+  "nvim_win_get_tabpage": {
+    "doc": [
+      "Gets the window tabpage"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "Tabpage that contains the window"
+    ],
+    "signature": "nvim_win_get_tabpage({window}, {err})",
+    "c_decl": "Tabpage nvim_win_get_tabpage(Window  window, Error * err);"
+  },
+  "nvim_win_get_var": {
+    "doc": [
+      "Gets a window-scoped (w:) variable"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name",
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "Variable value"
+    ],
+    "signature": "nvim_win_get_var({window}, {name}, {err})",
+    "c_decl": "Object nvim_win_get_var(Window  window, String  name, Error * err);"
+  },
+  "nvim_win_get_width": {
+    "doc": [
+      "Gets the window width"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "Width as a count of columns"
+    ],
+    "signature": "nvim_win_get_width({window}, {err})",
+    "c_decl": "Integer nvim_win_get_width(Window  window, Error * err);"
+  },
+  "nvim_win_is_valid": {
+    "doc": [
+      "Checks if a window is valid"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ]
+    ],
+    "parameters_doc": {
+      "window": "Window handle, or 0 for current window"
+    },
+    "return": [
+      "true if the window is valid, false otherwise"
+    ],
+    "signature": "nvim_win_is_valid({window})",
+    "c_decl": "Boolean nvim_win_is_valid(Window window);"
+  },
+  "nvim_win_set_buf": {
+    "doc": [
+      "Sets the current buffer in a window, without side-effects"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Buffer",
+        "buffer"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "buffer": "Buffer handle",
+      "window": "Window handle, or 0 for current window"
+    },
+    "signature": "nvim_win_set_buf({window}, {buffer}, {err})",
+    "c_decl": "void nvim_win_set_buf(Window  window, Buffer  buffer, Error * err);"
+  },
+  "nvim_win_set_config": {
+    "doc": [
+      "Configures window layout. Currently only for floating and\nexternal windows (including changing a split window to those\nlayouts).",
+      "When reconfiguring a floating window, absent option keys will\nnot be changed. `row` / `col` and `relative` must be\nreconfigured together."
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Dictionary",
+        "config"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "config": "Map defining the window configuration, see\n              |nvim_open_win()|",
+      "window": "Window handle, or 0 for current window"
+    },
+    "seealso": [
+      "|nvim_open_win()|"
+    ],
+    "signature": "nvim_win_set_config({window}, {config}, {err})",
+    "c_decl": "void nvim_win_set_config(Window     window, Dictionary config, Error *    err);"
+  },
+  "nvim_win_set_cursor": {
+    "doc": [
+      "Sets the (1,0)-indexed cursor position in the window.\n|api-indexing|"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "ArrayOf(Integer, 2)",
+        "pos"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "pos": "(row, col) tuple representing the new position",
+      "window": "Window handle, or 0 for current window"
+    },
+    "signature": "nvim_win_set_cursor({window}, {pos}, {err})",
+    "c_decl": "void nvim_win_set_cursor(Window              window, ArrayOf(Integer, 2) pos, Error *             err);"
+  },
+  "nvim_win_set_height": {
+    "doc": [
+      "Sets the window height. This will only succeed if the screen\nis split horizontally."
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Integer",
+        "height"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "height": "Height as a count of rows",
+      "window": "Window handle, or 0 for current window"
+    },
+    "signature": "nvim_win_set_height({window}, {height}, {err})",
+    "c_decl": "void nvim_win_set_height(Window  window, Integer height, Error * err);"
+  },
+  "nvim_win_set_option": {
+    "doc": [
+      "Sets a window option value. Passing 'nil' as value deletes the\noption(only works if there's a global fallback)"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Option name",
+      "value": "Option value",
+      "window": "Window handle, or 0 for current window"
+    },
+    "signature": "nvim_win_set_option({window}, {name}, {value}, {err})",
+    "c_decl": "void nvim_win_set_option(Window  window, String  name, Object  value, Error * err);"
+  },
+  "nvim_win_set_var": {
+    "doc": [
+      "Sets a window-scoped (w:) variable"
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "String",
+        "name"
+      ],
+      [
+        "Object",
+        "value"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "name": "Variable name",
+      "value": "Variable value",
+      "window": "Window handle, or 0 for current window"
+    },
+    "signature": "nvim_win_set_var({window}, {name}, {value}, {err})",
+    "c_decl": "void nvim_win_set_var(Window  window, String  name, Object  value, Error * err);"
+  },
+  "nvim_win_set_width": {
+    "doc": [
+      "Sets the window width. This will only succeed if the screen is\nsplit vertically."
+    ],
+    "parameters": [
+      [
+        "Window",
+        "window"
+      ],
+      [
+        "Integer",
+        "width"
+      ],
+      [
+        "Error *",
+        "err"
+      ]
+    ],
+    "parameters_doc": {
+      "width": "Width as a count of columns",
+      "window": "Window handle, or 0 for current window"
+    },
+    "signature": "nvim_win_set_width({window}, {width}, {err})",
+    "c_decl": "void nvim_win_set_width(Window  window, Integer width, Error * err);"
+  }
+}
