@@ -1077,6 +1077,34 @@ func (b *Batch) RuntimePaths(result *[]string) {
 	b.call("nvim_list_runtime_paths", result)
 }
 
+// RuntimeFiles finds files in runtime directories and returns list of absolute paths to the found files.
+//
+//  name
+// can contain wildcards. For example
+//  nvim_get_runtime_file("colors/*.vim", true)
+// will return all color scheme files.
+//
+//  all
+// whether to return all matches or only the first.
+func (v *Nvim) RuntimeFiles(name string, all bool) ([]string, error) {
+	var result []string
+	err := v.call("nvim_get_runtime_file", &result, name, all)
+	return result, err
+}
+
+// RuntimeFiles finds files in runtime directories and returns list of absolute paths to the found files.
+//
+//  name
+// can contain wildcards. For example
+//  nvim_get_runtime_file("colors/*.vim", true)
+// will return all color scheme files.
+//
+//  all
+// whether to return all matches or only the first.
+func (b *Batch) RuntimeFiles(name string, all bool, result *[]string) {
+	b.call("nvim_get_runtime_file", result, name, all)
+}
+
 // SetCurrentDirectory changes the Vim working directory.
 func (v *Nvim) SetCurrentDirectory(dir string) error {
 	return v.call("nvim_set_current_dir", nil, dir)
