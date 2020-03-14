@@ -476,6 +476,19 @@ func RuntimePaths() []string {
 	name(nvim_list_runtime_paths)
 }
 
+// RuntimeFiles finds files in runtime directories and returns list of absolute paths to the found files.
+//
+//  name
+// can contain wildcards. For example
+//  nvim_get_runtime_file("colors/*.vim", true)
+// will return all color scheme files.
+//
+//  all
+// whether to return all matches or only the first.
+func RuntimeFiles(name string, all bool) []string {
+	name(nvim_get_runtime_file)
+}
+
 // SetCurrentDirectory changes the Vim working directory.
 func SetCurrentDirectory(dir string) {
 	name(nvim_set_current_dir)
