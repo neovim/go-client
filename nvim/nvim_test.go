@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -665,6 +667,27 @@ func TestAPI(t *testing.T) {
 
 		if err := v.ClearBufferNamespace(Buffer(0), nsID, 0, -1); err != nil {
 			t.Fatal(err)
+		}
+	})
+
+	t.Run("runtime_file", func(t *testing.T) {
+		files, err := v.RuntimeFiles("doc/*_diff.txt", true)
+		if err != nil {
+			t.Fatal(err)
+		}
+		sort.Strings(files)
+		if len(files) != 2 {
+			t.Fatalf("expected 2 length but got %d", len(files))
+		}
+
+		var runtimePath string
+		if err := v.Eval("$VIMRUNTIME", &runtimePath); err != nil {
+			t.Fatal(err)
+		}
+
+		want := fmt.Sprintf("%s,%s", filepath.Join(runtimePath, "doc", "vi_diff.txt"), filepath.Join(runtimePath, "doc", "vim_diff.txt"))
+		if got := strings.Join(files, ","); !strings.EqualFold(got, want) {
+			t.Fatalf("got %s but want %s", got, want)
 		}
 	})
 }
