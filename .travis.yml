@@ -1,19 +1,32 @@
 language: go
-sudo: false
+os: linux
+dist: xenial
+
+git:
+  depth: 2
+  submodules: false
+
+go:
+  - 1.12.x
+  - 1.13.x
+  - 1.14.x
+  - tip
+
+env:
+  global:
+    - CC=clang
+    - CXX=clang++
+    - GO111MODULE=on
+
+before_cache:
+  - go mod download
+
+cache:
+  directories:
+    - $GOPATH/pkg/mod
 
 before_install:
   - eval "$(curl -Ss https://raw.githubusercontent.com/neovim/bot-ci/master/scripts/travis-setup.sh) nightly-x64"
-
-matrix:
-  include:
-  - go: 1.11.x
-    env: GO111MODULE=on
-  - go: 1.12.x
-    env: GO111MODULE=on
-  - go: 1.13.x
-    env: GO111MODULE=on
-  - go: tip
-    env: GO111MODULE=on
 
 script:
   - go get -t -v ./...
