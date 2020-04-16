@@ -14,13 +14,15 @@ import (
 	"time"
 )
 
-func newChildProcess(t *testing.T) (*Nvim, func()) {
+func newChildProcess(tb testing.TB) (*Nvim, func()) {
+	tb.Helper()
+
 	v, err := NewChildProcess(
 		ChildProcessArgs("-u", "NONE", "-n", "--embed", "--headless"),
 		ChildProcessEnv([]string{}),
-		ChildProcessLogf(t.Logf))
+		ChildProcessLogf(tb.Logf))
 	if err != nil {
-		t.Fatal(err)
+		tb.Fatal(err)
 	}
 
 	done := make(chan error, 1)
@@ -30,7 +32,7 @@ func newChildProcess(t *testing.T) (*Nvim, func()) {
 
 	return v, func() {
 		if err := v.Close(); err != nil {
-			t.Fatal(err)
+			tb.Fatal(err)
 		}
 	}
 }
@@ -754,9 +756,11 @@ func testRuntimeFiles(t *testing.T, v *Nvim) func(*testing.T) {
 }
 
 // clearBuffer clears the buffer text.
-func clearBuffer(t *testing.T, v *Nvim, buffer Buffer) {
+func clearBuffer(tb testing.TB, v *Nvim, buffer Buffer) {
+	tb.Helper()
+
 	if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
-		t.Fatal(err)
+		tb.Fatal(err)
 	}
 }
 
