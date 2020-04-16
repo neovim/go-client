@@ -35,24 +35,47 @@ func newChildProcess(t *testing.T) (*Nvim, func()) {
 	}
 }
 
-func helloHandler(s string) (string, error) {
-	return "Hello, " + s, nil
-}
-
-func errorHandler() error {
-	return errors.New("ouch")
-}
-
 func TestAPI(t *testing.T) {
+	t.Parallel()
 
 	v, cleanup := newChildProcess(t)
 	defer cleanup()
-	cid := v.ChannelID()
-	if cid <= 0 {
-		t.Fatal("could not get channel id")
-	}
 
-	t.Run("simpleHandler", func(t *testing.T) {
+	t.Run("SimpleHandler", testSimpleHandler(t, v))
+	t.Run("Buffer", testBuffer(t, v))
+	t.Run("Window", testWindow(t, v))
+	t.Run("Tabpage", testTabpage(t, v))
+	t.Run("Lines", testLines(t, v))
+	t.Run("Var", testVar(t, v))
+	t.Run("StructValue", testStructValue(t, v))
+	t.Run("Eval", testEval(t, v))
+	t.Run("Batch", testBatch(t, v))
+	t.Run("CallWithNoArgs", testCallWithNoArgs(t, v))
+	t.Run("Mode", testMode(t, v))
+	t.Run("ExecLua", testExecLua(t, v))
+	t.Run("Highlight", testHighlight(t, v))
+	t.Run("BufAttach", testBufAttach(t, v))
+	t.Run("VirtualText", testVirtualText(t, v))
+	t.Run("FloatingWindow", testFloatingWindow(t, v))
+	t.Run("Context", testContext(t, v))
+	t.Run("Extmarks", testExtmarks(t, v))
+	t.Run("RuntimeFiles", testRuntimeFiles(t, v))
+}
+
+func testSimpleHandler(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		cid := v.ChannelID()
+		if cid <= 0 {
+			t.Fatal("could not get channel id")
+		}
+
+		helloHandler := func(s string) (string, error) {
+			return "Hello, " + s, nil
+		}
+		errorHandler := func() error {
+			return errors.New("ouch")
+		}
+
 		if err := v.RegisterHandler("hello", helloHandler); err != nil {
 			t.Fatal(err)
 		}
@@ -74,9 +97,11 @@ func TestAPI(t *testing.T) {
 		if expected := "\nError invoking 'error' on channel 1:\nouch"; result != expected {
 			t.Errorf("got error %q, want %q", result, expected)
 		}
-	})
+	}
+}
 
-	t.Run("buffer", func(t *testing.T) {
+func testBuffer(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		bufs, err := v.Buffers()
 		if err != nil {
 			t.Fatal(err)
@@ -123,9 +148,11 @@ func TestAPI(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected key not found error")
 		}
-	})
+	}
+}
 
-	t.Run("window", func(t *testing.T) {
+func testWindow(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		wins, err := v.Windows()
 		if err != nil {
 			t.Fatal(err)
@@ -147,9 +174,11 @@ func TestAPI(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-	})
+	}
+}
 
-	t.Run("tabpage", func(t *testing.T) {
+func testTabpage(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		pages, err := v.Tabpages()
 		if err != nil {
 			t.Fatal(err)
@@ -171,9 +200,11 @@ func TestAPI(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-	})
+	}
+}
 
-	t.Run("lines", func(t *testing.T) {
+func testLines(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		buf, err := v.CurrentBuffer()
 		if err != nil {
 			t.Fatal(err)
@@ -189,9 +220,11 @@ func TestAPI(t *testing.T) {
 		if !reflect.DeepEqual(lines2, lines) {
 			t.Fatalf("lines = %+v, want %+v", lines2, lines)
 		}
-	})
+	}
+}
 
-	t.Run("var", func(t *testing.T) {
+func testVar(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		if err := v.SetVar("gvar", "gval"); err != nil {
 			t.Fatal(err)
 		}
@@ -212,9 +245,11 @@ func TestAPI(t *testing.T) {
 		if value != "" {
 			t.Errorf("got %v, want %q", value, "")
 		}
-	})
+	}
+}
 
-	t.Run("structValue", func(t *testing.T) {
+func testStructValue(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		var expected, actual struct {
 			Str string
 			Num int
@@ -230,9 +265,11 @@ func TestAPI(t *testing.T) {
 		if !reflect.DeepEqual(&actual, &expected) {
 			t.Errorf("got %+v, want %+v", &actual, &expected)
 		}
-	})
+	}
+}
 
-	t.Run("eval", func(t *testing.T) {
+func testEval(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		var a, b string
 		if err := v.Eval(`["hello", "world"]`, []*string{&a, &b}); err != nil {
 			t.Error(err)
@@ -240,9 +277,11 @@ func TestAPI(t *testing.T) {
 		if a != "hello" || b != "world" {
 			t.Errorf("a=%q b=%q, want a=hello b=world", a, b)
 		}
-	})
+	}
+}
 
-	t.Run("batch", func(t *testing.T) {
+func testBatch(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		b := v.NewBatch()
 		results := make([]int, 128)
 
@@ -323,17 +362,21 @@ func TestAPI(t *testing.T) {
 		if err != nil {
 			t.Errorf("GetCurrentBuffer returns err %s: %#v", err, err)
 		}
-	})
+	}
+}
 
-	t.Run("callWithNoArgs", func(t *testing.T) {
+func testCallWithNoArgs(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		var wd string
 		err := v.Call("getcwd", &wd)
 		if err != nil {
 			t.Fatal(err)
 		}
-	})
+	}
+}
 
-	t.Run("mode", func(t *testing.T) {
+func testMode(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		m, err := v.Mode()
 		if err != nil {
 			t.Fatal(err)
@@ -341,9 +384,11 @@ func TestAPI(t *testing.T) {
 		if m.Mode != "n" {
 			t.Errorf("Mode() returned %s, want n", m.Mode)
 		}
-	})
+	}
+}
 
-	t.Run("execLua", func(t *testing.T) {
+func testExecLua(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		var n int
 		err := v.ExecLua("local a, b = ... return a + b", &n, 1, 2)
 		if err != nil {
@@ -352,9 +397,11 @@ func TestAPI(t *testing.T) {
 		if n != 3 {
 			t.Errorf("Mode() returned %v, want 3", n)
 		}
-	})
+	}
+}
 
-	t.Run("hl", func(t *testing.T) {
+func testHighlight(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		cm, err := v.ColorMap()
 		if err != nil {
 			t.Fatal(err)
@@ -382,9 +429,11 @@ func TestAPI(t *testing.T) {
 		if !reflect.DeepEqual(hl, gui) {
 			t.Errorf("HLByID(id, true)\n got %+v,\nwant %+v", hl, gui)
 		}
-	})
+	}
+}
 
-	t.Run("buf_attach", func(t *testing.T) {
+func testBufAttach(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		clearBuffer(t, v, 0) // clear curret buffer text
 
 		type ChangedtickEvent struct {
@@ -483,9 +532,11 @@ func TestAPI(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-	})
+	}
+}
 
-	t.Run("virtual_text", func(t *testing.T) {
+func testVirtualText(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		clearBuffer(t, v, Buffer(0)) // clear curret buffer text
 
 		nsID, err := v.CreateNamespace("test_virtual_text")
@@ -524,9 +575,11 @@ func TestAPI(t *testing.T) {
 		if err := v.ClearBufferNamespace(Buffer(0), nsID, 0, -1); err != nil {
 			t.Fatal(err)
 		}
-	})
+	}
+}
 
-	t.Run("floating_window", func(t *testing.T) {
+func testFloatingWindow(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		clearBuffer(t, v, 0) // clear curret buffer text
 		curwin, err := v.CurrentWindow()
 		if err != nil {
@@ -595,9 +648,11 @@ func TestAPI(t *testing.T) {
 		if numberOpt || relativenumberOpt || cursorlineOpt || cursorcolumnOpt || spellOpt || listOpt || signcolumnOpt != "auto" || colorcolumnOpt != "" {
 			t.Fatal("expected minimal style")
 		}
-	})
+	}
+}
 
-	t.Run("context", func(t *testing.T) {
+func testContext(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		ctxt, err := v.Context(make(map[string][]string))
 		if err != nil {
 			t.Fatal(err)
@@ -610,9 +665,11 @@ func TestAPI(t *testing.T) {
 		if result != nil {
 			t.Fatal("expected result to nil")
 		}
-	})
+	}
+}
 
-	t.Run("extmarks", func(t *testing.T) {
+func testExtmarks(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		clearBuffer(t, v, 0) // clear curret buffer text
 
 		lines := [][]byte{[]byte("hello"), []byte("world")}
@@ -668,9 +725,11 @@ func TestAPI(t *testing.T) {
 		if err := v.ClearBufferNamespace(Buffer(0), nsID, 0, -1); err != nil {
 			t.Fatal(err)
 		}
-	})
+	}
+}
 
-	t.Run("runtime_file", func(t *testing.T) {
+func testRuntimeFiles(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		files, err := v.RuntimeFiles("doc/*_diff.txt", true)
 		if err != nil {
 			t.Fatal(err)
@@ -685,14 +744,25 @@ func TestAPI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		want := fmt.Sprintf("%s,%s", filepath.Join(runtimePath, "doc", "vi_diff.txt"), filepath.Join(runtimePath, "doc", "vim_diff.txt"))
+		viDiff := filepath.Join(runtimePath, "doc", "vi_diff.txt")
+		vimDiff := filepath.Join(runtimePath, "doc", "vim_diff.txt")
+		want := fmt.Sprintf("%s,%s", viDiff, vimDiff)
 		if got := strings.Join(files, ","); !strings.EqualFold(got, want) {
 			t.Fatalf("got %s but want %s", got, want)
 		}
-	})
+	}
+}
+
+// clearBuffer clears the buffer text.
+func clearBuffer(t *testing.T, v *Nvim, buffer Buffer) {
+	if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestDial(t *testing.T) {
+	t.Parallel()
+
 	v1, cleanup := newChildProcess(t)
 	defer cleanup()
 
@@ -726,6 +796,8 @@ func TestDial(t *testing.T) {
 }
 
 func TestEmbedded(t *testing.T) {
+	t.Parallel()
+
 	v, err := NewEmbedded(&EmbedOptions{
 		Args: []string{"-u", "NONE", "-n"},
 		Env:  []string{},
@@ -761,12 +833,5 @@ func TestEmbedded(t *testing.T) {
 		}
 	case <-time.After(10 * time.Second):
 		t.Fatal("timeout waiting for serve to exit")
-	}
-}
-
-// clearBuffer clear the buffer text.
-func clearBuffer(t *testing.T, v *Nvim, buffer Buffer) {
-	if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
-		t.Fatal(err)
 	}
 }
