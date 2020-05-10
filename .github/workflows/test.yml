@@ -1,0 +1,48 @@
+name: Test
+
+on:
+  push:
+    branches: "master"
+  pull_request:
+    branches: "*"
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go-version: [ 1.12.x, 1.13.x, 1.14.x ]
+        os: [ ubuntu-latest, macos-latest ]
+    env:
+      OS: ${{ matrix.os }}
+      GO_VERSION: ${{ matrix.go-version }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install nvim binary
+      run: |
+        case "$RUNNER_OS" in
+          Linux)
+            curl -sSL https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz | sudo tar xfz - --strip-components=1 -C '/usr/local'
+          ;;
+          macOS)
+            curl -sSL https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz | sudo tar xfz - --strip-components=1 -C '/usr/local'
+          ;;
+        esac
+        nvim --version
+
+    - name: Test
+      run: |
+        go test -v -race -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
+
+    - uses: codecov/codecov-action@v1.0.7
+      with:
+        file: ./coverage.out
+        env_vars: OS,GO_VERSION
+        fail_ci_if_error: true
