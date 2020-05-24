@@ -1,5 +1,5 @@
 [![GoDoc](https://godoc.org/github.com/neovim/go-client?status.svg)](https://godoc.org/github.com/neovim/go-client)
-[![Build Status](https://travis-ci.org/neovim/go-client.svg?branch=master)](https://travis-ci.org/neovim/go-client)
+[![Github Actions](https://github.com/neovim/go-client/workflows/Test/badge.svg?branch=master)](https://github.com/neovim/go-client/actions)
 
 Neovim/go-client is a [Neovim](https://neovim.io/) client and plugin host for [Go](https://golang.org/).
 
