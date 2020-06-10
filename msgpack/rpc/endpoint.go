@@ -24,8 +24,11 @@ const (
 )
 
 var (
-	errClosed   = errors.New("msgpack/rpc: session closed")
-	errInternal = errors.New("msgpack/rpc: internal error")
+	// ErrClosed session closed error.
+	ErrClosed = errors.New("msgpack/rpc: session closed")
+
+	// ErrInternal msgpack-rpc internal error.
+	ErrInternal = errors.New("msgpack/rpc: internal error")
 )
 
 type Error struct {
@@ -212,7 +215,7 @@ func (e *Endpoint) close(err error) error {
 	e.state = stateClosed
 	e.err = err
 	for _, call := range e.pending {
-		call.done(e, errClosed)
+		call.done(e, ErrClosed)
 	}
 	e.pending = nil
 	err = e.closer.Close()
@@ -252,7 +255,7 @@ func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ..
 
 	e.mu.Lock()
 	if e.state == stateClosed {
-		call.done(e, errClosed)
+		call.done(e, ErrClosed)
 		e.mu.Unlock()
 		return call
 	}
@@ -423,7 +426,7 @@ func (e *Endpoint) handleReply(messageLen int) error {
 
 	var errorValue interface{}
 	if err := e.dec.Decode(&errorValue); err != nil {
-		call.done(e, errInternal)
+		call.done(e, ErrInternal)
 		return fmt.Errorf("msgpack/rpc: error decoding error value: %v", err)
 	}
 
@@ -444,7 +447,7 @@ func (e *Endpoint) handleReply(messageLen int) error {
 	}
 
 	if err != nil {
-		call.done(e, errInternal)
+		call.done(e, ErrInternal)
 		return fmt.Errorf("msgpack/rpc: error decoding reply: %v", err)
 	}
 
