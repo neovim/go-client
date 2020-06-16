@@ -31,8 +31,10 @@ jobs:
         neovim: true
         version: nightly
 
-    - name: Test
+    - name: Test and vet
       run: |
+        diff -u <(echo -n) <(gofmt -s -d .)
+        go vet ./...
         go test -v -race -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
     - uses: codecov/codecov-action@v1.0.7
