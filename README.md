@@ -26,6 +26,13 @@ func main() {
 
 Build the program with the [go tool](https://golang.org/cmd/go/) to an
 executable named `hello`. Ensure that the executable is on your path.
+```go
+// Use the go build to generate an executable
+// Enusre this hello executable on your path
+// you can move hello to your $GOPATH/bin
+// or set the current dir into env variable `path`
+go build -o hello
+```
 
 Add the following plugin to Nvim:
 ```vim
