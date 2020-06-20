@@ -1,0 +1,44 @@
+name: Test
+
+on:
+  push:
+    branches: "master"
+  pull_request:
+    branches: "*"
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go-version: [ 1.12.x, 1.13.x, 1.14.x ]
+        os: [ ubuntu-latest, macos-latest ]
+    env:
+      OS: ${{ matrix.os }}
+      GO_VERSION: ${{ matrix.go-version }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install nvim binary
+      uses: rhysd/action-setup-vim@v1
+      with:
+        neovim: true
+        version: nightly
+
+    - name: Test and vet
+      run: |
+        diff -u <(echo -n) <(gofmt -s -d .)
+        go vet ./...
+        go test -v -race -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
+
+    - uses: codecov/codecov-action@v1.0.7
+      with:
+        file: ./coverage.out
+        env_vars: OS,GO_VERSION
+        fail_ci_if_error: true
