@@ -4,6 +4,7 @@
 Neovim/go-client is a [Neovim](https://neovim.io/) client and plugin host for [Go](https://golang.org/).
 
 This example plugin adds the Hello command to Nvim.
+
 ```go
 package main
 
@@ -27,7 +28,16 @@ func main() {
 Build the program with the [go tool](https://golang.org/cmd/go/) to an
 executable named `hello`. Ensure that the executable is on your path.
 
+```go
+// Use the go build to generate an executable
+// Enusre this hello executable on your path
+// you can move hello to your $GOPATH/bin
+// or set the current dir into env variable `path`
+go build -o hello
+```
+
 Add the following plugin to Nvim:
+
 ```vim
 if exists('g:loaded_hello')
     finish
@@ -48,7 +58,9 @@ call remote#host#RegisterPlugin('hello', '0', [
 
 " vim:ts=4:sw=4:et
 ```
+
 Start Nvim and run the following command:
+
 ```vim
 :echo Hello('world')
 ```
