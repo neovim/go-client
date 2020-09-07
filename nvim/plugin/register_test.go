@@ -1,6 +1,7 @@
 package plugin_test
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -29,6 +30,10 @@ func newEmbeddedPlugin(t *testing.T) (*plugin.Plugin, func()) {
 	}
 }
 
+type testEval struct {
+	Buffer int64 `eval:"nvim_get_current_buf()"`
+}
+
 func TestRegister(t *testing.T) {
 	p, cleanup := newEmbeddedPlugin(t)
 	defer cleanup()
@@ -39,33 +44,48 @@ func TestRegister(t *testing.T) {
 	p.HandleFunction(&plugin.FunctionOptions{Name: "Hello"}, func(args []string) (string, error) {
 		return "Hello, " + strings.Join(args, " "), nil
 	})
+	p.HandleAutocmd(&plugin.AutocmdOptions{Event: "BufEnter", Pattern: "*", Eval: "*"},
+		func(eval *testEval) error {
+			fmt.Printf("eval: %#v\n", eval)
+			// if err := p.Nvim.SetVar("fname", eval.Buffer); err != nil {
+			// 	return err
+			// }
+			return nil
+		})
 
-	if err := p.RegisterForTests(); err != nil {
+	err := p.RegisterForTests()
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	{
-		result, err := p.Nvim.CommandOutput(":echo Hello('John', 'Doe')")
-		if err != nil {
-			t.Error(err)
-		}
-		expected := "Hello, John Doe"
-		if result != expected {
-			t.Errorf("Hello returned %q, want %q", result, expected)
-		}
+	result, err := p.Nvim.CommandOutput(":echo Hello('John', 'Doe')")
+	if err != nil {
+		t.Error(err)
+	}
+	expected := "Hello, John Doe"
+	if result != expected {
+		t.Errorf("Hello returned %q, want %q", result, expected)
 	}
 
-	{
-		cid := p.Nvim.ChannelID()
+	cid := p.Nvim.ChannelID()
 
-		var result string
-		if err := p.Nvim.Call("rpcrequest", &result, cid, "hello", "world"); err != nil {
-			t.Fatal(err)
-		}
-
-		expected := "Hello, world"
-		if result != expected {
-			t.Errorf("hello returned %q, want %q", result, expected)
-		}
+	var result2 string
+	if err := p.Nvim.Call("rpcrequest", &result2, cid, "hello", "world"); err != nil {
+		t.Fatal(err)
 	}
+
+	expected2 := "Hello, world"
+	if result2 != expected2 {
+		t.Errorf("hello returned %q, want %q", result2, expected2)
+	}
+
+	// result3, err := p.Nvim.CommandOutput(":echomsg g:fname")
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+	// var result3 string
+	// if err := p.Nvim.Var("fname", &result3); err != nil {
+	// 	t.Fatal(err)
+	// }
+	// t.Logf("result2: %s", result3)
 }
