@@ -676,11 +676,11 @@ func testExtmarks(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		const (
-			extMarkID = 10
+			extMarkID = 1
 			wantLine  = 1
 			wantCol   = 3
 		)
-		gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, extMarkID, wantLine, wantCol, make(map[string]interface{}))
+		gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -705,7 +705,7 @@ func testExtmarks(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatalf("got %d extmarks Col but want %d", extmarks[0].Col, wantCol)
 		}
 
-		pos, err := v.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID)
+		pos, err := v.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]interface{}))
 		if err != nil {
 			t.Fatal(err)
 		}
