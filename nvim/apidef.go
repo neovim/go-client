@@ -285,20 +285,6 @@ func SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTex
 	name(nvim_buf_set_virtual_text)
 }
 
-// BufferVirtualText gets the virtual text (annotation) for a buffer line.
-//
-// The virtual text is returned as list of lists, whereas the inner lists have
-// either one or two elements. The first element is the actual text, the
-// optional second element is the highlight group.
-//
-// The format is exactly the same as given to SetBufferVirtualText.
-//
-// If there is no virtual text associated with the given line, an empty list
-// is returned.
-func BufferVirtualText(buffer Buffer, lnum int) []VirtualTextChunk {
-	name(nvim_buf_get_virtual_text)
-}
-
 // TabpageWindows returns the windows in a tabpage.
 func TabpageWindows(tabpage Tabpage) []Window {
 	name(nvim_tabpage_list_wins)

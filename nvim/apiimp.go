@@ -669,36 +669,6 @@ func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks [
 	b.call("nvim_buf_set_virtual_text", result, buffer, nsID, line, chunks, opts)
 }
 
-// BufferVirtualText gets the virtual text (annotation) for a buffer line.
-//
-// The virtual text is returned as list of lists, whereas the inner lists have
-// either one or two elements. The first element is the actual text, the
-// optional second element is the highlight group.
-//
-// The format is exactly the same as given to SetBufferVirtualText.
-//
-// If there is no virtual text associated with the given line, an empty list
-// is returned.
-func (v *Nvim) BufferVirtualText(buffer Buffer, lnum int) ([]VirtualTextChunk, error) {
-	var result []VirtualTextChunk
-	err := v.call("nvim_buf_get_virtual_text", &result, buffer, lnum)
-	return result, err
-}
-
-// BufferVirtualText gets the virtual text (annotation) for a buffer line.
-//
-// The virtual text is returned as list of lists, whereas the inner lists have
-// either one or two elements. The first element is the actual text, the
-// optional second element is the highlight group.
-//
-// The format is exactly the same as given to SetBufferVirtualText.
-//
-// If there is no virtual text associated with the given line, an empty list
-// is returned.
-func (b *Batch) BufferVirtualText(buffer Buffer, lnum int, result *[]VirtualTextChunk) {
-	b.call("nvim_buf_get_virtual_text", result, buffer, lnum)
-}
-
 // TabpageWindows returns the windows in a tabpage.
 func (v *Nvim) TabpageWindows(tabpage Tabpage) ([]Window, error) {
 	var result []Window

@@ -566,14 +566,6 @@ func testVirtualText(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatalf("namespaceID: got %d, want %d", got, nsID)
 		}
 
-		chunks2, err := v.BufferVirtualText(Buffer(0), 0)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(chunks, chunks2) {
-			t.Fatalf("BufferVirtualText = %+v, want %+v", chunks, chunks2)
-		}
-
 		if err := v.ClearBufferNamespace(Buffer(0), nsID, 0, -1); err != nil {
 			t.Fatal(err)
 		}
