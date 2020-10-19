@@ -171,7 +171,7 @@ func BufferMark(buffer Buffer, name string) [2]int {
 }
 
 // BufferExtmarkByID returns position for a given extmark id.
-func BufferExtmarkByID(buffer Buffer, nsID int, id int) []int {
+func BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}) []int {
 	name(nvim_buf_get_extmark_by_id)
 }
 
@@ -204,7 +204,7 @@ func BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{},
 // (Useful over RPC, to avoid waiting for the return value.)
 //
 // Currently opts arg not used.
-func SetBufferExtmark(buffer Buffer, nsID int, extmarkID int, line int, col int, opts map[string]interface{}) int {
+func SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}) int {
 	name(nvim_buf_set_extmark)
 }
 
