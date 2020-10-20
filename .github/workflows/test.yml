@@ -37,7 +37,7 @@ jobs:
         go vet ./...
         go test -v -race -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
-    - uses: codecov/codecov-action@v1.0.7
+    - uses: codecov/codecov-action@v1
       with:
         file: ./coverage.out
         env_vars: OS,GO_VERSION
