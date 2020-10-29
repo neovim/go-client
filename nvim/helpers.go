@@ -2,7 +2,6 @@ package nvim
 
 import (
 	"io"
-	"strconv"
 )
 
 // QuickfixError represents an item in a quickfix list.
@@ -55,12 +54,12 @@ type CommandCompletionArgs struct {
 
 	// CursorPosString is decimal representation of the cursor position in
 	// bytes.
-	CursorPosString string
+	CursorPosString int
 }
 
 // CursorPos returns the cursor position.
 func (a *CommandCompletionArgs) CursorPos() int {
-	n, _ := strconv.Atoi(a.CursorPosString)
+	n := a.CursorPosString
 	return n
 }
 
