@@ -19,8 +19,8 @@ func newChildProcess(tb testing.TB) (*Nvim, func()) {
 
 	v, err := NewChildProcess(
 		ChildProcessArgs("-u", "NONE", "-n", "--embed", "--headless"),
-		ChildProcessEnv([]string{}),
-		ChildProcessLogf(tb.Logf))
+		ChildProcessLogf(tb.Logf),
+	)
 	if err != nil {
 		tb.Fatal(err)
 	}
