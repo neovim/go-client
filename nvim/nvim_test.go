@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -33,6 +34,10 @@ func newChildProcess(tb testing.TB) (*Nvim, func()) {
 	return v, func() {
 		if err := v.Close(); err != nil {
 			tb.Fatal(err)
+		}
+
+		if _, err := os.Stat(".nvimlog"); err == nil {
+			os.RemoveAll(".nvimlog")
 		}
 	}
 }
