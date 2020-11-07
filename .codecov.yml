@@ -1,0 +1,22 @@
+coverage:
+  precision: 1
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 10%
+        if_not_found: success
+        if_ci_failed: error
+    patch:
+      default:
+        only_pulls: true
+        target: 50%
+        threshold: 10%
+    changes: true
+
+comment:
+  behavior: default
+  require_changes: true
