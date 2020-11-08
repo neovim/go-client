@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -19,8 +20,8 @@ func newChildProcess(tb testing.TB) (*Nvim, func()) {
 
 	v, err := NewChildProcess(
 		ChildProcessArgs("-u", "NONE", "-n", "--embed", "--headless"),
-		ChildProcessEnv([]string{}),
-		ChildProcessLogf(tb.Logf))
+		ChildProcessLogf(tb.Logf),
+	)
 	if err != nil {
 		tb.Fatal(err)
 	}
@@ -33,6 +34,10 @@ func newChildProcess(tb testing.TB) (*Nvim, func()) {
 	return v, func() {
 		if err := v.Close(); err != nil {
 			tb.Fatal(err)
+		}
+
+		if _, err := os.Stat(".nvimlog"); err == nil {
+			os.RemoveAll(".nvimlog")
 		}
 	}
 }
@@ -566,14 +571,6 @@ func testVirtualText(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatalf("namespaceID: got %d, want %d", got, nsID)
 		}
 
-		chunks2, err := v.BufferVirtualText(Buffer(0), 0)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(chunks, chunks2) {
-			t.Fatalf("BufferVirtualText = %+v, want %+v", chunks, chunks2)
-		}
-
 		if err := v.ClearBufferNamespace(Buffer(0), nsID, 0, -1); err != nil {
 			t.Fatal(err)
 		}
@@ -684,11 +681,11 @@ func testExtmarks(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		const (
-			extMarkID = 10
+			extMarkID = 1
 			wantLine  = 1
 			wantCol   = 3
 		)
-		gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, extMarkID, wantLine, wantCol, make(map[string]interface{}))
+		gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -713,7 +710,7 @@ func testExtmarks(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatalf("got %d extmarks Col but want %d", extmarks[0].Col, wantCol)
 		}
 
-		pos, err := v.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID)
+		pos, err := v.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]interface{}))
 		if err != nil {
 			t.Fatal(err)
 		}

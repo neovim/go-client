@@ -428,15 +428,15 @@ func (b *Batch) BufferMark(buffer Buffer, name string, result *[2]int) {
 }
 
 // BufferExtmarkByID returns position for a given extmark id.
-func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int) ([]int, error) {
+func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}) ([]int, error) {
 	var result []int
-	err := v.call("nvim_buf_get_extmark_by_id", &result, buffer, nsID, id)
+	err := v.call("nvim_buf_get_extmark_by_id", &result, buffer, nsID, id, opt)
 	return result, err
 }
 
 // BufferExtmarkByID returns position for a given extmark id.
-func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, result *[]int) {
-	b.call("nvim_buf_get_extmark_by_id", result, buffer, nsID, id)
+func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}, result *[]int) {
+	b.call("nvim_buf_get_extmark_by_id", result, buffer, nsID, id, opt)
 }
 
 // BufferExtmarks gets extmarks in "traversal order" from a charwise region defined by
@@ -489,9 +489,9 @@ func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end i
 // (Useful over RPC, to avoid waiting for the return value.)
 //
 // Currently opts arg not used.
-func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, extmarkID int, line int, col int, opts map[string]interface{}) (int, error) {
+func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}) (int, error) {
 	var result int
-	err := v.call("nvim_buf_set_extmark", &result, buffer, nsID, extmarkID, line, col, opts)
+	err := v.call("nvim_buf_set_extmark", &result, buffer, nsID, line, col, opts)
 	return result, err
 }
 
@@ -505,8 +505,8 @@ func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, extmarkID int, line int
 // (Useful over RPC, to avoid waiting for the return value.)
 //
 // Currently opts arg not used.
-func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, extmarkID int, line int, col int, opts map[string]interface{}, result *int) {
-	b.call("nvim_buf_set_extmark", result, buffer, nsID, extmarkID, line, col, opts)
+func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}, result *int) {
+	b.call("nvim_buf_set_extmark", result, buffer, nsID, line, col, opts)
 }
 
 // DeleteBufferExtmark removes an extmark.
@@ -667,36 +667,6 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 // The returns the nsID that was used.
 func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}, result *int) {
 	b.call("nvim_buf_set_virtual_text", result, buffer, nsID, line, chunks, opts)
-}
-
-// BufferVirtualText gets the virtual text (annotation) for a buffer line.
-//
-// The virtual text is returned as list of lists, whereas the inner lists have
-// either one or two elements. The first element is the actual text, the
-// optional second element is the highlight group.
-//
-// The format is exactly the same as given to SetBufferVirtualText.
-//
-// If there is no virtual text associated with the given line, an empty list
-// is returned.
-func (v *Nvim) BufferVirtualText(buffer Buffer, lnum int) ([]VirtualTextChunk, error) {
-	var result []VirtualTextChunk
-	err := v.call("nvim_buf_get_virtual_text", &result, buffer, lnum)
-	return result, err
-}
-
-// BufferVirtualText gets the virtual text (annotation) for a buffer line.
-//
-// The virtual text is returned as list of lists, whereas the inner lists have
-// either one or two elements. The first element is the actual text, the
-// optional second element is the highlight group.
-//
-// The format is exactly the same as given to SetBufferVirtualText.
-//
-// If there is no virtual text associated with the given line, an empty list
-// is returned.
-func (b *Batch) BufferVirtualText(buffer Buffer, lnum int, result *[]VirtualTextChunk) {
-	b.call("nvim_buf_get_virtual_text", result, buffer, lnum)
 }
 
 // TabpageWindows returns the windows in a tabpage.

@@ -171,7 +171,7 @@ func BufferMark(buffer Buffer, name string) [2]int {
 }
 
 // BufferExtmarkByID returns position for a given extmark id.
-func BufferExtmarkByID(buffer Buffer, nsID int, id int) []int {
+func BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}) []int {
 	name(nvim_buf_get_extmark_by_id)
 }
 
@@ -204,7 +204,7 @@ func BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{},
 // (Useful over RPC, to avoid waiting for the return value.)
 //
 // Currently opts arg not used.
-func SetBufferExtmark(buffer Buffer, nsID int, extmarkID int, line int, col int, opts map[string]interface{}) int {
+func SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}) int {
 	name(nvim_buf_set_extmark)
 }
 
@@ -283,20 +283,6 @@ func ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) 
 // The returns the nsID that was used.
 func SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}) int {
 	name(nvim_buf_set_virtual_text)
-}
-
-// BufferVirtualText gets the virtual text (annotation) for a buffer line.
-//
-// The virtual text is returned as list of lists, whereas the inner lists have
-// either one or two elements. The first element is the actual text, the
-// optional second element is the highlight group.
-//
-// The format is exactly the same as given to SetBufferVirtualText.
-//
-// If there is no virtual text associated with the given line, an empty list
-// is returned.
-func BufferVirtualText(buffer Buffer, lnum int) []VirtualTextChunk {
-	name(nvim_buf_get_virtual_text)
 }
 
 // TabpageWindows returns the windows in a tabpage.
