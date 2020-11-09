@@ -292,6 +292,7 @@ var nvimTypes = map[string]string{
 	"interface{}":   "Object",
 	"Process":       "Object",
 	"string":        "String",
+	"float64":       "Float",
 
 	"*Channel":                 "Dictionary",
 	"*ClientVersion":           "Dictionary",
@@ -354,11 +355,13 @@ var compareTemplate = template.Must(template.New("").Funcs(template.FuncMap{
 
 // specialAPIs lists API calls that are implemented by hand.
 var specialAPIs = map[string]bool{
-	"nvim_call_atomic":        true,
-	"nvim_call_function":      true,
-	"nvim_call_dict_function": true,
-	"nvim_execute_lua":        true,
-	"nvim_exec_lua":           true,
+	"nvim_call_atomic":             true,
+	"nvim_call_function":           true,
+	"nvim_call_dict_function":      true,
+	"nvim_execute_lua":             true,
+	"nvim_exec_lua":                true,
+	"nvim_buf_call":                true,
+	"nvim_set_decoration_provider": true,
 }
 
 func compareFunctions(functions []*Function) error {

@@ -160,6 +160,20 @@ func IsBufferLoaded(buffer Buffer) bool {
 	name(nvim_buf_is_loaded)
 }
 
+// DeleteBuffer deletes the buffer.
+//
+// See:
+//  :help bwipeout
+//
+// The `opts` is additional options. Supports the key:
+//  force
+// Force deletion and ignore unsaved changes.
+//  unload
+// Unloaded only, do not delete. See :help bunload.
+func DeleteBuffer(buffer Buffer, opts map[string]bool) {
+	name(nvim_buf_delete)
+}
+
 // IsBufferValid returns true if the buffer is valid.
 func IsBufferValid(buffer Buffer) bool {
 	name(nvim_buf_is_valid)
@@ -369,6 +383,20 @@ func SetPumHeight(height int) {
 	name(nvim_ui_pum_set_height)
 }
 
+// SetPumBounds tells Nvim the geometry of the popumenu, to align floating windows with an
+// external popup menu.
+//
+// Note that this method is not to be confused with SetPumHeight,
+// which sets the number of visible items in the popup menu, while this
+// function sets the bounding box of the popup menu, including visual
+// elements such as borders and sliders.
+//
+// Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
+// numbers to the popup menu geometry.
+func SetPumBounds(width, height, row, col float64) {
+	name(nvim_ui_pum_set_bounds)
+}
+
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
 func Exec(src string, output bool) string {
 	name(nvim_exec)
@@ -392,6 +420,27 @@ func HLIDByName(name string) int {
 // HLByName gets a highlight definition by name.
 func HLByName(name string, rgb bool) *HLAttrs {
 	name(nvim_get_hl_by_name)
+}
+
+// SetHighlight set a highlight group.
+//
+// name arg is highlight group name, like ErrorMsg.
+//
+// val arg is highlight definiton map, like HLByName.
+func SetHighlight(nsID int, name string, val *HLAttrs) {
+	name(nvim_set_hl)
+}
+
+// SetHighlightNameSpace set active namespace for highlights.
+//
+// NB: this function can be called from async contexts, but the
+// semantics are not yet well-defined.
+// To start with SetDecorationProvider on_win and on_line callbacks
+// are explicitly allowed to change the namespace during a redraw cycle.
+//
+// The `nsID` arg is the namespace to activate.
+func SetHighlightNameSpace(nsID int) {
+	name(nvim_set_hl_ns)
 }
 
 // FeedKeys Pushes keys to the Nvim user input buffer. Options can be a string
