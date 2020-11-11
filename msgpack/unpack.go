@@ -11,7 +11,7 @@ import (
 // Type represents the type of value in the MsgPack stream.
 type Type int
 
-// MsgPack types.
+// list of MsgPack types.
 const (
 	Invalid Type = iota
 	Nil
@@ -40,6 +40,7 @@ var typeNames = [...]string{
 	Extension: "Extension",
 }
 
+// String returns a string representation of the Type.
 func (t Type) String() string {
 	var n string
 	if 0 <= t && t < Type(len(typeNames)) {
@@ -72,8 +73,10 @@ func NewDecoder(r io.Reader) *Decoder {
 }
 
 // ExtensionMap specifies functions for converting MsgPack extensions to Go
-// values.The key is the MsgPack extension type. The value is a function that
-// converts the extension data to a Go value.
+// values.
+//
+// The key is the MsgPack extension type.
+// The value is a function that converts the extension data to a Go value.
 type ExtensionMap map[int]func([]byte) (interface{}, error)
 
 // SetExtensions specifies functions for converting MsgPack extensions to Go

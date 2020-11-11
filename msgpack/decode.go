@@ -632,6 +632,7 @@ type DecodeConvertError struct {
 	DestType reflect.Type
 }
 
+// Error implements the error interface.
 func (e *DecodeConvertError) Error() string {
 	if e.SrcValue == nil {
 		return fmt.Sprintf("msgpack: cannot convert %s to %s", e.SrcType, e.DestType)

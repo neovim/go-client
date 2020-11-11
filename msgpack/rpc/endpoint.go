@@ -31,14 +31,17 @@ var (
 	ErrInternal = errors.New("msgpack/rpc: internal error")
 )
 
+// Error represents a MessagePack RPC error.
 type Error struct {
 	Value interface{}
 }
 
+// Error implements the error interface.
 func (e Error) Error() string {
 	return fmt.Sprintf("%v", e.Value)
 }
 
+// Call represents a MessagePack RPC call.
 type Call struct {
 	Method string
 	Args   interface{}
@@ -114,14 +117,17 @@ func NewEndpoint(r io.Reader, w io.Writer, c io.Closer, options ...Option) (*End
 
 }
 
+// Option is a configures a Endpoint.
 type Option struct{ f func(*Endpoint) }
 
+// WithExtensions configures Endpoint to define application-specific types.
 func WithExtensions(extensions msgpack.ExtensionMap) Option {
 	return Option{func(e *Endpoint) {
 		e.dec.SetExtensions(extensions)
 	}}
 }
 
+// WithLogf sets the log function to Endpoint.
 func WithLogf(f func(fmt string, args ...interface{})) Option {
 	return Option{func(e *Endpoint) {
 		e.logf = f
@@ -230,11 +236,13 @@ func (e *Endpoint) Close() error {
 	return e.close(nil)
 }
 
+// Call invokes the target method and waits for a response.
 func (e *Endpoint) Call(method string, reply interface{}, args ...interface{}) error {
 	c := <-e.Go(method, make(chan *Call, 1), reply, args...).Done
 	return c.Err
 }
 
+// Go append method call to queue and returns the new Call.
 func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ...interface{}) *Call {
 	if args == nil {
 		args = []interface{}{}
@@ -296,6 +304,7 @@ func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ..
 	return call
 }
 
+// Notify invokes the target method with non-blocking.
 func (e *Endpoint) Notify(method string, args ...interface{}) error {
 	if args == nil {
 		args = []interface{}{}
