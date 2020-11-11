@@ -95,7 +95,7 @@ func testSimpleHandler(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		if expected := "Hello, world"; result != expected {
-			t.Errorf("hello returned %q, want %q", result, expected)
+			t.Fatalf("hello returned %q, want %q", result, expected)
 		}
 
 		// Test errors.
@@ -103,7 +103,7 @@ func testSimpleHandler(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		if expected := "\nError invoking 'error' on channel 1:\nouch"; result != expected {
-			t.Errorf("got error %q, want %q", result, expected)
+			t.Fatalf("got error %q, want %q", result, expected)
 		}
 	}
 }
@@ -187,11 +187,12 @@ func testWindow(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		if len(wins) != 1 {
-			t.Errorf("expected one win, found %d wins", len(wins))
+			t.Fatalf("expected one win, found %d wins", len(wins))
 		}
 		if wins[0] == 0 {
-			t.Errorf("wins[0] == 0")
+			t.Fatalf("wins[0] == 0")
 		}
+
 		win, err := v.CurrentWindow()
 		if err != nil {
 			t.Fatal(err)
@@ -199,8 +200,13 @@ func testWindow(t *testing.T, v *Nvim) func(*testing.T) {
 		if win != wins[0] {
 			t.Fatalf("win %v != wins[0] %v", win, wins[0])
 		}
-		err = v.SetCurrentWindow(win)
-		if err != nil {
+
+		const want = "Window:1000"
+		if got := win.String(); got != want {
+			t.Fatalf("got %s but want %s", got, want)
+		}
+
+		if err := v.SetCurrentWindow(win); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -213,11 +219,12 @@ func testTabpage(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		if len(pages) != 1 {
-			t.Errorf("expected one page, found %d pages", len(pages))
+			t.Fatalf("expected one page, found %d pages", len(pages))
 		}
 		if pages[0] == 0 {
-			t.Errorf("pages[0] == 0")
+			t.Fatalf("pages[0] == 0")
 		}
+
 		page, err := v.CurrentTabpage()
 		if err != nil {
 			t.Fatal(err)
@@ -225,8 +232,13 @@ func testTabpage(t *testing.T, v *Nvim) func(*testing.T) {
 		if page != pages[0] {
 			t.Fatalf("page %v != pages[0] %v", page, pages[0])
 		}
-		err = v.SetCurrentTabpage(page)
-		if err != nil {
+
+		const want = "Tabpage:1"
+		if got := page.String(); got != want {
+			t.Fatalf("got %s but want %s", got, want)
+		}
+
+		if err := v.SetCurrentTabpage(page); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -257,13 +269,15 @@ func testVar(t *testing.T, v *Nvim) func(*testing.T) {
 		if err := v.SetVar("gvar", "gval"); err != nil {
 			t.Fatal(err)
 		}
+
 		var value interface{}
 		if err := v.Var("gvar", &value); err != nil {
 			t.Fatal(err)
 		}
 		if value != "gval" {
-			t.Errorf("got %v, want %q", value, "gval")
+			t.Fatalf("got %v, want %q", value, "gval")
 		}
+
 		if err := v.SetVar("gvar", ""); err != nil {
 			t.Fatal(err)
 		}
@@ -272,7 +286,7 @@ func testVar(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		if value != "" {
-			t.Errorf("got %v, want %q", value, "")
+			t.Fatalf("got %v, want %q", value, "")
 		}
 	}
 }
@@ -291,8 +305,9 @@ func testStructValue(t *testing.T, v *Nvim) func(*testing.T) {
 		if err := v.Var("structvar", &actual); err != nil {
 			t.Fatal(err)
 		}
+
 		if !reflect.DeepEqual(&actual, &expected) {
-			t.Errorf("got %+v, want %+v", &actual, &expected)
+			t.Fatalf("got %+v, want %+v", &actual, &expected)
 		}
 	}
 }
@@ -301,10 +316,10 @@ func testEval(t *testing.T, v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		var a, b string
 		if err := v.Eval(`["hello", "world"]`, []*string{&a, &b}); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		if a != "hello" || b != "world" {
-			t.Errorf("a=%q b=%q, want a=hello b=world", a, b)
+			t.Fatalf("a=%q b=%q, want a=hello b=world", a, b)
 		}
 	}
 }
@@ -360,36 +375,34 @@ func testBatch(t *testing.T, v *Nvim) func(*testing.T) {
 		}
 		err := b.Execute()
 		if e, ok := err.(*BatchError); !ok || e.Index != errorIndex {
-			t.Errorf("unxpected error %T %v", e, e)
+			t.Fatalf("unxpected error %T %v", e, e)
 		}
 		// Expect results proceeding error.
 		for i := 0; i < errorIndex; i++ {
 			if results[i] != i {
-				t.Errorf("result[i] = %d, want %d", results[i], i)
+				t.Fatalf("result[i] = %d, want %d", results[i], i)
 				break
 			}
 		}
 		// No results after error.
 		for i := errorIndex; i < len(results); i++ {
 			if results[i] != -1 {
-				t.Errorf("result[i] = %d, want %d", results[i], -1)
+				t.Fatalf("result[i] = %d, want %d", results[i], -1)
 				break
 			}
 		}
 
 		// Execute should return marshal error for argument that cannot be marshaled.
 		b.SetVar("batch0", make(chan bool))
-		err = b.Execute()
-		if err == nil || !strings.Contains(err.Error(), "chan bool") {
-			t.Errorf("err = nil, expect error containing text 'chan bool'")
+		if err := b.Execute(); err == nil || !strings.Contains(err.Error(), "chan bool") {
+			t.Fatalf("err = nil, expect error containing text 'chan bool'")
 		}
 
 		// Test call with empty argument list.
 		var buf Buffer
 		b.CurrentBuffer(&buf)
-		err = b.Execute()
-		if err != nil {
-			t.Errorf("GetCurrentBuffer returns err %s: %#v", err, err)
+		if err = b.Execute(); err != nil {
+			t.Fatalf("GetCurrentBuffer returns err %s: %#v", err, err)
 		}
 	}
 }
@@ -411,7 +424,7 @@ func testMode(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		if m.Mode != "n" {
-			t.Errorf("Mode() returned %s, want n", m.Mode)
+			t.Fatalf("Mode() returned %s, want n", m.Mode)
 		}
 	}
 }
@@ -424,7 +437,7 @@ func testExecLua(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 		if n != 3 {
-			t.Errorf("Mode() returned %v, want 3", n)
+			t.Fatalf("Mode() returned %v, want 3", n)
 		}
 	}
 }
