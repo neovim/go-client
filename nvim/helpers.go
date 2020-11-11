@@ -70,6 +70,9 @@ type bufferReader struct {
 	err   error
 }
 
+// compile time check whether the bufferReader implements io.Reader interface.
+var _ io.Reader = (*bufferReader)(nil)
+
 // NewBufferReader returns a reader for the specified buffer. If b = 0, then
 // the current buffer is used.
 func NewBufferReader(v *Nvim, b Buffer) io.Reader {
@@ -78,7 +81,8 @@ func NewBufferReader(v *Nvim, b Buffer) io.Reader {
 
 var lineEnd = []byte{'\n'}
 
-func (r *bufferReader) Read(p []byte) (int, error) {
+// Read implements io.Reader.
+func (r *bufferReader) Read(p []byte) (n int, err error) {
 	if r.err != nil {
 		return 0, r.err
 	}
@@ -88,7 +92,6 @@ func (r *bufferReader) Read(p []byte) (int, error) {
 			return 0, r.err
 		}
 	}
-	n := 0
 	for {
 		if len(r.lines) == 0 {
 			r.err = io.EOF
@@ -97,6 +100,7 @@ func (r *bufferReader) Read(p []byte) (int, error) {
 		if len(p) == 0 {
 			return n, nil
 		}
+
 		line0 := r.lines[0]
 		if len(line0) == 0 {
 			p[0] = '\n'
@@ -105,6 +109,7 @@ func (r *bufferReader) Read(p []byte) (int, error) {
 			r.lines = r.lines[1:]
 			continue
 		}
+
 		nn := copy(p, line0)
 		n += nn
 		p = p[nn:]
