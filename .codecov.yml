@@ -1,3 +1,13 @@
+projects: *projects
+  target: auto
+  threshold: 10%
+  if_not_found: success
+  if_ci_failed: error
+pathes: *patches
+  only_pulls: true
+  target: auto
+  threshold: 10%
+
 coverage:
   precision: 1
   round: down
@@ -5,17 +15,54 @@ coverage:
 
   status:
     project:
-      default:
-        target: auto
-        threshold: 10%
-        if_not_found: success
-        if_ci_failed: error
+      default: off
+      Linux-1.13.x:
+        <<: *projects
+      Linux-1.14.x:
+        <<: *projects
+      Linux-1.15.x:
+        <<: *projects
+      macOS-1.13.x:
+        <<: *projects
+      macOS-1.14.x:
+        <<: *projects
+      macOS-1.15.x:
+        <<: *projects
     patch:
-      default:
-        only_pulls: true
-        target: 50%
-        threshold: 10%
+      default: off
+      Linux-1.13.x:
+        <<: *patches
+      Linux-1.14.x:
+        <<: *patches
+      Linux-1.15.x:
+        <<: *patches
+      macOS-1.13.x:
+        <<: *patches
+      macOS-1.14.x:
+        <<: *patches
+      macOS-1.15.x:
+        <<: *patches
     changes: true
+
+flags:
+  Linux-1.13.x:
+    paths:
+      - /
+  Linux-1.14.x:
+    paths:
+      - /
+  Linux-1.15.x:
+    paths:
+      - /
+  macOS-1.13.x:
+    paths:
+      - /
+  macOS-1.14.x:
+    paths:
+      - /
+  macOS-1.15.x:
+    paths:
+      - /
 
 comment:
   behavior: default

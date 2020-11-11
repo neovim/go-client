@@ -40,6 +40,5 @@ jobs:
     - uses: codecov/codecov-action@v1
       with:
         file: ./coverage.out
-        env_vars: OS,GO_VERSION
+        flags: ${{ runner.os }}-${{ matrix.go-version }}
         fail_ci_if_error: true
-        verbose: true
