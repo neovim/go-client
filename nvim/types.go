@@ -113,7 +113,7 @@ type ClientMethodNArgs struct {
 	Min int `msgpack:",array"`
 
 	// Max is the maximum number of method arguments.
-	Max int `msgpack:",array"`
+	Max int
 }
 
 // ClientAttributes informal attributes describing the client. Clients might define their own keys, but the following are suggested.
