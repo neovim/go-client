@@ -48,21 +48,27 @@ flags:
   Linux-1.13.x:
     paths:
       - /
+    carryforward: true
   Linux-1.14.x:
     paths:
       - /
+    carryforward: true
   Linux-1.15.x:
     paths:
       - /
+    carryforward: true
   macOS-1.13.x:
     paths:
       - /
+    carryforward: true
   macOS-1.14.x:
     paths:
       - /
+    carryforward: true
   macOS-1.15.x:
     paths:
       - /
+    carryforward: true
 
 comment:
   behavior: default
