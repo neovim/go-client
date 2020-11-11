@@ -45,6 +45,7 @@ type ExtensionType struct {
 type Function struct {
 	Name            string   `msgpack:"name"`
 	Parameters      []*Field `msgpack:"parameters"`
+	ReturnName      string   `msgpack:"_"`
 	ReturnType      string   `msgpack:"return_type"`
 	DeprecatedSince int      `msgpack:"deprecated_since"`
 	Doc             string   `msgpack:"-"`
@@ -63,9 +64,9 @@ var errorTypes = map[string]ErrorType{
 }
 
 var extensionTypes = map[string]ExtensionType{
-	"Buffer":  {ID: 0, Doc: `// Buffer represents a remote Nvim buffer.`},
-	"Window":  {ID: 1, Doc: `// Window represents a remote Nvim window.`},
-	"Tabpage": {ID: 2, Doc: `// Tabpage represents a remote Nvim tabpage.`},
+	"Buffer":  {ID: 0, Doc: `// Buffer represents a Nvim buffer.`},
+	"Window":  {ID: 1, Doc: `// Window represents a Nvim window.`},
+	"Tabpage": {ID: 2, Doc: `// Tabpage represents a Nvim tabpage.`},
 }
 
 func formatNode(fset *token.FileSet, node interface{}) string {
@@ -125,6 +126,7 @@ func parseAPIDef() ([]*Function, error) {
 		if len(fields) > 1 {
 			return nil, fmt.Errorf("%s: more than one result for %s", fset.Position(fdecl.Pos()), m.Name)
 		} else if len(fields) == 1 {
+			m.ReturnName = fields[0].Name
 			m.ReturnType = fields[0].Type
 		}
 		for _, n := range fdecl.Body.List {
@@ -180,12 +182,12 @@ const (
 
 func withExtensions() rpc.Option {
 	return rpc.WithExtensions(msgpack.ExtensionMap{
-{{range $name, $type := .Types}}
+{{- range $name, $type := .Types}}
 		{{$type.ID}}: func(p []byte) (interface{}, error) {
 			x, err := decodeExt(p)
 			return {{$name}}(x), err
 		},
-{{end}}
+{{end -}}
 	})
 }
 
@@ -193,16 +195,19 @@ func withExtensions() rpc.Option {
 {{$type.Doc}}
 type {{$name}} int
 
+// MarshalMsgPack implements msgpack.Marshaler.
+func (x {{$name}}) MarshalMsgPack(enc *msgpack.Encoder) error {
+	return enc.PackExtension({{$type.ID}}, encodeExt(int(x)))
+}
+
+// UnmarshalMsgPack implements msgpack.Unmarshaler.
 func (x *{{$name}}) UnmarshalMsgPack(dec *msgpack.Decoder) error {
 	n, err := unmarshalExt(dec, {{$type.ID}}, x)
 	*x = {{$name}}(n)
 	return err
 }
 
-func (x {{$name}}) MarshalMsgPack(enc *msgpack.Encoder) error {
-	return enc.PackExtension({{$type.ID}}, encodeExt(int(x)))
-}
-
+// String returns a string representation of the {{$name}}.
 func (x {{$name}}) String() string {
 	return fmt.Sprintf("{{$name}}:%d", int(x))
 }
@@ -220,6 +225,16 @@ func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} res
     b.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
 }
 
+{{else if and (.ReturnName) (not .ReturnPtr)}}
+{{.Doc}}
+func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{.ReturnName}} {{.ReturnType}}, err error) {
+	err = v.call("{{.Name}}", &{{.ReturnName}}, {{range .Parameters}}{{.Name}},{{end}})
+	return {{.ReturnName}}, err
+}
+{{.Doc}}
+func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result *{{.ReturnType}}) {
+    b.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
+}
 {{else if .ReturnType}}
 {{.Doc}}
 func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{if .ReturnPtr}}*{{end}}{{.ReturnType}}, error) {
@@ -251,7 +266,7 @@ func printImplementation(functions []*Function, outFile string) error {
 		Types:      extensionTypes,
 		ErrorTypes: errorTypes,
 	}); err != nil {
-		return err
+		return fmt.Errorf("falied to Execute implementationTemplate: %w", err)
 	}
 
 	out, err := format.Source(buf.Bytes())
@@ -259,7 +274,7 @@ func printImplementation(functions []*Function, outFile string) error {
 		for i, p := range bytes.Split(buf.Bytes(), []byte("\n")) {
 			fmt.Fprintf(os.Stderr, "%d: %s\n", i+1, p)
 		}
-		return fmt.Errorf("error formating source: %v", err)
+		return fmt.Errorf("error formating source: %w", err)
 	}
 
 	if outFile != "" {
@@ -270,14 +285,16 @@ func printImplementation(functions []*Function, outFile string) error {
 }
 
 func readAPIInfo() (*APIInfo, error) {
-	output, err := exec.Command("nvim", "--api-info").Output()
+	const cmdName = "nvim"
+	const cmdArgs = "--api-info"
+	output, err := exec.Command(cmdName, cmdArgs).Output()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execuce %s %s: %w", cmdName, cmdArgs, err)
 	}
 
 	var info APIInfo
 	if err := msgpack.NewDecoder(bytes.NewReader(output)).Decode(&info); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode APIInfo: %w", err)
 	}
 	return &info, nil
 }
@@ -294,9 +311,12 @@ var nvimTypes = map[string]string{
 	"string":        "String",
 	"float64":       "Float",
 
+	"Channel":                  "Dictionary",
 	"*Channel":                 "Dictionary",
 	"*ClientVersion":           "Dictionary",
+	"HLAttrs":                  "Dictionary",
 	"*HLAttrs":                 "Dictionary",
+	"WindowConfig":             "Dictionary",
 	"*WindowConfig":            "Dictionary",
 	"ClientAttributes":         "Dictionary",
 	"ClientMethods":            "Dictionary",
@@ -368,7 +388,7 @@ var specialAPIs = map[string]bool{
 func compareFunctions(functions []*Function) error {
 	info, err := readAPIInfo()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to real APIInfo :%w", err)
 	}
 
 	sort.Sort(byName(functions))
@@ -427,18 +447,21 @@ func compareFunctions(functions []*Function) error {
 		j++
 	}
 
-	return compareTemplate.Execute(os.Stdout, &data)
+	if err := compareTemplate.Execute(os.Stdout, &data); err != nil {
+		return fmt.Errorf("falied to Execute compareTemplate: %w", err)
+	}
+	return nil
 }
 
 func dumpAPI() error {
 	output, err := exec.Command("nvim", "--api-info").Output()
 	if err != nil {
-		return fmt.Errorf("error getting API info: %v", err)
+		return fmt.Errorf("error getting API info: %w", err)
 	}
 
 	var v interface{}
 	if err := msgpack.NewDecoder(bytes.NewReader(output)).Decode(&v); err != nil {
-		return fmt.Errorf("error parsing msppack: %v", err)
+		return fmt.Errorf("error parsing msppack: %w", err)
 	}
 
 	p, err := json.MarshalIndent(v, "", "    ")
@@ -451,7 +474,7 @@ func dumpAPI() error {
 }
 
 func main() {
-	log.SetFlags(0)
+	log.SetFlags(log.Lshortfile)
 
 	generateFlag := flag.String("generate", "", "Generate implementation from apidef.go and write to `file`")
 	compareFlag := flag.Bool("compare", false, "Compare apidef.go to the output of nvim --api-info")
