@@ -11,44 +11,75 @@ type Mode struct {
 
 // HLAttrs represents a highlight definitions.
 type HLAttrs struct {
-	Bold       bool `msgpack:"bold,omitempty"`
-	Underline  bool `msgpack:"underline,omitempty"`
-	Undercurl  bool `msgpack:"undercurl,omitempty"`
-	Italic     bool `msgpack:"italic,omitempty"`
-	Reverse    bool `msgpack:"reverse,omitempty"`
-	Foreground int  `msgpack:"foreground,omitempty" empty:"-1"`
-	Background int  `msgpack:"background,omitempty" empty:"-1"`
-	Special    int  `msgpack:"special,omitempty" empty:"-1"`
+	// Bold is the bold font style.
+	Bold bool `msgpack:"bold,omitempty"`
+
+	// Underline is the underline font style.
+	Underline bool `msgpack:"underline,omitempty"`
+
+	// Undercurl is the curly underline font style.
+	Undercurl bool `msgpack:"undercurl,omitempty"`
+
+	// Italic is the italic font style.
+	Italic bool `msgpack:"italic,omitempty"`
+
+	// Reverse is the reverse to foreground and background.
+	Reverse bool `msgpack:"reverse,omitempty"`
+
+	// Inverse same as Reverse.
+	Inverse bool `msgpack:"inverse,omitempty"`
+
+	// Standout is the standout font style.
+	Standout int `msgpack:"standout,omitempty"`
+
+	// Nocombine override attributes instead of combining them.
+	Nocombine int `msgpack:"nocombine,omitempty"`
+
+	// Foreground use normal foreground color.
+	Foreground int `msgpack:"foreground,omitempty" empty:"-1"`
+
+	// Background use normal background color.
+	Background int `msgpack:"background,omitempty" empty:"-1"`
+
+	// Special is used for undercurl and underline.
+	Special int `msgpack:"special,omitempty" empty:"-1"`
+
+	// Blend override the blend level for a highlight group within the popupmenu
+	// or floating windows.
+	//
+	// Only takes effect if 'pumblend' or 'winblend' is set for the menu or window.
+	// See the help at the respective option.
+	Blend int `msgpack:"blend,omitempty"`
 }
 
 // Mapping represents a nvim mapping options.
 type Mapping struct {
 	// LHS is the {lhs} of the mapping.
-	LHS string `msgpack:"lhs"`
+	LHS string `msgpack:"lhs,omitempty"`
 
 	// RHS is the {hrs} of the mapping as typed.
-	RHS string `msgpack:"rhs"`
+	RHS string `msgpack:"rhs,omitempty"`
 
-	// Silent is 1 for a |:map-silent| mapping, else 0.
-	Silent int `msgpack:"silent"`
+	// Silent is 1 for a :map-silent mapping, else 0.
+	Silent int `msgpack:"silent,omitempty"`
 
 	// Noremap is 1 if the {rhs} of the mapping is not remappable.
-	NoRemap int `msgpack:"noremap"`
+	NoRemap int `msgpack:"noremap,omitempty"`
 
 	// Expr is  1 for an expression mapping.
-	Expr int `msgpack:"expr"`
+	Expr int `msgpack:"expr,omitempty"`
 
 	// Buffer for a local mapping.
-	Buffer int `msgpack:"buffer"`
+	Buffer int `msgpack:"buffer,omitempty"`
 
 	// SID is the script local ID, used for <sid> mappings.
-	SID int `msgpack:"sid"`
+	SID int `msgpack:"sid,omitempty"`
 
 	// Nowait is 1 if map does not wait for other, longer mappings.
-	NoWait int `msgpack:"nowait"`
+	NoWait int `msgpack:"nowait,omitempty"`
 
 	// Mode specifies modes for which the mapping is defined.
-	Mode string `msgpack:"string"`
+	Mode string `msgpack:"string,omitempty"`
 }
 
 // ClientVersion represents a version of client for nvim.
@@ -133,7 +164,7 @@ const (
 // Client represents a identify the client for nvim.
 //
 // Can be called more than once, but subsequent calls will remove earlier info, which should be resent if it is still valid.
-// (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info)
+// (This could happen if a library first identifies the channel, and a plugin using that library later overrides that info).
 type Client struct {
 	// Name is short name for the connected client.
 	Name string `msgpack:"name,omitempty"`
@@ -159,13 +190,13 @@ type Channel struct {
 	// Mode is the how data received on the channel is interpreted.
 	Mode string `msgpack:"mode,omitempty"`
 
-	// Pty is the name of pseudoterminal, if one is used (optional).
+	// Pty is the name of pseudoterminal, if one is used.
 	Pty string `msgpack:"pty,omitempty"`
 
-	// Buffer is the buffer with connected terminal instance (optional).
+	// Buffer is the buffer with connected terminal instance.
 	Buffer Buffer `msgpack:"buffer,omitempty"`
 
-	// Client is the information about the client on the other end of the RPC channel, if it has added it using nvim_set_client_info (optional).
+	// Client is the information about the client on the other end of the RPC channel, if it has added it using SetClientInfo.
 	Client *Client `msgpack:"client,omitempty"`
 }
 
@@ -216,49 +247,83 @@ type UI struct {
 
 // Command represents a Neovim Ex command.
 type Command struct {
-	Bang        bool   `msgpack:"bang"`
-	Complete    string `msgpack:"complete,omitempty"`
-	Nargs       string `msgpack:"nargs"`
-	Range       string `msgpack:"range,omitempty"`
-	Name        string `msgpack:"name"`
-	ScriptID    int    `msgpack:"script_id"`
-	Bar         bool   `msgpack:"bar"`
-	Register    bool   `msgpack:"register"`
-	Addr        string `msgpack:"addr,omitempty"`
-	Count       string `msgpack:"count,omitempty"`
+	// Name is the name of command.
+	Name string `msgpack:"name"`
+
+	// Nargs is the command-nargs.
+	// See :help :command-nargs.
+	Nargs string `msgpack:"nargs"`
+
+	// Complete is the specifying one or the other of the following attributes.
+	// See :help :command-completion.
+	Complete string `msgpack:"complete,omitempty"`
+
+	// CompleteArg is the argument completion name.
 	CompleteArg string `msgpack:"complete_arg,omitempty"`
-	Definition  string `msgpack:"definition"`
+
+	// Range is the specify that the command does take a range, or that it takes an arbitrary count value.
+	Range string `msgpack:"range,omitempty"`
+
+	// Count is a count (default N) which is specified either in the line number position, or as an initial argument, like `:Next`.
+	// Specifying -count (without a default) acts like -count=0
+	Count string `msgpack:"count,omitempty"`
+
+	// Addr is the special characters in the range like `.`, `$` or `%` which by default correspond to the current line,
+	// last line and the whole buffer, relate to arguments, (loaded) buffers, windows or tab pages.
+	Addr string `msgpack:"addr,omitempty"`
+
+	// Bang is the command can take a ! modifier, like `:q` or `:w`.
+	Bang bool `msgpack:"bang"`
+
+	// Bar is the command can be followed by a `|` and another command.
+	// A `|` inside the command argument is not allowed then. Also checks for a `"` to start a comment.
+	Bar bool `msgpack:"bar"`
+
+	// Register is the first argument to the command can be an optional register name, like `:del`, `:put`, `:yank`.
+	Register bool `msgpack:"register"`
+
+	// ScriptID is the line number in the script sid.
+	ScriptID int `msgpack:"script_id"`
+
+	// Definition is the command's replacement string.
+	Definition string `msgpack:"definition"`
 }
 
 // VirtualTextChunk represents a virtual text chunk.
 type VirtualTextChunk struct {
-	Text    string `msgpack:",array"`
-	HLGroup string `msgpack:",array"`
+	// Text is VirtualText text.
+	Text string `msgpack:",array"`
+
+	// HLGroup is VirtualText highlight group.
+	HLGroup string
 }
 
 // WindowConfig represents a configs of OpenWindow.
 //
 // Relative is the specifies the type of positioning method used for the floating window.
-// The positioning method keys names:
+// The positioning method string keys names:
 //
-//  editor: The global editor grid.
-//  win: Window given by the `win` field, or current window by default.
-//  cursor: Cursor position in current window.
-//
-// Win is the Window for relative="win".
+//  editor
+// The global editor grid.
+//  win
+// Window given by the `win` field, or current window by default.
+//  cursor
+// Cursor position in current window.
 //
 // Anchor is the decides which corner of the float to place at row and col.
 //
-//  NW: northwest (default)
-//  NE: northeast
-//  SW: southwest
-//  SE: southeast
+//  NW
+// northwest (default)
+//  NE
+// northeast
+//  SW
+// southwest
+//  SE
+// southeast
 //
-// Width is the window width (in character cells). Minimum of 1.
+// BufPos places float relative to buffer text only when Relative == "win".
+// Takes a tuple of zero-indexed [line, column].
 //
-// Height is the window height (in character cells). Minimum of 1.
-//
-// BufPos places float relative to buffer text only when relative="win". Takes a tuple of zero-indexed [line, column].
 // Row and Col if given are applied relative to this position, else they default to Row=1 and Col=0 (thus like a tooltip near the buffer text).
 //
 // Row is the row position in units of "screen cell height", may be fractional.
@@ -274,30 +339,59 @@ type VirtualTextChunk struct {
 // Style is the Configure the appearance of the window.
 // Currently only takes one non-empty value:
 //
-//  minimal:
-//    Nvim will display the window with many UI options disabled.
-//    This is useful when displaying a temporary float where the text should not be edited.
-//    Disables 'number', 'relativenumber', 'cursorline', 'cursorcolumn','foldcolumn', 'spell' and 'list' options. 'signcolumn' is changed to `auto`.
-//    The end-of-buffer region is hidden by setting `eob` flag of 'fillchars' to a space char, and clearing the EndOfBuffer region in 'winhighlight'.
+//  minimal
+// Nvim will display the window with many UI options disabled.
+// This is useful when displaying a temporary float where the text should not be edited.
+//
+// Disables `number`, `relativenumber`, `cursorline`, `cursorcolumn`, `foldcolumn`, `spell` and `list` options.
+// And, `signcolumn` is changed to `auto` and `colorcolumn` is cleared.
+//
+// The end-of-buffer region is hidden by setting `eob` flag of `fillchars` to a space char, and clearing the EndOfBuffer region in `winhighlight`.
 type WindowConfig struct {
-	Relative  string `msgpack:"relative,omitempty"`
-	Win       Window `msgpack:"win,omitempty"`
-	Anchor    string `msgpack:"anchor,omitempty" empty:"NW"`
-	Width     int    `msgpack:"width" empty:"1"`
-	Height    int    `msgpack:"height" empty:"1"`
-	BufPos    [2]int `msgpack:"bufpos,omitempty"`
-	Row       int    `msgpack:"row,omitempty"`
-	Col       int    `msgpack:"col,omitempty"`
-	Focusable bool   `msgpack:"focusable,omitempty" empty:"true"`
-	External  bool   `msgpack:"external,omitempty"`
-	Style     string `msgpack:"style,omitempty"`
+	// Relative is the specifies the type of positioning method used for the floating window.
+	Relative string `msgpack:"relative,omitempty"`
+
+	// Win is the Window for relative="win".
+	Win Window `msgpack:"win,omitempty"`
+
+	// Anchor is the decides which corner of the float to place at row and col.
+	Anchor string `msgpack:"anchor,omitempty" empty:"NW"`
+
+	// Width is the window width (in character cells). Minimum of 1.
+	Width int `msgpack:"width" empty:"1"`
+
+	// Height is the window height (in character cells). Minimum of 1.
+	Height int `msgpack:"height" empty:"1"`
+
+	// BufPos places float relative to buffer text only when relative="win".
+	BufPos [2]int `msgpack:"bufpos,omitempty"`
+
+	// Row is the row position in units of "screen cell height", may be fractional.
+	Row float64 `msgpack:"row,omitempty"`
+
+	// Col is the column position in units of "screen cell width", may be fractional.
+	Col float64 `msgpack:"col,omitempty"`
+
+	// Focusable whether the enable focus by user actions (wincmds, mouse events).
+	Focusable bool `msgpack:"focusable,omitempty" empty:"true"`
+
+	// External is the GUI should display the window as an external top-level window.
+	External bool `msgpack:"external,omitempty"`
+
+	// Style is the Configure the appearance of the window.
+	Style string `msgpack:"style,omitempty"`
 }
 
-// ExtMarks represents a BufferExtmarks returns type.
+// ExtMarks represents a extmarks type.
 type ExtMarks struct {
-	ExtmarkID int `msgpack:",array"`
-	Row       int
-	Col       int
+	// ID is the extmarks ID.
+	ID int `msgpack:",array"`
+
+	// Row is the extmark row position.
+	Row int
+
+	// Col is the extmark column position.
+	Col int
 }
 
 // OptionInfo represents a option information.

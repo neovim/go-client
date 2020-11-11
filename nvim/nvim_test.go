@@ -787,8 +787,8 @@ func testExtmarks(t *testing.T, v *Nvim) func(*testing.T) {
 		if len(extmarks) > 1 {
 			t.Fatalf("expected extmarks length to 1 but %d", len(extmarks))
 		}
-		if extmarks[0].ExtmarkID != gotExtMarkID {
-			t.Fatalf("got %d extMarkID but want %d", extmarks[0].ExtmarkID, extMarkID)
+		if extmarks[0].ID != gotExtMarkID {
+			t.Fatalf("got %d extMarkID but want %d", extmarks[0].ID, extMarkID)
 		}
 		if extmarks[0].Row != wantLine {
 			t.Fatalf("got %d extmarks Row but want %d", extmarks[0].Row, wantLine)
