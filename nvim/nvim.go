@@ -63,7 +63,6 @@ func (v *Nvim) startServe() {
 
 // Close releases the resources used the client.
 func (v *Nvim) Close() error {
-
 	if v.cmd != nil && v.cmd.Process != nil {
 		// The child process should exit cleanly on call to v.ep.Close(). Kill
 		// the process if it does not exit as expected.
@@ -191,7 +190,6 @@ func ChildProcessLogf(logf func(string, ...interface{})) ChildProcessOption {
 // NewChildProcess returns a client connected to stdin and stdout of a new
 // child process.
 func NewChildProcess(options ...ChildProcessOption) (*Nvim, error) {
-
 	cpos := &childProcessOptions{
 		serve:   true,
 		logf:    log.Printf,
@@ -234,6 +232,8 @@ func NewChildProcess(options ...ChildProcessOption) (*Nvim, error) {
 }
 
 // EmbedOptions specifies options for starting an embedded instance of Nvim.
+//
+// Deprecated: Use ChildProcessOption instead.
 type EmbedOptions struct {
 	// Args specifies the command line arguments. Do not include the program
 	// name (the first argument) or the --embed option.
@@ -505,6 +505,10 @@ type batchArg struct {
 	p []byte
 }
 
+// compile time check whether the batchArg implements msgpack.Marshaler interface.
+var _ msgpack.Marshaler = (*batchArg)(nil)
+
+// MarshalMsgPack implements msgpack.Marshaler.
 func (a *batchArg) MarshalMsgPack(enc *msgpack.Encoder) error {
 	enc.PackArrayLen(int64(a.n))
 	return enc.PackRaw(a.p)
@@ -520,6 +524,7 @@ type BatchError struct {
 	Err error
 }
 
+// Error implements the error interface.
 func (e *BatchError) Error() string {
 	return e.Err.Error()
 }
@@ -541,6 +546,7 @@ func fixError(sm string, err error) error {
 // ErrorList is a list of errors.
 type ErrorList []error
 
+// Error implements the error interface.
 func (el ErrorList) Error() string {
 	return el[0].Error()
 }
