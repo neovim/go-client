@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: "master"
+    branches: "*"
   pull_request:
     branches: "*"
 
@@ -39,6 +39,6 @@ jobs:
 
     - uses: codecov/codecov-action@v1
       with:
-        file: ./coverage.out
+        file: coverage.out
         flags: ${{ runner.os }}-${{ matrix.go-version }}
         fail_ci_if_error: true
