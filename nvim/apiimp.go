@@ -403,6 +403,34 @@ func (b *Batch) IsBufferLoaded(buffer Buffer, result *bool) {
 	b.call("nvim_buf_is_loaded", result, buffer)
 }
 
+// DeleteBuffer deletes the buffer.
+//
+// See:
+//  :help bwipeout
+//
+// The `opts` is additional options. Supports the key:
+//  force
+// Force deletion and ignore unsaved changes.
+//  unload
+// Unloaded only, do not delete. See :help bunload.
+func (v *Nvim) DeleteBuffer(buffer Buffer, opts map[string]bool) error {
+	return v.call("nvim_buf_delete", nil, buffer, opts)
+}
+
+// DeleteBuffer deletes the buffer.
+//
+// See:
+//  :help bwipeout
+//
+// The `opts` is additional options. Supports the key:
+//  force
+// Force deletion and ignore unsaved changes.
+//  unload
+// Unloaded only, do not delete. See :help bunload.
+func (b *Batch) DeleteBuffer(buffer Buffer, opts map[string]bool) {
+	b.call("nvim_buf_delete", nil, buffer, opts)
+}
+
 // IsBufferValid returns true if the buffer is valid.
 func (v *Nvim) IsBufferValid(buffer Buffer) (bool, error) {
 	var result bool
@@ -845,6 +873,34 @@ func (b *Batch) SetPumHeight(height int) {
 	b.call("nvim_ui_pum_set_height", nil, height)
 }
 
+// SetPumBounds tells Nvim the geometry of the popumenu, to align floating windows with an
+// external popup menu.
+//
+// Note that this method is not to be confused with SetPumHeight,
+// which sets the number of visible items in the popup menu, while this
+// function sets the bounding box of the popup menu, including visual
+// elements such as borders and sliders.
+//
+// Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
+// numbers to the popup menu geometry.
+func (v *Nvim) SetPumBounds(width float64, height float64, row float64, col float64) error {
+	return v.call("nvim_ui_pum_set_bounds", nil, width, height, row, col)
+}
+
+// SetPumBounds tells Nvim the geometry of the popumenu, to align floating windows with an
+// external popup menu.
+//
+// Note that this method is not to be confused with SetPumHeight,
+// which sets the number of visible items in the popup menu, while this
+// function sets the bounding box of the popup menu, including visual
+// elements such as borders and sliders.
+//
+// Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
+// numbers to the popup menu geometry.
+func (b *Batch) SetPumBounds(width float64, height float64, row float64, col float64) {
+	b.call("nvim_ui_pum_set_bounds", nil, width, height, row, col)
+}
+
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
 func (v *Nvim) Exec(src string, output bool) (string, error) {
 	var result string
@@ -901,6 +957,48 @@ func (v *Nvim) HLByName(name string, rgb bool) (*HLAttrs, error) {
 // HLByName gets a highlight definition by name.
 func (b *Batch) HLByName(name string, rgb bool, result **HLAttrs) {
 	b.call("nvim_get_hl_by_name", result, name, rgb)
+}
+
+// SetHighlight set a highlight group.
+//
+// name arg is highlight group name, like ErrorMsg.
+//
+// val arg is highlight definiton map, like HLByName.
+func (v *Nvim) SetHighlight(nsID int, name string, val *HLAttrs) error {
+	return v.call("nvim_set_hl", nil, nsID, name, val)
+}
+
+// SetHighlight set a highlight group.
+//
+// name arg is highlight group name, like ErrorMsg.
+//
+// val arg is highlight definiton map, like HLByName.
+func (b *Batch) SetHighlight(nsID int, name string, val *HLAttrs) {
+	b.call("nvim_set_hl", nil, nsID, name, val)
+}
+
+// SetHighlightNameSpace set active namespace for highlights.
+//
+// NB: this function can be called from async contexts, but the
+// semantics are not yet well-defined.
+// To start with SetDecorationProvider on_win and on_line callbacks
+// are explicitly allowed to change the namespace during a redraw cycle.
+//
+// The `nsID` arg is the namespace to activate.
+func (v *Nvim) SetHighlightNameSpace(nsID int) error {
+	return v.call("nvim_set_hl_ns", nil, nsID)
+}
+
+// SetHighlightNameSpace set active namespace for highlights.
+//
+// NB: this function can be called from async contexts, but the
+// semantics are not yet well-defined.
+// To start with SetDecorationProvider on_win and on_line callbacks
+// are explicitly allowed to change the namespace during a redraw cycle.
+//
+// The `nsID` arg is the namespace to activate.
+func (b *Batch) SetHighlightNameSpace(nsID int) {
+	b.call("nvim_set_hl_ns", nil, nsID)
 }
 
 // FeedKeys Pushes keys to the Nvim user input buffer. Options can be a string
