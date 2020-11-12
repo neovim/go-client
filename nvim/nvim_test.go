@@ -109,52 +109,73 @@ func testSimpleHandler(t *testing.T, v *Nvim) func(*testing.T) {
 
 func testBuffer(t *testing.T, v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		bufs, err := v.Buffers()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(bufs) != 1 {
-			t.Errorf("expected one buf, found %d bufs", len(bufs))
-		}
-		if bufs[0] == 0 {
-			t.Errorf("bufs[0] == 0")
-		}
-		buf, err := v.CurrentBuffer()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if buf != bufs[0] {
-			t.Fatalf("buf %v != bufs[0] %v", buf, bufs[0])
-		}
-		err = v.SetCurrentBuffer(buf)
-		if err != nil {
-			t.Fatal(err)
-		}
+		t.Run("Buffers", func(t *testing.T) {
+			bufs, err := v.Buffers()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(bufs) != 1 {
+				t.Errorf("expected one buf, found %d bufs", len(bufs))
+			}
+			if bufs[0] == 0 {
+				t.Errorf("bufs[0] == 0")
+			}
 
-		err = v.SetBufferVar(buf, "bvar", "bval")
-		if err != nil {
-			t.Fatal(err)
-		}
+			buf, err := v.CurrentBuffer()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if buf != bufs[0] {
+				t.Fatalf("buf %v != bufs[0] %v", buf, bufs[0])
+			}
 
-		var s string
-		err = v.BufferVar(buf, "bvar", &s)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if s != "bval" {
-			t.Fatalf("expected bvar=bval, got %s", s)
-		}
+			if err := v.SetCurrentBuffer(buf); err != nil {
+				t.Fatal(err)
+			}
+		})
 
-		err = v.DeleteBufferVar(buf, "bvar")
-		if err != nil {
-			t.Fatal(err)
-		}
+		t.Run("Var", func(t *testing.T) {
+			buf, err := v.CurrentBuffer()
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		s = ""
-		err = v.BufferVar(buf, "bvar", &s)
-		if err == nil {
-			t.Errorf("expected key not found error")
-		}
+			if err := v.SetBufferVar(buf, "bvar", "bval"); err != nil {
+				t.Fatal(err)
+			}
+
+			var s string
+			if err := v.BufferVar(buf, "bvar", &s); err != nil {
+				t.Fatal(err)
+			}
+			if s != "bval" {
+				t.Fatalf("expected bvar=bval, got %s", s)
+			}
+
+			if err := v.DeleteBufferVar(buf, "bvar"); err != nil {
+				t.Fatal(err)
+			}
+
+			s = ""
+			if err := v.BufferVar(buf, "bvar", &s); err == nil {
+				t.Errorf("expected key not found error")
+			}
+		})
+
+		t.Run("Delete", func(t *testing.T) {
+			buf, err := v.CreateBuffer(true, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			deleteBufferOpts := map[string]bool{
+				"force":  true,
+				"unload": false,
+			}
+			if err := v.DeleteBuffer(buf, deleteBufferOpts); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
 
@@ -414,27 +435,92 @@ func testHighlight(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := v.Command("hi NewHighlight cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold"); err != nil {
+		const cmd = "hi NewHighlight cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold"
+		if err := v.Command(cmd); err != nil {
 			t.Fatal(err)
 		}
 
-		cterm := &HLAttrs{Underline: true, Foreground: -1, Background: 10, Special: -1}
-		gui := &HLAttrs{Bold: true, Foreground: cm["Red"], Background: cm["Yellow"], Special: cm["Blue"]}
+		wantCTerm := &HLAttrs{
+			Underline:  true,
+			Foreground: -1,
+			Background: 10,
+			Special:    -1,
+		}
+		wantGUI := &HLAttrs{
+			Bold:       true,
+			Foreground: cm["Red"],
+			Background: cm["Yellow"],
+			Special:    cm["Blue"],
+		}
 
-		var id int
-		if err := v.Eval("hlID('NewHighlight')", &id); err != nil {
+		var nsID int
+		if err := v.Eval("hlID('NewHighlight')", &nsID); err != nil {
 			t.Fatal(err)
 		}
-		hl, err := v.HLByID(id, false)
+
+		gotCTermHL, err := v.HLByID(nsID, false)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !reflect.DeepEqual(hl, cterm) {
-			t.Errorf("HLByID(id, false)\n got %+v,\nwant %+v", hl, cterm)
+		if !reflect.DeepEqual(gotCTermHL, wantCTerm) {
+			t.Errorf("HLByID(id, false)\n got %+v,\nwant %+v", gotCTermHL, wantCTerm)
 		}
-		hl, err = v.HLByID(id, true)
-		if !reflect.DeepEqual(hl, gui) {
-			t.Errorf("HLByID(id, true)\n got %+v,\nwant %+v", hl, gui)
+
+		gotGUIHL, err := v.HLByID(nsID, true)
+		if !reflect.DeepEqual(gotGUIHL, wantGUI) {
+			t.Errorf("HLByID(id, true)\n got %+v,\nwant %+v", gotGUIHL, wantGUI)
+		}
+
+		errorMsgHL, err := v.HLByName("ErrorMsg", true)
+		if err != nil {
+			t.Fatal(err)
+		}
+		errorMsgHL.Bold = true
+		errorMsgHL.Underline = true
+		errorMsgHL.Italic = true
+		if err := v.SetHighlight(nsID, "ErrorMsg", errorMsgHL); err != nil {
+			t.Fatal(err)
+		}
+
+		wantErrorMsgEHL := &HLAttrs{
+			Bold:       true,
+			Underline:  true,
+			Italic:     true,
+			Foreground: 16777215,
+			Background: 16711680,
+			Special:    -1,
+		}
+		if !reflect.DeepEqual(wantErrorMsgEHL, errorMsgHL) {
+			t.Fatalf("SetHighlight:\nwant %#v\n got %#v", wantErrorMsgEHL, errorMsgHL)
+		}
+
+		const cmd2 = "hi NewHighlight2 guifg=yellow guibg=red gui=bold"
+		if err := v.Command(cmd2); err != nil {
+			t.Fatal(err)
+		}
+		var nsID2 int
+		if err := v.Eval("hlID('NewHighlight2')", &nsID2); err != nil {
+			t.Fatal(err)
+		}
+		if err := v.SetHighlightNameSpace(nsID2); err != nil {
+			t.Fatal(err)
+		}
+		want := &HLAttrs{
+			Bold:       true,
+			Underline:  false,
+			Undercurl:  false,
+			Italic:     false,
+			Reverse:    false,
+			Foreground: 16776960,
+			Background: 16711680,
+			Special:    -1,
+		}
+		got, err := v.HLByID(nsID2, true)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(want, got) {
+			t.Fatalf("SetHighlight:\nwant %#v\n got %#v", want, got)
 		}
 	}
 }
