@@ -3,7 +3,7 @@ projects: *projects
   threshold: 10%
   if_not_found: success
   if_ci_failed: error
-pathes: *patches
+patch: *patch
   only_pulls: true
   target: auto
   threshold: 10%
@@ -31,17 +31,17 @@ coverage:
     patch:
       default: off
       Linux-1.13.x:
-        <<: *patches
+        <<: *patch
       Linux-1.14.x:
-        <<: *patches
+        <<: *patch
       Linux-1.15.x:
-        <<: *patches
+        <<: *patch
       macOS-1.13.x:
-        <<: *patches
+        <<: *patch
       macOS-1.14.x:
-        <<: *patches
+        <<: *patch
       macOS-1.15.x:
-        <<: *patches
+        <<: *patch
     changes: true
 
 flags:
