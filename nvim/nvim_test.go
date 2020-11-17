@@ -2,6 +2,7 @@ package nvim
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -15,31 +16,64 @@ import (
 	"time"
 )
 
-func newChildProcess(tb testing.TB) (*Nvim, func()) {
+func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 	tb.Helper()
 
-	v, err := NewChildProcess(
-		ChildProcessArgs("-u", "NONE", "-n", "--embed", "--headless"),
+	ctx := context.Background()
+	n, err := NewChildProcess(
+		ChildProcessArgs("-u", "NONE", "-n", "--embed", "--headless", "--noplugin"),
+		ChildProcessContext(ctx),
 		ChildProcessLogf(tb.Logf),
 	)
 	if err != nil {
 		tb.Fatal(err)
 	}
+	v = n
 
 	done := make(chan error, 1)
 	go func() {
 		done <- v.Serve()
 	}()
 
-	return v, func() {
+	cleanup = func() {
 		if err := v.Close(); err != nil {
 			tb.Fatal(err)
 		}
 
-		if _, err := os.Stat(".nvimlog"); err == nil {
-			os.RemoveAll(".nvimlog")
+		select {
+		case err := <-done:
+			if err != nil {
+				tb.Fatal(err)
+			}
+		}
+
+		const nvimlogFile = ".nvimlog"
+		wd, err := os.Getwd()
+		if err != nil {
+			tb.Fatal(err)
+		}
+		if walkErr := filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if info.IsDir() {
+				return nil
+			}
+
+			if fname := info.Name(); fname == nvimlogFile {
+				if err := os.RemoveAll(path); err != nil {
+					return fmt.Errorf("failed to remove %s file: %w", path, err)
+				}
+			}
+
+			return nil
+		}); walkErr != nil {
+			tb.Fatal(fmt.Errorf("walkErr: %w", errors.Unwrap(walkErr)))
 		}
 	}
+
+	return v, cleanup
 }
 
 func TestAPI(t *testing.T) {
