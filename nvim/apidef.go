@@ -274,6 +274,7 @@ func ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lineEnd int) {
 // Deprecated: Use ClearBufferNamespace() instead.
 func ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) {
 	name(nvim_buf_clear_highlight)
+	deprecatedSince(7)
 }
 
 // SetBufferVirtualText sets the virtual text (annotation) for a buffer line.
