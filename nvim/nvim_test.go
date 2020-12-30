@@ -101,6 +101,7 @@ func TestAPI(t *testing.T) {
 	t.Run("Context", testContext(t, v))
 	t.Run("Extmarks", testExtmarks(t, v))
 	t.Run("RuntimeFiles", testRuntimeFiles(t, v))
+	t.Run("AllOptionsInfo", testAllOptionsInfo(t, v))
 	t.Run("OptionsInfo", testOptionsInfo(t, v))
 }
 
@@ -886,7 +887,7 @@ func testRuntimeFiles(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
+func testAllOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		want := &OptionInfo{
 			Name:          "",
@@ -902,6 +903,7 @@ func testOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
 			CommaList:     false,
 			FlagList:      false,
 		}
+
 		got, err := v.AllOptionsInfo()
 		if err != nil {
 			t.Fatal(err)
@@ -910,6 +912,20 @@ func testOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
 			t.Fatalf("got %v but want %v", got, want)
 		}
 
+		b := v.NewBatch()
+		var got2 OptionInfo
+		b.AllOptionsInfo(&got2)
+		if err := b.Execute(); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(want, &got2) {
+			t.Fatalf("got %v but want %v", got2, want)
+		}
+	}
+}
+
+func testOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
 		tests := map[string]struct {
 			name string
 			want *OptionInfo
@@ -966,6 +982,7 @@ func testOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
 				},
 			},
 		}
+
 		for name, tt := range tests {
 			tt := tt
 			t.Run("Nvim/"+name, func(t *testing.T) {
@@ -980,6 +997,7 @@ func testOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
 				}
 			})
 		}
+
 		for name, tt := range tests {
 			tt := tt
 			t.Run("Atomic/"+name, func(t *testing.T) {
