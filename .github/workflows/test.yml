@@ -8,15 +8,25 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go-version: [ 1.13.x, 1.14.x, 1.15.x ]
-        os: [ ubuntu-latest, macos-latest ]
-    env:
-      OS: ${{ matrix.os }}
-      GO_VERSION: ${{ matrix.go-version }}
+        os:
+          # https://github.com/actions/virtual-environments/blob/ubuntu20/20201210.0/images/linux/Ubuntu2004-README.md
+          - ubuntu-20.04
+          # https://github.com/actions/virtual-environments/blob/macOS-10.15/20201212.1/images/macos/macos-10.15-Readme.md
+          - macos-10.15
+        go-version:
+          - 1.13.x
+          - 1.14.x
+          - 1.15.x
+    runs-on: ${{ matrix.os }}
+
     steps:
+    - name: Set flag environment variable
+      run: |
+        echo "OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "GO_VERSION=$(echo ${{ matrix.go-version }} | cut -d. -f-2)" >> $GITHUB_ENV
+
     - name: Install Go
       uses: actions/setup-go@v2
       with:
@@ -40,5 +50,5 @@ jobs:
     - uses: codecov/codecov-action@v1
       with:
         file: coverage.out
-        flags: ${{ runner.os }}-${{ matrix.go-version }}
+        flags: ${{ env.OS }}-${{ env.GO_VERSION }}
         fail_ci_if_error: true
