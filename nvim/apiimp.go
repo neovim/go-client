@@ -1265,6 +1265,144 @@ func (b *Batch) SetVVar(name string, value interface{}) {
 	b.call("nvim_set_vvar", nil, name, value)
 }
 
+// AllOptionsInfo gets the option information for all options.
+//
+// The dictionary has the full option names as keys and option metadata
+// dictionaries as detailed at `nvim_get_option_info`.
+//
+// Resulting map has keys:
+//
+//  name
+// Name of the option (like 'filetype').
+//  shortname
+// Shortened name of the option (like 'ft').
+//  type
+// type of option ("string", "integer" or "boolean").
+//  default
+// The default value for the option.
+//  was_set
+// Whether the option was set.
+//  last_set_sid
+// Last set script id (if any).
+//  last_set_linenr
+// line number where option was set.
+//  last_set_chan
+// Channel where option was set (0 for local).
+//  scope
+// one of "global", "win", or "buf".
+//  global_local
+// whether win or buf option has a global value.
+//  commalist
+// List of comma separated values.
+//  flaglist
+// List of single char flags.
+func (v *Nvim) AllOptionsInfo() (*OptionInfo, error) {
+	var result OptionInfo
+	err := v.call("nvim_get_all_options_info", &result)
+	return &result, err
+}
+
+// AllOptionsInfo gets the option information for all options.
+//
+// The dictionary has the full option names as keys and option metadata
+// dictionaries as detailed at `nvim_get_option_info`.
+//
+// Resulting map has keys:
+//
+//  name
+// Name of the option (like 'filetype').
+//  shortname
+// Shortened name of the option (like 'ft').
+//  type
+// type of option ("string", "integer" or "boolean").
+//  default
+// The default value for the option.
+//  was_set
+// Whether the option was set.
+//  last_set_sid
+// Last set script id (if any).
+//  last_set_linenr
+// line number where option was set.
+//  last_set_chan
+// Channel where option was set (0 for local).
+//  scope
+// one of "global", "win", or "buf".
+//  global_local
+// whether win or buf option has a global value.
+//  commalist
+// List of comma separated values.
+//  flaglist
+// List of single char flags.
+func (b *Batch) AllOptionsInfo(result *OptionInfo) {
+	b.call("nvim_get_all_options_info", result)
+}
+
+// OptionInfo Gets the option information for one option.
+//
+// Resulting dictionary has keys:
+//
+//  name
+// Name of the option (like 'filetype').
+//  shortname
+// Shortened name of the option (like 'ft').
+//  type
+// type of option ("string", "integer" or "boolean").
+//  default
+// The default value for the option.
+//  was_set
+// Whether the option was set.
+//  last_set_sid
+// Last set script id (if any).
+//  last_set_linenr
+// line number where option was set.
+//  last_set_chan
+// Channel where option was set (0 for local).
+//  scope
+// one of "global", "win", or "buf".
+//  global_local
+// whether win or buf option has a global value.
+//  commalist
+// List of comma separated values.
+//  flaglist
+//  List of single char flags.
+func (v *Nvim) OptionInfo(name string) (*OptionInfo, error) {
+	var result OptionInfo
+	err := v.call("nvim_get_option_info", &result, name)
+	return &result, err
+}
+
+// OptionInfo Gets the option information for one option.
+//
+// Resulting dictionary has keys:
+//
+//  name
+// Name of the option (like 'filetype').
+//  shortname
+// Shortened name of the option (like 'ft').
+//  type
+// type of option ("string", "integer" or "boolean").
+//  default
+// The default value for the option.
+//  was_set
+// Whether the option was set.
+//  last_set_sid
+// Last set script id (if any).
+//  last_set_linenr
+// line number where option was set.
+//  last_set_chan
+// Channel where option was set (0 for local).
+//  scope
+// one of "global", "win", or "buf".
+//  global_local
+// whether win or buf option has a global value.
+//  commalist
+// List of comma separated values.
+//  flaglist
+//  List of single char flags.
+func (b *Batch) OptionInfo(name string, result *OptionInfo) {
+	b.call("nvim_get_option_info", result, name)
+}
+
 // Option gets an option.
 func (v *Nvim) Option(name string, result interface{}) error {
 	return v.call("nvim_get_option", result, name)
