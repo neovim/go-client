@@ -63,7 +63,7 @@ coverage:
         if_ci_failed: success
         only_pulls: false
         branches:
-          - codecov-flags
+          - master
         flags:
           - "linux-1.13"
           - "linux-1.14"
