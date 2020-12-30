@@ -16,56 +16,56 @@ coverage:
   status:
     project:
       default: off
-      Linux-1.13.x:
+      linux-1.13:
         <<: *projects
-      Linux-1.14.x:
+      linux-1.14:
         <<: *projects
-      Linux-1.15.x:
+      linux-1.15:
         <<: *projects
-      macOS-1.13.x:
+      macos-1.13:
         <<: *projects
-      macOS-1.14.x:
+      macos-1.14:
         <<: *projects
-      macOS-1.15.x:
+      macos-1.15:
         <<: *projects
     patch:
       default: off
-      Linux-1.13.x:
+      linux-1.13:
         <<: *patch
-      Linux-1.14.x:
+      linux-1.14:
         <<: *patch
-      Linux-1.15.x:
+      linux-1.15:
         <<: *patch
-      macOS-1.13.x:
+      macos-1.13:
         <<: *patch
-      macOS-1.14.x:
+      macos-1.14:
         <<: *patch
-      macOS-1.15.x:
+      macos-1.15:
         <<: *patch
     changes: true
 
 flags:
-  Linux-1.13.x:
+  linux-1.13:
     paths:
       - /
     carryforward: true
-  Linux-1.14.x:
+  linux-1.14:
     paths:
       - /
     carryforward: true
-  Linux-1.15.x:
+  linux-1.15:
     paths:
       - /
     carryforward: true
-  macOS-1.13.x:
+  macos-1.13:
     paths:
       - /
     carryforward: true
-  macOS-1.14.x:
+  macos-1.14:
     paths:
       - /
     carryforward: true
-  macOS-1.15.x:
+  macos-1.15:
     paths:
       - /
     carryforward: true
