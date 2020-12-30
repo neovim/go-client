@@ -1,5 +1,4 @@
-[![Github Actions](https://github.com/neovim/go-client/workflows/Test/badge.svg?branch=master)](https://github.com/neovim/go-client/actions)
-[![pkg.go.dev](https://bit.ly/pkg-go-dev-flat)](https://pkg.go.dev/github.com/neovim/go-client)
+[![Github Actions][Github Actions Badge]][Github Actions] [![codecov.io][codecov-badge]][codecov] [![pkg.go.dev][pkg.go.dev-badge]][pkg.go.dev]
 
 Neovim/go-client is a [Neovim](https://neovim.io/) client and plugin host for [Go](https://golang.org/).
 
@@ -64,3 +63,13 @@ Start Nvim and run the following command:
 ```vim
 :echo Hello('world')
 ```
+
+
+<!-- badge links -->
+[Github Actions]: https://github.com/neovim/go-client/actions
+[codecov]: https://codecov.io/gh/neovim/go-client
+[pkg.go.dev]: https://pkg.go.dev/github.com/neovim/go-client
+
+[Github Actions Badge]: https://github.com/neovim/go-client/workflows/Test/badge.svg?branch=master
+[codecov-badge]: https://codecov.io/gh/neovim/go-client/branch/master/graph/badge.svg?token=hLNAnxbEWr
+[pkg.go.dev-badge]: https://pkg.go.dev/badge/github.com/neovim/go-client.svg
