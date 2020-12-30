@@ -299,3 +299,42 @@ type ExtMarks struct {
 	Row       int
 	Col       int
 }
+
+// OptionInfo represents a option information.
+type OptionInfo struct {
+	// Name is the name of the option (like 'filetype').
+	Name string `msgpack:"name"`
+
+	// ShortName is the shortened name of the option (like 'ft').
+	ShortName string `msgpack:"shortname"`
+
+	// Type is the type of option ("string", "number" or "boolean").
+	Type string `msgpack:"type"`
+
+	// Default is the default value for the option.
+	Default interface{} `msgpack:"default"`
+
+	// WasSet whether the option was set.
+	WasSet bool `msgpack:"was_set"`
+
+	// LastSetSid is the last set script id (if any).
+	LastSetSid int `msgpack:"last_set_sid"`
+
+	// LastSetLinenr is the line number where option was set.
+	LastSetLinenr int `msgpack:"last_set_linenr"`
+
+	// LastSetChan is the channel where option was set (0 for local).
+	LastSetChan int `msgpack:"last_set_chan"`
+
+	// Scope one of "global", "win", or "buf".
+	Scope string `msgpack:"scope"`
+
+	// GlobalLocal whether win or buf option has a global value.
+	GlobalLocal bool `msgpack:"global_local"`
+
+	// CommaList whether the list of comma separated values.
+	CommaList bool `msgpack:"commalist"`
+
+	// FlagList whether the list of single char flags.
+	FlagList bool `msgpack:"flaglist"`
+}

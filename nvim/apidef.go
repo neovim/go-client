@@ -570,6 +570,75 @@ func SetVVar(name string, value interface{}) {
 	name(nvim_set_vvar)
 }
 
+// AllOptionsInfo gets the option information for all options.
+//
+// The dictionary has the full option names as keys and option metadata
+// dictionaries as detailed at `nvim_get_option_info`.
+//
+// Resulting map has keys:
+//
+//  name
+// Name of the option (like 'filetype').
+//  shortname
+// Shortened name of the option (like 'ft').
+//  type
+// type of option ("string", "integer" or "boolean").
+//  default
+// The default value for the option.
+//  was_set
+// Whether the option was set.
+//  last_set_sid
+// Last set script id (if any).
+//  last_set_linenr
+// line number where option was set.
+//  last_set_chan
+// Channel where option was set (0 for local).
+//  scope
+// one of "global", "win", or "buf".
+//  global_local
+// whether win or buf option has a global value.
+//  commalist
+// List of comma separated values.
+//  flaglist
+// List of single char flags.
+func AllOptionsInfo() OptionInfo {
+	name(nvim_get_all_options_info)
+	returnPtr()
+}
+
+// OptionInfo Gets the option information for one option.
+//
+// Resulting dictionary has keys:
+//
+//  name
+// Name of the option (like 'filetype').
+//  shortname
+// Shortened name of the option (like 'ft').
+//  type
+// type of option ("string", "integer" or "boolean").
+//  default
+// The default value for the option.
+//  was_set
+// Whether the option was set.
+//  last_set_sid
+// Last set script id (if any).
+//  last_set_linenr
+// line number where option was set.
+//  last_set_chan
+// Channel where option was set (0 for local).
+//  scope
+// one of "global", "win", or "buf".
+//  global_local
+// whether win or buf option has a global value.
+//  commalist
+// List of comma separated values.
+//  flaglist
+//  List of single char flags.
+func OptionInfo(name string) OptionInfo {
+	name(nvim_get_option_info)
+	returnPtr()
+}
+
 // Option gets an option.
 func Option(name string) interface{} {
 	name(nvim_get_option)
