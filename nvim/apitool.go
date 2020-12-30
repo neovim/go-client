@@ -31,6 +31,8 @@ type APIInfo struct {
 	ErrorTypes map[string]ErrorType     `msgpack:"error_types"`
 	Types      map[string]ExtensionType `msgpack:"types"`
 	Functions  []*Function              `msgpack:"functions"`
+	UIOptions  UIOptions                `msgpack:"ui_options"`
+	Version    Version                  `msgpack:"version"`
 }
 
 type ErrorType struct {
@@ -58,15 +60,39 @@ type Field struct {
 	Name string
 }
 
+type UIOptions []string
+
+type Version struct {
+	APICompatible int  `msgpack:"api_compatible"`
+	APILevel      int  `msgpack:"api_level"`
+	APIPrerelease bool `msgpack:"api_prerelease"`
+	Major         int  `msgpack:"major"`
+	Minor         int  `msgpack:"minor"`
+	Patch         int  `msgpack:"patch"`
+}
+
 var errorTypes = map[string]ErrorType{
-	"Exception":  {ID: 0},
-	"Validation": {ID: 1},
+	"Exception": {
+		ID: 0,
+	},
+	"Validation": {
+		ID: 1,
+	},
 }
 
 var extensionTypes = map[string]ExtensionType{
-	"Buffer":  {ID: 0, Doc: `// Buffer represents a Nvim buffer.`},
-	"Window":  {ID: 1, Doc: `// Window represents a Nvim window.`},
-	"Tabpage": {ID: 2, Doc: `// Tabpage represents a Nvim tabpage.`},
+	"Buffer": {
+		ID:  0,
+		Doc: `// Buffer represents a Nvim buffer.`,
+	},
+	"Window": {
+		ID:  1,
+		Doc: `// Window represents a Nvim window.`,
+	},
+	"Tabpage": {
+		ID:  2,
+		Doc: `// Tabpage represents a Nvim tabpage.`,
+	},
 }
 
 func formatNode(fset *token.FileSet, node interface{}) string {
