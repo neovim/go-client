@@ -1,12 +1,15 @@
 projects: *projects
   target: auto
-  threshold: 10%
+  threshold: 1%
   if_not_found: success
   if_ci_failed: error
 patch: *patch
   only_pulls: true
   target: auto
   threshold: 10%
+
+codecov:
+  allow_coverage_offsets: true
 
 coverage:
   precision: 1
@@ -15,21 +18,33 @@ coverage:
 
   status:
     project:
-      default: off
+      default: false
       linux-1.13:
         <<: *projects
+        flags:
+          - "linux-1.13"
       linux-1.14:
         <<: *projects
+        flags:
+          - "linux-1.14"
       linux-1.15:
         <<: *projects
+        flags:
+          - "linux-1.15"
       macos-1.13:
         <<: *projects
+        flags:
+          - "macos-1.13"
       macos-1.14:
         <<: *projects
+        flags:
+          - "macos-1.14"
       macos-1.15:
         <<: *projects
+        flags:
+          - "macos-1.15"
     patch:
-      default: off
+      default: false
       linux-1.13:
         <<: *patch
       linux-1.14:
@@ -42,7 +57,20 @@ coverage:
         <<: *patch
       macos-1.15:
         <<: *patch
-    changes: true
+    changes:
+      default:
+        base: auto
+        if_ci_failed: success
+        only_pulls: false
+        branches:
+          - codecov-flags
+        flags:
+          - "linux-1.13"
+          - "linux-1.14"
+          - "linux-1.15"
+          - "macos-1.13"
+          - "macos-1.14"
+          - "macos-1.15"
 
 flags:
   linux-1.13:
@@ -73,3 +101,6 @@ flags:
 comment:
   behavior: default
   require_changes: true
+
+github_checks:
+  annotations: true
