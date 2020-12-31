@@ -40,11 +40,9 @@ func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 			tb.Fatal(err)
 		}
 
-		select {
-		case err := <-done:
-			if err != nil {
-				tb.Fatal(err)
-			}
+		err := <-done
+		if err != nil {
+			tb.Fatal(err)
 		}
 
 		const nvimlogFile = ".nvimlog"
@@ -82,30 +80,30 @@ func TestAPI(t *testing.T) {
 	v, cleanup := newChildProcess(t)
 	defer cleanup()
 
-	t.Run("SimpleHandler", testSimpleHandler(t, v))
-	t.Run("Buffer", testBuffer(t, v))
-	t.Run("Window", testWindow(t, v))
-	t.Run("Tabpage", testTabpage(t, v))
-	t.Run("Lines", testLines(t, v))
-	t.Run("Var", testVar(t, v))
-	t.Run("StructValue", testStructValue(t, v))
-	t.Run("Eval", testEval(t, v))
-	t.Run("Batch", testBatch(t, v))
-	t.Run("CallWithNoArgs", testCallWithNoArgs(t, v))
-	t.Run("Mode", testMode(t, v))
-	t.Run("ExecLua", testExecLua(t, v))
-	t.Run("Highlight", testHighlight(t, v))
-	t.Run("BufAttach", testBufAttach(t, v))
-	t.Run("VirtualText", testVirtualText(t, v))
-	t.Run("FloatingWindow", testFloatingWindow(t, v))
-	t.Run("Context", testContext(t, v))
-	t.Run("Extmarks", testExtmarks(t, v))
-	t.Run("RuntimeFiles", testRuntimeFiles(t, v))
-	t.Run("AllOptionsInfo", testAllOptionsInfo(t, v))
-	t.Run("OptionsInfo", testOptionsInfo(t, v))
+	t.Run("SimpleHandler", testSimpleHandler(v))
+	t.Run("Buffer", testBuffer(v))
+	t.Run("Window", testWindow(v))
+	t.Run("Tabpage", testTabpage(v))
+	t.Run("Lines", testLines(v))
+	t.Run("Var", testVar(v))
+	t.Run("StructValue", testStructValue(v))
+	t.Run("Eval", testEval(v))
+	t.Run("Batch", testBatch(v))
+	t.Run("CallWithNoArgs", testCallWithNoArgs(v))
+	t.Run("Mode", testMode(v))
+	t.Run("ExecLua", testExecLua(v))
+	t.Run("Highlight", testHighlight(v))
+	t.Run("BufAttach", testBufAttach(v))
+	t.Run("VirtualText", testVirtualText(v))
+	t.Run("FloatingWindow", testFloatingWindow(v))
+	t.Run("Context", testContext(v))
+	t.Run("Extmarks", testExtmarks(v))
+	t.Run("RuntimeFiles", testRuntimeFiles(v))
+	t.Run("AllOptionsInfo", testAllOptionsInfo(v))
+	t.Run("OptionsInfo", testOptionsInfo(v))
 }
 
-func testSimpleHandler(t *testing.T, v *Nvim) func(*testing.T) {
+func testSimpleHandler(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		cid := v.ChannelID()
 		if cid <= 0 {
@@ -143,223 +141,615 @@ func testSimpleHandler(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testBuffer(t *testing.T, v *Nvim) func(*testing.T) {
+func testBuffer(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		t.Run("Buffers", func(t *testing.T) {
-			bufs, err := v.Buffers()
+		t.Run("Nvim", func(t *testing.T) {
+			t.Run("Buffers", func(t *testing.T) {
+				bufs, err := v.Buffers()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(bufs) != 1 {
+					t.Fatalf("expected one buf, found %d bufs", len(bufs))
+				}
+				if bufs[0] == 0 {
+					t.Fatalf("bufs[0] is not %q: %q", bufs[0], Buffer(0))
+				}
+
+				buf, err := v.CurrentBuffer()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if buf != bufs[0] {
+					t.Fatalf("buf is not bufs[0]: buf %v, bufs[0]: %v", buf, bufs[0])
+				}
+
+				const want = "Buffer:1"
+				if got := buf.String(); got != want {
+					t.Fatalf("buf.String() = %s, want %s", got, want)
+				}
+
+				if err := v.SetCurrentBuffer(buf); err != nil {
+					t.Fatal(err)
+				}
+			})
+
+			t.Run("Var", func(t *testing.T) {
+				buf, err := v.CurrentBuffer()
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				const (
+					varkey = "bvar"
+					varVal = "bval"
+				)
+				if err := v.SetBufferVar(buf, varkey, varVal); err != nil {
+					t.Fatal(err)
+				}
+
+				var s string
+				if err := v.BufferVar(buf, varkey, &s); err != nil {
+					t.Fatal(err)
+				}
+				if s != "bval" {
+					t.Fatalf("expected %s=%s, got %s", s, varkey, varVal)
+				}
+
+				if err := v.DeleteBufferVar(buf, varkey); err != nil {
+					t.Fatal(err)
+				}
+
+				s = "" // reuse
+				if err := v.BufferVar(buf, varkey, &s); err == nil {
+					t.Fatalf("expected %s not found but error is nil: err: %#v", varkey, err)
+				}
+			})
+
+			t.Run("Delete", func(t *testing.T) {
+				buf, err := v.CreateBuffer(true, true)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				deleteBufferOpts := map[string]bool{
+					"force":  true,
+					"unload": false,
+				}
+				if err := v.DeleteBuffer(buf, deleteBufferOpts); err != nil {
+					t.Fatal(err)
+				}
+			})
+
+			t.Run("ChangeTick", func(t *testing.T) {
+				buf, err := v.CreateBuffer(true, true)
+				if err != nil {
+					t.Fatal(err)
+				}
+				// 1 changedtick
+
+				lines := [][]byte{[]byte("hello"), []byte("world")}
+				if err := v.SetBufferLines(buf, 0, -1, true, lines); err != nil {
+					t.Fatal(err)
+				}
+				// 2 changedtick
+
+				const wantChangedTick = 2
+				changedTick, err := v.BufferChangedTick(buf)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if changedTick != wantChangedTick {
+					t.Fatalf("got %d changedTick but want %d", changedTick, wantChangedTick)
+				}
+
+				// cleanup buffer
+				deleteBufferOpts := map[string]bool{
+					"force":  true,
+					"unload": false,
+				}
+				if err := v.DeleteBuffer(buf, deleteBufferOpts); err != nil {
+					t.Fatal(err)
+				}
+			})
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Run("Buffers", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var bufs []Buffer
+				b.Buffers(&bufs)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if len(bufs) != 1 {
+					t.Fatalf("expected one buf, found %d bufs", len(bufs))
+				}
+				if bufs[0] == Buffer(0) {
+					t.Fatalf("bufs[0] is not %q: %q", bufs[0], Buffer(0))
+				}
+
+				var buf Buffer
+				b.CurrentBuffer(&buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if buf != bufs[0] {
+					t.Fatalf("buf is not bufs[0]: buf %v, bufs[0]: %v", buf, bufs[0])
+				}
+
+				const want = "Buffer:1"
+				if got := buf.String(); got != want {
+					t.Fatalf("buf.String() = %s, want %s", got, want)
+				}
+
+				b.SetCurrentBuffer(buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+			})
+
+			t.Run("Var", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var buf Buffer
+				b.CurrentBuffer(&buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				const (
+					varkey = "bvar"
+					varVal = "bval"
+				)
+				b.SetBufferVar(buf, varkey, varVal)
+				var s string
+				b.BufferVar(buf, varkey, &s)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if s != varVal {
+					t.Fatalf("expected bvar=bval, got %s", s)
+				}
+
+				b.DeleteBufferVar(buf, varkey)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				s = "" // reuse
+				b.BufferVar(buf, varkey, &s)
+				if err := b.Execute(); err == nil {
+					t.Fatalf("expected %s not found but error is nil: err: %#v", varkey, err)
+				}
+			})
+
+			t.Run("Delete", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var buf Buffer
+				b.CreateBuffer(true, true, &buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				deleteBufferOpts := map[string]bool{
+					"force":  true,
+					"unload": false,
+				}
+				b.DeleteBuffer(buf, deleteBufferOpts)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+			})
+
+			t.Run("ChangeTick", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var buf Buffer
+				b.CreateBuffer(true, true, &buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				// 1 changedtick
+
+				lines := [][]byte{[]byte("hello"), []byte("world")}
+				b.SetBufferLines(buf, 0, -1, true, lines)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				// 2 changedtick
+
+				const wantChangedTick = 2
+				var changedTick int
+				b.BufferChangedTick(buf, &changedTick)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if changedTick != wantChangedTick {
+					t.Fatalf("got %d changedTick but want %d", changedTick, wantChangedTick)
+				}
+
+				// cleanup buffer
+				deleteBufferOpts := map[string]bool{
+					"force":  true,
+					"unload": false,
+				}
+				b.DeleteBuffer(buf, deleteBufferOpts)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+			})
+		})
+	}
+}
+
+func testWindow(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
+
+			wins, err := v.Windows()
 			if err != nil {
 				t.Fatal(err)
 			}
-			if len(bufs) != 1 {
-				t.Errorf("expected one buf, found %d bufs", len(bufs))
+			if len(wins) != 1 {
+				t.Fatalf("expected one win, found %d wins", len(wins))
 			}
-			if bufs[0] == 0 {
-				t.Errorf("bufs[0] == 0")
+			if wins[0] == 0 {
+				t.Fatalf("wins[0] == 0")
 			}
 
+			win, err := v.CurrentWindow()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if win != wins[0] {
+				t.Fatalf("win is not wins[0]: win: %v wins[0]: %v", win, wins[0])
+			}
+
+			const want = "Window:1000"
+			if got := win.String(); got != want {
+				t.Fatalf("got %s but want %s", got, want)
+			}
+
+			if err := v.SetCurrentWindow(win); err != nil {
+				t.Fatal(err)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			var wins []Window
+			b.Windows(&wins)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if len(wins) != 1 {
+				t.Fatalf("expected one win, found %d wins", len(wins))
+			}
+			if wins[0] == 0 {
+				t.Fatalf("wins[0] == 0")
+			}
+
+			var win Window
+			b.CurrentWindow(&win)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if win != wins[0] {
+				t.Fatalf("win is not wins[0]: win: %v wins[0]: %v", win, wins[0])
+			}
+
+			const want = "Window:1000"
+			if got := win.String(); got != want {
+				t.Fatalf("got %s but want %s", got, want)
+			}
+
+			b.SetCurrentWindow(win)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func testTabpage(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
+
+			pages, err := v.Tabpages()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(pages) != 1 {
+				t.Fatalf("expected one page, found %d pages", len(pages))
+			}
+			if pages[0] == 0 {
+				t.Fatalf("pages[0] is not 0: %d", pages[0])
+			}
+
+			page, err := v.CurrentTabpage()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if page != pages[0] {
+				t.Fatalf("page is not pages[0]: page: %v pages[0]: %v", page, pages[0])
+			}
+
+			const want = "Tabpage:1"
+			if got := page.String(); got != want {
+				t.Fatalf("got %s but want %s", got, want)
+			}
+
+			if err := v.SetCurrentTabpage(page); err != nil {
+				t.Fatal(err)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			var pages []Tabpage
+			b.Tabpages(&pages)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if len(pages) != 1 {
+				t.Fatalf("expected one page, found %d pages", len(pages))
+			}
+			if pages[0] == 0 {
+				t.Fatalf("pages[0] is not 0: %d", pages[0])
+			}
+
+			var page Tabpage
+			b.CurrentTabpage(&page)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if page != pages[0] {
+				t.Fatalf("page is not pages[0]: page: %v pages[0]: %v", page, pages[0])
+			}
+
+			const want = "Tabpage:1"
+			if got := page.String(); got != want {
+				t.Fatalf("got %s but want %s", got, want)
+			}
+
+			b.SetCurrentTabpage(page)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func testLines(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
 			buf, err := v.CurrentBuffer()
 			if err != nil {
 				t.Fatal(err)
 			}
-			if buf != bufs[0] {
-				t.Fatalf("buf %v != bufs[0] %v", buf, bufs[0])
-			}
 
-			if err := v.SetCurrentBuffer(buf); err != nil {
+			lines := [][]byte{[]byte("hello"), []byte("world")}
+			if err := v.SetBufferLines(buf, 0, -1, true, lines); err != nil {
 				t.Fatal(err)
 			}
-		})
-
-		t.Run("Var", func(t *testing.T) {
-			buf, err := v.CurrentBuffer()
+			lines2, err := v.BufferLines(buf, 0, -1, true)
 			if err != nil {
 				t.Fatal(err)
 			}
-
-			if err := v.SetBufferVar(buf, "bvar", "bval"); err != nil {
-				t.Fatal(err)
+			if !reflect.DeepEqual(lines2, lines) {
+				t.Fatalf("lines = %+v, want %+v", lines2, lines)
 			}
 
-			var s string
-			if err := v.BufferVar(buf, "bvar", &s); err != nil {
-				t.Fatal(err)
-			}
-			if s != "bval" {
-				t.Fatalf("expected bvar=bval, got %s", s)
-			}
-
-			if err := v.DeleteBufferVar(buf, "bvar"); err != nil {
-				t.Fatal(err)
-			}
-
-			s = ""
-			if err := v.BufferVar(buf, "bvar", &s); err == nil {
-				t.Errorf("expected key not found error")
-			}
-		})
-
-		t.Run("Delete", func(t *testing.T) {
-			buf, err := v.CreateBuffer(true, true)
+			const wantCount = 2
+			count, err := v.BufferLineCount(buf)
 			if err != nil {
 				t.Fatal(err)
 			}
-
-			deleteBufferOpts := map[string]bool{
-				"force":  true,
-				"unload": false,
+			if count != wantCount {
+				t.Fatalf("got count %d but want %d", count, wantCount)
 			}
-			if err := v.DeleteBuffer(buf, deleteBufferOpts); err != nil {
+
+			const wantOffset = 12 // [][]byte{[]byte("hello"), []byte("\n"), []byte("world"), []byte("\n")}
+			offset, err := v.BufferOffset(buf, count)
+			if err != nil {
 				t.Fatal(err)
+			}
+			if offset != wantOffset {
+				t.Fatalf("got offset %d but want %d", offset, wantOffset)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			b := v.NewBatch()
+
+			var buf Buffer
+			b.CurrentBuffer(&buf)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			lines := [][]byte{[]byte("hello"), []byte("world")}
+			b.SetBufferLines(buf, 0, -1, true, lines)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			var lines2 [][]byte
+			b.BufferLines(buf, 0, -1, true, &lines2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(lines2, lines) {
+				t.Fatalf("lines = %+v, want %+v", lines2, lines)
+			}
+
+			const wantCount = 2
+			var count int
+			b.BufferLineCount(buf, &count)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if count != wantCount {
+				t.Fatalf("count is not 2 %d", count)
+			}
+
+			const wantOffset = 12 // [][]byte{[]byte("hello"), []byte("\n"), []byte("world"), []byte("\n")}
+			var offset int
+			b.BufferOffset(buf, count, &offset)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if offset != wantOffset {
+				t.Fatalf("got offset %d but want %d", offset, wantOffset)
 			}
 		})
 	}
 }
 
-func testWindow(t *testing.T, v *Nvim) func(*testing.T) {
+func testVar(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		wins, err := v.Windows()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(wins) != 1 {
-			t.Fatalf("expected one win, found %d wins", len(wins))
-		}
-		if wins[0] == 0 {
-			t.Fatalf("wins[0] == 0")
-		}
+		t.Run("Nvim", func(t *testing.T) {
+			if err := v.SetVar("gvar", "gval"); err != nil {
+				t.Fatal(err)
+			}
 
-		win, err := v.CurrentWindow()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if win != wins[0] {
-			t.Fatalf("win %v != wins[0] %v", win, wins[0])
-		}
+			var value interface{}
+			if err := v.Var("gvar", &value); err != nil {
+				t.Fatal(err)
+			}
+			if value != "gval" {
+				t.Fatalf("got %v, want %q", value, "gval")
+			}
 
-		const want = "Window:1000"
-		if got := win.String(); got != want {
-			t.Fatalf("got %s but want %s", got, want)
-		}
+			if err := v.SetVar("gvar", ""); err != nil {
+				t.Fatal(err)
+			}
+			value = nil
+			if err := v.Var("gvar", &value); err != nil {
+				t.Fatal(err)
+			}
+			if value != "" {
+				t.Fatalf("got %v, want %q", value, "")
+			}
+		})
 
-		if err := v.SetCurrentWindow(win); err != nil {
-			t.Fatal(err)
-		}
+		t.Run("Batch", func(t *testing.T) {
+			b := v.NewBatch()
+
+			b.SetVar("gvar", "gval")
+			var value interface{}
+			b.Var("gvar", &value)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if value != "gval" {
+				t.Fatalf("got %v, want %q", value, "gval")
+			}
+
+			b.SetVar("gvar", "")
+			value = nil
+			b.Var("gvar", &value)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if value != "" {
+				t.Fatalf("got %v, want %q", value, "")
+			}
+		})
 	}
 }
 
-func testTabpage(t *testing.T, v *Nvim) func(*testing.T) {
+func testStructValue(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		pages, err := v.Tabpages()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(pages) != 1 {
-			t.Fatalf("expected one page, found %d pages", len(pages))
-		}
-		if pages[0] == 0 {
-			t.Fatalf("pages[0] == 0")
-		}
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
 
-		page, err := v.CurrentTabpage()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if page != pages[0] {
-			t.Fatalf("page %v != pages[0] %v", page, pages[0])
-		}
+			var expected, actual struct {
+				Str string
+				Num int
+			}
+			expected.Str = "Hello"
+			expected.Num = 42
+			if err := v.SetVar("structvar", &expected); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.Var("structvar", &actual); err != nil {
+				t.Fatal(err)
+			}
 
-		const want = "Tabpage:1"
-		if got := page.String(); got != want {
-			t.Fatalf("got %s but want %s", got, want)
-		}
+			if !reflect.DeepEqual(&actual, &expected) {
+				t.Fatalf("got %+v, want %+v", &actual, &expected)
+			}
+		})
 
-		if err := v.SetCurrentTabpage(page); err != nil {
-			t.Fatal(err)
-		}
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			var expected, actual struct {
+				Str string
+				Num int
+			}
+			expected.Str = "Hello"
+			expected.Num = 42
+			b.SetVar("structvar", &expected)
+			b.Var("structvar", &actual)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			if !reflect.DeepEqual(&actual, &expected) {
+				t.Fatalf("got %+v, want %+v", &actual, &expected)
+			}
+		})
 	}
 }
 
-func testLines(t *testing.T, v *Nvim) func(*testing.T) {
+func testEval(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		buf, err := v.CurrentBuffer()
-		if err != nil {
-			t.Fatal(err)
-		}
-		lines := [][]byte{[]byte("hello"), []byte("world")}
-		if err := v.SetBufferLines(buf, 0, -1, true, lines); err != nil {
-			t.Fatal(err)
-		}
-		lines2, err := v.BufferLines(buf, 0, -1, true)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(lines2, lines) {
-			t.Fatalf("lines = %+v, want %+v", lines2, lines)
-		}
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
+
+			var a, b string
+			if err := v.Eval(`["hello", "world"]`, []*string{&a, &b}); err != nil {
+				t.Fatal(err)
+			}
+			if a != "hello" || b != "world" {
+				t.Fatalf("a=%q b=%q, want a=hello b=world", a, b)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			var x, y string
+			b.Eval(`["hello", "world"]`, []*string{&x, &y})
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			if x != "hello" || y != "world" {
+				t.Fatalf("a=%q b=%q, want a=hello b=world", x, y)
+			}
+		})
 	}
 }
 
-func testVar(t *testing.T, v *Nvim) func(*testing.T) {
-	return func(t *testing.T) {
-		if err := v.SetVar("gvar", "gval"); err != nil {
-			t.Fatal(err)
-		}
-
-		var value interface{}
-		if err := v.Var("gvar", &value); err != nil {
-			t.Fatal(err)
-		}
-		if value != "gval" {
-			t.Fatalf("got %v, want %q", value, "gval")
-		}
-
-		if err := v.SetVar("gvar", ""); err != nil {
-			t.Fatal(err)
-		}
-		value = nil
-		if err := v.Var("gvar", &value); err != nil {
-			t.Fatal(err)
-		}
-		if value != "" {
-			t.Fatalf("got %v, want %q", value, "")
-		}
-	}
-}
-
-func testStructValue(t *testing.T, v *Nvim) func(*testing.T) {
-	return func(t *testing.T) {
-		var expected, actual struct {
-			Str string
-			Num int
-		}
-		expected.Str = "Hello"
-		expected.Num = 42
-		if err := v.SetVar("structvar", &expected); err != nil {
-			t.Fatal(err)
-		}
-		if err := v.Var("structvar", &actual); err != nil {
-			t.Fatal(err)
-		}
-
-		if !reflect.DeepEqual(&actual, &expected) {
-			t.Fatalf("got %+v, want %+v", &actual, &expected)
-		}
-	}
-}
-
-func testEval(t *testing.T, v *Nvim) func(*testing.T) {
-	return func(t *testing.T) {
-		var a, b string
-		if err := v.Eval(`["hello", "world"]`, []*string{&a, &b}); err != nil {
-			t.Fatal(err)
-		}
-		if a != "hello" || b != "world" {
-			t.Fatalf("a=%q b=%q, want a=hello b=world", a, b)
-		}
-	}
-}
-
-func testBatch(t *testing.T, v *Nvim) func(*testing.T) {
+func testBatch(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		b := v.NewBatch()
 		results := make([]int, 128)
@@ -442,7 +832,7 @@ func testBatch(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testCallWithNoArgs(t *testing.T, v *Nvim) func(*testing.T) {
+func testCallWithNoArgs(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		var wd string
 		err := v.Call("getcwd", &wd)
@@ -452,7 +842,7 @@ func testCallWithNoArgs(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testMode(t *testing.T, v *Nvim) func(*testing.T) {
+func testMode(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		m, err := v.Mode()
 		if err != nil {
@@ -464,117 +854,253 @@ func testMode(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testExecLua(t *testing.T, v *Nvim) func(*testing.T) {
+func testExecLua(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		var n int
-		err := v.ExecLua("local a, b = ... return a + b", &n, 1, 2)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if n != 3 {
-			t.Fatalf("Mode() returned %v, want 3", n)
-		}
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
+
+			var n int
+			err := v.ExecLua("local a, b = ... return a + b", &n, 1, 2)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if n != 3 {
+				t.Fatalf("Mode() returned %v, want 3", n)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			var n int
+			b.ExecLua("local a, b = ... return a + b", &n, 1, 2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if n != 3 {
+				t.Fatalf("Mode() returned %v, want 3", n)
+			}
+		})
 	}
 }
 
-func testHighlight(t *testing.T, v *Nvim) func(*testing.T) {
+func testHighlight(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		cm, err := v.ColorMap()
-		if err != nil {
-			t.Fatal(err)
-		}
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
 
-		const cmd = "hi NewHighlight cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold"
-		if err := v.Command(cmd); err != nil {
-			t.Fatal(err)
-		}
+			cm, err := v.ColorMap()
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		wantCTerm := &HLAttrs{
-			Underline:  true,
-			Foreground: -1,
-			Background: 10,
-			Special:    -1,
-		}
-		wantGUI := &HLAttrs{
-			Bold:       true,
-			Foreground: cm["Red"],
-			Background: cm["Yellow"],
-			Special:    cm["Blue"],
-		}
+			const cmd = `highlight NewHighlight cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold`
+			if err := v.Command(cmd); err != nil {
+				t.Fatal(err)
+			}
 
-		var nsID int
-		if err := v.Eval("hlID('NewHighlight')", &nsID); err != nil {
-			t.Fatal(err)
-		}
+			wantCTerm := &HLAttrs{
+				Underline:  true,
+				Foreground: -1,
+				Background: 10,
+				Special:    -1,
+			}
+			wantGUI := &HLAttrs{
+				Bold:       true,
+				Foreground: cm["Red"],
+				Background: cm["Yellow"],
+				Special:    cm["Blue"],
+			}
 
-		gotCTermHL, err := v.HLByID(nsID, false)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(gotCTermHL, wantCTerm) {
-			t.Errorf("HLByID(id, false)\n got %+v,\nwant %+v", gotCTermHL, wantCTerm)
-		}
+			var nsID int
+			if err := v.Eval("hlID('NewHighlight')", &nsID); err != nil {
+				t.Fatal(err)
+			}
 
-		gotGUIHL, err := v.HLByID(nsID, true)
-		if !reflect.DeepEqual(gotGUIHL, wantGUI) {
-			t.Errorf("HLByID(id, true)\n got %+v,\nwant %+v", gotGUIHL, wantGUI)
-		}
+			gotCTermHL, err := v.HLByID(nsID, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(gotCTermHL, wantCTerm) {
+				t.Errorf("HLByID(id, false)\n got %+v,\nwant %+v", gotCTermHL, wantCTerm)
+			}
 
-		errorMsgHL, err := v.HLByName("ErrorMsg", true)
-		if err != nil {
-			t.Fatal(err)
-		}
-		errorMsgHL.Bold = true
-		errorMsgHL.Underline = true
-		errorMsgHL.Italic = true
-		if err := v.SetHighlight(nsID, "ErrorMsg", errorMsgHL); err != nil {
-			t.Fatal(err)
-		}
+			gotGUIHL, err := v.HLByID(nsID, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(gotGUIHL, wantGUI) {
+				t.Fatalf("HLByID(id, true)\n got %+v,\nwant %+v", gotGUIHL, wantGUI)
+			}
 
-		wantErrorMsgEHL := &HLAttrs{
-			Bold:       true,
-			Underline:  true,
-			Italic:     true,
-			Foreground: 16777215,
-			Background: 16711680,
-			Special:    -1,
-		}
-		if !reflect.DeepEqual(wantErrorMsgEHL, errorMsgHL) {
-			t.Fatalf("SetHighlight:\nwant %#v\n got %#v", wantErrorMsgEHL, errorMsgHL)
-		}
+			errorMsgHL, err := v.HLByName("ErrorMsg", true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			errorMsgHL.Bold = true
+			errorMsgHL.Underline = true
+			errorMsgHL.Italic = true
+			if err := v.SetHighlight(nsID, "ErrorMsg", errorMsgHL); err != nil {
+				t.Fatal(err)
+			}
 
-		const cmd2 = "hi NewHighlight2 guifg=yellow guibg=red gui=bold"
-		if err := v.Command(cmd2); err != nil {
-			t.Fatal(err)
-		}
-		var nsID2 int
-		if err := v.Eval("hlID('NewHighlight2')", &nsID2); err != nil {
-			t.Fatal(err)
-		}
-		if err := v.SetHighlightNameSpace(nsID2); err != nil {
-			t.Fatal(err)
-		}
-		want := &HLAttrs{
-			Bold:       true,
-			Underline:  false,
-			Undercurl:  false,
-			Italic:     false,
-			Reverse:    false,
-			Foreground: 16776960,
-			Background: 16711680,
-			Special:    -1,
-		}
-		got, err := v.HLByID(nsID2, true)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !reflect.DeepEqual(want, got) {
-			t.Fatalf("SetHighlight:\nwant %#v\n got %#v", want, got)
-		}
+			wantErrorMsgEHL := &HLAttrs{
+				Bold:       true,
+				Underline:  true,
+				Italic:     true,
+				Foreground: 16777215,
+				Background: 16711680,
+				Special:    -1,
+			}
+			if !reflect.DeepEqual(wantErrorMsgEHL, errorMsgHL) {
+				t.Fatalf("SetHighlight:\nwant %#v\n got %#v", wantErrorMsgEHL, errorMsgHL)
+			}
+
+			const cmd2 = "hi NewHighlight2 guifg=yellow guibg=red gui=bold"
+			if err := v.Command(cmd2); err != nil {
+				t.Fatal(err)
+			}
+			var nsID2 int
+			if err := v.Eval("hlID('NewHighlight2')", &nsID2); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.SetHighlightNameSpace(nsID2); err != nil {
+				t.Fatal(err)
+			}
+			want := &HLAttrs{
+				Bold:       true,
+				Underline:  false,
+				Undercurl:  false,
+				Italic:     false,
+				Reverse:    false,
+				Foreground: 16776960,
+				Background: 16711680,
+				Special:    -1,
+			}
+			got, err := v.HLByID(nsID2, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(want, got) {
+				t.Fatalf("SetHighlight:\nwant %#v\n got %#v", want, got)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			var cm map[string]int
+			b.ColorMap(&cm)
+
+			const cmd = `highlight NewHighlight cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold`
+			b.Command(cmd)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			wantCTerm := &HLAttrs{
+				Underline:  true,
+				Foreground: -1,
+				Background: 10,
+				Special:    -1,
+			}
+			wantGUI := &HLAttrs{
+				Bold:       true,
+				Foreground: cm["Red"],
+				Background: cm["Yellow"],
+				Special:    cm["Blue"],
+			}
+
+			var nsID int
+			b.Eval("hlID('NewHighlight')", &nsID)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			var gotCTermHL HLAttrs
+			b.HLByID(nsID, false, &gotCTermHL)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&gotCTermHL, wantCTerm) {
+				t.Fatalf("HLByID(id, false)\n got %+v,\nwant %+v", &gotCTermHL, wantCTerm)
+			}
+
+			var gotGUIHL HLAttrs
+			b.HLByID(nsID, true, &gotGUIHL)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&gotGUIHL, wantGUI) {
+				t.Fatalf("HLByID(id, true)\n got %+v,\nwant %+v", &gotGUIHL, wantGUI)
+			}
+
+			var errorMsgHL HLAttrs
+			b.HLByName("ErrorMsg", true, &errorMsgHL)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			errorMsgHL.Bold = true
+			errorMsgHL.Underline = true
+			errorMsgHL.Italic = true
+			b.SetHighlight(nsID, "ErrorMsg", &errorMsgHL)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			wantErrorMsgEHL := &HLAttrs{
+				Bold:       true,
+				Underline:  true,
+				Italic:     true,
+				Foreground: 16777215,
+				Background: 16711680,
+				Special:    -1,
+			}
+			if !reflect.DeepEqual(&errorMsgHL, wantErrorMsgEHL) {
+				t.Fatalf("SetHighlight:\ngot %#v\nwant %#v", &errorMsgHL, wantErrorMsgEHL)
+			}
+
+			const cmd2 = "hi NewHighlight2 guifg=yellow guibg=red gui=bold"
+			b.Command(cmd2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			var nsID2 int
+			b.Eval("hlID('NewHighlight2')", &nsID2)
+			b.SetHighlightNameSpace(nsID2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			want := &HLAttrs{
+				Bold:       true,
+				Underline:  false,
+				Undercurl:  false,
+				Italic:     false,
+				Reverse:    false,
+				Foreground: 16776960,
+				Background: 16711680,
+				Special:    -1,
+			}
+
+			var got HLAttrs
+			b.HLByID(nsID2, true, &got)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(&got, want) {
+				t.Fatalf("SetHighlight:\n got %#v\nwant %#v", &got, want)
+			}
+		})
 	}
 }
 
-func testBufAttach(t *testing.T, v *Nvim) func(*testing.T) {
+func testBufAttach(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		clearBuffer(t, v, 0) // clear curret buffer text
 
@@ -623,11 +1149,11 @@ func testBufAttach(t *testing.T, v *Nvim) func(*testing.T) {
 
 		changedtickExpected := &ChangedtickEvent{
 			Buffer:     1,
-			Changetick: 4,
+			Changetick: 5,
 		}
 		bufLinesEventExpected := &BufLinesEvent{
 			Buffer:      1,
-			Changetick:  5,
+			Changetick:  6,
 			FirstLine:   0,
 			LastLine:    1,
 			LineData:    "[test]",
@@ -677,7 +1203,7 @@ func testBufAttach(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testVirtualText(t *testing.T, v *Nvim) func(*testing.T) {
+func testVirtualText(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		clearBuffer(t, v, Buffer(0)) // clear curret buffer text
 
@@ -712,7 +1238,7 @@ func testVirtualText(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testFloatingWindow(t *testing.T, v *Nvim) func(*testing.T) {
+func testFloatingWindow(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		clearBuffer(t, v, 0) // clear curret buffer text
 		curwin, err := v.CurrentWindow()
@@ -785,7 +1311,7 @@ func testFloatingWindow(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testContext(t *testing.T, v *Nvim) func(*testing.T) {
+func testContext(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		ctxt, err := v.Context(make(map[string][]string))
 		if err != nil {
@@ -802,7 +1328,7 @@ func testContext(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testExtmarks(t *testing.T, v *Nvim) func(*testing.T) {
+func testExtmarks(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		clearBuffer(t, v, 0) // clear curret buffer text
 
@@ -862,7 +1388,7 @@ func testExtmarks(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testRuntimeFiles(t *testing.T, v *Nvim) func(*testing.T) {
+func testRuntimeFiles(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		files, err := v.RuntimeFiles("doc/*_diff.txt", true)
 		if err != nil {
@@ -887,7 +1413,7 @@ func testRuntimeFiles(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testAllOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
+func testAllOptionsInfo(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		want := &OptionInfo{
 			Name:          "",
@@ -924,7 +1450,7 @@ func testAllOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
 	}
 }
 
-func testOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
+func testOptionsInfo(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		tests := map[string]struct {
 			name string
@@ -1000,7 +1526,7 @@ func testOptionsInfo(t *testing.T, v *Nvim) func(*testing.T) {
 
 		for name, tt := range tests {
 			tt := tt
-			t.Run("Atomic/"+name, func(t *testing.T) {
+			t.Run("Batch/"+name, func(t *testing.T) {
 				t.Parallel()
 
 				b := v.NewBatch()
