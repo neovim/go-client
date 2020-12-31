@@ -259,8 +259,8 @@ func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{
 	return &result, err
 }
 {{.Doc}}
-func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result *{{.ReturnType}}) {
-    b.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
+func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} {{.ReturnName}} *{{.ReturnType}}) {
+    b.call("{{.Name}}", {{.ReturnName}}, {{range .Parameters}}{{.Name}},{{end}})
 }
 
 {{else if and (.ReturnName) (not .ReturnPtr)}}
@@ -270,8 +270,8 @@ func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{
 	return {{.ReturnName}}, err
 }
 {{.Doc}}
-func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result *{{.ReturnType}}) {
-    b.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
+func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} {{.ReturnName}} *{{.ReturnType}}) {
+    b.call("{{.Name}}", {{.ReturnName}}, {{range .Parameters}}{{.Name}},{{end}})
 }
 {{else if .ReturnType}}
 {{.Doc}}
