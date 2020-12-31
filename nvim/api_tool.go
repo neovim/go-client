@@ -1,7 +1,7 @@
 // +build ignore
 
-// Command apitool generates apiimp.go from apidef.go. The command also has
-// an option to compare apidef.go to Nvim's current API meta data.
+// Command apitool generates api.go from api_def.go. The command also has
+// an option to compare api_def.go to Nvim's current API meta data.
 package main
 
 import (
@@ -121,10 +121,10 @@ func parseFields(fset *token.FileSet, fl *ast.FieldList) []*Field {
 	return fields
 }
 
-// parseAPIDef parses the file apidef.go.
+// parseAPIDef parses the file api_def.go.
 func parseAPIDef() ([]*Function, error) {
 	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, "apidef.go", nil, parser.ParseComments)
+	file, err := parser.ParseFile(fset, "api_def.go", nil, parser.ParseComments)
 	if err != nil {
 		return nil, err
 	}
@@ -502,8 +502,8 @@ func dumpAPI() error {
 func main() {
 	log.SetFlags(log.Lshortfile)
 
-	generateFlag := flag.String("generate", "", "Generate implementation from apidef.go and write to `file`")
-	compareFlag := flag.Bool("compare", false, "Compare apidef.go to the output of nvim --api-info")
+	generateFlag := flag.String("generate", "", "Generate implementation from api_def.go and write to `file`")
+	compareFlag := flag.Bool("compare", false, "Compare api_def.go to the output of nvim --api-info")
 	dumpFlag := flag.Bool("dump", false, "Print nvim --api-info as JSON")
 	flag.Parse()
 

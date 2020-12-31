@@ -19,7 +19,7 @@ import (
 	"github.com/neovim/go-client/msgpack/rpc"
 )
 
-//go:generate go run apitool.go -generate apiimp.go
+//go:generate go run api_tool.go -generate api.go
 
 var embedProcAttr *syscall.SysProcAttr
 

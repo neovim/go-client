@@ -1,11 +1,11 @@
 // +build ignore
 
 // This file defines the Nvim remote API using Go syntax. Run the 'go generate'
-// command to convert this file to the API implementation in apiimp.go.
+// command to convert this file to the API implementation in api.go.
 //
 // The go generate command runs the apitool program. Run
 //
-//  go run apitool.go --help
+//  go run api_tool.go --help
 //
 // to learn more about the apitool program.
 
