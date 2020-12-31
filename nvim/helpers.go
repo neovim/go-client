@@ -20,8 +20,6 @@ func NewBufferReader(v *Nvim, b Buffer) io.Reader {
 	return &bufferReader{v: v, b: b}
 }
 
-var lineEnd = []byte{'\n'}
-
 // Read implements io.Reader.
 func (r *bufferReader) Read(p []byte) (n int, err error) {
 	if r.err != nil {

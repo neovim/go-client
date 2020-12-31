@@ -55,8 +55,7 @@ type CommandCompletionArgs struct {
 
 // CursorPos returns the cursor position.
 func (a *CommandCompletionArgs) CursorPos() int {
-	n := a.CursorPosString
-	return n
+	return a.CursorPosString
 }
 
 // Mode represents a Nvim's current mode.
@@ -194,7 +193,7 @@ type ClientMethod struct {
 	Async bool `msgpack:"async"`
 
 	// NArgs is the number of method arguments.
-	NArgs ClientMethodNArgs `msgpack:"nargs"`
+	NArgs ClientMethodNArgs
 }
 
 // ClientMethodNArgs is the number of arguments. Could be a single integer or an array two integers, minimum and maximum inclusive.
