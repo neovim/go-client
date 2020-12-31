@@ -186,6 +186,14 @@ type CommandOptions struct {
 	//  :help command-addr
 	Addr string
 
+	// Eval is evaluated in Nvim and the result is passed as an argument.
+	Eval string
+
+	// Complete specifies command completion.
+	//
+	//  :help :command-complete
+	Complete string
+
 	// Bang specifies that the command can take a ! modifier (like :q or :w).
 	Bang bool
 
@@ -193,18 +201,10 @@ type CommandOptions struct {
 	// optional register name (like :del, :put, :yank).
 	Register bool
 
-	// Eval is evaluated in Nvim and the result is passed as an argument.
-	Eval string
-
 	// Bar specifies that the command can be followed by a "|" and another
 	// command.  A "|" inside the command argument is not allowed then. Also
 	// checks for a " to start a comment.
 	Bar bool
-
-	// Complete specifies command completion.
-	//
-	//  :help :command-complete
-	Complete string
 }
 
 // HandleCommand registers fn as a handler for a Nvim command. The arguments

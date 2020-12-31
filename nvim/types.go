@@ -466,8 +466,8 @@ type OptionInfo struct {
 	// Default is the default value for the option.
 	Default interface{} `msgpack:"default"`
 
-	// WasSet whether the option was set.
-	WasSet bool `msgpack:"was_set"`
+	// Scope one of "global", "win", or "buf".
+	Scope string `msgpack:"scope"`
 
 	// LastSetSid is the last set script id (if any).
 	LastSetSid int `msgpack:"last_set_sid"`
@@ -478,8 +478,8 @@ type OptionInfo struct {
 	// LastSetChan is the channel where option was set (0 for local).
 	LastSetChan int `msgpack:"last_set_chan"`
 
-	// Scope one of "global", "win", or "buf".
-	Scope string `msgpack:"scope"`
+	// WasSet whether the option was set.
+	WasSet bool `msgpack:"was_set"`
 
 	// GlobalLocal whether win or buf option has a global value.
 	GlobalLocal bool `msgpack:"global_local"`
