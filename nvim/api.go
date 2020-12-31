@@ -100,8 +100,8 @@ func (v *Nvim) BufferLineCount(buffer Buffer) (count int, err error) {
 }
 
 // BufferLineCount returns the number of lines in the buffer.
-func (b *Batch) BufferLineCount(buffer Buffer, result *int) {
-	b.call("nvim_buf_line_count", result, buffer)
+func (b *Batch) BufferLineCount(buffer Buffer, count *int) {
+	b.call("nvim_buf_line_count", count, buffer)
 }
 
 // BufferLines retrieves a line range from a buffer.
@@ -125,8 +125,8 @@ func (v *Nvim) BufferLines(buffer Buffer, start int, end int, strict bool) (line
 //
 // Out-of-bounds indices are clamped to the nearest valid value, unless strict
 // = true.
-func (b *Batch) BufferLines(buffer Buffer, start int, end int, strict bool, result *[][]byte) {
-	b.call("nvim_buf_get_lines", result, buffer, start, end, strict)
+func (b *Batch) BufferLines(buffer Buffer, start int, end int, strict bool, lines *[][]byte) {
+	b.call("nvim_buf_get_lines", lines, buffer, start, end, strict)
 }
 
 // AttachBuffer activate updates from this buffer to the current channel.
@@ -152,8 +152,8 @@ func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]inte
 // opts is optional parameters. Currently not used.
 //
 // returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
-func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}, result *bool) {
-	b.call("nvim_buf_attach", result, buffer, sendBuffer, opts)
+func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}, attached *bool) {
+	b.call("nvim_buf_attach", attached, buffer, sendBuffer, opts)
 }
 
 // DetachBuffer deactivate updates from this buffer to the current channel.
@@ -167,8 +167,8 @@ func (v *Nvim) DetachBuffer(buffer Buffer) (detached bool, err error) {
 // DetachBuffer deactivate updates from this buffer to the current channel.
 //
 // returns whether the updates couldn't be disabled because the buffer isn't loaded.
-func (b *Batch) DetachBuffer(buffer Buffer, result *bool) {
-	b.call("nvim_buf_detach", result, buffer)
+func (b *Batch) DetachBuffer(buffer Buffer, detached *bool) {
+	b.call("nvim_buf_detach", detached, buffer)
 }
 
 // SetBufferLines replaces a line range on a buffer.
@@ -224,8 +224,8 @@ func (v *Nvim) BufferOffset(buffer Buffer, index int) (offset int, err error) {
 //
 // Unlike |line2byte()|, throws error for out-of-bounds indexing.
 // Returns -1 for unloaded buffer.
-func (b *Batch) BufferOffset(buffer Buffer, index int, result *int) {
-	b.call("nvim_buf_get_offset", result, buffer, index)
+func (b *Batch) BufferOffset(buffer Buffer, index int, offset *int) {
+	b.call("nvim_buf_get_offset", offset, buffer, index)
 }
 
 // BufferVar gets a buffer-scoped (b:) variable.
@@ -245,8 +245,8 @@ func (v *Nvim) BufferChangedTick(buffer Buffer) (changedtick int, err error) {
 }
 
 // BufferChangedTick gets a changed tick of a buffer.
-func (b *Batch) BufferChangedTick(buffer Buffer, result *int) {
-	b.call("nvim_buf_get_changedtick", result, buffer)
+func (b *Batch) BufferChangedTick(buffer Buffer, changedtick *int) {
+	b.call("nvim_buf_get_changedtick", changedtick, buffer)
 }
 
 // BufferKeymap gets a list of buffer-local mappings.
@@ -366,8 +366,8 @@ func (v *Nvim) BufferNumber(buffer Buffer) (number int, err error) {
 // BufferNumber gets a buffer's number.
 //
 // Deprecated: Use int(buffer) to get the buffer's number as an integer.
-func (b *Batch) BufferNumber(buffer Buffer, result *int) {
-	b.call("nvim_buf_get_number", result, buffer)
+func (b *Batch) BufferNumber(buffer Buffer, number *int) {
+	b.call("nvim_buf_get_number", number, buffer)
 }
 
 // BufferName gets the full file name of a buffer.
@@ -377,8 +377,8 @@ func (v *Nvim) BufferName(buffer Buffer) (name string, err error) {
 }
 
 // BufferName gets the full file name of a buffer.
-func (b *Batch) BufferName(buffer Buffer, result *string) {
-	b.call("nvim_buf_get_name", result, buffer)
+func (b *Batch) BufferName(buffer Buffer, name *string) {
+	b.call("nvim_buf_get_name", name, buffer)
 }
 
 // SetBufferName sets the full file name of a buffer.
@@ -402,8 +402,8 @@ func (v *Nvim) IsBufferLoaded(buffer Buffer) (loaded bool, err error) {
 
 // IsBufferLoaded Checks if a buffer is valid and loaded.
 // See api-buffer for more info about unloaded buffers.
-func (b *Batch) IsBufferLoaded(buffer Buffer, result *bool) {
-	b.call("nvim_buf_is_loaded", result, buffer)
+func (b *Batch) IsBufferLoaded(buffer Buffer, loaded *bool) {
+	b.call("nvim_buf_is_loaded", loaded, buffer)
 }
 
 // DeleteBuffer deletes the buffer.
@@ -441,8 +441,8 @@ func (v *Nvim) IsBufferValid(buffer Buffer) (valied bool, err error) {
 }
 
 // IsBufferValid returns true if the buffer is valid.
-func (b *Batch) IsBufferValid(buffer Buffer, result *bool) {
-	b.call("nvim_buf_is_valid", result, buffer)
+func (b *Batch) IsBufferValid(buffer Buffer, valied *bool) {
+	b.call("nvim_buf_is_valid", valied, buffer)
 }
 
 // BufferMark returns the (row,col) of the named mark.
@@ -452,8 +452,8 @@ func (v *Nvim) BufferMark(buffer Buffer, name string) (pos [2]int, err error) {
 }
 
 // BufferMark returns the (row,col) of the named mark.
-func (b *Batch) BufferMark(buffer Buffer, name string, result *[2]int) {
-	b.call("nvim_buf_get_mark", result, buffer, name)
+func (b *Batch) BufferMark(buffer Buffer, name string, pos *[2]int) {
+	b.call("nvim_buf_get_mark", pos, buffer, name)
 }
 
 // BufferExtmarkByID returns position for a given extmark id.
@@ -479,8 +479,8 @@ func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string
 //
 //  details (value: bool)
 // Whether to include the details dict.
-func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}, result *[]int) {
-	b.call("nvim_buf_get_extmark_by_id", result, buffer, nsID, id, opt)
+func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}, pos *[]int) {
+	b.call("nvim_buf_get_extmark_by_id", pos, buffer, nsID, id, opt)
 }
 
 // BufferExtmarks gets extmarks in "traversal order" from a charwise region defined by
@@ -528,8 +528,8 @@ func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end in
 //
 //  details (value: bool)
 // Whether to include the details dict.
-func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, result *[]ExtMarks) {
-	b.call("nvim_buf_get_extmarks", result, buffer, nsID, start, end, opt)
+func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, marks *[]ExtMarks) {
+	b.call("nvim_buf_get_extmarks", marks, buffer, nsID, start, end, opt)
 }
 
 // SetBufferExtmark creates or updates an extmark.
@@ -601,8 +601,8 @@ func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts
 //  ephemeral (value: bool)
 // For use with SetDecorationProvider callbacks.
 // The mark will only be used for the current redraw cycle, and not be permantently stored in the buffer.
-func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}, result *int) {
-	b.call("nvim_buf_set_extmark", result, buffer, nsID, line, col, opts)
+func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}, id *int) {
+	b.call("nvim_buf_set_extmark", id, buffer, nsID, line, col, opts)
 }
 
 // DeleteBufferExtmark removes an extmark.
@@ -612,8 +612,8 @@ func (v *Nvim) DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int) (dele
 }
 
 // DeleteBufferExtmark removes an extmark.
-func (b *Batch) DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int, result *bool) {
-	b.call("nvim_buf_del_extmark", result, buffer, nsID, extmarkID)
+func (b *Batch) DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int, deleted *bool) {
+	b.call("nvim_buf_del_extmark", deleted, buffer, nsID, extmarkID)
 }
 
 // AddBufferHighlight adds a highlight to buffer and returns the source id of
@@ -667,8 +667,8 @@ func (v *Nvim) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line
 //
 // The startCol and endCol parameters specify the range of columns to
 // highlight. Use endCol = -1 to highlight to the end of the line.
-func (b *Batch) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, startCol int, endCol int, result *int) {
-	b.call("nvim_buf_add_highlight", result, buffer, srcID, hlGroup, line, startCol, endCol)
+func (b *Batch) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, startCol int, endCol int, id *int) {
+	b.call("nvim_buf_add_highlight", id, buffer, srcID, hlGroup, line, startCol, endCol)
 }
 
 // ClearBufferNamespace clears namespaced objects, highlights and virtual text, from a line range.
@@ -758,8 +758,8 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 // The `opts` is optional parameters. Currently not used.
 //
 // The returns the nsID that was used.
-func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}, result *int) {
-	b.call("nvim_buf_set_virtual_text", result, buffer, nsID, line, chunks, opts)
+func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}, id *int) {
+	b.call("nvim_buf_set_virtual_text", id, buffer, nsID, line, chunks, opts)
 }
 
 // TabpageWindows returns the windows in a tabpage.
@@ -769,8 +769,8 @@ func (v *Nvim) TabpageWindows(tabpage Tabpage) (windows []Window, err error) {
 }
 
 // TabpageWindows returns the windows in a tabpage.
-func (b *Batch) TabpageWindows(tabpage Tabpage, result *[]Window) {
-	b.call("nvim_tabpage_list_wins", result, tabpage)
+func (b *Batch) TabpageWindows(tabpage Tabpage, windows *[]Window) {
+	b.call("nvim_tabpage_list_wins", windows, tabpage)
 }
 
 // TabpageVar gets a tab-scoped (t:) variable.
@@ -822,8 +822,8 @@ func (v *Nvim) TabpageNumber(tabpage Tabpage) (number int, err error) {
 }
 
 // TabpageNumber gets the tabpage number from the tabpage handle.
-func (b *Batch) TabpageNumber(tabpage Tabpage, result *int) {
-	b.call("nvim_tabpage_get_number", result, tabpage)
+func (b *Batch) TabpageNumber(tabpage Tabpage, number *int) {
+	b.call("nvim_tabpage_get_number", number, tabpage)
 }
 
 // IsTabpageValid checks if a tab page is valid.
@@ -833,8 +833,8 @@ func (v *Nvim) IsTabpageValid(tabpage Tabpage) (valid bool, err error) {
 }
 
 // IsTabpageValid checks if a tab page is valid.
-func (b *Batch) IsTabpageValid(tabpage Tabpage, result *bool) {
-	b.call("nvim_tabpage_is_valid", result, tabpage)
+func (b *Batch) IsTabpageValid(tabpage Tabpage, valid *bool) {
+	b.call("nvim_tabpage_is_valid", valid, tabpage)
 }
 
 // AttachUI registers the client as a remote UI. After this method is called,
@@ -970,8 +970,8 @@ func (v *Nvim) Exec(src string, output bool) (out string, err error) {
 }
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
-func (b *Batch) Exec(src string, output bool, result *string) {
-	b.call("nvim_exec", result, src, output)
+func (b *Batch) Exec(src string, output bool, out *string) {
+	b.call("nvim_exec", out, src, output)
 }
 
 // Command executes a single ex command.
@@ -992,8 +992,8 @@ func (v *Nvim) HLByID(id int, rgb bool) (highlight *HLAttrs, err error) {
 }
 
 // HLByID gets a highlight definition by id.
-func (b *Batch) HLByID(id int, rgb bool, result *HLAttrs) {
-	b.call("nvim_get_hl_by_id", result, id, rgb)
+func (b *Batch) HLByID(id int, rgb bool, highlight *HLAttrs) {
+	b.call("nvim_get_hl_by_id", highlight, id, rgb)
 }
 
 // HLIDByName gets a highlight group by name.
@@ -1003,8 +1003,8 @@ func (v *Nvim) HLIDByName(name string) (highlightID int, err error) {
 }
 
 // HLIDByName gets a highlight group by name.
-func (b *Batch) HLIDByName(name string, result *int) {
-	b.call("nvim_get_hl_id_by_name", result, name)
+func (b *Batch) HLIDByName(name string, highlightID *int) {
+	b.call("nvim_get_hl_id_by_name", highlightID, name)
 }
 
 // HLByName gets a highlight definition by name.
@@ -1015,8 +1015,8 @@ func (v *Nvim) HLByName(name string, rgb bool) (highlight *HLAttrs, err error) {
 }
 
 // HLByName gets a highlight definition by name.
-func (b *Batch) HLByName(name string, rgb bool, result *HLAttrs) {
-	b.call("nvim_get_hl_by_name", result, name, rgb)
+func (b *Batch) HLByName(name string, rgb bool, highlight *HLAttrs) {
+	b.call("nvim_get_hl_by_name", highlight, name, rgb)
 }
 
 // SetHighlight set a highlight group.
@@ -1104,8 +1104,8 @@ func (v *Nvim) Input(keys string) (written int, err error) {
 // Unlike FeedKeys, this uses the lowest level input buffer and the call is not
 // deferred. It returns the number of bytes actually written(which can be less
 // than what was requested if the buffer is full).
-func (b *Batch) Input(keys string, result *int) {
-	b.call("nvim_input", result, keys)
+func (b *Batch) Input(keys string, written *int) {
+	b.call("nvim_input", written, keys)
 }
 
 // InputMouse send mouse event from GUI.
@@ -1149,8 +1149,8 @@ func (v *Nvim) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bo
 //  <up>  -> '\x80ku'
 //
 // The returned sequences can be used as input to feedkeys.
-func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool, result *string) {
-	b.call("nvim_replace_termcodes", result, str, fromPart, doLT, special)
+func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool, input *string) {
+	b.call("nvim_replace_termcodes", input, str, fromPart, doLT, special)
 }
 
 // CommandOutput executes a single ex command and returns the output.
@@ -1164,8 +1164,8 @@ func (v *Nvim) CommandOutput(cmd string) (out string, err error) {
 // CommandOutput executes a single ex command and returns the output.
 //
 // Deprecated: Use Exec() instead.
-func (b *Batch) CommandOutput(cmd string, result *string) {
-	b.call("nvim_command_output", result, cmd)
+func (b *Batch) CommandOutput(cmd string, out *string) {
+	b.call("nvim_command_output", out, cmd)
 }
 
 // Eval evaluates the expression expr using the Vim internal expression
@@ -1193,8 +1193,8 @@ func (v *Nvim) StringWidth(s string) (width int, err error) {
 
 // StringWidth returns the number of display cells the string occupies. Tab is
 // counted as one cell.
-func (b *Batch) StringWidth(s string, result *int) {
-	b.call("nvim_strwidth", result, s)
+func (b *Batch) StringWidth(s string, width *int) {
+	b.call("nvim_strwidth", width, s)
 }
 
 // RuntimePaths returns a list of paths contained in the runtimepath option.
@@ -1204,8 +1204,8 @@ func (v *Nvim) RuntimePaths() (paths []string, err error) {
 }
 
 // RuntimePaths returns a list of paths contained in the runtimepath option.
-func (b *Batch) RuntimePaths(result *[]string) {
-	b.call("nvim_list_runtime_paths", result)
+func (b *Batch) RuntimePaths(paths *[]string) {
+	b.call("nvim_list_runtime_paths", paths)
 }
 
 // RuntimeFiles finds files in runtime directories and returns list of absolute paths to the found files.
@@ -1227,8 +1227,8 @@ func (v *Nvim) RuntimeFiles(name string, all bool) (files []string, err error) {
 // will return all color scheme files.
 //
 // The all arg is whether to return all matches or only the first.
-func (b *Batch) RuntimeFiles(name string, all bool, result *[]string) {
-	b.call("nvim_get_runtime_file", result, name, all)
+func (b *Batch) RuntimeFiles(name string, all bool, files *[]string) {
+	b.call("nvim_get_runtime_file", files, name, all)
 }
 
 // SetCurrentDirectory changes the Vim working directory.
@@ -1248,8 +1248,8 @@ func (v *Nvim) CurrentLine() (line []byte, err error) {
 }
 
 // CurrentLine gets the current line in the current buffer.
-func (b *Batch) CurrentLine(result *[]byte) {
-	b.call("nvim_get_current_line", result)
+func (b *Batch) CurrentLine(line *[]byte) {
+	b.call("nvim_get_current_line", line)
 }
 
 // SetCurrentLine sets the current line in the current buffer.
@@ -1390,8 +1390,8 @@ func (v *Nvim) AllOptionsInfo() (opinfo *OptionInfo, err error) {
 // List of comma separated values.
 //  flaglist
 // List of single char flags.
-func (b *Batch) AllOptionsInfo(result *OptionInfo) {
-	b.call("nvim_get_all_options_info", result)
+func (b *Batch) AllOptionsInfo(opinfo *OptionInfo) {
+	b.call("nvim_get_all_options_info", opinfo)
 }
 
 // OptionInfo Gets the option information for one option.
@@ -1456,8 +1456,8 @@ func (v *Nvim) OptionInfo(name string) (opinfo *OptionInfo, err error) {
 // List of comma separated values.
 //  flaglist
 //  List of single char flags.
-func (b *Batch) OptionInfo(name string, result *OptionInfo) {
-	b.call("nvim_get_option_info", result, name)
+func (b *Batch) OptionInfo(name string, opinfo *OptionInfo) {
+	b.call("nvim_get_option_info", opinfo, name)
 }
 
 // Option gets an option.
@@ -1521,8 +1521,8 @@ func (v *Nvim) Buffers() (buffers []Buffer, err error) {
 }
 
 // Buffers returns the current list of buffers.
-func (b *Batch) Buffers(result *[]Buffer) {
-	b.call("nvim_list_bufs", result)
+func (b *Batch) Buffers(buffers *[]Buffer) {
+	b.call("nvim_list_bufs", buffers)
 }
 
 // CurrentBuffer returns the current buffer.
@@ -1532,8 +1532,8 @@ func (v *Nvim) CurrentBuffer() (buffer Buffer, err error) {
 }
 
 // CurrentBuffer returns the current buffer.
-func (b *Batch) CurrentBuffer(result *Buffer) {
-	b.call("nvim_get_current_buf", result)
+func (b *Batch) CurrentBuffer(buffer *Buffer) {
+	b.call("nvim_get_current_buf", buffer)
 }
 
 // SetCurrentBuffer sets the current buffer.
@@ -1553,8 +1553,8 @@ func (v *Nvim) Windows() (windows []Window, err error) {
 }
 
 // Windows returns the current list of windows.
-func (b *Batch) Windows(result *[]Window) {
-	b.call("nvim_list_wins", result)
+func (b *Batch) Windows(windows *[]Window) {
+	b.call("nvim_list_wins", windows)
 }
 
 // CurrentWindow returns the current window.
@@ -1564,8 +1564,8 @@ func (v *Nvim) CurrentWindow() (window Window, err error) {
 }
 
 // CurrentWindow returns the current window.
-func (b *Batch) CurrentWindow(result *Window) {
-	b.call("nvim_get_current_win", result)
+func (b *Batch) CurrentWindow(window *Window) {
+	b.call("nvim_get_current_win", window)
 }
 
 // SetCurrentWindow sets the current window.
@@ -1585,8 +1585,8 @@ func (v *Nvim) CreateBuffer(listed bool, scratch bool) (buffer Buffer, err error
 }
 
 // CreateBuffer creates a new, empty, unnamed buffer.
-func (b *Batch) CreateBuffer(listed bool, scratch bool, result *Buffer) {
-	b.call("nvim_create_buf", result, listed, scratch)
+func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
+	b.call("nvim_create_buf", buffer, listed, scratch)
 }
 
 // OpenWindow opens a new window.
@@ -1644,8 +1644,8 @@ func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *WindowConfig) (wind
 // this should not be used to specify arbitrary WM screen positions.
 //
 // The returns the window handle or 0 when error.
-func (b *Batch) OpenWindow(buffer Buffer, enter bool, config *WindowConfig, result *Window) {
-	b.call("nvim_open_win", result, buffer, enter, config)
+func (b *Batch) OpenWindow(buffer Buffer, enter bool, config *WindowConfig, window *Window) {
+	b.call("nvim_open_win", window, buffer, enter, config)
 }
 
 // Tabpages returns the current list of tabpages.
@@ -1655,8 +1655,8 @@ func (v *Nvim) Tabpages() (tabpages []Tabpage, err error) {
 }
 
 // Tabpages returns the current list of tabpages.
-func (b *Batch) Tabpages(result *[]Tabpage) {
-	b.call("nvim_list_tabpages", result)
+func (b *Batch) Tabpages(tabpages *[]Tabpage) {
+	b.call("nvim_list_tabpages", tabpages)
 }
 
 // CurrentTabpage returns the current tabpage.
@@ -1666,8 +1666,8 @@ func (v *Nvim) CurrentTabpage() (tabpage Tabpage, err error) {
 }
 
 // CurrentTabpage returns the current tabpage.
-func (b *Batch) CurrentTabpage(result *Tabpage) {
-	b.call("nvim_get_current_tabpage", result)
+func (b *Batch) CurrentTabpage(tabpage *Tabpage) {
+	b.call("nvim_get_current_tabpage", tabpage)
 }
 
 // SetCurrentTabpage sets the current tabpage.
@@ -1705,8 +1705,8 @@ func (v *Nvim) CreateNamespace(name string) (nsID int, err error) {
 // a new, anonymous namespace is created.
 //
 // The returns the namespace ID.
-func (b *Batch) CreateNamespace(name string, result *int) {
-	b.call("nvim_create_namespace", result, name)
+func (b *Batch) CreateNamespace(name string, nsID *int) {
+	b.call("nvim_create_namespace", nsID, name)
 }
 
 // Namespaces gets existing named namespaces.
@@ -1720,8 +1720,8 @@ func (v *Nvim) Namespaces() (namespaces map[string]int, err error) {
 // Namespaces gets existing named namespaces.
 //
 // The return dict that maps from names to namespace ids.
-func (b *Batch) Namespaces(result *map[string]int) {
-	b.call("nvim_get_namespaces", result)
+func (b *Batch) Namespaces(namespaces *map[string]int) {
+	b.call("nvim_get_namespaces", namespaces)
 }
 
 // Paste pastes at cursor, in any mode.
@@ -1803,8 +1803,8 @@ func (v *Nvim) Paste(data string, crlf bool, phase int) (state bool, err error) 
 //
 //  false
 // Client must cancel the paste.
-func (b *Batch) Paste(data string, crlf bool, phase int, result *bool) {
-	b.call("nvim_paste", result, data, crlf, phase)
+func (b *Batch) Paste(data string, crlf bool, phase int, state *bool) {
+	b.call("nvim_paste", state, data, crlf, phase)
 }
 
 // Put puts text at cursor, in any mode.
@@ -1870,8 +1870,8 @@ func (v *Nvim) ColorByName(name string) (color int, err error) {
 }
 
 // ColorByName returns the 24-bit RGB value of a ColorMap color name or `#rrggbb` hexadecimal string.
-func (b *Batch) ColorByName(name string, result *int) {
-	b.call("nvim_get_color_by_name", result, name)
+func (b *Batch) ColorByName(name string, color *int) {
+	b.call("nvim_get_color_by_name", color, name)
 }
 
 // ColorMap returns a map of color names and RGB values.
@@ -1889,8 +1889,8 @@ func (v *Nvim) ColorMap() (colorMap map[string]int, err error) {
 // Keys are color names (e.g. "Aqua") and values are 24-bit RGB color values (e.g. 65535).
 //
 // The returns map is color names and RGB values.
-func (b *Batch) ColorMap(result *map[string]int) {
-	b.call("nvim_get_color_map", result)
+func (b *Batch) ColorMap(colorMap *map[string]int) {
+	b.call("nvim_get_color_map", colorMap)
 }
 
 // Context gets a map of the current editor state.
@@ -1924,8 +1924,8 @@ func (v *Nvim) Context(opts map[string][]string) (contexts map[string]interface{
 //  gvars
 //  funcs
 //  sfuncs
-func (b *Batch) Context(opts map[string][]string, result *map[string]interface{}) {
-	b.call("nvim_get_context", result, opts)
+func (b *Batch) Context(opts map[string][]string, contexts *map[string]interface{}) {
+	b.call("nvim_get_context", contexts, opts)
 }
 
 // LoadContext sets the current editor state from the given context map.
@@ -1946,8 +1946,8 @@ func (v *Nvim) Mode() (mode *Mode, err error) {
 }
 
 // Mode gets Nvim's current mode.
-func (b *Batch) Mode(result *Mode) {
-	b.call("nvim_get_mode", result)
+func (b *Batch) Mode(mode *Mode) {
+	b.call("nvim_get_mode", mode)
 }
 
 // KeyMap gets a list of global (non-buffer-local) mapping definitions.
@@ -1961,8 +1961,8 @@ func (v *Nvim) KeyMap(mode string) (maps []*Mapping, err error) {
 // KeyMap gets a list of global (non-buffer-local) mapping definitions.
 //
 // The mode arg is the mode short-name, like `n`, `i`, `v` or etc.
-func (b *Batch) KeyMap(mode string, result *[]*Mapping) {
-	b.call("nvim_get_keymap", result, mode)
+func (b *Batch) KeyMap(mode string, maps *[]*Mapping) {
+	b.call("nvim_get_keymap", maps, mode)
 }
 
 // SetKeyMap sets a global mapping for the given mode.
@@ -2046,8 +2046,8 @@ func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Comma
 // Currently only user-commands are supported, not builtin Ex commands.
 //
 // opts is optional parameters. Currently only supports {"builtin":false}.
-func (b *Batch) Commands(opts map[string]interface{}, result *map[string]*Command) {
-	b.call("nvim_get_commands", result, opts)
+func (b *Batch) Commands(opts map[string]interface{}, commands *map[string]*Command) {
+	b.call("nvim_get_commands", commands, opts)
 }
 
 func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
@@ -2055,8 +2055,8 @@ func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
 	return apiInfo, err
 }
 
-func (b *Batch) APIInfo(result *[]interface{}) {
-	b.call("nvim_get_api_info", result)
+func (b *Batch) APIInfo(apiInfo *[]interface{}) {
+	b.call("nvim_get_api_info", apiInfo)
 }
 
 // SetClientInfo identify the client for nvim.
@@ -2085,8 +2085,8 @@ func (v *Nvim) ChannelInfo(channelID int) (channel *Channel, err error) {
 }
 
 // ChannelInfo get information about a channel.
-func (b *Batch) ChannelInfo(channelID int, result *Channel) {
-	b.call("nvim_get_chan_info", result, channelID)
+func (b *Batch) ChannelInfo(channelID int, channel *Channel) {
+	b.call("nvim_get_chan_info", channel, channelID)
 }
 
 // Channels get information about all open channels.
@@ -2096,8 +2096,8 @@ func (v *Nvim) Channels() (channels []*Channel, err error) {
 }
 
 // Channels get information about all open channels.
-func (b *Batch) Channels(result *[]*Channel) {
-	b.call("nvim_list_chans", result)
+func (b *Batch) Channels(channels *[]*Channel) {
+	b.call("nvim_list_chans", channels)
 }
 
 // ParseExpression parse a VimL expression.
@@ -2107,8 +2107,8 @@ func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (expre
 }
 
 // ParseExpression parse a VimL expression.
-func (b *Batch) ParseExpression(expr string, flags string, highlight bool, result *map[string]interface{}) {
-	b.call("nvim_parse_expression", result, expr, flags, highlight)
+func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expression *map[string]interface{}) {
+	b.call("nvim_parse_expression", expression, expr, flags, highlight)
 }
 
 // UIs gets a list of dictionaries representing attached UIs.
@@ -2118,8 +2118,8 @@ func (v *Nvim) UIs() (uis []*UI, err error) {
 }
 
 // UIs gets a list of dictionaries representing attached UIs.
-func (b *Batch) UIs(result *[]*UI) {
-	b.call("nvim_list_uis", result)
+func (b *Batch) UIs(uis *[]*UI) {
+	b.call("nvim_list_uis", uis)
 }
 
 // ProcChildren gets the immediate children of process `pid`.
@@ -2129,8 +2129,8 @@ func (v *Nvim) ProcChildren(pid int) (processes []*Process, err error) {
 }
 
 // ProcChildren gets the immediate children of process `pid`.
-func (b *Batch) ProcChildren(pid int, result *[]*Process) {
-	b.call("nvim_get_proc_children", result, pid)
+func (b *Batch) ProcChildren(pid int, processes *[]*Process) {
+	b.call("nvim_get_proc_children", processes, pid)
 }
 
 // Proc gets info describing process `pid`.
@@ -2140,8 +2140,8 @@ func (v *Nvim) Proc(pid int) (process Process, err error) {
 }
 
 // Proc gets info describing process `pid`.
-func (b *Batch) Proc(pid int, result *Process) {
-	b.call("nvim_get_proc", result, pid)
+func (b *Batch) Proc(pid int, process *Process) {
+	b.call("nvim_get_proc", process, pid)
 }
 
 // SelectPopupmenuItem selects an item in the completion popupmenu.
@@ -2175,8 +2175,8 @@ func (v *Nvim) WindowBuffer(window Window) (buffer Buffer, err error) {
 }
 
 // WindowBuffer returns the current buffer in a window.
-func (b *Batch) WindowBuffer(window Window, result *Buffer) {
-	b.call("nvim_win_get_buf", result, window)
+func (b *Batch) WindowBuffer(window Window, buffer *Buffer) {
+	b.call("nvim_win_get_buf", buffer, window)
 }
 
 // SetBufferToWindow sets the current buffer in a window, without side-effects.
@@ -2196,8 +2196,8 @@ func (v *Nvim) WindowCursor(window Window) (pos [2]int, err error) {
 }
 
 // WindowCursor returns the cursor position in the window.
-func (b *Batch) WindowCursor(window Window, result *[2]int) {
-	b.call("nvim_win_get_cursor", result, window)
+func (b *Batch) WindowCursor(window Window, pos *[2]int) {
+	b.call("nvim_win_get_cursor", pos, window)
 }
 
 // SetWindowCursor sets the cursor position in the window to the given position.
@@ -2217,8 +2217,8 @@ func (v *Nvim) WindowHeight(window Window) (height int, err error) {
 }
 
 // WindowHeight returns the window height.
-func (b *Batch) WindowHeight(window Window, result *int) {
-	b.call("nvim_win_get_height", result, window)
+func (b *Batch) WindowHeight(window Window, height *int) {
+	b.call("nvim_win_get_height", height, window)
 }
 
 // SetWindowHeight sets the window height.
@@ -2238,8 +2238,8 @@ func (v *Nvim) WindowWidth(window Window) (width int, err error) {
 }
 
 // WindowWidth returns the window width.
-func (b *Batch) WindowWidth(window Window, result *int) {
-	b.call("nvim_win_get_width", result, window)
+func (b *Batch) WindowWidth(window Window, width *int) {
+	b.call("nvim_win_get_width", width, window)
 }
 
 // SetWindowWidth sets the window width.
@@ -2309,8 +2309,8 @@ func (v *Nvim) WindowPosition(window Window) (pos [2]int, err error) {
 }
 
 // WindowPosition gets the window position in display cells. First position is zero.
-func (b *Batch) WindowPosition(window Window, result *[2]int) {
-	b.call("nvim_win_get_position", result, window)
+func (b *Batch) WindowPosition(window Window, pos *[2]int) {
+	b.call("nvim_win_get_position", pos, window)
 }
 
 // WindowTabpage gets the tab page that contains the window.
@@ -2320,8 +2320,8 @@ func (v *Nvim) WindowTabpage(window Window) (tabpage Tabpage, err error) {
 }
 
 // WindowTabpage gets the tab page that contains the window.
-func (b *Batch) WindowTabpage(window Window, result *Tabpage) {
-	b.call("nvim_win_get_tabpage", result, window)
+func (b *Batch) WindowTabpage(window Window, tabpage *Tabpage) {
+	b.call("nvim_win_get_tabpage", tabpage, window)
 }
 
 // WindowNumber gets the window number from the window handle.
@@ -2331,8 +2331,8 @@ func (v *Nvim) WindowNumber(window Window) (number int, err error) {
 }
 
 // WindowNumber gets the window number from the window handle.
-func (b *Batch) WindowNumber(window Window, result *int) {
-	b.call("nvim_win_get_number", result, window)
+func (b *Batch) WindowNumber(window Window, number *int) {
+	b.call("nvim_win_get_number", number, window)
 }
 
 // IsWindowValid returns true if the window is valid.
@@ -2342,8 +2342,8 @@ func (v *Nvim) IsWindowValid(window Window) (valid bool, err error) {
 }
 
 // IsWindowValid returns true if the window is valid.
-func (b *Batch) IsWindowValid(window Window, result *bool) {
-	b.call("nvim_win_is_valid", result, window)
+func (b *Batch) IsWindowValid(window Window, valid *bool) {
+	b.call("nvim_win_is_valid", valid, window)
 }
 
 // SetWindowConfig configure window position. Currently this is only used to configure
@@ -2392,8 +2392,8 @@ func (v *Nvim) WindowConfig(window Window) (config *WindowConfig, err error) {
 // Return a dictionary containing the same config that can be given to OpenWindow.
 //
 // The `relative` will be an empty string for normal windows.
-func (b *Batch) WindowConfig(window Window, result *WindowConfig) {
-	b.call("nvim_win_get_config", result, window)
+func (b *Batch) WindowConfig(window Window, config *WindowConfig) {
+	b.call("nvim_win_get_config", config, window)
 }
 
 // CloseWindow close a window.
