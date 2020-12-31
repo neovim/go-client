@@ -235,7 +235,7 @@ func (v *Nvim) BufferVar(buffer Buffer, name string, result interface{}) error {
 
 // BufferVar gets a buffer-scoped (b:) variable.
 func (b *Batch) BufferVar(buffer Buffer, name string, result interface{}) {
-	b.call("nvim_buf_get_var", result, buffer, name)
+	b.call("nvim_buf_get_var", &result, buffer, name)
 }
 
 // BufferChangedTick gets a changed tick of a buffer.
@@ -250,6 +250,8 @@ func (b *Batch) BufferChangedTick(buffer Buffer, result *int) {
 }
 
 // BufferKeymap gets a list of buffer-local mappings.
+//
+// The mode short-name ("n", "i", "v", ...).
 func (v *Nvim) BufferKeyMap(buffer Buffer, mode string) ([]*Mapping, error) {
 	var result []*Mapping
 	err := v.call("nvim_buf_get_keymap", &result, buffer, mode)
@@ -257,6 +259,8 @@ func (v *Nvim) BufferKeyMap(buffer Buffer, mode string) ([]*Mapping, error) {
 }
 
 // BufferKeymap gets a list of buffer-local mappings.
+//
+// The mode short-name ("n", "i", "v", ...).
 func (b *Batch) BufferKeyMap(buffer Buffer, mode string, result *[]*Mapping) {
 	b.call("nvim_buf_get_keymap", result, buffer, mode)
 }
@@ -336,7 +340,7 @@ func (v *Nvim) BufferOption(buffer Buffer, name string, result interface{}) erro
 
 // BufferOption gets a buffer option value.
 func (b *Batch) BufferOption(buffer Buffer, name string, result interface{}) {
-	b.call("nvim_buf_get_option", result, buffer, name)
+	b.call("nvim_buf_get_option", &result, buffer, name)
 }
 
 // SetBufferOption sets a buffer option value. The value nil deletes the option
@@ -776,7 +780,7 @@ func (v *Nvim) TabpageVar(tabpage Tabpage, name string, result interface{}) erro
 
 // TabpageVar gets a tab-scoped (t:) variable.
 func (b *Batch) TabpageVar(tabpage Tabpage, name string, result interface{}) {
-	b.call("nvim_tabpage_get_var", result, tabpage, name)
+	b.call("nvim_tabpage_get_var", &result, tabpage, name)
 }
 
 // SetTabpageVar sets a tab-scoped (t:) variable.
@@ -981,9 +985,9 @@ func (b *Batch) Command(cmd string) {
 }
 
 // HLByID gets a highlight definition by id.
-func (v *Nvim) HLByID(id int, rgb bool) (*HLAttrs, error) {
+func (v *Nvim) HLByID(id int, rgb bool) (highlight *HLAttrs, err error) {
 	var result HLAttrs
-	err := v.call("nvim_get_hl_by_id", &result, id, rgb)
+	err = v.call("nvim_get_hl_by_id", &result, id, rgb)
 	return &result, err
 }
 
@@ -1004,9 +1008,9 @@ func (b *Batch) HLIDByName(name string, result *int) {
 }
 
 // HLByName gets a highlight definition by name.
-func (v *Nvim) HLByName(name string, rgb bool) (*HLAttrs, error) {
+func (v *Nvim) HLByName(name string, rgb bool) (highlight *HLAttrs, err error) {
 	var result HLAttrs
-	err := v.call("nvim_get_hl_by_name", &result, name, rgb)
+	err = v.call("nvim_get_hl_by_name", &result, name, rgb)
 	return &result, err
 }
 
@@ -1177,7 +1181,7 @@ func (v *Nvim) Eval(expr string, result interface{}) error {
 //
 //  :help expression
 func (b *Batch) Eval(expr string, result interface{}) {
-	b.call("nvim_eval", result, expr)
+	b.call("nvim_eval", &result, expr)
 }
 
 // StringWidth returns the number of display cells the string occupies. Tab is
@@ -1275,7 +1279,7 @@ func (v *Nvim) Var(name string, result interface{}) error {
 
 // Var gets a global (g:) variable.
 func (b *Batch) Var(name string, result interface{}) {
-	b.call("nvim_get_var", result, name)
+	b.call("nvim_get_var", &result, name)
 }
 
 // SetVar sets a global (g:) variable.
@@ -1305,7 +1309,7 @@ func (v *Nvim) VVar(name string, result interface{}) error {
 
 // VVar gets a vim (v:) variable.
 func (b *Batch) VVar(name string, result interface{}) {
-	b.call("nvim_get_vvar", result, name)
+	b.call("nvim_get_vvar", &result, name)
 }
 
 // SetVVar sets a v: variable, if it is not readonly.
@@ -1321,7 +1325,7 @@ func (b *Batch) SetVVar(name string, value interface{}) {
 // AllOptionsInfo gets the option information for all options.
 //
 // The dictionary has the full option names as keys and option metadata
-// dictionaries as detailed at `nvim_get_option_info`.
+// dictionaries as detailed at OptionInfo.
 //
 // Resulting map has keys:
 //
@@ -1330,7 +1334,7 @@ func (b *Batch) SetVVar(name string, value interface{}) {
 //  shortname
 // Shortened name of the option (like 'ft').
 //  type
-// type of option ("string", "integer" or "boolean").
+// type of option ("string", "number" or "boolean").
 //  default
 // The default value for the option.
 //  was_set
@@ -1349,16 +1353,16 @@ func (b *Batch) SetVVar(name string, value interface{}) {
 // List of comma separated values.
 //  flaglist
 // List of single char flags.
-func (v *Nvim) AllOptionsInfo() (*OptionInfo, error) {
+func (v *Nvim) AllOptionsInfo() (opinfo *OptionInfo, err error) {
 	var result OptionInfo
-	err := v.call("nvim_get_all_options_info", &result)
+	err = v.call("nvim_get_all_options_info", &result)
 	return &result, err
 }
 
 // AllOptionsInfo gets the option information for all options.
 //
 // The dictionary has the full option names as keys and option metadata
-// dictionaries as detailed at `nvim_get_option_info`.
+// dictionaries as detailed at OptionInfo.
 //
 // Resulting map has keys:
 //
@@ -1367,7 +1371,7 @@ func (v *Nvim) AllOptionsInfo() (*OptionInfo, error) {
 //  shortname
 // Shortened name of the option (like 'ft').
 //  type
-// type of option ("string", "integer" or "boolean").
+// type of option ("string", "number" or "boolean").
 //  default
 // The default value for the option.
 //  was_set
@@ -1399,7 +1403,7 @@ func (b *Batch) AllOptionsInfo(result *OptionInfo) {
 //  shortname
 // Shortened name of the option (like 'ft').
 //  type
-// type of option ("string", "integer" or "boolean").
+// type of option ("string", "number" or "boolean").
 //  default
 // The default value for the option.
 //  was_set
@@ -1418,9 +1422,9 @@ func (b *Batch) AllOptionsInfo(result *OptionInfo) {
 // List of comma separated values.
 //  flaglist
 //  List of single char flags.
-func (v *Nvim) OptionInfo(name string) (*OptionInfo, error) {
+func (v *Nvim) OptionInfo(name string) (opinfo *OptionInfo, err error) {
 	var result OptionInfo
-	err := v.call("nvim_get_option_info", &result, name)
+	err = v.call("nvim_get_option_info", &result, name)
 	return &result, err
 }
 
@@ -1433,7 +1437,7 @@ func (v *Nvim) OptionInfo(name string) (*OptionInfo, error) {
 //  shortname
 // Shortened name of the option (like 'ft').
 //  type
-// type of option ("string", "integer" or "boolean").
+// type of option ("string", "number" or "boolean").
 //  default
 // The default value for the option.
 //  was_set
@@ -1463,7 +1467,7 @@ func (v *Nvim) Option(name string, result interface{}) error {
 
 // Option gets an option.
 func (b *Batch) Option(name string, result interface{}) {
-	b.call("nvim_get_option", result, name)
+	b.call("nvim_get_option", &result, name)
 }
 
 // SetOption sets an option.
@@ -1931,13 +1935,13 @@ func (v *Nvim) LoadContext(dict map[string]interface{}, result interface{}) erro
 
 // LoadContext sets the current editor state from the given context map.
 func (b *Batch) LoadContext(dict map[string]interface{}, result interface{}) {
-	b.call("nvim_load_context", result, dict)
+	b.call("nvim_load_context", &result, dict)
 }
 
 // Mode gets Nvim's current mode.
-func (v *Nvim) Mode() (*Mode, error) {
+func (v *Nvim) Mode() (mode *Mode, err error) {
 	var result Mode
-	err := v.call("nvim_get_mode", &result)
+	err = v.call("nvim_get_mode", &result)
 	return &result, err
 }
 
@@ -1949,10 +1953,9 @@ func (b *Batch) Mode(result *Mode) {
 // KeyMap gets a list of global (non-buffer-local) mapping definitions.
 //
 // The mode arg is the mode short-name, like `n`, `i`, `v` or etc.
-func (v *Nvim) KeyMap(mode string) ([]*Mapping, error) {
-	var result []*Mapping
-	err := v.call("nvim_get_keymap", &result, mode)
-	return result, err
+func (v *Nvim) KeyMap(mode string) (maps []*Mapping, err error) {
+	err = v.call("nvim_get_keymap", &maps, mode)
+	return maps, err
 }
 
 // KeyMap gets a list of global (non-buffer-local) mapping definitions.
@@ -2047,10 +2050,9 @@ func (b *Batch) Commands(opts map[string]interface{}, result *map[string]*Comman
 	b.call("nvim_get_commands", result, opts)
 }
 
-func (v *Nvim) APIInfo() ([]interface{}, error) {
-	var result []interface{}
-	err := v.call("nvim_get_api_info", &result)
-	return result, err
+func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
+	err = v.call("nvim_get_api_info", &apiInfo)
+	return apiInfo, err
 }
 
 func (b *Batch) APIInfo(result *[]interface{}) {
@@ -2076,9 +2078,9 @@ func (b *Batch) SetClientInfo(name string, version *ClientVersion, typ string, m
 }
 
 // ChannelInfo get information about a channel.
-func (v *Nvim) ChannelInfo(channelID int) (*Channel, error) {
+func (v *Nvim) ChannelInfo(channelID int) (channel *Channel, err error) {
 	var result Channel
-	err := v.call("nvim_get_chan_info", &result, channelID)
+	err = v.call("nvim_get_chan_info", &result, channelID)
 	return &result, err
 }
 
@@ -2257,7 +2259,7 @@ func (v *Nvim) WindowVar(window Window, name string, result interface{}) error {
 
 // WindowVar gets a window-scoped (w:) variable.
 func (b *Batch) WindowVar(window Window, name string, result interface{}) {
-	b.call("nvim_win_get_var", result, window, name)
+	b.call("nvim_win_get_var", &result, window, name)
 }
 
 // SetWindowVar sets a window-scoped (w:) variable.
@@ -2287,7 +2289,7 @@ func (v *Nvim) WindowOption(window Window, name string, result interface{}) erro
 
 // WindowOption gets a window option.
 func (b *Batch) WindowOption(window Window, name string, result interface{}) {
-	b.call("nvim_win_get_option", result, window, name)
+	b.call("nvim_win_get_option", &result, window, name)
 }
 
 // SetWindowOption sets a window option.
@@ -2379,9 +2381,9 @@ func (b *Batch) SetWindowConfig(window Window, config *WindowConfig) {
 // Return a dictionary containing the same config that can be given to OpenWindow.
 //
 // The `relative` will be an empty string for normal windows.
-func (v *Nvim) WindowConfig(window Window) (*WindowConfig, error) {
+func (v *Nvim) WindowConfig(window Window) (config *WindowConfig, err error) {
 	var result WindowConfig
-	err := v.call("nvim_win_get_config", &result, window)
+	err = v.call("nvim_win_get_config", &result, window)
 	return &result, err
 }
 
