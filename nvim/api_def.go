@@ -87,6 +87,8 @@ func BufferChangedTick(buffer Buffer) (changedtick int) {
 }
 
 // BufferKeymap gets a list of buffer-local mappings.
+//
+// The mode short-name ("n", "i", "v", ...).
 func BufferKeyMap(buffer Buffer, mode string) []*Mapping {
 	name(nvim_buf_get_keymap)
 }
@@ -612,7 +614,7 @@ func SetVVar(name string, value interface{}) {
 // AllOptionsInfo gets the option information for all options.
 //
 // The dictionary has the full option names as keys and option metadata
-// dictionaries as detailed at `nvim_get_option_info`.
+// dictionaries as detailed at OptionInfo.
 //
 // Resulting map has keys:
 //
@@ -621,7 +623,7 @@ func SetVVar(name string, value interface{}) {
 //  shortname
 // Shortened name of the option (like 'ft').
 //  type
-// type of option ("string", "integer" or "boolean").
+// type of option ("string", "number" or "boolean").
 //  default
 // The default value for the option.
 //  was_set
@@ -640,7 +642,7 @@ func SetVVar(name string, value interface{}) {
 // List of comma separated values.
 //  flaglist
 // List of single char flags.
-func AllOptionsInfo() OptionInfo {
+func AllOptionsInfo() (opinfo OptionInfo) {
 	name(nvim_get_all_options_info)
 	returnPtr()
 }
@@ -654,7 +656,7 @@ func AllOptionsInfo() OptionInfo {
 //  shortname
 // Shortened name of the option (like 'ft').
 //  type
-// type of option ("string", "integer" or "boolean").
+// type of option ("string", "number" or "boolean").
 //  default
 // The default value for the option.
 //  was_set
@@ -673,7 +675,7 @@ func AllOptionsInfo() OptionInfo {
 // List of comma separated values.
 //  flaglist
 //  List of single char flags.
-func OptionInfo(name string) OptionInfo {
+func OptionInfo(name string) (opinfo OptionInfo) {
 	name(nvim_get_option_info)
 	returnPtr()
 }
@@ -911,7 +913,7 @@ func LoadContext(dict map[string]interface{}) (contextMap interface{}) {
 }
 
 // Mode gets Nvim's current mode.
-func Mode() Mode {
+func Mode() (mode Mode) {
 	name(nvim_get_mode)
 	returnPtr()
 }
@@ -919,7 +921,7 @@ func Mode() Mode {
 // KeyMap gets a list of global (non-buffer-local) mapping definitions.
 //
 // The mode arg is the mode short-name, like `n`, `i`, `v` or etc.
-func KeyMap(mode string) []*Mapping {
+func KeyMap(mode string) (maps []*Mapping) {
 	name(nvim_get_keymap)
 }
 
@@ -965,7 +967,7 @@ func Commands(opts map[string]interface{}) (commands map[string]*Command) {
 	name(nvim_get_commands)
 }
 
-func APIInfo() []interface{} {
+func APIInfo() (apiInfo []interface{}) {
 	name(nvim_get_api_info)
 }
 
