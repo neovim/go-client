@@ -2,8 +2,7 @@ name: Test
 
 on:
   push:
-    branches:
-      - master
+    branches: "*"
     tags:
       - "v*"
   pull_request:
