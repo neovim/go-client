@@ -670,3 +670,53 @@ func Test_floatDecoder(t *testing.T) {
 		})
 	}
 }
+
+func Test_stringDecoder(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		ds   *decodeState
+		want string
+	}{
+		"Binary": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					p: []byte("hello"),
+					t: Binary,
+				},
+			},
+			want: string("hello"),
+		},
+		"String": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					p: []byte("world"),
+					t: String,
+				},
+			},
+			want: string("world"),
+		},
+		// TODO(zchee): default case
+		// "": {
+		// 	ds: &decodeState{
+		// 		Decoder: &Decoder{
+		// 			p: []byte(nil),
+		// 			t: Invalid,
+		// 		},
+		// 	},
+		// 	want: string(""),
+		// },
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			v := reflect.ValueOf(new(string)).Elem()
+			stringDecoder(tt.ds, v)
+			if got := tt.ds.String(); got != tt.want {
+				t.Fatalf("stringDecoder(%v, %v) = %v: want: %v", tt.ds, v, got, tt.want)
+			}
+		})
+	}
+}
