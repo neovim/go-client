@@ -3,6 +3,7 @@ package msgpack
 import (
 	"bytes"
 	"io"
+	"math"
 	"reflect"
 	"testing"
 )
@@ -606,6 +607,65 @@ func Test_uintDecoder(t *testing.T) {
 			uintDecoder(tt.ds, v)
 			if got := tt.ds.Uint(); got != tt.want {
 				t.Fatalf("uintDecoder(%v, %v) = %v: want: %v", tt.ds, v, got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_floatDecoder(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		ds   *decodeState
+		want float64
+	}{
+		"Int": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(1234),
+					t: Int,
+				},
+			},
+			want: math.Float64frombits(uint64(1234)),
+		},
+		"Uint": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(4321),
+					t: Uint,
+				},
+			},
+			want: math.Float64frombits(uint64(4321)),
+		},
+		"Float": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(5678),
+					t: Float,
+				},
+			},
+			want: math.Float64frombits(uint64(5678)),
+		},
+		// TODO(zchee): default case
+		// "": {
+		// 	ds: &decodeState{
+		// 		Decoder: &Decoder{
+		// 			n: uint64(0),
+		// 			t: Invalid,
+		// 		},
+		// 	},
+		// 	want: float64(0),
+		// },
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			v := reflect.ValueOf(new(float64)).Elem()
+			floatDecoder(tt.ds, v)
+			if got := tt.ds.Float(); got != tt.want {
+				t.Fatalf("floatDecoder(%v, %v) = %v: want: %v", tt.ds, v, got, tt.want)
 			}
 		})
 	}
