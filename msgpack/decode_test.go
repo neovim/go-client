@@ -720,3 +720,53 @@ func Test_stringDecoder(t *testing.T) {
 		})
 	}
 }
+
+func Test_byteSliceDecoder(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		ds   *decodeState
+		want []byte
+	}{
+		"Binary": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					p: []byte("hello"),
+					t: Binary,
+				},
+			},
+			want: []byte("hello"),
+		},
+		"String": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					p: []byte("world"),
+					t: String,
+				},
+			},
+			want: []byte("world"),
+		},
+		// TODO(zchee): default case
+		// "": {
+		// 	ds: &decodeState{
+		// 		Decoder: &Decoder{
+		// 			p: []byte(nil),
+		// 			t: Invalid,
+		// 		},
+		// 	},
+		// 	want: []byte(""),
+		// },
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			v := reflect.ValueOf(new([]byte)).Elem()
+			byteSliceDecoder(tt.ds, v)
+			if got := tt.ds.Bytes(); !bytes.Equal(got, tt.want) {
+				t.Fatalf("byteSliceDecoder(%v, %v) = %v: want: %v", tt.ds, v, got, tt.want)
+			}
+		})
+	}
+}
