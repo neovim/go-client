@@ -2,7 +2,6 @@ package msgpack
 
 import (
 	"bytes"
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -42,93 +41,93 @@ func (m me) MarshalMsgPack(enc *Encoder) error {
 func TestEncode(t *testing.T) {
 	t.Parallel()
 
-	encodeTests := []struct {
+	encodeTests := map[string]struct {
 		v    interface{}
 		data []interface{}
 	}{
-		{
+		"Bool": {
 			v:    true,
 			data: []interface{}{true},
 		},
-		{
-			v:    1,
+		"Int": {
+			v:    int(1),
 			data: []interface{}{(1)},
 		},
-		{
+		"Int8": {
 			v:    int8(2),
 			data: []interface{}{2},
 		},
-		{
+		"Int16": {
 			v:    int16(3),
 			data: []interface{}{3},
 		},
-		{
+		"Int32": {
 			v:    int32(4),
 			data: []interface{}{4},
 		},
-		{
+		"Int64": {
 			v:    int64(5),
 			data: []interface{}{5},
 		},
-		{
+		"Uint": {
 			v:    uint(1),
 			data: []interface{}{1},
 		},
-		{
+		"Uint8": {
 			v:    uint8(2),
 			data: []interface{}{2},
 		},
-		{
+		"Uint16": {
 			v:    uint16(3),
 			data: []interface{}{3},
 		},
-		{
+		"Uint32": {
 			v:    uint32(4),
 			data: []interface{}{4},
 		},
-		{
+		"Uint64": {
 			v:    uint64(5),
 			data: []interface{}{5},
 		},
-		{
+		"Float32": {
 			v:    float32(5.0),
 			data: []interface{}{5.0},
 		},
-		{
+		"Float64": {
 			v:    float64(6.0),
 			data: []interface{}{6.0},
 		},
-		{
+		"String": {
 			v:    "hello",
 			data: []interface{}{"hello"},
 		},
-		{
+		"Bytes": {
 			v:    []byte("world"),
 			data: []interface{}{[]byte("world")},
 		},
-		{
+		"typedString": {
 			v:    typedString("quux"),
 			data: []interface{}{"quux"},
 		},
-		{
+		"typedByteSlice": {
 			v: typedByteSlice("foo"),
 			data: []interface{}{
 				[]byte("foo"),
 			},
 		},
-		{
+		"typedTypedByteSlice": {
 			v:    typedTypedByteSlice("bar"),
 			data: []interface{}{[]byte("bar")},
 		},
-		{
+		"StringSlice/Nil": {
 			v:    []string(nil),
 			data: []interface{}{nil},
 		},
-		{
+		"StringSlice/Empty": {
 			v:    []string{},
 			data: []interface{}{arrayLen(0)},
 		},
-		{
+		"StringSlice/Value": {
 			v: []string{"hello", "world"},
 			data: []interface{}{
 				arrayLen(2),
@@ -136,18 +135,19 @@ func TestEncode(t *testing.T) {
 				"world",
 			},
 		},
-		{
+		"StringArray/Value": {
 			v: [2]string{"hello", "world"},
-			data: []interface{}{arrayLen(2),
+			data: []interface{}{
+				arrayLen(2),
 				"hello",
 				"world",
 			},
 		},
-		{
+		"MapStringString/Nil": {
 			v:    map[string]string(nil),
 			data: []interface{}{nil},
 		},
-		{
+		"MapStringString/Value": {
 			v: map[string]string{"hello": "world"},
 			data: []interface{}{
 				mapLen(1),
@@ -155,12 +155,11 @@ func TestEncode(t *testing.T) {
 				"world",
 			},
 		},
-		{
+		"IntPointer": {
 			v:    new(int),
 			data: []interface{}{0},
 		},
-		// Tag names
-		{
+		"TagNames": {
 			v: struct {
 				A int
 				B int `msgpack:"BB"`
@@ -179,8 +178,7 @@ func TestEncode(t *testing.T) {
 				"omitempty", 3,
 			},
 		},
-		// Struct as array
-		{
+		"StructAsArray": {
 			v: struct {
 				I int `msgpack:",array"`
 				S string
@@ -190,8 +188,7 @@ func TestEncode(t *testing.T) {
 			},
 			data: []interface{}{arrayLen(2), 22, "skidoo"},
 		},
-		// Omit Empty
-		{
+		"OmitEmpty": {
 			v: struct {
 				B  bool `msgpack:"b,omitempty"`
 				Bo bool `msgpack:"bo,omitempty"`
@@ -248,7 +245,7 @@ func TestEncode(t *testing.T) {
 				"p", 0,
 			},
 		},
-		{
+		"Struct": {
 			v: &ra{"foo", &rb{"bar", &ra{"quux", nil}}},
 			data: []interface{}{
 				mapLen(2),
@@ -260,22 +257,22 @@ func TestEncode(t *testing.T) {
 				"Ra", nil,
 			},
 		},
-		{
+		"MarshalMsgPack": {
 			v:    &me{"hello"},
 			data: []interface{}{"hello"},
 		},
-		{
+		"Interface": {
 			v:    []interface{}{"foo", "bar"},
 			data: []interface{}{arrayLen(2), "foo", "bar"},
 		},
-		{
+		"Nil": {
 			v:    nil,
 			data: []interface{}{nil},
 		},
 	}
-	for _, tt := range encodeTests {
+	for name, tt := range encodeTests {
 		tt := tt
-		t.Run(fmt.Sprintf("%v", tt.v), func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
 			var buf bytes.Buffer
