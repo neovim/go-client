@@ -7,6 +7,35 @@ import (
 	"sync"
 )
 
+// Unmarshaler is the interface implemented by objects that can decode
+// themselves from a MessagePack stream.
+type Unmarshaler interface {
+	UnmarshalMsgPack(d *Decoder) error
+}
+
+// DecodeConvertError describes a MessagePack value that was not appropriate
+// for a value of a specific Go type.
+type DecodeConvertError struct {
+	// The MessagePack type of the value.
+	SrcType Type
+	// Option value.
+	SrcValue interface{}
+	// Type of the Go value that could not be assigned to.
+	DestType reflect.Type
+}
+
+// Error implements the error interface.
+func (e *DecodeConvertError) Error() string {
+	if e.SrcValue == nil {
+		return fmt.Sprintf("msgpack: cannot convert %s to %s", e.SrcType, e.DestType)
+	}
+	return fmt.Sprintf("msgpack: cannot convert %s(%v) to %s", e.SrcType, e.SrcValue, e.DestType)
+}
+
+func decodeUnsupportedType(ds *decodeState, v reflect.Value) {
+	ds.saveErrorAndSkip(v, nil)
+}
+
 // decodeState represents the state while decoding value.
 type decodeState struct {
 	*Decoder
@@ -518,12 +547,6 @@ func (b *decodeBuilder) ptrDecoder(t reflect.Type) decodeFunc {
 	return ptrDecoder{elem: decoderForType(t.Elem(), b)}.decode
 }
 
-// Unmarshaler is the interface implemented by objects that can decode
-// themselves from a MessagePack stream.
-type Unmarshaler interface {
-	UnmarshalMsgPack(ds *Decoder) error
-}
-
 var unmarshalerType = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
 
 func unmarshalDecoder(ds *decodeState, v reflect.Value) {
@@ -620,27 +643,4 @@ func decodeNoReflect(ds *decodeState) (x interface{}) {
 	default:
 		return nil
 	}
-}
-
-// DecodeConvertError describes a MessagePack value that was not appropriate
-// for a value of a specific Go type.
-type DecodeConvertError struct {
-	// The MessagePack type of the value.
-	SrcType Type
-	// Option value.
-	SrcValue interface{}
-	// Type of the Go value that could not be assigned to.
-	DestType reflect.Type
-}
-
-// Error implements the error interface.
-func (e *DecodeConvertError) Error() string {
-	if e.SrcValue == nil {
-		return fmt.Sprintf("msgpack: cannot convert %s to %s", e.SrcType, e.DestType)
-	}
-	return fmt.Sprintf("msgpack: cannot convert %s(%v) to %s", e.SrcType, e.SrcValue, e.DestType)
-}
-
-func decodeUnsupportedType(ds *decodeState, v reflect.Value) {
-	ds.saveErrorAndSkip(v, nil)
 }
