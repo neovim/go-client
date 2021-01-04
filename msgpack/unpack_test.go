@@ -7,12 +7,80 @@ import (
 	"testing"
 )
 
+func TestType_String(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		tr   Type
+		want string
+	}{
+		"Invalid": {
+			tr:   Invalid,
+			want: "Invalid",
+		},
+		"Nil": {
+			tr:   Nil,
+			want: "Nil",
+		},
+		"Bool": {
+			tr:   Bool,
+			want: "Bool",
+		},
+		"Int": {
+			tr:   Int,
+			want: "Int",
+		},
+		"Uint": {
+			tr:   Uint,
+			want: "Uint",
+		},
+		"Float": {
+			tr:   Float,
+			want: "Float",
+		},
+		"ArrayLen": {
+			tr:   ArrayLen,
+			want: "ArrayLen",
+		},
+		"MapLen": {
+			tr:   MapLen,
+			want: "MapLen",
+		},
+		"String": {
+			tr:   String,
+			want: "String",
+		},
+		"Binary": {
+			tr:   Binary,
+			want: "Binary",
+		},
+		"Extension": {
+			tr:   Extension,
+			want: "Extension",
+		},
+		"unknown": {
+			tr:   Type(11),
+			want: "unknown",
+		},
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := tt.tr.String(); got != tt.want {
+				t.Fatalf("Type.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 var unpackTests = map[string]struct {
-	// Expected type
+	// typ is Expected type
 	typ Type
-	// Expected value
+	// v is Expected value
 	v interface{}
-	// Hex encodings of typ, v
+	// hs is Hex encodings of typ, v
 	hs []string
 }{
 	"Int/0x0": {
@@ -353,14 +421,17 @@ func TestUnpack(t *testing.T) {
 				if err != nil {
 					t.Fatalf("decode(%s) returned error %v", h, err)
 				}
+
 				d := NewDecoder(bytes.NewReader(p))
 				err = d.Unpack()
 				if err != nil && tt.typ != Invalid {
 					t.Fatalf("unpack(%s) returned %v", h, err)
 				}
+
 				if d.Type() != tt.typ {
 					t.Fatalf("unpack(%s) returned type %d, want %d", h, d.Type(), tt.typ)
 				}
+
 				switch v := tt.v.(type) {
 				case int64:
 					if d.Int() != v {
