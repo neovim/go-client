@@ -416,3 +416,79 @@ func TestDecode(t *testing.T) {
 		})
 	}
 }
+
+func Test_boolDecoder(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		ds   *decodeState
+		want bool
+	}{
+		"Bool/True": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(1),
+					t: Bool,
+				},
+			},
+			want: true,
+		},
+		"Bool/False": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(0),
+					t: Bool,
+				},
+			},
+			want: false,
+		},
+		"Int/True": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(1),
+					t: Int,
+				},
+			},
+			want: true,
+		},
+		"Int/False": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(0),
+					t: Int,
+				},
+			},
+			want: false,
+		},
+		"Uint/True": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(1),
+					t: Uint,
+				},
+			},
+			want: true,
+		},
+		"Uint/False": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(0),
+					t: Uint,
+				},
+			},
+			want: false,
+		},
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			v := reflect.ValueOf(new(bool)).Elem()
+			boolDecoder(tt.ds, v)
+			if got := tt.ds.Bool(); got != tt.want {
+				t.Fatalf("boolDecoder(%v, %v) = %v: want: %v", tt.ds, v, got, tt.want)
+			}
+		})
+	}
+}
