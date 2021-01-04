@@ -201,6 +201,7 @@ func intDecoder(ds *decodeState, v reflect.Value) {
 		}
 	default:
 		ds.saveErrorAndSkip(v, nil)
+		return
 	}
 	if v.OverflowInt(x) {
 		ds.saveErrorAndSkip(v, x)
