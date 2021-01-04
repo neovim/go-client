@@ -39,11 +39,11 @@ func TestDecode(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		// arg is argument for Decode().
+		// arg is argument for Decode()
 		arg func() interface{}
-		// data is data to decode.
+		// data is data to decode
 		data []interface{}
-		// expected is the expected decoded value.
+		// expected is the expected decoded value
 		expected interface{}
 	}{
 		"Bool/Bool/True": {
@@ -56,22 +56,22 @@ func TestDecode(t *testing.T) {
 			data:     []interface{}{false},
 			expected: false,
 		},
-		"Bool/Int/True": {
+		"Bool/Int64/True": {
 			arg:      func() interface{} { return new(bool) },
-			data:     []interface{}{int64(1)},
+			data:     []interface{}{int64(1234)},
 			expected: true,
 		},
-		"Bool/Int/False": {
+		"Bool/Int64/False": {
 			arg:      func() interface{} { return new(bool) },
 			data:     []interface{}{int64(0)},
 			expected: false,
 		},
-		"Bool/Uint/True": {
+		"Bool/Uint64/True": {
 			arg:      func() interface{} { return new(bool) },
-			data:     []interface{}{uint64(1)},
+			data:     []interface{}{uint64(1234)},
 			expected: true,
 		},
-		"Bool/Uint/False": {
+		"Bool/Uint64/False": {
 			arg:      func() interface{} { return new(bool) },
 			data:     []interface{}{uint64(0)},
 			expected: false,
@@ -81,14 +81,14 @@ func TestDecode(t *testing.T) {
 			data:     []interface{}{int64(1234)},
 			expected: int(1234),
 		},
-		"Int/Float64": {
-			arg:      func() interface{} { return new(int) },
-			data:     []interface{}{float64(4321)},
-			expected: int(4321),
-		},
 		"Int/Uint64": {
 			arg:      func() interface{} { return new(int) },
-			data:     []interface{}{uint64(5678)},
+			data:     []interface{}{uint64(4321)},
+			expected: int(4321),
+		},
+		"Int/Float64": {
+			arg:      func() interface{} { return new(int) },
+			data:     []interface{}{float64(5678)},
 			expected: int(5678),
 		},
 		"Uint/Int64": {
@@ -96,14 +96,14 @@ func TestDecode(t *testing.T) {
 			data:     []interface{}{int64(1234)},
 			expected: uint(1234),
 		},
-		"Uint/Float64": {
-			arg:      func() interface{} { return new(uint) },
-			data:     []interface{}{float64(4321)},
-			expected: uint(4321),
-		},
 		"Uint/Uint64": {
 			arg:      func() interface{} { return new(uint) },
-			data:     []interface{}{uint64(5678)},
+			data:     []interface{}{uint64(4321)},
+			expected: uint(4321),
+		},
+		"Uint/Float64": {
+			arg:      func() interface{} { return new(uint) },
+			data:     []interface{}{float64(5678)},
 			expected: uint(5678),
 		},
 		"Float64/Int64": {
@@ -111,139 +111,262 @@ func TestDecode(t *testing.T) {
 			data:     []interface{}{int64(1234)},
 			expected: float64(1234),
 		},
-		"Float64/Float64": {
-			arg:      func() interface{} { return new(float64) },
-			data:     []interface{}{float64(4321)},
-			expected: float64(4321),
-		},
 		"Float64/Uint64": {
 			arg:      func() interface{} { return new(float64) },
-			data:     []interface{}{uint64(5678)},
+			data:     []interface{}{uint64(4321)},
+			expected: float64(4321),
+		},
+		"Float64/Float64": {
+			arg:      func() interface{} { return new(float64) },
+			data:     []interface{}{float64(5678)},
 			expected: float64(5678),
+		},
+		"String/Binary": {
+			arg:      func() interface{} { return new(string) },
+			data:     []interface{}{[]byte("world")},
+			expected: "world",
 		},
 		"String/String": {
 			arg:      func() interface{} { return new(string) },
 			data:     []interface{}{"hello"},
 			expected: "hello",
 		},
-		"String/Bytes": {
-			arg:      func() interface{} { return new(string) },
-			data:     []interface{}{[]byte("world")},
-			expected: "world",
-		},
-		"Bytes/String": {
-			arg:      func() interface{} { return new([]byte) },
-			data:     []interface{}{"hello"},
-			expected: []byte("hello"),
-		},
-		"Bytes/Bytes": {
-			arg:      func() interface{} { return new([]byte) },
-			data:     []interface{}{[]byte("world")},
-			expected: []byte("world"),
-		},
-		"Bytes/Nil": {
+		"Binary/Nil": {
 			arg:      func() interface{} { return new([]byte) },
 			data:     []interface{}{nil},
 			expected: []byte(nil),
 		},
-		"Interface/Int64Pointer": {
-			arg:  func() interface{} { return &testDecStruct{IF: ptrInt(1234)} },
-			data: []interface{}{mapLen(1), "IF", int64(5678)},
+		"Binary/Binary": {
+			arg: func() interface{} { return new([]byte) },
+			data: []interface{}{
+				[]byte("hello"),
+			},
+			expected: []byte("hello"),
+		},
+		"Binary/String": {
+			arg: func() interface{} { return new([]byte) },
+			data: []interface{}{
+				"world",
+			},
+			expected: []byte("world"),
+		},
+		"Interface/IntPointer": {
+			arg: func() interface{} { return &testDecStruct{IF: ptrInt(1234)} },
+			data: []interface{}{
+				mapLen(1),
+				"IF",
+				int64(5678),
+			},
 			expected: testDecStruct{
 				IF: ptrInt(5678),
 			},
 		},
 		"Interface/StringSlice": {
-			arg:  func() interface{} { return &testDecStruct{IF: []string{"hello", "world"}} },
-			data: []interface{}{mapLen(1), "IF", arrayLen(1), "foo"},
+			arg: func() interface{} { return &testDecStruct{IF: []string{"hello", "world"}} },
+			data: []interface{}{
+				mapLen(1),
+				"IF",
+				arrayLen(1),
+				"foo",
+			},
 			expected: testDecStruct{
 				IF: []string{"foo", ""},
 			},
 		},
 		"StringSlice/ArrayLen/1": {
-			arg:      func() interface{} { return []string{""} },
-			data:     []interface{}{arrayLen(2), "foo", "bar"},
-			expected: []string{"foo"},
+			arg: func() interface{} { return []string{""} },
+			data: []interface{}{
+				arrayLen(2),
+				"foo",
+				"bar",
+			},
+			expected: []string{
+				"foo",
+			},
 		},
 		"StringSlice/ArrayLen/2/ValueValue": {
-			arg:      func() interface{} { return []string{"", ""} },
-			data:     []interface{}{arrayLen(2), "foo", "bar"},
-			expected: []string{"foo", "bar"},
+			arg: func() interface{} { return []string{"", ""} },
+			data: []interface{}{
+				arrayLen(2),
+				"foo",
+				"bar",
+			},
+			expected: []string{
+				"foo",
+				"bar",
+			},
 		},
 		"StringSlice/ArrayLen/2/ValueEmpty": {
-			arg:      func() interface{} { return []string{"", "bar"} },
-			data:     []interface{}{arrayLen(1), "foo"},
-			expected: []string{"foo", ""},
+			arg: func() interface{} { return []string{"", "bar"} },
+			data: []interface{}{
+				arrayLen(1),
+				"foo",
+			},
+			expected: []string{
+				"foo",
+				"",
+			},
 		},
 		"StringSlice/ArrayLen/Make/2": {
-			arg:      func() interface{} { x := make([]string, 1); return &x },
-			data:     []interface{}{arrayLen(2), "foo", "bar"},
-			expected: []string{"foo", "bar"},
+			arg: func() interface{} { x := make([]string, 1); return &x },
+			data: []interface{}{
+				arrayLen(2),
+				"foo",
+				"bar",
+			},
+			expected: []string{
+				"foo",
+				"bar",
+			},
 		},
 		"StringSlice/ArrayLen/Make/3": {
-			arg:      func() interface{} { x := make([]string, 3); return &x },
-			data:     []interface{}{arrayLen(2), "foo", "bar"},
-			expected: []string{"foo", "bar"},
+			arg: func() interface{} { x := make([]string, 3); return &x },
+			data: []interface{}{
+				arrayLen(2),
+				"foo",
+				"bar",
+			},
+			expected: []string{
+				"foo",
+				"bar",
+			},
 		},
 		"StringSlicePointer/ArrayLen/2": {
-			arg:      func() interface{} { return new([]string) },
-			data:     []interface{}{arrayLen(2), "foo", "bar"},
-			expected: []string{"foo", "bar"},
+			arg: func() interface{} { return new([]string) },
+			data: []interface{}{
+				arrayLen(2),
+				"foo",
+				"bar",
+			},
+			expected: []string{
+				"foo",
+				"bar",
+			},
 		},
 		"StringArray/ArrayLen/3/ValueValueEmpty": {
-			arg:      func() interface{} { x := [...]string{"foo", "bar", "quux"}; return &x },
-			data:     []interface{}{arrayLen(2), "hello", "world"},
-			expected: [...]string{"hello", "world", ""},
+			arg: func() interface{} { x := [...]string{"foo", "bar", "quux"}; return &x },
+			data: []interface{}{
+				arrayLen(2),
+				"hello",
+				"world",
+			},
+			expected: [...]string{
+				"hello",
+				"world",
+				"",
+			},
 		},
 		"StringArray/ArrayLen/1/Value": {
-			arg:      func() interface{} { x := [...]string{"foo"}; return &x },
-			data:     []interface{}{arrayLen(2), "hello", "world"},
-			expected: [...]string{"hello"},
+			arg: func() interface{} { x := [...]string{"foo"}; return &x },
+			data: []interface{}{
+				arrayLen(2),
+				"hello",
+				"world",
+			},
+			expected: [...]string{
+				"hello",
+			},
 		},
 		"StructArray/Int64": {
-			arg:      func() interface{} { return new(testDecArrayStruct) },
-			data:     []interface{}{arrayLen(2), int64(22), "skidoo"},
-			expected: testDecArrayStruct{I: 22, S: "skidoo"},
+			arg: func() interface{} { return new(testDecArrayStruct) },
+			data: []interface{}{
+				arrayLen(2),
+				int64(22),
+				"skidoo",
+			},
+			expected: testDecArrayStruct{
+				I: 22,
+				S: "skidoo",
+			},
 		},
 		"Map/StringString": {
-			arg:      func() interface{} { return make(map[string]string) },
-			data:     []interface{}{mapLen(1), "foo", "bar"},
-			expected: map[string]string{"foo": "bar"},
+			arg: func() interface{} { return make(map[string]string) },
+			data: []interface{}{
+				mapLen(1),
+				"foo", "bar",
+			},
+			expected: map[string]string{
+				"foo": "bar",
+			},
 		},
 		"MapPointer/StringString": {
-			arg:      func() interface{} { return new(map[string]string) },
-			data:     []interface{}{mapLen(1), "foo", "bar"},
-			expected: map[string]string{"foo": "bar"},
+			arg: func() interface{} { return new(map[string]string) },
+			data: []interface{}{
+				mapLen(1),
+				"foo", "bar",
+			},
+			expected: map[string]string{
+				"foo": "bar",
+			},
 		},
 		"Pointer/Int64": {
-			arg:      func() interface{} { return new(*int) },
-			data:     []interface{}{int64(-1)},
+			arg: func() interface{} { return new(*int) },
+			data: []interface{}{
+				int64(-1),
+			},
 			expected: ptrInt(-1),
 		},
 		"Interface/Extensions/ExtensionValue": {
-			arg:      func() interface{} { return new(interface{}) },
-			data:     []interface{}{extension{0, "hello"}},
-			expected: extensionValue{kind: 0, data: []byte("hello")},
+			arg: func() interface{} { return new(interface{}) },
+			data: []interface{}{
+				extension{
+					0,
+					"hello",
+				},
+			},
+			expected: extensionValue{
+				kind: 0,
+				data: []byte("hello"),
+			},
 		},
 		"Interface/Extensions/TestExtension": {
-			arg:      func() interface{} { return new(interface{}) },
-			data:     []interface{}{extension{1, "hello"}},
-			expected: testExtension1{data: []byte("hello")},
+			arg: func() interface{} { return new(interface{}) },
+			data: []interface{}{
+				extension{
+					1, "hello",
+				},
+			},
+			expected: testExtension1{
+				data: []byte("hello"),
+			},
 		},
 		"TestExtension/Extensions": {
-			arg:      func() interface{} { return new(testExtension1) },
-			data:     []interface{}{extension{1, "hello"}},
-			expected: testExtension1{data: []byte("hello")},
+			arg: func() interface{} { return new(testExtension1) },
+			data: []interface{}{
+				extension{
+					1, "hello",
+				},
+			},
+			expected: testExtension1{
+				data: []byte("hello"),
+			},
 		},
 		"TestDecEmptyStruct/Empty/blank": {
-			arg:      func() interface{} { return &testDecEmptyStruct{} },
-			data:     []interface{}{mapLen(0)},
-			expected: testDecEmptyStruct{B: true, S: "blank", I: 1234, I8: 45, I32: 6789},
+			arg: func() interface{} { return &testDecEmptyStruct{} },
+			data: []interface{}{
+				mapLen(0),
+			},
+			expected: testDecEmptyStruct{
+				B:   true,
+				S:   "blank",
+				I:   1234,
+				I8:  45,
+				I32: 6789,
+			},
 		},
 		"TestDecEmptyStruct/Empty/NotBlank": {
-			arg:      func() interface{} { return &testDecEmptyStruct{} },
-			data:     []interface{}{mapLen(1), "S", "not blank"},
-			expected: testDecEmptyStruct{B: true, S: "not blank", I: 1234, I8: 45, I32: 6789},
+			arg: func() interface{} { return &testDecEmptyStruct{} },
+			data: []interface{}{
+				mapLen(1),
+				"S", "not blank",
+			},
+			expected: testDecEmptyStruct{
+				B:   true,
+				S:   "not blank",
+				I:   1234,
+				I8:  45,
+				I32: 6789,
+			},
 		},
 		// TODO(zchee): test errors like the following:
 		// "Errors": {
