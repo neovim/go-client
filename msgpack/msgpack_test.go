@@ -7,11 +7,66 @@ import (
 	"reflect"
 )
 
-type arrayLen uint32
-type mapLen uint32
+type (
+	arrayLen uint32
+)
+
+type (
+	mapLen uint32
+)
+
 type extension struct {
 	k int
 	d string
+}
+
+// pack packs the values vs and returns the result.
+//
+//  Go Type     Encoder method
+//  nil         PackNil
+//  bool        PackBool
+//  int64       PackInt
+//  uint64      PackUint
+//  float64     PackFloat
+//  arrayLen    PackArrayLen
+//  mapLen      PackMapLen
+//  string      PackString(s, false)
+//  []byte      PackBytes(s, true)
+//  extension   PackExtension(k, d)
+func pack(vs ...interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := NewEncoder(&buf)
+	for _, v := range vs {
+		var err error
+		switch v := v.(type) {
+		case int64:
+			err = enc.PackInt(v)
+		case uint64:
+			err = enc.PackUint(v)
+		case bool:
+			err = enc.PackBool(v)
+		case float64:
+			err = enc.PackFloat(v)
+		case arrayLen:
+			err = enc.PackArrayLen(int64(v))
+		case mapLen:
+			err = enc.PackMapLen(int64(v))
+		case string:
+			err = enc.PackString(v)
+		case []byte:
+			err = enc.PackBinary(v)
+		case extension:
+			err = enc.PackExtension(v.k, []byte(v.d))
+		case nil:
+			err = enc.PackNil()
+		default:
+			err = fmt.Errorf("no pack for type %T", v)
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	return buf.Bytes(), nil
 }
 
 // unpack unpacks a byte slice to the following types.
@@ -68,55 +123,6 @@ func unpack(p []byte) ([]interface{}, error) {
 		data = append(data, v)
 	}
 	return data, nil
-}
-
-// pack packs the values vs and returns the result.
-//
-//  Go Type     Encoder method
-//  nil         PackNil
-//  bool        PackBool
-//  int64       PackInt
-//  uint64      PackUint
-//  float64     PackFloat
-//  arrayLen    PackArrayLen
-//  mapLen      PackMapLen
-//  string      PackString(s, false)
-//  []byte      PackBytes(s, true)
-//  extension   PackExtension(k, d)
-func pack(vs ...interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	enc := NewEncoder(&buf)
-	for _, v := range vs {
-		var err error
-		switch v := v.(type) {
-		case int64:
-			err = enc.PackInt(v)
-		case uint64:
-			err = enc.PackUint(v)
-		case bool:
-			err = enc.PackBool(v)
-		case float64:
-			err = enc.PackFloat(v)
-		case arrayLen:
-			err = enc.PackArrayLen(int64(v))
-		case mapLen:
-			err = enc.PackMapLen(int64(v))
-		case string:
-			err = enc.PackString(v)
-		case []byte:
-			err = enc.PackBinary(v)
-		case extension:
-			err = enc.PackExtension(v.k, []byte(v.d))
-		case nil:
-			err = enc.PackNil()
-		default:
-			err = fmt.Errorf("no pack for type %T", v)
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	return buf.Bytes(), nil
 }
 
 type testExtension1 struct {
