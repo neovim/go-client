@@ -492,3 +492,62 @@ func Test_boolDecoder(t *testing.T) {
 		})
 	}
 }
+
+func Test_intDecoder(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		ds   *decodeState
+		want int64
+	}{
+		"Int": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(1234),
+					t: Int,
+				},
+			},
+			want: int64(1234),
+		},
+		"Uint": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(4321),
+					t: Uint,
+				},
+			},
+			want: int64(4321),
+		},
+		"Float": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					n: uint64(5678),
+					t: Float,
+				},
+			},
+			want: int64(5678),
+		},
+		// TODO(zchee): default case
+		// "": {
+		// 	ds: &decodeState{
+		// 		Decoder: &Decoder{
+		// 			n: uint64(0),
+		// 			t: Invalid,
+		// 		},
+		// 	},
+		// 	want: int64(0),
+		// },
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			v := reflect.ValueOf(new(int64)).Elem()
+			intDecoder(tt.ds, v)
+			if got := tt.ds.Int(); got != tt.want {
+				t.Fatalf("intDecoder(%v, %v) = %v: want: %v", tt.ds, v, got, tt.want)
+			}
+		})
+	}
+}
