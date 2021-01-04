@@ -410,10 +410,34 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"Error": {
-			arg:      func() interface{} { return &testDecStruct{I: 1234} },
+		"Error/Bool": {
+			arg:      func() interface{} { return &testDecStruct{B: true} },
+			data:     []interface{}{mapLen(1), "B", false},
+			expected: testDecStruct{B: true},
+			wantErr:  true,
+		},
+		"Error/Int": {
+			arg:      func() interface{} { return &testDecStruct{I: int(1234)} },
 			data:     []interface{}{mapLen(1), "I", int64(5678)},
-			expected: testDecStruct{I: 1234},
+			expected: testDecStruct{I: int(1234)},
+			wantErr:  true,
+		},
+		"Error/Uint": {
+			arg:      func() interface{} { return &testDecStruct{U: uint(1234)} },
+			data:     []interface{}{mapLen(1), "U", uint64(5678)},
+			expected: testDecStruct{U: uint(1234)},
+			wantErr:  true,
+		},
+		"Error/Float": {
+			arg:      func() interface{} { return &testDecStruct{F64: float64(1234)} },
+			data:     []interface{}{mapLen(1), "F64", float64(5678)},
+			expected: testDecStruct{F64: float64(1234)},
+			wantErr:  true,
+		},
+		"Error/String": {
+			arg:      func() interface{} { return &testDecStruct{S: "hello"} },
+			data:     []interface{}{mapLen(1), "S", "world"},
+			expected: testDecStruct{S: "hello"},
 			wantErr:  true,
 		},
 	}
