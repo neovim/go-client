@@ -46,6 +46,36 @@ func TestDecode(t *testing.T) {
 		// expected is the expected decoded value.
 		expected interface{}
 	}{
+		"Bool/Bool/True": {
+			arg:      func() interface{} { return new(bool) },
+			data:     []interface{}{true},
+			expected: true,
+		},
+		"Bool/Bool/False": {
+			arg:      func() interface{} { return new(bool) },
+			data:     []interface{}{false},
+			expected: false,
+		},
+		"Bool/Int/True": {
+			arg:      func() interface{} { return new(bool) },
+			data:     []interface{}{int64(1)},
+			expected: true,
+		},
+		"Bool/Int/False": {
+			arg:      func() interface{} { return new(bool) },
+			data:     []interface{}{int64(0)},
+			expected: false,
+		},
+		"Bool/Uint/True": {
+			arg:      func() interface{} { return new(bool) },
+			data:     []interface{}{uint64(1)},
+			expected: true,
+		},
+		"Bool/Uint/False": {
+			arg:      func() interface{} { return new(bool) },
+			data:     []interface{}{uint64(0)},
+			expected: false,
+		},
 		"Int/Int64": {
 			arg:      func() interface{} { return new(int) },
 			data:     []interface{}{int64(1234)},
@@ -91,16 +121,6 @@ func TestDecode(t *testing.T) {
 			data:     []interface{}{uint64(5678)},
 			expected: float64(5678),
 		},
-		"Bool/True": {
-			arg:      func() interface{} { return new(bool) },
-			data:     []interface{}{true},
-			expected: true,
-		},
-		"Bool/False": {
-			arg:      func() interface{} { return new(bool) },
-			data:     []interface{}{false},
-			expected: false,
-		},
 		"String/String": {
 			arg:      func() interface{} { return new(string) },
 			data:     []interface{}{"hello"},
@@ -121,15 +141,17 @@ func TestDecode(t *testing.T) {
 			data:     []interface{}{[]byte("world")},
 			expected: []byte("world"),
 		},
-		"Pointer/Int64": {
-			arg:      func() interface{} { return new(*int) },
-			data:     []interface{}{int64(-1)},
-			expected: ptrInt(-1),
+		"Bytes/Nil": {
+			arg:      func() interface{} { return new([]byte) },
+			data:     []interface{}{nil},
+			expected: []byte(nil),
 		},
 		"Interface/Int64Pointer": {
-			arg:      func() interface{} { return &testDecStruct{IF: ptrInt(1234)} },
-			data:     []interface{}{mapLen(1), "IF", int64(5678)},
-			expected: testDecStruct{IF: ptrInt(5678)},
+			arg:  func() interface{} { return &testDecStruct{IF: ptrInt(1234)} },
+			data: []interface{}{mapLen(1), "IF", int64(5678)},
+			expected: testDecStruct{
+				IF: ptrInt(5678),
+			},
 		},
 		"Interface/StringSlice": {
 			arg:  func() interface{} { return &testDecStruct{IF: []string{"hello", "world"}} },
@@ -192,6 +214,11 @@ func TestDecode(t *testing.T) {
 			arg:      func() interface{} { return new(map[string]string) },
 			data:     []interface{}{mapLen(1), "foo", "bar"},
 			expected: map[string]string{"foo": "bar"},
+		},
+		"Pointer/Int64": {
+			arg:      func() interface{} { return new(*int) },
+			data:     []interface{}{int64(-1)},
+			expected: ptrInt(-1),
 		},
 		"Interface/Extensions/ExtensionValue": {
 			arg:      func() interface{} { return new(interface{}) },
