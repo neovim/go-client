@@ -43,12 +43,14 @@ var typeNames = [...]string{
 // String returns a string representation of the Type.
 func (t Type) String() string {
 	var n string
+
 	if 0 <= t && t < Type(len(typeNames)) {
 		n = typeNames[t]
 	}
 	if n == "" {
 		n = "unknown"
 	}
+
 	return n
 }
 
@@ -106,6 +108,7 @@ func (d *Decoder) Bytes() []byte {
 		copy(p, d.p)
 		d.p = p
 	}
+
 	return d.p
 }
 
@@ -141,6 +144,7 @@ func (d *Decoder) Bool() bool {
 	if d.n != 0 {
 		return true
 	}
+
 	return false
 }
 
@@ -160,10 +164,11 @@ func (d *Decoder) Unpack() error {
 	code, err := d.r.ReadByte()
 	if err != nil {
 		// Don't call d.fatal here because we don't want io.EOF converted to
-		// io.ErrUnexpectedEOF.
+		// io.ErrUnexpectedEOF
 		d.err = err
 		return err
 	}
+
 	f := formats[code]
 	d.t = f.t
 
@@ -213,6 +218,7 @@ func (d *Decoder) Unpack() error {
 // Skip skips over any nested values in the stream.
 func (d *Decoder) Skip() error {
 	n := d.skipCount()
+
 	for n > 0 {
 		n--
 		if err := d.Unpack(); err != nil {
@@ -220,6 +226,7 @@ func (d *Decoder) Skip() error {
 		}
 		n += d.skipCount()
 	}
+
 	return nil
 }
 
@@ -422,15 +429,19 @@ func init() {
 	for i := fixIntCodeMin + 1; i <= fixIntCodeMax; i++ {
 		formats[i] = formats[fixIntCodeMin]
 	}
+
 	for i := fixMapCodeMin + 1; i <= fixMapCodeMax; i++ {
 		formats[i] = formats[fixMapCodeMin]
 	}
+
 	for i := fixArrayCodeMin + 1; i <= fixArrayCodeMax; i++ {
 		formats[i] = formats[fixArrayCodeMin]
 	}
+
 	for i := fixStringCodeMin + 1; i <= fixStringCodeMax; i++ {
 		formats[i] = formats[fixStringCodeMin]
 	}
+
 	for i := negFixIntCodeMin + 1; i <= negFixIntCodeMax; i++ {
 		formats[i] = formats[negFixIntCodeMin]
 	}
@@ -440,6 +451,7 @@ func (d *Decoder) fatal(err error) error {
 	if err == io.EOF {
 		err = io.ErrUnexpectedEOF
 	}
+
 	d.t = Invalid
 	d.err = err
 	return err
@@ -447,6 +459,7 @@ func (d *Decoder) fatal(err error) error {
 
 func (d *Decoder) read1(format byte) (uint64, error) {
 	b, err := d.r.ReadByte()
+
 	return uint64(b), err
 }
 
@@ -456,6 +469,7 @@ func (d *Decoder) read2(format byte) (uint64, error) {
 		return 0, err
 	}
 	d.r.Discard(2)
+
 	return uint64(p[1]) | uint64(p[0])<<8, nil
 }
 
@@ -465,6 +479,7 @@ func (d *Decoder) read4(format byte) (uint64, error) {
 		return 0, err
 	}
 	d.r.Discard(4)
+
 	return uint64(p[3]) | uint64(p[2])<<8 | uint64(p[1])<<16 | uint64(p[0])<<24, nil
 }
 
@@ -474,6 +489,7 @@ func (d *Decoder) read8(format byte) (uint64, error) {
 		return 0, err
 	}
 	d.r.Discard(8)
+
 	return uint64(p[7]) | uint64(p[6])<<8 | uint64(p[5])<<16 | uint64(p[4])<<24 |
 		uint64(p[3])<<32 | uint64(p[2])<<40 | uint64(p[1])<<48 | uint64(p[0])<<56, nil
 }
