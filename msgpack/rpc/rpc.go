@@ -106,6 +106,23 @@ type Endpoint struct {
 	notificationsCond *sync.Cond
 }
 
+// Option is a configures a Endpoint.
+type Option struct{ f func(*Endpoint) }
+
+// WithExtensions configures Endpoint to define application-specific types.
+func WithExtensions(extensions msgpack.ExtensionMap) Option {
+	return Option{func(e *Endpoint) {
+		e.dec.SetExtensions(extensions)
+	}}
+}
+
+// WithLogf sets the log function to Endpoint.
+func WithLogf(f func(fmt string, args ...interface{})) Option {
+	return Option{func(e *Endpoint) {
+		e.logf = f
+	}}
+}
+
 // NewEndpoint returns a new endpoint with the specified options.
 func NewEndpoint(r io.Reader, w io.Writer, c io.Closer, options ...Option) (*Endpoint, error) {
 	bw := bufio.NewWriter(w)
@@ -123,23 +140,6 @@ func NewEndpoint(r io.Reader, w io.Writer, c io.Closer, options ...Option) (*End
 	}
 	return e, nil
 
-}
-
-// Option is a configures a Endpoint.
-type Option struct{ f func(*Endpoint) }
-
-// WithExtensions configures Endpoint to define application-specific types.
-func WithExtensions(extensions msgpack.ExtensionMap) Option {
-	return Option{func(e *Endpoint) {
-		e.dec.SetExtensions(extensions)
-	}}
-}
-
-// WithLogf sets the log function to Endpoint.
-func WithLogf(f func(fmt string, args ...interface{})) Option {
-	return Option{func(e *Endpoint) {
-		e.logf = f
-	}}
 }
 
 func (e *Endpoint) decodeUint(what string) (uint64, error) {
@@ -173,6 +173,71 @@ func (e *Endpoint) skip(n int) error {
 		}
 	}
 	return nil
+}
+
+// Serve serves incoming requests. Serve blocks until the peer disconnects or
+// there is an error.
+func (e *Endpoint) Serve() error {
+	e.notificationsCond = sync.NewCond(&e.notificationsMu)
+	defer e.enqueNotification(nil)
+	go e.runNotifications()
+
+	for {
+		if err := e.dec.Unpack(); err != nil {
+			if err == io.EOF {
+				err = nil
+			}
+			return e.close(err)
+		}
+
+		messageLen := e.dec.Len()
+		if messageLen < 1 {
+			return e.close(fmt.Errorf("msgpack/rpc: invalid message length %d", messageLen))
+		}
+
+		messageType, err := e.decodeUint("message type")
+		if err != nil {
+			return e.close(err)
+		}
+
+		switch kind(messageType) {
+		case requestMessage:
+			err = e.handleRequest(messageLen)
+		case replyMessage:
+			err = e.handleReply(messageLen)
+		case notificationMessage:
+			err = e.handleNotification(messageLen)
+		default:
+			err = fmt.Errorf("msgpack/rpc: unknown message type %d", messageType)
+		}
+		if err != nil {
+			return e.close(err)
+		}
+	}
+}
+
+func (e *Endpoint) close(err error) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.state == stateClosed {
+		return e.err
+	}
+	e.state = stateClosed
+	e.err = err
+	for _, call := range e.pending {
+		call.done(e, ErrClosed)
+	}
+	e.pending = nil
+	err = e.closer.Close()
+	if e.err == nil {
+		e.err = err
+	}
+	return e.err
+}
+
+// Close releases the resources used by endpoint.
+func (e *Endpoint) Close() error {
+	return e.close(nil)
 }
 
 var errorType = reflect.ValueOf(new(error)).Elem().Type()
@@ -218,30 +283,6 @@ func (e *Endpoint) Register(method string, fn interface{}, args ...interface{}) 
 	e.handlers[method] = h
 	e.handlersMu.Unlock()
 	return nil
-}
-
-func (e *Endpoint) close(err error) error {
-	e.mu.Lock()
-	defer e.mu.Unlock()
-	if e.state == stateClosed {
-		return e.err
-	}
-	e.state = stateClosed
-	e.err = err
-	for _, call := range e.pending {
-		call.done(e, ErrClosed)
-	}
-	e.pending = nil
-	err = e.closer.Close()
-	if e.err == nil {
-		e.err = err
-	}
-	return e.err
-}
-
-// Close releases the resources used by endpoint.
-func (e *Endpoint) Close() error {
-	return e.close(nil)
 }
 
 // Call invokes the target method and waits for a response.
@@ -340,138 +381,6 @@ func (e *Endpoint) Notify(method string, args ...interface{}) error {
 	return err
 }
 
-func (e *Endpoint) reply(id uint64, replyErr error, reply interface{}) error {
-	e.encMu.Lock()
-	defer e.encMu.Unlock()
-
-	err := e.enc.PackArrayLen(4)
-	if err != nil {
-		return err
-	}
-
-	err = e.enc.PackUint(uint64(replyMessage))
-	if err != nil {
-		return err
-	}
-
-	err = e.enc.PackUint(id)
-	if err != nil {
-		return err
-	}
-
-	if replyErr == nil {
-		err = e.enc.PackNil()
-	} else if ee, ok := replyErr.(Error); ok {
-		err = e.enc.Encode(ee.Value)
-	} else if ee, ok := replyErr.(msgpack.Marshaler); ok {
-		err = ee.MarshalMsgPack(e.enc)
-	} else {
-		err = e.enc.PackString(replyErr.Error())
-	}
-	if err != nil {
-		return err
-	}
-
-	err = e.enc.Encode(reply)
-	if err != nil {
-		return err
-	}
-	return e.bw.Flush()
-}
-
-// Serve serves incoming requests. Serve blocks until the peer disconnects or
-// there is an error.
-func (e *Endpoint) Serve() error {
-	e.notificationsCond = sync.NewCond(&e.notificationsMu)
-	defer e.enqueNotification(nil)
-	go e.runNotifications()
-
-	for {
-		if err := e.dec.Unpack(); err != nil {
-			if err == io.EOF {
-				err = nil
-			}
-			return e.close(err)
-		}
-
-		messageLen := e.dec.Len()
-		if messageLen < 1 {
-			return e.close(fmt.Errorf("msgpack/rpc: invalid message length %d", messageLen))
-		}
-
-		messageType, err := e.decodeUint("message type")
-		if err != nil {
-			return e.close(err)
-		}
-
-		switch kind(messageType) {
-		case requestMessage:
-			err = e.handleRequest(messageLen)
-		case replyMessage:
-			err = e.handleReply(messageLen)
-		case notificationMessage:
-			err = e.handleNotification(messageLen)
-		default:
-			err = fmt.Errorf("msgpack/rpc: unknown message type %d", messageType)
-		}
-		if err != nil {
-			return e.close(err)
-		}
-	}
-}
-
-func (e *Endpoint) handleReply(messageLen int) error {
-	if messageLen != 4 {
-		// messageType, id, error, reply
-		return fmt.Errorf("msgpack/rpc: invalid reply message length %d", messageLen)
-	}
-
-	id, err := e.decodeUint("response id")
-	if err != nil {
-		return err
-	}
-
-	e.mu.Lock()
-	call := e.pending[id]
-	delete(e.pending, id)
-	e.mu.Unlock()
-
-	if call == nil {
-		e.logf("msgpack/rpc: no pending call for reply %d", id)
-		return e.skip(2)
-	}
-
-	var errorValue interface{}
-	if err := e.dec.Decode(&errorValue); err != nil {
-		call.done(e, ErrInternal)
-		return fmt.Errorf("msgpack/rpc: error decoding error value: %v", err)
-	}
-
-	if errorValue != nil {
-		err := e.skip(1)
-		call.done(e, Error{errorValue})
-		return err
-	}
-
-	if call.Reply == nil {
-		err = e.skip(1)
-	} else {
-		err = e.dec.Decode(call.Reply)
-		if cvterr, ok := err.(*msgpack.DecodeConvertError); ok {
-			call.done(e, cvterr)
-			return nil
-		}
-	}
-
-	if err != nil {
-		call.done(e, ErrInternal)
-		return fmt.Errorf("msgpack/rpc: error decoding reply: %v", err)
-	}
-
-	call.done(e, nil)
-	return nil
-}
-
 func (e *Endpoint) createCall(h *handler) (func([]reflect.Value) []reflect.Value, []reflect.Value, error) {
 	t := h.fn.Type()
 	args := make([]reflect.Value, t.NumIn())
@@ -553,6 +462,45 @@ func (e *Endpoint) createCall(h *handler) (func([]reflect.Value) []reflect.Value
 	return h.fn.CallSlice, args, nil
 }
 
+func (e *Endpoint) reply(id uint64, replyErr error, reply interface{}) error {
+	e.encMu.Lock()
+	defer e.encMu.Unlock()
+
+	err := e.enc.PackArrayLen(4)
+	if err != nil {
+		return err
+	}
+
+	err = e.enc.PackUint(uint64(replyMessage))
+	if err != nil {
+		return err
+	}
+
+	err = e.enc.PackUint(id)
+	if err != nil {
+		return err
+	}
+
+	if replyErr == nil {
+		err = e.enc.PackNil()
+	} else if ee, ok := replyErr.(Error); ok {
+		err = e.enc.Encode(ee.Value)
+	} else if ee, ok := replyErr.(msgpack.Marshaler); ok {
+		err = ee.MarshalMsgPack(e.enc)
+	} else {
+		err = e.enc.PackString(replyErr.Error())
+	}
+	if err != nil {
+		return err
+	}
+
+	err = e.enc.Encode(reply)
+	if err != nil {
+		return err
+	}
+	return e.bw.Flush()
+}
+
 func (e *Endpoint) handleRequest(messageLen int) error {
 	if messageLen != 4 {
 		// messageType, id, method, args
@@ -605,6 +553,58 @@ func (e *Endpoint) handleRequest(messageLen int) error {
 		}
 	}()
 
+	return nil
+}
+
+func (e *Endpoint) handleReply(messageLen int) error {
+	if messageLen != 4 {
+		// messageType, id, error, reply
+		return fmt.Errorf("msgpack/rpc: invalid reply message length %d", messageLen)
+	}
+
+	id, err := e.decodeUint("response id")
+	if err != nil {
+		return err
+	}
+
+	e.mu.Lock()
+	call := e.pending[id]
+	delete(e.pending, id)
+	e.mu.Unlock()
+
+	if call == nil {
+		e.logf("msgpack/rpc: no pending call for reply %d", id)
+		return e.skip(2)
+	}
+
+	var errorValue interface{}
+	if err := e.dec.Decode(&errorValue); err != nil {
+		call.done(e, ErrInternal)
+		return fmt.Errorf("msgpack/rpc: error decoding error value: %v", err)
+	}
+
+	if errorValue != nil {
+		err := e.skip(1)
+		call.done(e, Error{errorValue})
+		return err
+	}
+
+	if call.Reply == nil {
+		err = e.skip(1)
+	} else {
+		err = e.dec.Decode(call.Reply)
+		if cvterr, ok := err.(*msgpack.DecodeConvertError); ok {
+			call.done(e, cvterr)
+			return nil
+		}
+	}
+
+	if err != nil {
+		call.done(e, ErrInternal)
+		return fmt.Errorf("msgpack/rpc: error decoding reply: %v", err)
+	}
+
+	call.done(e, nil)
 	return nil
 }
 
