@@ -59,28 +59,29 @@ func testClientServer(tb testing.TB, opts ...Option) (client, server *Endpoint, 
 }
 
 func TestEndpoint(t *testing.T) {
+	t.Parallel()
+
 	client, server, cleanup := testClientServer(t)
 	defer cleanup()
 
-	if err := server.Register("add", func(a, b int) (int, error) { return a + b, nil }); err != nil {
+	addFn := func(a, b int) (int, error) { return a + b, nil }
+	if err := server.Register("add", addFn); err != nil {
 		t.Fatal(err)
 	}
 
-	// Call.
-
+	// call
 	var sum int
 	if err := client.Call("add", &sum, 1, 2); err != nil {
 		t.Fatal(err)
 	}
-
 	if sum != 3 {
-		t.Errorf("sum = %d, want %d", sum, 3)
+		t.Fatalf("sum = %d, want %d", sum, 3)
 	}
 
-	// Notification.
-
+	// notification
 	notifCh := make(chan string)
-	if err := server.Register("n1", func(s string) { notifCh <- s }); err != nil {
+	n1Fn := func(s string) { notifCh <- s }
+	if err := server.Register("n1", n1Fn); err != nil {
 		t.Fatal(err)
 	}
 
@@ -101,28 +102,9 @@ func TestEndpoint(t *testing.T) {
 	}
 }
 
-var argsTests = []struct {
-	sm     string
-	args   []interface{}
-	result []string
-}{
-	{"n", []interface{}{}, []string{"", ""}},
-	{"n", []interface{}{"a"}, []string{"a", ""}},
-	{"n", []interface{}{"a", "b"}, []string{"a", "b"}},
-	{"n", []interface{}{"a", "b", "c"}, []string{"a", "b"}},
-
-	{"v", []interface{}{}, []string{"", ""}},
-	{"v", []interface{}{"a"}, []string{"a", ""}},
-	{"v", []interface{}{"a", "b"}, []string{"a", "b"}},
-	{"v", []interface{}{"a", "b", "x1"}, []string{"a", "b", "x1"}},
-	{"v", []interface{}{"a", "b", "x1", "x2"}, []string{"a", "b", "x1", "x2"}},
-	{"v", []interface{}{"a", "b", "x1", "x2", "x3"}, []string{"a", "b", "x1", "x2", "x3"}},
-
-	{"a", []interface{}{}, []string(nil)},
-	{"a", []interface{}{"x1", "x2", "x3"}, []string{"x1", "x2", "x3"}},
-}
-
 func TestArgs(t *testing.T) {
+	t.Parallel()
+
 	client, server, cleanup := testClientServer(t)
 	defer cleanup()
 
@@ -144,44 +126,115 @@ func TestArgs(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	argsTests := []struct {
+		sm     string
+		args   []interface{}
+		result []string
+	}{
+		{
+			sm:     "n",
+			args:   []interface{}{},
+			result: []string{"", ""},
+		},
+		{
+			sm:     "n",
+			args:   []interface{}{"a"},
+			result: []string{"a", ""},
+		},
+		{
+			sm:     "n",
+			args:   []interface{}{"a", "b"},
+			result: []string{"a", "b"},
+		},
+		{
+			sm:     "n",
+			args:   []interface{}{"a", "b", "c"},
+			result: []string{"a", "b"},
+		},
+		{
+			sm:     "v",
+			args:   []interface{}{},
+			result: []string{"", ""},
+		},
+		{
+			sm:     "v",
+			args:   []interface{}{"a"},
+			result: []string{"a", ""},
+		},
+		{
+			sm:     "v",
+			args:   []interface{}{"a", "b"},
+			result: []string{"a", "b"},
+		},
+		{
+			sm:     "v",
+			args:   []interface{}{"a", "b", "x1"},
+			result: []string{"a", "b", "x1"},
+		},
+		{
+			sm:     "v",
+			args:   []interface{}{"a", "b", "x1", "x2"},
+			result: []string{"a", "b", "x1", "x2"},
+		},
+		{
+			sm:     "v",
+			args:   []interface{}{"a", "b", "x1", "x2", "x3"},
+			result: []string{"a", "b", "x1", "x2", "x3"},
+		},
+		{
+			sm:     "a",
+			args:   []interface{}{},
+			result: []string(nil),
+		},
+		{
+			sm:     "a",
+			args:   []interface{}{"x1", "x2", "x3"},
+			result: []string{"x1", "x2", "x3"},
+		},
+	}
 	for _, tt := range argsTests {
-		var result []string
-		if err := client.Call(tt.sm, &result, tt.args...); err != nil {
-			t.Errorf("%s(%v) returned error %v", tt.sm, tt.args, err)
-			continue
-		}
+		t.Run(tt.sm, func(t *testing.T) {
+			var result []string
+			if err := client.Call(tt.sm, &result, tt.args...); err != nil {
+				t.Fatalf("%s(%v) returned error %v", tt.sm, tt.args, err)
+			}
 
-		if !reflect.DeepEqual(result, tt.result) {
-			t.Errorf("%s(%v) returned %#v, want %#v", tt.sm, tt.args, result, tt.result)
-		}
+			if !reflect.DeepEqual(result, tt.result) {
+				t.Fatalf("%s(%v) returned %#v, want %#v", tt.sm, tt.args, result, tt.result)
+			}
+		})
 	}
 }
 
 func TestCallAfterClose(t *testing.T) {
+	t.Parallel()
+
 	client, server, cleanup := testClientServer(t)
-	err := server.Register("a", func() error {
+
+	if err := server.Register("a", func() error {
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		t.Fatal(err)
 	}
 	cleanup()
+
 	if err := client.Call("a", nil); err == nil {
 		t.Fatal("expected error")
 	}
 }
 
 func TestExtraArgs(t *testing.T) {
+	t.Parallel()
+
 	client, server, cleanup := testClientServer(t)
 	defer cleanup()
 
-	err := server.Register("a", func(hello string) error {
+	if err := server.Register("a", func(hello string) error {
 		if hello != "hello" {
 			t.Fatal("first arg not equal to 'hello'")
 		}
 		return nil
-	}, "hello")
-	if err != nil {
+	}, "hello"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -189,29 +242,29 @@ func TestExtraArgs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = server.Register("b", func(hello *string) error {
+	if err := server.Register("b", func(hello *string) error {
 		if hello != nil {
 			t.Fatal("first arg not nil")
 		}
 		return nil
-	}, nil)
-	if err != nil {
+	}, nil); err != nil {
 		t.Fatal(err)
 	}
+
 	if err := client.Call("b", nil); err != nil {
 		t.Fatal(err)
 	}
-
 }
 
 func TestBadFunction(t *testing.T) {
+	t.Parallel()
+
 	_, server, cleanup := testClientServer(t)
 	defer cleanup()
 
-	err := server.Register("a", func(hello string) int {
+	if err := server.Register("a", func(hello string) int {
 		return 1
-	})
-	if err == nil {
+	}); err == nil {
 		t.Fatal("expected error, got nil")
 	}
 }
