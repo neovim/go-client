@@ -16,6 +16,14 @@ func TestPack(t *testing.T) {
 		// Hex encodings of typ, v
 		hs string
 	}{
+		"Bool/True": {
+			v:  true,
+			hs: "c3",
+		},
+		"Bool/False": {
+			v:  false,
+			hs: "c2",
+		},
 		"Int64/0x0": {
 			v:  int64(0x0),
 			hs: "00",
@@ -132,21 +140,33 @@ func TestPack(t *testing.T) {
 			v:  uint64(0xffffffffffffffff),
 			hs: "cfffffffffffffffff",
 		},
-		"Nil": {
-			v:  nil,
-			hs: "c0",
-		},
-		"True": {
-			v:  true,
-			hs: "c3",
-		},
-		"False": {
-			v:  false,
-			hs: "c2",
-		},
 		"Float64/1.23456": {
 			v:  float64(1.23456),
 			hs: "cb3ff3c0c1fc8f3238",
+		},
+		"String/Empty": {
+			v:  string(""),
+			hs: "a0",
+		},
+		"String/1": {
+			v:  string("1"),
+			hs: "a131",
+		},
+		"String/1234567890123456789012345678901": {
+			v:  string("1234567890123456789012345678901"),
+			hs: "bf31323334353637383930313233343536373839303132333435363738393031",
+		},
+		"String/12345678901234567890123456789012": {
+			v:  string("12345678901234567890123456789012"),
+			hs: "d9203132333435363738393031323334353637383930313233343536373839303132",
+		},
+		"Binary/Empty": {
+			v:  []byte(""),
+			hs: "c400",
+		},
+		"Binary/1": {
+			v:  []byte("1"),
+			hs: "c40131",
 		},
 		"MapLen/0x0": {
 			v:  mapLen(0x0),
@@ -204,30 +224,6 @@ func TestPack(t *testing.T) {
 			v:  arrayLen(0xffffffff),
 			hs: "ddffffffff",
 		},
-		"String/Empty": {
-			v:  "",
-			hs: "a0",
-		},
-		"String/1": {
-			v:  "1",
-			hs: "a131",
-		},
-		"String/1234567890123456789012345678901": {
-			v:  "1234567890123456789012345678901",
-			hs: "bf31323334353637383930313233343536373839303132333435363738393031",
-		},
-		"String/12345678901234567890123456789012": {
-			v:  "12345678901234567890123456789012",
-			hs: "d9203132333435363738393031323334353637383930313233343536373839303132",
-		},
-		"Bytes/Empty": {
-			v:  []byte(""),
-			hs: "c400",
-		},
-		"Bytes/1": {
-			v:  []byte("1"),
-			hs: "c40131",
-		},
 		"Extension/1/Empty": {
 			v:  extension{1, ""},
 			hs: "c70001",
@@ -256,6 +252,10 @@ func TestPack(t *testing.T) {
 			v:  extension{7, "12345678901234567"},
 			hs: "c711073132333435363738393031323334353637",
 		},
+		"Nil": {
+			v:  nil,
+			hs: "c0",
+		},
 	}
 	for name, tt := range packTests {
 		tt := tt
@@ -274,6 +274,7 @@ func TestPack(t *testing.T) {
 			if err != nil {
 				t.Fatalf("pack %s returned error %v", arg, err)
 			}
+
 			h := hex.EncodeToString(p)
 			if h != tt.hs {
 				t.Fatalf("pack %s returned %s, want %s", arg, h, tt.hs)
