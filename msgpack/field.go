@@ -17,7 +17,7 @@ type field struct {
 }
 
 func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]bool, depth map[string]int, index []int) []*field {
-	// Break recursion.
+	// Break recursion
 	if visited[t] {
 		return fields
 	}
@@ -26,7 +26,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 	for i := 0; i < t.NumField(); i++ {
 		sf := t.Field(i)
 		if sf.PkgPath != "" && !sf.Anonymous {
-			// Skip field if not exported and not anonymous.
+			// Skip field if not exported and not anonymous
 			continue
 		}
 
@@ -48,7 +48,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		}
 
 		if name == "-" {
-			// Skip field when field tag starts with "-".
+			// Skip field when field tag starts with "-"
 			continue
 		}
 
@@ -58,7 +58,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		}
 
 		if name == "" && sf.Anonymous && ft.Kind() == reflect.Struct {
-			// Flatten anonymous struct field.
+			// Flatten anonymous struct field
 			fields = collectFields(fields, ft, visited, depth, append(index, i))
 			continue
 		}
@@ -67,14 +67,15 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 			name = sf.Name
 		}
 
-		// Check for name collisions.
+		// Check for name collisions
 		d, found := depth[name]
 		if !found {
 			d = 65535
 		}
+
 		if len(index) == d {
-			// There is another field with same name and same depth.
-			// Remove that field and skip this field.
+			// There is another field with same name and same depth
+			// Remove that field and skip this field
 			j := 0
 			for i := 0; i < len(fields); i++ {
 				if name != fields[i].name {
@@ -97,8 +98,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		copy(f.index, index)
 		f.index[len(index)] = i
 
-		// Parse empty field tag.
-
+		// Parse empty field tag
 		if e := sf.Tag.Get("empty"); e != "" {
 			switch sf.Type.Kind() {
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -112,6 +112,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 				}
 				f.empty = reflect.New(sf.Type).Elem()
 				f.empty.SetInt(v)
+
 			case reflect.Bool:
 				v, err := strconv.ParseBool(e)
 				if err != nil {
@@ -119,9 +120,11 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 				}
 				f.empty = reflect.New(sf.Type).Elem()
 				f.empty.SetBool(v)
+
 			case reflect.String:
 				f.empty = reflect.New(sf.Type).Elem()
 				f.empty.SetString(e)
+
 			default:
 				panic(fmt.Errorf("msgpack: unsupported empty field %s.%s", t.Name(), sf.Name))
 			}
@@ -130,18 +133,21 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		fields = append(fields, f)
 
 	}
+
 	return fields
 }
 
 func fieldsForType(t reflect.Type) ([]*field, bool) {
 	fields := collectFields(nil, t, make(map[reflect.Type]bool), make(map[string]int), nil)
 	array := false
+
 	for _, field := range fields {
 		if field.array {
 			array = true
 			break
 		}
 	}
+
 	return fields, array
 }
 
@@ -155,5 +161,6 @@ func fieldByIndex(v reflect.Value, index []int) reflect.Value {
 		}
 		v = v.Field(i)
 	}
+
 	return v
 }
