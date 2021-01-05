@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -9,42 +10,46 @@ import (
 	"testing"
 )
 
-func clientServer(t *testing.T, options ...Option) (*Endpoint, *Endpoint, func()) {
-	var wg sync.WaitGroup
+func testClientServer(tb testing.TB, opts ...Option) (client, server *Endpoint, cleanup func()) {
+	tb.Helper()
 
-	options = append(options, WithLogf(t.Logf))
+	opts = append(opts, WithLogf(tb.Logf))
 
 	serverConn, clientConn := net.Pipe()
 
-	server, err := NewEndpoint(serverConn, serverConn, serverConn, options...)
+	var err error
+	server, err = NewEndpoint(serverConn, serverConn, serverConn, opts...)
 	if err != nil {
-		t.Fatal(err)
+		tb.Fatal(err)
 	}
 
-	client, err := NewEndpoint(clientConn, clientConn, clientConn, options...)
+	client, err = NewEndpoint(clientConn, clientConn, clientConn, opts...)
 	if err != nil {
-		t.Fatal(err)
+		tb.Fatal(err)
 	}
 
+	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		err := server.Serve()
-		if err != nil && err != io.ErrClosedPipe {
-			t.Logf("server: %v", err)
+		if err := server.Serve(); err != nil && !errors.Is(err, io.ErrClosedPipe) {
+			tb.Errorf("server: %v", err)
 		}
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
-		err := client.Serve()
-		if err != nil && err != io.ErrClosedPipe {
-			t.Logf("server: %v", err)
+		if err := client.Serve(); err != nil && !errors.Is(err, io.ErrClosedPipe) {
+			tb.Errorf("server: %v", err)
 		}
 		wg.Done()
 	}()
 
-	cleanup := func() {
+	if tb.Failed() {
+		tb.FailNow()
+	}
+
+	cleanup = func() {
 		client.Close()
 		server.Close()
 		wg.Wait()
@@ -54,7 +59,7 @@ func clientServer(t *testing.T, options ...Option) (*Endpoint, *Endpoint, func()
 }
 
 func TestEndpoint(t *testing.T) {
-	client, server, cleanup := clientServer(t)
+	client, server, cleanup := testClientServer(t)
 	defer cleanup()
 
 	if err := server.Register("add", func(a, b int) (int, error) { return a + b, nil }); err != nil {
@@ -118,7 +123,7 @@ var argsTests = []struct {
 }
 
 func TestArgs(t *testing.T) {
-	client, server, cleanup := clientServer(t)
+	client, server, cleanup := testClientServer(t)
 	defer cleanup()
 
 	if err := server.Register("n", func(a, b string) ([]string, error) {
@@ -153,7 +158,7 @@ func TestArgs(t *testing.T) {
 }
 
 func TestCallAfterClose(t *testing.T) {
-	client, server, cleanup := clientServer(t)
+	client, server, cleanup := testClientServer(t)
 	err := server.Register("a", func() error {
 		return nil
 	})
@@ -167,7 +172,7 @@ func TestCallAfterClose(t *testing.T) {
 }
 
 func TestExtraArgs(t *testing.T) {
-	client, server, cleanup := clientServer(t)
+	client, server, cleanup := testClientServer(t)
 	defer cleanup()
 
 	err := server.Register("a", func(hello string) error {
@@ -200,7 +205,7 @@ func TestExtraArgs(t *testing.T) {
 }
 
 func TestBadFunction(t *testing.T) {
-	_, server, cleanup := clientServer(t)
+	_, server, cleanup := testClientServer(t)
 	defer cleanup()
 
 	err := server.Register("a", func(hello string) int {
