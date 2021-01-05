@@ -5,6 +5,12 @@ import (
 	"sync"
 )
 
+// Marshaler is the interface implemented by objects that can encode themselves
+// to a MessagePack stream.
+type Marshaler interface {
+	MarshalMsgPack(e *Encoder) error
+}
+
 // Encode writes the MessagePack encoding of v to the stream.
 //
 // Encode traverses the value v recursively. If an encountered value implements
@@ -246,12 +252,6 @@ func (b *encodeBuilder) sliceEncoder(t reflect.Type) encodeFunc {
 		return byteSliceEncoder
 	}
 	return sliceArrayEncoder{encoderForType(t.Elem(), b)}.encodeSlice
-}
-
-// Marshaler is the interface implemented by objects that can encode themselves
-// to a MessagePack stream.
-type Marshaler interface {
-	MarshalMsgPack(e *Encoder) error
 }
 
 var marshalerType = reflect.TypeOf((*Marshaler)(nil)).Elem()
