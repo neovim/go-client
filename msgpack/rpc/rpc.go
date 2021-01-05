@@ -51,11 +51,11 @@ func (e Error) Error() string {
 
 // Call represents a MessagePack RPC call.
 type Call struct {
-	Method string
 	Args   interface{}
 	Reply  interface{}
 	Err    error
 	Done   chan *Call
+	Method string
 }
 
 func (c *Call) done(e *Endpoint, err error) {
@@ -75,35 +75,35 @@ type handler struct {
 
 type notification struct {
 	call   func([]reflect.Value) []reflect.Value
-	args   []reflect.Value
-	method string
 	next   *notification
+	method string
+	args   []reflect.Value
 }
 
 // Endpoint represents a MessagePack RPC peer.
 type Endpoint struct {
-	logf   func(fmt string, args ...interface{})
-	arg    reflect.Value
-	dec    *msgpack.Decoder
-	closer io.Closer
+	err  error
+	logf func(fmt string, args ...interface{})
+
 	done   chan struct{}
+	closer io.Closer
+	bw     *bufio.Writer
+	enc    *msgpack.Encoder
+	dec    *msgpack.Decoder
 
-	bw    *bufio.Writer
-	enc   *msgpack.Encoder
-	encMu sync.Mutex
-
-	mu      sync.Mutex
-	id      uint64
-	pending map[uint64]*Call
-	state   state
-	err     error
-
-	handlers   map[string]*handler
-	handlersMu sync.RWMutex
-
-	notifications     []*notification
-	notificationsMu   sync.Mutex
+	handlers          map[string]*handler
+	pending           map[uint64]*Call
 	notificationsCond *sync.Cond
+
+	arg           reflect.Value
+	notifications []*notification
+	state         state
+	id            uint64
+
+	mu              sync.Mutex
+	handlersMu      sync.RWMutex
+	encMu           sync.Mutex
+	notificationsMu sync.Mutex
 }
 
 // Option is a configures a Endpoint.
