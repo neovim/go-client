@@ -11,6 +11,18 @@ type Marshaler interface {
 	MarshalMsgPack(e *Encoder) error
 }
 
+type encodeTypeError struct {
+	Type reflect.Type
+}
+
+func (e *encodeTypeError) Error() string {
+	return "msgpack: unsupported type: " + e.Type.String()
+}
+
+func encodeUnsupportedType(e *Encoder, v reflect.Value) {
+	abort(&encodeTypeError{v.Type()})
+}
+
 // Encode writes the MessagePack encoding of v to the stream.
 //
 // Encode traverses the value v recursively. If an encountered value implements
@@ -50,8 +62,10 @@ func (e *Encoder) Encode(v interface{}) (err error) {
 		return e.PackNil()
 	}
 	defer handleAbort(&err)
+
 	rv := reflect.ValueOf(v)
 	encoderForType(rv.Type(), nil)(e, rv)
+
 	return nil
 }
 
@@ -81,6 +95,7 @@ func encoderForType(t reflect.Type, b *encodeBuilder) encodeFunc {
 	} else if f, ok := b.m[t]; ok {
 		return f
 	}
+
 	// Add temporary entry to break recursion.
 	b.m[t] = func(e *Encoder, v reflect.Value) {
 		f(e, v)
@@ -90,14 +105,17 @@ func encoderForType(t reflect.Type, b *encodeBuilder) encodeFunc {
 
 	if save {
 		encodeFuncCache.Lock()
+
 		if encodeFuncCache.m == nil {
 			encodeFuncCache.m = make(map[reflect.Type]encodeFunc)
 		}
 		for t, f := range b.m {
 			encodeFuncCache.m[t] = f
 		}
+
 		encodeFuncCache.Unlock()
 	}
+
 	return f
 }
 
@@ -105,6 +123,7 @@ func (b *encodeBuilder) encoder(t reflect.Type) encodeFunc {
 	if t.Implements(marshalerType) {
 		return b.marshalEncoder(t)
 	}
+
 	var f encodeFunc
 	switch t.Kind() {
 	case reflect.Bool:
@@ -132,9 +151,11 @@ func (b *encodeBuilder) encoder(t reflect.Type) encodeFunc {
 	default:
 		f = encodeUnsupportedType
 	}
+
 	if t.Kind() != reflect.Ptr && reflect.PtrTo(t).Implements(marshalerType) {
 		f = marshalAddrEncoder{f}.encode
 	}
+
 	return f
 }
 
@@ -185,6 +206,7 @@ func interfaceEncoder(e *Encoder, v reflect.Value) {
 		nilEncoder(e, v)
 		return
 	}
+
 	v = v.Elem()
 	encoderForType(v.Type(), nil)(e, v)
 }
@@ -196,6 +218,7 @@ func (enc ptrEncoder) encode(e *Encoder, v reflect.Value) {
 		nilEncoder(e, v)
 		return
 	}
+
 	enc.elem(e, v.Elem())
 }
 
@@ -210,9 +233,11 @@ func (enc *mapEncoder) encode(e *Encoder, v reflect.Value) {
 		nilEncoder(e, v)
 		return
 	}
+
 	if err := e.PackMapLen(int64(v.Len())); err != nil {
 		abort(err)
 	}
+
 	for _, k := range v.MapKeys() {
 		enc.key(e, k)
 		enc.elem(e, v.MapIndex(k))
@@ -230,6 +255,7 @@ func (enc sliceArrayEncoder) encodeArray(e *Encoder, v reflect.Value) {
 	if err := e.PackArrayLen(int64(v.Len())); err != nil {
 		abort(err)
 	}
+
 	for i := 0; i < v.Len(); i++ {
 		enc.elem(e, v.Index(i))
 	}
@@ -244,6 +270,7 @@ func (enc sliceArrayEncoder) encodeSlice(e *Encoder, v reflect.Value) {
 		nilEncoder(e, v)
 		return
 	}
+
 	enc.encodeArray(e, v)
 }
 
@@ -251,6 +278,7 @@ func (b *encodeBuilder) sliceEncoder(t reflect.Type) encodeFunc {
 	if t.Elem().Kind() == reflect.Uint8 {
 		return byteSliceEncoder
 	}
+
 	return sliceArrayEncoder{encoderForType(t.Elem(), b)}.encodeSlice
 }
 
@@ -261,11 +289,13 @@ func marshalPtrEncoder(e *Encoder, v reflect.Value) {
 		nilEncoder(e, v)
 		return
 	}
+
 	marshalEncoder(e, v)
 }
 
 func marshalEncoder(e *Encoder, v reflect.Value) {
 	m := v.Interface().(Marshaler)
+
 	if err := m.MarshalMsgPack(e); err != nil {
 		abort(err)
 	}
@@ -275,6 +305,7 @@ func (b *encodeBuilder) marshalEncoder(t reflect.Type) encodeFunc {
 	if t.Kind() == reflect.Ptr {
 		return marshalPtrEncoder
 	}
+
 	return marshalEncoder
 }
 
@@ -285,6 +316,7 @@ func (enc marshalAddrEncoder) encode(e *Encoder, v reflect.Value) {
 		marshalEncoder(e, v.Addr())
 		return
 	}
+
 	enc.f(e, v)
 }
 
@@ -306,17 +338,21 @@ func (enc structEncoder) encode(e *Encoder, v reflect.Value) {
 		}
 		n++
 	}
+
 	if err := e.PackMapLen(n); err != nil {
 		abort(err)
 	}
+
 	for _, fe := range enc {
 		fv := fieldByIndex(v, fe.index)
 		if !fv.IsValid() || (fe.empty != nil && fe.empty(fv)) {
 			continue
 		}
+
 		if err := e.PackString(fe.name); err != nil {
 			abort(err)
 		}
+
 		fe.f(e, fv)
 	}
 }
@@ -325,6 +361,7 @@ func (enc structEncoder) encodeArray(e *Encoder, v reflect.Value) {
 	if err := e.PackArrayLen(int64(len(enc))); err != nil {
 		abort(err)
 	}
+
 	for _, fe := range enc {
 		fv := fieldByIndex(v, fe.index)
 		fe.f(e, fv)
@@ -334,6 +371,7 @@ func (enc structEncoder) encodeArray(e *Encoder, v reflect.Value) {
 func (b *encodeBuilder) structEncoder(t reflect.Type) encodeFunc {
 	fields, array := fieldsForType(t)
 	enc := make(structEncoder, len(fields))
+
 	for i, f := range fields {
 		var empty func(reflect.Value) bool
 		if f.omitEmpty {
@@ -345,9 +383,11 @@ func (b *encodeBuilder) structEncoder(t reflect.Type) encodeFunc {
 			index: f.index,
 			f:     encoderForType(f.typ, b)}
 	}
+
 	if array {
 		return enc.encodeArray
 	}
+
 	return enc.encode
 }
 
@@ -355,6 +395,7 @@ func emptyFunc(f *field) func(reflect.Value) bool {
 	if f.empty.IsValid() {
 		return func(v reflect.Value) bool { return v.Interface() == f.empty.Interface() }
 	}
+
 	switch f.typ.Kind() {
 	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
 		return lenEmpty
@@ -373,21 +414,9 @@ func emptyFunc(f *field) func(reflect.Value) bool {
 	}
 }
 
+func lenEmpty(v reflect.Value) bool   { return v.Len() == 0 }
+func boolEmpty(v reflect.Value) bool  { return !v.Bool() }
 func intEmpty(v reflect.Value) bool   { return v.Int() == 0 }
 func uintEmpty(v reflect.Value) bool  { return v.Uint() == 0 }
 func floatEmpty(v reflect.Value) bool { return v.Float() == 0 }
-func boolEmpty(v reflect.Value) bool  { return !v.Bool() }
-func lenEmpty(v reflect.Value) bool   { return v.Len() == 0 }
 func nilEmpty(v reflect.Value) bool   { return v.IsNil() }
-
-type encodeTypeError struct {
-	Type reflect.Type
-}
-
-func (e *encodeTypeError) Error() string {
-	return "msgpack: unsupported type: " + e.Type.String()
-}
-
-func encodeUnsupportedType(e *Encoder, v reflect.Value) {
-	abort(&encodeTypeError{v.Type()})
-}
