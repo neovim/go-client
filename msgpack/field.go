@@ -108,14 +108,14 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 				}
 				v, err := strconv.ParseInt(e, 10, bits)
 				if err != nil {
-					panic(fmt.Errorf("msgpack: error parsing field empty field %s.%s: %v", t.Name(), sf.Name, err))
+					panic(fmt.Errorf("msgpack: error parsing field empty field %s.%s: %w", t.Name(), sf.Name, err))
 				}
 				f.empty = reflect.New(sf.Type).Elem()
 				f.empty.SetInt(v)
 			case reflect.Bool:
 				v, err := strconv.ParseBool(e)
 				if err != nil {
-					panic(fmt.Errorf("msgpack: error parsing field empty field %s.%s: %v", t.Name(), sf.Name, err))
+					panic(fmt.Errorf("msgpack: error parsing field empty field %s.%s: %w", t.Name(), sf.Name, err))
 				}
 				f.empty = reflect.New(sf.Type).Elem()
 				f.empty.SetBool(v)
