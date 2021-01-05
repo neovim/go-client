@@ -2,6 +2,8 @@ package msgpack
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io"
 	"math"
 	"reflect"
@@ -577,6 +579,21 @@ func Test_boolDecoder(t *testing.T) {
 			if (tt.ds.errSaved != nil) != tt.wantErr {
 				t.Fatalf("expected tt.ds.errSaved is not nil: %#v", tt.ds.errSaved)
 			}
+
+			if tt.wantErr {
+				var decConvErr *DecodeConvertError
+				if !errors.As(tt.ds.errSaved, &decConvErr) {
+					t.Fatalf("tt.ds.errSaved is not DecodeConvertError: %#v", tt.ds.errSaved)
+				}
+
+				expected := fmt.Sprintf("msgpack: cannot convert %s to %s", decConvErr.SrcType, decConvErr.DestType)
+				if decConvErr.SrcValue != nil {
+					expected = fmt.Sprintf("msgpack: cannot convert %s(%v) to %s", decConvErr.SrcType, decConvErr.SrcValue, decConvErr.DestType)
+				}
+				if got := decConvErr.Error(); got != expected {
+					t.Fatalf("decConvErr.Error() = %s: want: %s", got, expected)
+				}
+			}
 		})
 	}
 }
@@ -643,6 +660,21 @@ func Test_intDecoder(t *testing.T) {
 
 			if (tt.ds.errSaved != nil) != tt.wantErr {
 				t.Fatalf("expected tt.ds.errSaved is not nil: %#v", tt.ds.errSaved)
+			}
+
+			if tt.wantErr {
+				var decConvErr *DecodeConvertError
+				if !errors.As(tt.ds.errSaved, &decConvErr) {
+					t.Fatalf("tt.ds.errSaved is not DecodeConvertError: %#v", tt.ds.errSaved)
+				}
+
+				expected := fmt.Sprintf("msgpack: cannot convert %s to %s", decConvErr.SrcType, decConvErr.DestType)
+				if decConvErr.SrcValue != nil {
+					expected = fmt.Sprintf("msgpack: cannot convert %s(%v) to %s", decConvErr.SrcType, decConvErr.SrcValue, decConvErr.DestType)
+				}
+				if got := decConvErr.Error(); got != expected {
+					t.Fatalf("decConvErr.Error() = %s: want: %s", got, expected)
+				}
 			}
 		})
 	}
@@ -711,6 +743,21 @@ func Test_uintDecoder(t *testing.T) {
 			if (tt.ds.errSaved != nil) != tt.wantErr {
 				t.Fatalf("expected tt.ds.errSaved is not nil: %#v", tt.ds.errSaved)
 			}
+
+			if tt.wantErr {
+				var decConvErr *DecodeConvertError
+				if !errors.As(tt.ds.errSaved, &decConvErr) {
+					t.Fatalf("tt.ds.errSaved is not DecodeConvertError: %#v", tt.ds.errSaved)
+				}
+
+				expected := fmt.Sprintf("msgpack: cannot convert %s to %s", decConvErr.SrcType, decConvErr.DestType)
+				if decConvErr.SrcValue != nil {
+					expected = fmt.Sprintf("msgpack: cannot convert %s(%v) to %s", decConvErr.SrcType, decConvErr.SrcValue, decConvErr.DestType)
+				}
+				if got := decConvErr.Error(); got != expected {
+					t.Fatalf("decConvErr.Error() = %s: want: %s", got, expected)
+				}
+			}
 		})
 	}
 }
@@ -778,6 +825,21 @@ func Test_floatDecoder(t *testing.T) {
 			if (tt.ds.errSaved != nil) != tt.wantErr {
 				t.Fatalf("expected tt.ds.errSaved is not nil: %#v", tt.ds.errSaved)
 			}
+
+			if tt.wantErr {
+				var decConvErr *DecodeConvertError
+				if !errors.As(tt.ds.errSaved, &decConvErr) {
+					t.Fatalf("tt.ds.errSaved is not DecodeConvertError: %#v", tt.ds.errSaved)
+				}
+
+				expected := fmt.Sprintf("msgpack: cannot convert %s to %s", decConvErr.SrcType, decConvErr.DestType)
+				if decConvErr.SrcValue != nil {
+					expected = fmt.Sprintf("msgpack: cannot convert %s(%v) to %s", decConvErr.SrcType, decConvErr.SrcValue, decConvErr.DestType)
+				}
+				if got := decConvErr.Error(); got != expected {
+					t.Fatalf("decConvErr.Error() = %s: want: %s", got, expected)
+				}
+			}
 		})
 	}
 }
@@ -835,6 +897,21 @@ func Test_stringDecoder(t *testing.T) {
 			if (tt.ds.errSaved != nil) != tt.wantErr {
 				t.Fatalf("expected tt.ds.errSaved is not nil: %#v", tt.ds.errSaved)
 			}
+
+			if tt.wantErr {
+				var decConvErr *DecodeConvertError
+				if !errors.As(tt.ds.errSaved, &decConvErr) {
+					t.Fatalf("tt.ds.errSaved is not DecodeConvertError: %#v", tt.ds.errSaved)
+				}
+
+				expected := fmt.Sprintf("msgpack: cannot convert %s to %s", decConvErr.SrcType, decConvErr.DestType)
+				if decConvErr.SrcValue != nil {
+					expected = fmt.Sprintf("msgpack: cannot convert %s(%v) to %s", decConvErr.SrcType, decConvErr.SrcValue, decConvErr.DestType)
+				}
+				if got := decConvErr.Error(); got != expected {
+					t.Fatalf("decConvErr.Error() = %s: want: %s", got, expected)
+				}
+			}
 		})
 	}
 }
@@ -891,6 +968,21 @@ func Test_byteSliceDecoder(t *testing.T) {
 
 			if (tt.ds.errSaved != nil) != tt.wantErr {
 				t.Fatalf("expected tt.ds.errSaved is not nil: %#v", tt.ds.errSaved)
+			}
+
+			if tt.wantErr {
+				var decConvErr *DecodeConvertError
+				if !errors.As(tt.ds.errSaved, &decConvErr) {
+					t.Fatalf("tt.ds.errSaved is not DecodeConvertError: %#v", tt.ds.errSaved)
+				}
+
+				expected := fmt.Sprintf("msgpack: cannot convert %s to %s", decConvErr.SrcType, decConvErr.DestType)
+				if decConvErr.SrcValue != nil {
+					expected = fmt.Sprintf("msgpack: cannot convert %s(%v) to %s", decConvErr.SrcType, decConvErr.SrcValue, decConvErr.DestType)
+				}
+				if got := decConvErr.Error(); got != expected {
+					t.Fatalf("decConvErr.Error() = %s: want: %s", got, expected)
+				}
 			}
 		})
 	}
