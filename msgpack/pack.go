@@ -38,16 +38,49 @@ func (e *Encoder) writeStringUnopt(s string) (int, error) {
 }
 
 type numCodes struct {
-	c8, c16, c32, c64 byte
+	c8  byte
+	c16 byte
+	c32 byte
+	c64 byte
 }
 
 var (
-	stringLenEncodings = &numCodes{string8Code, string16Code, string32Code, 0}
-	binaryLenEncodings = &numCodes{binary8Code, binary16Code, binary32Code, 0}
-	arrayLenEncodings  = &numCodes{0, array16Code, array32Code, 0}
-	mapLenEncodings    = &numCodes{0, map16Code, map32Code, 0}
-	extLenEncodings    = &numCodes{ext8Code, ext16Code, ext32Code, 0}
-	uintEncodings      = &numCodes{uint8Code, uint16Code, uint32Code, uint64Code}
+	stringLenEncodings = &numCodes{
+		c8:  string8Code,
+		c16: string16Code,
+		c32: string32Code,
+		c64: 0,
+	}
+	binaryLenEncodings = &numCodes{
+		c8:  binary8Code,
+		c16: binary16Code,
+		c32: binary32Code,
+		c64: 0,
+	}
+	arrayLenEncodings = &numCodes{
+		c8:  0,
+		c16: array16Code,
+		c32: array32Code,
+		c64: 0,
+	}
+	mapLenEncodings = &numCodes{
+		c8:  0,
+		c16: map16Code,
+		c32: map32Code,
+		c64: 0,
+	}
+	extLenEncodings = &numCodes{
+		c8:  ext8Code,
+		c16: ext16Code,
+		c32: ext32Code,
+		c64: 0,
+	}
+	uintEncodings = &numCodes{
+		c8:  uint8Code,
+		c16: uint16Code,
+		c32: uint32Code,
+		c64: uint64Code,
+	}
 )
 
 func (e *Encoder) encodeNum(fc *numCodes, v uint64) []byte {
@@ -80,13 +113,6 @@ func (e *Encoder) encodeNum(fc *numCodes, v uint64) []byte {
 		e.buf[8] = byte(v)
 		return e.buf[:9]
 	}
-}
-
-// PackNil writes a Nil value to the MessagePack stream.
-func (e *Encoder) PackNil() error {
-	e.buf[0] = nilCode
-	_, err := e.w.Write(e.buf[:1])
-	return err
 }
 
 // PackBool writes a Bool value to the MessagePack stream.
@@ -159,6 +185,67 @@ func (e *Encoder) PackUint(v uint64) error {
 	return err
 }
 
+// PackFloat writes a Float value to the MessagePack stream.
+func (e *Encoder) PackFloat(f float64) error {
+	n := math.Float64bits(f)
+	e.buf[0] = float64Code
+	e.buf[1] = byte(n >> 56)
+	e.buf[2] = byte(n >> 48)
+	e.buf[3] = byte(n >> 40)
+	e.buf[4] = byte(n >> 32)
+	e.buf[5] = byte(n >> 24)
+	e.buf[6] = byte(n >> 16)
+	e.buf[7] = byte(n >> 8)
+	e.buf[8] = byte(n)
+	_, err := e.w.Write(e.buf[:9])
+	return err
+}
+
+func (e *Encoder) packStringLen(n int64) error {
+	var b []byte
+	if n < 32 {
+		e.buf[0] = byte(fixStringCodeMin + n)
+		b = e.buf[:1]
+	} else if n <= math.MaxUint32 {
+		b = e.encodeNum(stringLenEncodings, uint64(n))
+	} else {
+		return errors.New("msgpack: long string or binary")
+	}
+	_, err := e.w.Write(b)
+	return err
+}
+
+// PackString writes a String value to the MessagePack stream.
+func (e *Encoder) PackString(v string) error {
+	if err := e.packStringLen(int64(len(v))); err != nil {
+		return err
+	}
+	_, err := e.writeString(v)
+	return err
+}
+
+// PackStringBytes writes a String value to the MessagePack stream.
+func (e *Encoder) PackStringBytes(v []byte) error {
+	if err := e.packStringLen(int64(len(v))); err != nil {
+		return err
+	}
+	_, err := e.w.Write(v)
+	return err
+}
+
+// PackBinary writes a Binary value to the MessagePack stream.
+func (e *Encoder) PackBinary(v []byte) error {
+	n := uint64(len(v))
+	if n > math.MaxUint32 {
+		return errors.New("msgpack: long string or binary")
+	}
+	if _, err := e.w.Write(e.encodeNum(binaryLenEncodings, n)); err != nil {
+		return err
+	}
+	_, err := e.w.Write(v)
+	return err
+}
+
 func (e *Encoder) packArrayMapLen(fixMin int64, fc *numCodes, v int64) error {
 	if v < 0 || v > math.MaxUint32 {
 		return errors.New("msgpack: illegal array or map size")
@@ -221,64 +308,10 @@ func (e *Encoder) PackExtension(kind int, data []byte) error {
 	return err
 }
 
-func (e *Encoder) packStringLen(n int64) error {
-	var b []byte
-	if n < 32 {
-		e.buf[0] = byte(fixStringCodeMin + n)
-		b = e.buf[:1]
-	} else if n <= math.MaxUint32 {
-		b = e.encodeNum(stringLenEncodings, uint64(n))
-	} else {
-		return errors.New("msgpack: long string or binary")
-	}
-	_, err := e.w.Write(b)
-	return err
-}
-
-// PackString writes a String value to the MessagePack stream.
-func (e *Encoder) PackString(v string) error {
-	if err := e.packStringLen(int64(len(v))); err != nil {
-		return err
-	}
-	_, err := e.writeString(v)
-	return err
-}
-
-// PackStringBytes writes a String value to the MessagePack stream.
-func (e *Encoder) PackStringBytes(v []byte) error {
-	if err := e.packStringLen(int64(len(v))); err != nil {
-		return err
-	}
-	_, err := e.w.Write(v)
-	return err
-}
-
-// PackBinary writes a Binary value to the MessagePack stream.
-func (e *Encoder) PackBinary(v []byte) error {
-	n := uint64(len(v))
-	if n > math.MaxUint32 {
-		return errors.New("msgpack: long string or binary")
-	}
-	if _, err := e.w.Write(e.encodeNum(binaryLenEncodings, n)); err != nil {
-		return err
-	}
-	_, err := e.w.Write(v)
-	return err
-}
-
-// PackFloat writes a Float value to the MessagePack stream.
-func (e *Encoder) PackFloat(f float64) error {
-	n := math.Float64bits(f)
-	e.buf[0] = float64Code
-	e.buf[1] = byte(n >> 56)
-	e.buf[2] = byte(n >> 48)
-	e.buf[3] = byte(n >> 40)
-	e.buf[4] = byte(n >> 32)
-	e.buf[5] = byte(n >> 24)
-	e.buf[6] = byte(n >> 16)
-	e.buf[7] = byte(n >> 8)
-	e.buf[8] = byte(n)
-	_, err := e.w.Write(e.buf[:9])
+// PackNil writes a Nil value to the MessagePack stream.
+func (e *Encoder) PackNil() error {
+	e.buf[0] = nilCode
+	_, err := e.w.Write(e.buf[:1])
 	return err
 }
 
