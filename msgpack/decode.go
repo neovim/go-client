@@ -101,15 +101,18 @@ func (d *Decoder) Decode(v interface{}) (err error) {
 		Decoder: d,
 	}
 	ds.unpack()
+
 	rv := reflect.ValueOf(v)
 	if (rv.Kind() != reflect.Ptr && rv.Kind() != reflect.Slice && rv.Kind() != reflect.Map) || rv.IsNil() {
 		ds.skip()
 		return ErrInvalidDecodeArg
 	}
+
 	if rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()
 	}
 	decoderForType(rv.Type(), nil)(ds, rv)
+
 	return ds.errSaved
 }
 
@@ -139,7 +142,8 @@ func decoderForType(t reflect.Type, b *decodeBuilder) decodeFunc {
 	} else if f, ok := b.m[t]; ok {
 		return f
 	}
-	// Add temporary entry to break recursion.
+
+	// Add temporary entry to break recursion
 	b.m[t] = func(ds *decodeState, v reflect.Value) {
 		f(ds, v)
 	}
@@ -148,12 +152,14 @@ func decoderForType(t reflect.Type, b *decodeBuilder) decodeFunc {
 
 	if save {
 		decodeFuncCache.Lock()
+
 		if decodeFuncCache.m == nil {
 			decodeFuncCache.m = make(map[reflect.Type]decodeFunc)
 		}
 		for t, f := range b.m {
 			decodeFuncCache.m[t] = f
 		}
+
 		decodeFuncCache.Unlock()
 	}
 	return f
@@ -163,6 +169,7 @@ func (b *decodeBuilder) decoder(t reflect.Type) decodeFunc {
 	if t.Kind() == reflect.Ptr && t.Implements(unmarshalerType) {
 		return unmarshalDecoder
 	}
+
 	var f decodeFunc
 	switch t.Kind() {
 	case reflect.Bool:
@@ -190,14 +197,17 @@ func (b *decodeBuilder) decoder(t reflect.Type) decodeFunc {
 	default:
 		f = decodeUnsupportedType
 	}
+
 	if t.Kind() != reflect.Ptr && reflect.PtrTo(t).Implements(unmarshalerType) {
 		f = unmarshalAddrDecoder{f}.decode
 	}
+
 	return f
 }
 
 func boolDecoder(ds *decodeState, v reflect.Value) {
 	var x bool
+
 	switch ds.Type() {
 	case Bool:
 		x = ds.Bool()
@@ -209,11 +219,13 @@ func boolDecoder(ds *decodeState, v reflect.Value) {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	v.SetBool(x)
 }
 
 func intDecoder(ds *decodeState, v reflect.Value) {
 	var x int64
+
 	switch ds.Type() {
 	case Int:
 		x = ds.Int()
@@ -235,15 +247,18 @@ func intDecoder(ds *decodeState, v reflect.Value) {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	if v.OverflowInt(x) {
 		ds.saveErrorAndSkip(v, x)
 		return
 	}
+
 	v.SetInt(x)
 }
 
 func uintDecoder(ds *decodeState, v reflect.Value) {
 	var x uint64
+
 	switch ds.Type() {
 	case Uint:
 		x = ds.Uint()
@@ -265,15 +280,18 @@ func uintDecoder(ds *decodeState, v reflect.Value) {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	if v.OverflowUint(x) {
 		ds.saveErrorAndSkip(v, x)
 		return
 	}
+
 	v.SetUint(x)
 }
 
 func floatDecoder(ds *decodeState, v reflect.Value) {
 	var x float64
+
 	switch ds.Type() {
 	case Int:
 		i := ds.Int()
@@ -295,11 +313,13 @@ func floatDecoder(ds *decodeState, v reflect.Value) {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	v.SetFloat(x)
 }
 
 func stringDecoder(ds *decodeState, v reflect.Value) {
 	var x string
+
 	switch ds.Type() {
 	case Binary, String:
 		x = ds.String()
@@ -307,11 +327,13 @@ func stringDecoder(ds *decodeState, v reflect.Value) {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	v.SetString(x)
 }
 
 func byteSliceDecoder(ds *decodeState, v reflect.Value) {
 	var x []byte
+
 	switch ds.Type() {
 	case Nil:
 		// Nothing to do
@@ -322,6 +344,7 @@ func byteSliceDecoder(ds *decodeState, v reflect.Value) {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	v.SetBytes(x)
 }
 
@@ -366,6 +389,7 @@ func (dec sliceArrayDecoder) decodeArray(ds *decodeState, v reflect.Value) {
 			ds.skip()
 		}
 	}
+
 	if n < v.Len() {
 		z := reflect.Zero(v.Type().Elem())
 		for i := n; i < v.Len(); i++ {
@@ -383,6 +407,7 @@ func (dec sliceArrayDecoder) decodeSlice(ds *decodeState, v reflect.Value) {
 		dec.decodeArray(ds, v)
 		return
 	}
+
 	n := ds.Len()
 	if n > v.Cap() {
 		newv := reflect.MakeSlice(v.Type(), n, n)
@@ -391,6 +416,7 @@ func (dec sliceArrayDecoder) decodeSlice(ds *decodeState, v reflect.Value) {
 	} else {
 		v.SetLen(n)
 	}
+
 	for i := 0; i < n; i++ {
 		ds.unpack()
 		dec.elem(ds, v.Index(i))
@@ -401,6 +427,7 @@ func (b *decodeBuilder) sliceDecoder(t reflect.Type) decodeFunc {
 	if t.Elem().Kind() == reflect.Uint8 {
 		return byteSliceDecoder
 	}
+
 	return sliceArrayDecoder{elem: decoderForType(t.Elem(), b)}.decodeSlice
 }
 
@@ -414,9 +441,11 @@ func (dec *mapDecoder) decode(ds *decodeState, v reflect.Value) {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	if v.IsNil() {
 		v.Set(reflect.MakeMap(v.Type()))
 	}
+
 	n := ds.Len()
 	for i := 0; i < n; i++ {
 		ds.unpack()
@@ -449,6 +478,7 @@ func (fd *fieldDec) setEmpty(v reflect.Value) {
 	if !fd.empty.IsValid() {
 		return
 	}
+
 	fv := fieldByIndex(v, fd.index)
 	fv.Set(fd.empty)
 }
@@ -459,10 +489,12 @@ func (dec structArrayDecoder) decode(ds *decodeState, v reflect.Value) {
 	for _, fd := range dec {
 		fd.setEmpty(v)
 	}
+
 	if ds.Type() != ArrayLen {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	n := ds.Len()
 	for i := 0; i < n; i++ {
 		ds.unpack()
@@ -482,14 +514,17 @@ func (dec structDecoder) decode(ds *decodeState, v reflect.Value) {
 	for _, fd := range dec {
 		fd.setEmpty(v)
 	}
+
 	if ds.Type() != MapLen {
 		ds.saveErrorAndSkip(v, nil)
 		return
 	}
+
 	n := ds.Len()
 	for i := 0; i < n; i++ {
 		// Key
 		ds.unpack()
+
 		var fd *fieldDec
 		if ds.Type() == String || ds.Type() == Binary {
 			fd = dec[string(ds.BytesNoCopy())]
@@ -499,6 +534,7 @@ func (dec structDecoder) decode(ds *decodeState, v reflect.Value) {
 
 		// Value
 		ds.unpack()
+
 		if fd != nil {
 			fv := fieldByIndex(v, fd.index)
 			fd.f(ds, fv)
@@ -510,6 +546,7 @@ func (dec structDecoder) decode(ds *decodeState, v reflect.Value) {
 
 func (b *decodeBuilder) structDecoder(t reflect.Type) decodeFunc {
 	fields, array := fieldsForType(t)
+
 	if array {
 		var dec structArrayDecoder
 		for _, field := range fields {
@@ -520,6 +557,7 @@ func (b *decodeBuilder) structDecoder(t reflect.Type) decodeFunc {
 		}
 		return dec.decode
 	}
+
 	dec := make(structDecoder)
 	for _, field := range fields {
 		dec[field.name] = &fieldDec{
@@ -528,6 +566,7 @@ func (b *decodeBuilder) structDecoder(t reflect.Type) decodeFunc {
 			empty: field.empty,
 		}
 	}
+
 	return dec.decode
 }
 
@@ -540,9 +579,11 @@ func (dec ptrDecoder) decode(ds *decodeState, v reflect.Value) {
 		v.Set(reflect.Zero(v.Type()))
 		return
 	}
+
 	if v.IsNil() {
 		v.Set(reflect.New(v.Type().Elem()))
 	}
+
 	dec.elem(ds, v.Elem())
 }
 
@@ -557,9 +598,11 @@ func unmarshalDecoder(ds *decodeState, v reflect.Value) {
 		v.Set(reflect.Zero(v.Type()))
 		return
 	}
+
 	if v.IsNil() {
 		v.Set(reflect.New(v.Type().Elem()))
 	}
+
 	m := v.Interface().(Unmarshaler)
 	err := m.UnmarshalMsgPack(ds.Decoder)
 	if e, ok := err.(*DecodeConvertError); ok {
@@ -578,6 +621,7 @@ func (dec unmarshalAddrDecoder) decode(ds *decodeState, v reflect.Value) {
 		dec.f(ds, v)
 		return
 	}
+
 	unmarshalDecoder(ds, v.Addr())
 }
 
@@ -614,22 +658,26 @@ func decodeNoReflect(ds *decodeState) (x interface{}) {
 			a[i] = decodeNoReflect(ds)
 		}
 		return a
+
 	case MapLen:
 		n := ds.Len()
 		m := make(map[string]interface{})
 		for i := 0; i < n; i++ {
 			ds.unpack()
+
 			if ds.Type() != String && ds.Type() != Binary {
 				ds.saveErrorAndSkip(reflect.ValueOf(""), nil)
 				ds.unpack()
 				ds.skip()
 				continue
 			}
+
 			key := ds.String()
 			ds.unpack()
 			m[key] = decodeNoReflect(ds)
 		}
 		return m
+
 	case Extension:
 		if f := ds.extensions[ds.Extension()]; f != nil {
 			v, err := f(ds.Bytes())
@@ -643,6 +691,7 @@ func decodeNoReflect(ds *decodeState) (x interface{}) {
 			return v
 		}
 		return extensionValue{ds.Extension(), ds.Bytes()}
+
 	default:
 		return nil
 	}
