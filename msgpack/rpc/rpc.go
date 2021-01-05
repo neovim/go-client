@@ -88,9 +88,9 @@ type Endpoint struct {
 	closer io.Closer
 	done   chan struct{}
 
-	packMu sync.Mutex
-	enc    *msgpack.Encoder
-	bw     *bufio.Writer
+	bw    *bufio.Writer
+	enc   *msgpack.Encoder
+	encMu sync.Mutex
 
 	mu      sync.Mutex
 	id      uint64
@@ -98,12 +98,12 @@ type Endpoint struct {
 	state   state
 	err     error
 
-	handlersMu sync.RWMutex
 	handlers   map[string]*handler
+	handlersMu sync.RWMutex
 
+	notifications     []*notification
 	notificationsMu   sync.Mutex
 	notificationsCond *sync.Cond
-	notifications     []*notification
 }
 
 // NewEndpoint returns a new endpoint with the specified options.
@@ -292,12 +292,12 @@ func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ..
 		args,
 	}
 
-	e.packMu.Lock()
+	e.encMu.Lock()
 	err := e.enc.Encode(message)
 	if e := e.bw.Flush(); err == nil {
 		err = e
 	}
-	e.packMu.Unlock()
+	e.encMu.Unlock()
 
 	if err != nil {
 		e.mu.Lock()
@@ -328,12 +328,12 @@ func (e *Endpoint) Notify(method string, args ...interface{}) error {
 		args,
 	}
 
-	e.packMu.Lock()
+	e.encMu.Lock()
 	err := e.enc.Encode(message)
 	if e := e.bw.Flush(); err == nil {
 		err = e
 	}
-	e.packMu.Unlock()
+	e.encMu.Unlock()
 	if err != nil {
 		e.close(fmt.Errorf("msgpack/rpc: error encoding %s: %v", method, err))
 	}
@@ -341,8 +341,8 @@ func (e *Endpoint) Notify(method string, args ...interface{}) error {
 }
 
 func (e *Endpoint) reply(id uint64, replyErr error, reply interface{}) error {
-	e.packMu.Lock()
-	defer e.packMu.Unlock()
+	e.encMu.Lock()
+	defer e.encMu.Unlock()
 
 	err := e.enc.PackArrayLen(4)
 	if err != nil {
