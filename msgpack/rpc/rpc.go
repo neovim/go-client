@@ -58,13 +58,13 @@ type Call struct {
 	Done   chan *Call
 }
 
-func (call *Call) done(e *Endpoint, err error) {
-	call.Err = err
+func (c *Call) done(e *Endpoint, err error) {
+	c.Err = err
 	select {
-	case call.Done <- call:
+	case c.Done <- c:
 		// ok
 	default:
-		e.logf("msgpack/rpc: done channel over capacity for method %s", call.Method)
+		e.logf("msgpack/rpc: done channel over capacity for method %s", c.Method)
 	}
 }
 
