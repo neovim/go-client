@@ -37,6 +37,15 @@ var (
 
 	// ErrInternal msgpack-rpc internal error.
 	ErrInternal = errors.New("msgpack/rpc: internal error")
+
+	// ErrHandlerNotFunction handler type is not a function error.
+	ErrHandlerNotFunction = errors.New("msgpack/rpc: handler not a function")
+
+	// ErrInvalidHandlerReturn invalid handler function return type error.
+	ErrInvalidHandlerReturn = errors.New("msgpack/rpc: handler return must be (), (error) or (valueType, error)")
+
+	// ErrInvalidArgument invalid argument error.
+	ErrInvalidArgument = errors.New("msgpack/rpc: invalid argument")
 )
 
 // Error represents a MessagePack RPC error.
@@ -250,7 +259,7 @@ func (e *Endpoint) Register(method string, fn interface{}, args ...interface{}) 
 	v := reflect.ValueOf(fn)
 	t := v.Type()
 	if t.Kind() != reflect.Func {
-		return errors.New("msgpack/rpc: handler not a function")
+		return ErrHandlerNotFunction
 	}
 	if t.NumIn() < len(args) {
 		return fmt.Errorf("msgpack/rpc: handler must have at least %d args", len(args))
@@ -276,7 +285,7 @@ func (e *Endpoint) Register(method string, fn interface{}, args ...interface{}) 
 	}
 
 	if t.NumOut() > 2 || (t.NumOut() > 0 && t.Out(t.NumOut()-1) != errorType) {
-		return errors.New("msgpack/rpc: handler return must be (), (error) or (valueType, error)")
+		return ErrInvalidHandlerReturn
 	}
 
 	e.handlersMu.Lock()
@@ -532,7 +541,7 @@ func (e *Endpoint) handleRequest(messageLen int) error {
 	call, args, err := e.createCall(h)
 	if _, ok := err.(*msgpack.DecodeConvertError); ok {
 		e.logf("msgpack/rpc: %s: %v", method, err)
-		return e.reply(id, errors.New("invalid argument"), nil)
+		return e.reply(id, ErrInvalidArgument, nil)
 	} else if err != nil {
 		return err
 	}
