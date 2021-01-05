@@ -356,7 +356,7 @@ func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ..
 			call.done(e, err)
 		}
 		e.mu.Unlock()
-		e.close(fmt.Errorf("msgpack/rpc: error encoding %s: %v", call.Method, err))
+		e.close(fmt.Errorf("msgpack/rpc: error encoding %s: %w", call.Method, err))
 	}
 
 	return call
@@ -385,7 +385,7 @@ func (e *Endpoint) Notify(method string, args ...interface{}) error {
 	}
 	e.encMu.Unlock()
 	if err != nil {
-		e.close(fmt.Errorf("msgpack/rpc: error encoding %s: %v", method, err))
+		e.close(fmt.Errorf("msgpack/rpc: error encoding %s: %w", method, err))
 	}
 	return err
 }
@@ -589,7 +589,7 @@ func (e *Endpoint) handleReply(messageLen int) error {
 	var errorValue interface{}
 	if err := e.dec.Decode(&errorValue); err != nil {
 		call.done(e, ErrInternal)
-		return fmt.Errorf("msgpack/rpc: error decoding error value: %v", err)
+		return fmt.Errorf("msgpack/rpc: error decoding error value: %w", err)
 	}
 
 	if errorValue != nil {
@@ -610,7 +610,7 @@ func (e *Endpoint) handleReply(messageLen int) error {
 
 	if err != nil {
 		call.done(e, ErrInternal)
-		return fmt.Errorf("msgpack/rpc: error decoding reply: %v", err)
+		return fmt.Errorf("msgpack/rpc: error decoding reply: %w", err)
 	}
 
 	call.done(e, nil)
