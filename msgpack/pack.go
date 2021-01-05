@@ -27,6 +27,7 @@ func NewEncoder(w io.Writer) *Encoder {
 	e := &Encoder{
 		w: w,
 	}
+
 	if ws, ok := w.(interface {
 		WriteString(string) (int, error)
 	}); ok {
@@ -34,6 +35,7 @@ func NewEncoder(w io.Writer) *Encoder {
 	} else {
 		e.writeString = e.writeStringUnopt
 	}
+
 	return e
 }
 
@@ -42,6 +44,7 @@ func (e *Encoder) writeStringUnopt(s string) (int, error) {
 		copy(e.buf[:], s)
 		return e.w.Write(e.buf[:len(s)])
 	}
+
 	return e.w.Write([]byte(s))
 }
 
@@ -97,11 +100,13 @@ func (e *Encoder) encodeNum(fc *numCodes, v uint64) []byte {
 		e.buf[0] = fc.c8
 		e.buf[1] = byte(v)
 		return e.buf[:2]
+
 	case v <= math.MaxUint16:
 		e.buf[0] = fc.c16
 		e.buf[1] = byte(v >> 8)
 		e.buf[2] = byte(v)
 		return e.buf[:3]
+
 	case v <= math.MaxUint32:
 		e.buf[0] = fc.c32
 		e.buf[1] = byte(v >> 24)
@@ -109,6 +114,7 @@ func (e *Encoder) encodeNum(fc *numCodes, v uint64) []byte {
 		e.buf[3] = byte(v >> 8)
 		e.buf[4] = byte(v)
 		return e.buf[:5]
+
 	default:
 		e.buf[0] = fc.c64
 		e.buf[1] = byte(v >> 56)
@@ -130,6 +136,7 @@ func (e *Encoder) PackBool(b bool) error {
 	} else {
 		e.buf[0] = falseCode
 	}
+
 	_, err := e.w.Write(e.buf[:1])
 	return err
 }
@@ -137,25 +144,31 @@ func (e *Encoder) PackBool(b bool) error {
 // PackInt packs an Int value to the MessagePack stream.
 func (e *Encoder) PackInt(v int64) error {
 	var b []byte
+
 	switch {
 	case 0 <= v && v <= math.MaxInt8:
 		e.buf[0] = byte(v)
 		b = e.buf[:1]
+
 	case v > 0:
 		// Pack as unsigned for compatibility with other encoders.
 		b = e.encodeNum(uintEncodings, uint64(v))
+
 	case v >= -32:
 		e.buf[0] = byte(v)
 		b = e.buf[:1]
+
 	case v >= math.MinInt8:
 		e.buf[0] = int8Code
 		e.buf[1] = byte(v)
 		b = e.buf[:2]
+
 	case v >= math.MinInt16:
 		e.buf[0] = int16Code
 		e.buf[1] = byte(v >> 8)
 		e.buf[2] = byte(v)
 		b = e.buf[:3]
+
 	case v >= math.MinInt32:
 		e.buf[0] = int32Code
 		e.buf[1] = byte(v >> 24)
@@ -163,6 +176,7 @@ func (e *Encoder) PackInt(v int64) error {
 		e.buf[3] = byte(v >> 8)
 		e.buf[4] = byte(v)
 		b = e.buf[:5]
+
 	default:
 		e.buf[0] = int64Code
 		e.buf[1] = byte(v >> 56)
@@ -175,6 +189,7 @@ func (e *Encoder) PackInt(v int64) error {
 		e.buf[8] = byte(v)
 		b = e.buf[:9]
 	}
+
 	_, err := e.w.Write(b)
 	return err
 }
@@ -182,6 +197,7 @@ func (e *Encoder) PackInt(v int64) error {
 // PackUint packs a Uint value to the message pack stream.
 func (e *Encoder) PackUint(v uint64) error {
 	var b []byte
+
 	if v <= math.MaxInt8 {
 		// Pack as signed for compatibility with other encoders.
 		e.buf[0] = byte(v)
@@ -189,6 +205,7 @@ func (e *Encoder) PackUint(v uint64) error {
 	} else {
 		b = e.encodeNum(uintEncodings, v)
 	}
+
 	_, err := e.w.Write(b)
 	return err
 }
@@ -205,12 +222,14 @@ func (e *Encoder) PackFloat(f float64) error {
 	e.buf[6] = byte(n >> 16)
 	e.buf[7] = byte(n >> 8)
 	e.buf[8] = byte(n)
+
 	_, err := e.w.Write(e.buf[:9])
 	return err
 }
 
 func (e *Encoder) packStringLen(n int64) error {
 	var b []byte
+
 	if n < 32 {
 		e.buf[0] = byte(fixStringCodeMin + n)
 		b = e.buf[:1]
@@ -219,6 +238,7 @@ func (e *Encoder) packStringLen(n int64) error {
 	} else {
 		return ErrLongStringOrBinary
 	}
+
 	_, err := e.w.Write(b)
 	return err
 }
@@ -228,6 +248,7 @@ func (e *Encoder) PackString(v string) error {
 	if err := e.packStringLen(int64(len(v))); err != nil {
 		return err
 	}
+
 	_, err := e.writeString(v)
 	return err
 }
@@ -237,6 +258,7 @@ func (e *Encoder) PackStringBytes(v []byte) error {
 	if err := e.packStringLen(int64(len(v))); err != nil {
 		return err
 	}
+
 	_, err := e.w.Write(v)
 	return err
 }
@@ -244,12 +266,15 @@ func (e *Encoder) PackStringBytes(v []byte) error {
 // PackBinary writes a Binary value to the MessagePack stream.
 func (e *Encoder) PackBinary(v []byte) error {
 	n := uint64(len(v))
+
 	if n > math.MaxUint32 {
 		return ErrLongStringOrBinary
 	}
+
 	if _, err := e.w.Write(e.encodeNum(binaryLenEncodings, n)); err != nil {
 		return err
 	}
+
 	_, err := e.w.Write(v)
 	return err
 }
@@ -258,6 +283,7 @@ func (e *Encoder) packArrayMapLen(fixMin int64, fc *numCodes, v int64) error {
 	if v < 0 || v > math.MaxUint32 {
 		return ErrIllegalSize
 	}
+
 	var b []byte
 	if v < 16 {
 		e.buf[0] = byte(fixMin + v)
@@ -265,6 +291,7 @@ func (e *Encoder) packArrayMapLen(fixMin int64, fc *numCodes, v int64) error {
 	} else {
 		b = e.encodeNum(fc, uint64(v))
 	}
+
 	_, err := e.w.Write(b)
 	return err
 }
@@ -284,34 +311,42 @@ func (e *Encoder) PackMapLen(n int64) error {
 // PackExtension writes an extension to the MessagePack stream.
 func (e *Encoder) PackExtension(kind int, data []byte) error {
 	var b []byte
+
 	switch len(data) {
 	case 1:
 		e.buf[0] = fixext1Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
+
 	case 2:
 		e.buf[0] = fixext2Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
+
 	case 4:
 		e.buf[0] = fixext4Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
+
 	case 8:
 		e.buf[0] = fixext8Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
+
 	case 16:
 		e.buf[0] = fixext16Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
+
 	default:
 		b = e.encodeNum(extLenEncodings, uint64(len(data)))
 		b = append(b, byte(kind))
 	}
+
 	if _, err := e.w.Write(b); err != nil {
 		return err
 	}
+
 	_, err := e.w.Write(data)
 	return err
 }
