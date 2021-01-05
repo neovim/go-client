@@ -8,10 +8,10 @@ import (
 	"math"
 )
 
-// Type represents the type of value in the MsgPack stream.
+// Type represents the type of value in the MessagePack stream.
 type Type int
 
-// list of MsgPack types.
+// list of MessagePack types.
 const (
 	Invalid Type = iota
 	Nil
@@ -57,7 +57,7 @@ func (t Type) String() string {
 // ErrDataSizeTooLarge is the data size too large error.
 var ErrDataSizeTooLarge = errors.New("msgpack: data size too large")
 
-// Decoder reads MsgPack objects from an io.Reader.
+// Decoder reads MessagePack objects from an io.Reader.
 type Decoder struct {
 	extensions ExtensionMap
 	err        error
@@ -77,14 +77,14 @@ func NewDecoder(r io.Reader) *Decoder {
 	}
 }
 
-// ExtensionMap specifies functions for converting MsgPack extensions to Go
+// ExtensionMap specifies functions for converting MessagePack extensions to Go
 // values.
 //
-// The key is the MsgPack extension type.
+// The key is the MessagePack extension type.
 // The value is a function that converts the extension data to a Go value.
 type ExtensionMap map[int]func([]byte) (interface{}, error)
 
-// SetExtensions specifies functions for converting MsgPack extensions to Go
+// SetExtensions specifies functions for converting MessagePack extensions to Go
 // values.
 func (d *Decoder) SetExtensions(extensions ExtensionMap) {
 	d.extensions = extensions
@@ -153,7 +153,7 @@ func (d *Decoder) Float() float64 {
 	return math.Float64frombits(d.n)
 }
 
-// Unpack reads the next value from the MsgPack stream. Call Type to get the
+// Unpack reads the next value from the MessagePack stream. Call Type to get the
 // type of the current value. Call Bool, Uint, Int, Float, Bytes or Extension
 // to get the value.
 func (d *Decoder) Unpack() error {
