@@ -13,6 +13,9 @@ type Unmarshaler interface {
 	UnmarshalMsgPack(d *Decoder) error
 }
 
+// ErrInvalidDecodeArg is the invalid argument error.
+var ErrInvalidDecodeArg = errors.New("msgpack: argument to Decode must be non-nil pointer, slice or map")
+
 // DecodeConvertError describes a MessagePack value that was not appropriate
 // for a value of a specific Go type.
 type DecodeConvertError struct {
@@ -101,7 +104,7 @@ func (d *Decoder) Decode(v interface{}) (err error) {
 	rv := reflect.ValueOf(v)
 	if (rv.Kind() != reflect.Ptr && rv.Kind() != reflect.Slice && rv.Kind() != reflect.Map) || rv.IsNil() {
 		ds.skip()
-		return errors.New("msgpack: argument to Decode must be non-nil pointer, slice or map")
+		return ErrInvalidDecodeArg
 	}
 	if rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()

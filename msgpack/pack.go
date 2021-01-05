@@ -6,6 +6,14 @@ import (
 	"math"
 )
 
+var (
+	// ErrLongStringOrBinary is the long string or binary error.
+	ErrLongStringOrBinary = errors.New("msgpack: long string or binary")
+
+	// ErrIllegalSize is the illegal array or map size error.
+	ErrIllegalSize = errors.New("msgpack: illegal array or map size")
+)
+
 // Encoder writes values in MessagePack format.
 type Encoder struct {
 	buf         [32]byte
@@ -209,7 +217,7 @@ func (e *Encoder) packStringLen(n int64) error {
 	} else if n <= math.MaxUint32 {
 		b = e.encodeNum(stringLenEncodings, uint64(n))
 	} else {
-		return errors.New("msgpack: long string or binary")
+		return ErrLongStringOrBinary
 	}
 	_, err := e.w.Write(b)
 	return err
@@ -237,7 +245,7 @@ func (e *Encoder) PackStringBytes(v []byte) error {
 func (e *Encoder) PackBinary(v []byte) error {
 	n := uint64(len(v))
 	if n > math.MaxUint32 {
-		return errors.New("msgpack: long string or binary")
+		return ErrLongStringOrBinary
 	}
 	if _, err := e.w.Write(e.encodeNum(binaryLenEncodings, n)); err != nil {
 		return err
@@ -248,7 +256,7 @@ func (e *Encoder) PackBinary(v []byte) error {
 
 func (e *Encoder) packArrayMapLen(fixMin int64, fc *numCodes, v int64) error {
 	if v < 0 || v > math.MaxUint32 {
-		return errors.New("msgpack: illegal array or map size")
+		return ErrIllegalSize
 	}
 	var b []byte
 	if v < 16 {

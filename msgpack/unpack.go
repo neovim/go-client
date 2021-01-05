@@ -52,6 +52,9 @@ func (t Type) String() string {
 	return n
 }
 
+// ErrDataSizeTooLarge is the data size too large error.
+var ErrDataSizeTooLarge = errors.New("msgpack: data size too large")
+
 // Decoder reads MsgPack objects from an io.Reader.
 type Decoder struct {
 	extensions ExtensionMap
@@ -176,7 +179,7 @@ func (d *Decoder) Unpack() error {
 
 	nn := int(d.n)
 	if nn < 0 {
-		return d.fatal(errors.New("msgpack: data size too large"))
+		return d.fatal(ErrDataSizeTooLarge)
 	}
 
 	if f.t == Extension {
