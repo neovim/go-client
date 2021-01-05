@@ -12,14 +12,22 @@ import (
 	"github.com/neovim/go-client/msgpack"
 )
 
+// kind represents a MessagePack RPC message kind.
+type kind int
+
+// list of kind.
 const (
-	requestMessage      = 0
-	replyMessage        = 1
-	notificationMessage = 2
+	requestMessage      kind = 0
+	replyMessage        kind = 1
+	notificationMessage kind = 2
 )
 
+// state represents a MessagePack RPC state.
+type state int
+
+// list of state.
 const (
-	stateInit = iota
+	stateInit state = iota
 	stateClosed
 )
 
@@ -87,7 +95,7 @@ type Endpoint struct {
 	mu      sync.Mutex
 	id      uint64
 	pending map[uint64]*Call
-	state   int
+	state   state
 	err     error
 
 	handlersMu sync.RWMutex
@@ -273,7 +281,7 @@ func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ..
 	e.mu.Unlock()
 
 	message := &struct {
-		Kind   int `msgpack:",array"`
+		Kind   kind `msgpack:",array"`
 		ID     uint64
 		Method string
 		Args   []interface{}
@@ -311,7 +319,7 @@ func (e *Endpoint) Notify(method string, args ...interface{}) error {
 	}
 
 	message := &struct {
-		Kind   int `msgpack:",array"`
+		Kind   kind `msgpack:",array"`
 		Method string
 		Args   []interface{}
 	}{
@@ -341,7 +349,7 @@ func (e *Endpoint) reply(id uint64, replyErr error, reply interface{}) error {
 		return err
 	}
 
-	err = e.enc.PackUint(replyMessage)
+	err = e.enc.PackUint(uint64(replyMessage))
 	if err != nil {
 		return err
 	}
@@ -396,7 +404,7 @@ func (e *Endpoint) Serve() error {
 			return e.close(err)
 		}
 
-		switch messageType {
+		switch kind(messageType) {
 		case requestMessage:
 			err = e.handleRequest(messageLen)
 		case replyMessage:
