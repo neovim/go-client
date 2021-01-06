@@ -11,14 +11,14 @@ import (
 )
 
 type testDecStruct struct {
-	IF  interface{}
 	B   bool
-	S   string
 	I   int
 	U   uint
 	F64 float64
+	S   string
 	SS  []string
 	M   map[string]interface{}
+	IF  interface{}
 }
 
 type testDecEmptyStruct struct {
@@ -35,6 +35,10 @@ type testDecArrayStruct struct {
 }
 
 func ptrInt(i int) *int {
+	return &i
+}
+
+func ptrUint(i uint) *uint {
 	return &i
 }
 
@@ -175,32 +179,7 @@ func TestDecode(t *testing.T) {
 			expected: []byte("world"),
 			wantErr:  false,
 		},
-		"Interface/IntPointer": {
-			arg: func() interface{} { return &testDecStruct{IF: ptrInt(1234)} },
-			data: []interface{}{
-				mapLen(1),
-				"IF",
-				int64(5678),
-			},
-			expected: testDecStruct{
-				IF: ptrInt(5678),
-			},
-			wantErr: false,
-		},
-		"Interface/StringSlice": {
-			arg: func() interface{} { return &testDecStruct{IF: []string{"hello", "world"}} },
-			data: []interface{}{
-				mapLen(1),
-				"IF",
-				arrayLen(1),
-				"foo",
-			},
-			expected: testDecStruct{
-				IF: []string{"foo", ""},
-			},
-			wantErr: false,
-		},
-		"StringSlice/ArrayLen/1": {
+		"StringSlice/ArrayLen/2": {
 			arg: func() interface{} { return []string{""} },
 			data: []interface{}{
 				arrayLen(2),
@@ -225,7 +204,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"StringSlice/ArrayLen/2/ValueEmpty": {
+		"StringSlice/ArrayLen/1/ValueEmpty": {
 			arg: func() interface{} { return []string{"", "bar"} },
 			data: []interface{}{
 				arrayLen(1),
@@ -237,7 +216,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"StringSlice/ArrayLen/Make/2": {
+		"StringSlice/ArrayLen/2/Make/1": {
 			arg: func() interface{} { x := make([]string, 1); return &x },
 			data: []interface{}{
 				arrayLen(2),
@@ -250,7 +229,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"StringSlice/ArrayLen/Make/3": {
+		"StringSlice/ArrayLen/2/Make/3": {
 			arg: func() interface{} { x := make([]string, 3); return &x },
 			data: []interface{}{
 				arrayLen(2),
@@ -276,7 +255,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"StringArray/ArrayLen/3/ValueValueEmpty": {
+		"StringArray/ArrayLen/2/ValueValueEmpty": {
 			arg: func() interface{} { x := [...]string{"foo", "bar", "quux"}; return &x },
 			data: []interface{}{
 				arrayLen(2),
@@ -290,7 +269,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"StringArray/ArrayLen/1/Value": {
+		"StringArray/ArrayLen/2/Value": {
 			arg: func() interface{} { x := [...]string{"foo"}; return &x },
 			data: []interface{}{
 				arrayLen(2),
@@ -302,7 +281,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"StructArray/Int64": {
+		"StructArray/ArrayLen/Int": {
 			arg: func() interface{} { return new(testDecArrayStruct) },
 			data: []interface{}{
 				arrayLen(2),
@@ -337,7 +316,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"Pointer/Int64": {
+		"Pointer/Int": {
 			arg: func() interface{} { return new(*int) },
 			data: []interface{}{
 				int64(-1),
@@ -345,12 +324,153 @@ func TestDecode(t *testing.T) {
 			expected: ptrInt(-1),
 			wantErr:  false,
 		},
+		"Pointer/Uint": {
+			arg: func() interface{} { return new(*uint) },
+			data: []interface{}{
+				uint64(1),
+			},
+			expected: ptrUint(1),
+			wantErr:  false,
+		},
+		"Struct/Bool": {
+			arg: func() interface{} { return &testDecStruct{B: true} },
+			data: []interface{}{
+				mapLen(1),
+				"B",
+				bool(true),
+			},
+			expected: testDecStruct{
+				B: bool(true),
+			},
+			wantErr: false,
+		},
+		"Struct/Int": {
+			arg: func() interface{} { return &testDecStruct{I: int(1234)} },
+			data: []interface{}{
+				mapLen(1),
+				"I",
+				int64(1234),
+			},
+			expected: testDecStruct{
+				I: int(1234),
+			},
+			wantErr: false,
+		},
+		"Struct/Uint": {
+			arg: func() interface{} { return &testDecStruct{U: uint(1234)} },
+			data: []interface{}{
+				mapLen(1),
+				"U",
+				uint64(1234),
+			},
+			expected: testDecStruct{
+				U: uint(1234),
+			},
+			wantErr: false,
+		},
+		"Struct/Float": {
+			arg: func() interface{} { return &testDecStruct{F64: float64(1234)} },
+			data: []interface{}{
+				mapLen(1),
+				"F64",
+				float64(1234),
+			},
+			expected: testDecStruct{
+				F64: float64(1234),
+			},
+			wantErr: false,
+		},
+		"Struct/String": {
+			arg: func() interface{} { return &testDecStruct{S: "hello"} },
+			data: []interface{}{
+				mapLen(1),
+				"S",
+				"hello",
+			},
+			expected: testDecStruct{
+				S: "hello",
+			},
+			wantErr: false,
+		},
+		"Struct/StringSlice": {
+			arg: func() interface{} { return &testDecStruct{SS: []string{"hello", "world"}} },
+			data: []interface{}{
+				mapLen(1),
+				"SS",
+				arrayLen(2),
+				"hello", "world",
+			},
+			expected: testDecStruct{
+				SS: []string{"hello", "world"},
+			},
+			wantErr: false,
+		},
+		"Interface/IntPointer": {
+			arg: func() interface{} { return &testDecStruct{IF: ptrInt(1234)} },
+			data: []interface{}{
+				mapLen(1),
+				"IF",
+				int64(5678),
+			},
+			expected: testDecStruct{
+				IF: ptrInt(5678),
+			},
+			wantErr: false,
+		},
+		"Interface/UintPointer": {
+			arg: func() interface{} { return &testDecStruct{IF: ptrUint(1234)} },
+			data: []interface{}{
+				mapLen(1),
+				"IF",
+				uint64(5678),
+			},
+			expected: testDecStruct{
+				IF: ptrUint(5678),
+			},
+			wantErr: false,
+		},
+		"Interface/StringSlice": {
+			arg: func() interface{} { return &testDecStruct{IF: []string{"hello", "world"}} },
+			data: []interface{}{
+				mapLen(1),
+				"IF",
+				arrayLen(1),
+				"foo",
+			},
+			expected: testDecStruct{
+				IF: []string{"foo", ""},
+			},
+			wantErr: false,
+		},
+		"Interface/NoReflect/Bool": {
+			arg:      func() interface{} { return new(interface{}) },
+			data:     []interface{}{bool(true)},
+			expected: bool(true),
+			wantErr:  false,
+		},
+		"Interface/NoReflect/Float64": {
+			arg:      func() interface{} { return new(interface{}) },
+			data:     []interface{}{float64(1234)},
+			expected: float64(1234),
+			wantErr:  false,
+		},
+		"Interface/NoReflect/Bytes": {
+			arg:      func() interface{} { return new(interface{}) },
+			data:     []interface{}{[]byte("hello")},
+			expected: []byte("hello"),
+			wantErr:  false,
+		},
+		"Interface/NoReflect/String": {
+			arg:      func() interface{} { return new(interface{}) },
+			data:     []interface{}{"hello"},
+			expected: string("hello"),
+			wantErr:  false,
+		},
 		"Interface/Extensions/ExtensionValue": {
 			arg: func() interface{} { return new(interface{}) },
 			data: []interface{}{
 				extension{
-					0,
-					"hello",
+					0, "hello",
 				},
 			},
 			expected: extensionValue{
@@ -371,7 +491,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"TestExtension/Extensions": {
+		"Extensions/TestExtension": {
 			arg: func() interface{} { return new(testExtension1) },
 			data: []interface{}{
 				extension{
@@ -383,7 +503,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"TestDecEmptyStruct/Empty/blank": {
+		"Empty/blank": {
 			arg: func() interface{} { return &testDecEmptyStruct{} },
 			data: []interface{}{
 				mapLen(0),
@@ -397,7 +517,7 @@ func TestDecode(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		"TestDecEmptyStruct/Empty/NotBlank": {
+		"Empty/NotBlank": {
 			arg: func() interface{} { return &testDecEmptyStruct{} },
 			data: []interface{}{
 				mapLen(1),
@@ -474,7 +594,7 @@ func TestDecode(t *testing.T) {
 			}
 			v := rv.Interface()
 			if !reflect.DeepEqual(v, tt.expected) != tt.wantErr {
-				t.Fatalf("decode(%+v, %T) returned %#v, want %#v", tt.data, arg, v, tt.expected)
+				t.Fatalf("decode(%+v, %T) returned %T:%#v, want %#v", tt.data, arg, arg, v, tt.expected)
 			}
 
 			// Decode should read to EOF.
