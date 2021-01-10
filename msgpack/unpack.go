@@ -377,27 +377,27 @@ var formats = [256]*struct {
 		t: MapLen,
 		n: (*Decoder).read4,
 	},
-	fixext1Code: {
+	fixExt1Code: {
 		t:    Extension,
 		n:    func(d *Decoder, code byte) (uint64, error) { return 1, nil },
 		more: true,
 	},
-	fixext2Code: {
+	fixExt2Code: {
 		t:    Extension,
 		n:    func(d *Decoder, code byte) (uint64, error) { return 2, nil },
 		more: true,
 	},
-	fixext4Code: {
+	fixExt4Code: {
 		t:    Extension,
 		n:    func(d *Decoder, code byte) (uint64, error) { return 4, nil },
 		more: true,
 	},
-	fixext8Code: {
+	fixExt8Code: {
 		t:    Extension,
 		n:    func(d *Decoder, code byte) (uint64, error) { return 8, nil },
 		more: true,
 	},
-	fixext16Code: {
+	fixExt16Code: {
 		t:    Extension,
 		n:    func(d *Decoder, code byte) (uint64, error) { return 16, nil },
 		more: true,

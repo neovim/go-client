@@ -30,11 +30,11 @@ const (
 	int16Code        = 0xd1
 	int32Code        = 0xd2
 	int64Code        = 0xd3
-	fixext1Code      = 0xd4
-	fixext2Code      = 0xd5
-	fixext4Code      = 0xd6
-	fixext8Code      = 0xd7
-	fixext16Code     = 0xd8
+	fixExt1Code      = 0xd4
+	fixExt2Code      = 0xd5
+	fixExt4Code      = 0xd6
+	fixExt8Code      = 0xd7
+	fixExt16Code     = 0xd8
 	string8Code      = 0xd9
 	string16Code     = 0xda
 	string32Code     = 0xdb

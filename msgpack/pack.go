@@ -314,27 +314,27 @@ func (e *Encoder) PackExtension(kind int, data []byte) error {
 
 	switch len(data) {
 	case 1:
-		e.buf[0] = fixext1Code
+		e.buf[0] = fixExt1Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
 
 	case 2:
-		e.buf[0] = fixext2Code
+		e.buf[0] = fixExt2Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
 
 	case 4:
-		e.buf[0] = fixext4Code
+		e.buf[0] = fixExt4Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
 
 	case 8:
-		e.buf[0] = fixext8Code
+		e.buf[0] = fixExt8Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
 
 	case 16:
-		e.buf[0] = fixext16Code
+		e.buf[0] = fixExt16Code
 		e.buf[1] = byte(kind)
 		b = e.buf[:2]
 
