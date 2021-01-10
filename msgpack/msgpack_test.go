@@ -43,6 +43,14 @@ var testExtensionMap = ExtensionMap{
 	1: func(data []byte) (interface{}, error) { return testExtension1{data}, nil },
 }
 
+func ptrInt(i int) *int {
+	return &i
+}
+
+func ptrUint(i uint) *uint {
+	return &i
+}
+
 type testReader struct {
 	p   []byte
 	pos int

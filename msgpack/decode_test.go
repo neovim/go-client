@@ -34,14 +34,6 @@ type testDecArrayStruct struct {
 	S string
 }
 
-func ptrInt(i int) *int {
-	return &i
-}
-
-func ptrUint(i uint) *uint {
-	return &i
-}
-
 func TestDecode(t *testing.T) {
 	t.Parallel()
 
