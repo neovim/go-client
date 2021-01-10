@@ -1,6 +1,7 @@
 package msgpack
 
 import (
+	"io"
 	"reflect"
 )
 
@@ -40,4 +41,25 @@ func (x testExtension1) MarshalMsgPack(enc *Encoder) error {
 
 var testExtensionMap = ExtensionMap{
 	1: func(data []byte) (interface{}, error) { return testExtension1{data}, nil },
+}
+
+type testReader struct {
+	p   []byte
+	pos int
+}
+
+func NewTestReader(b []byte) io.Reader {
+	return &testReader{p: b}
+}
+
+func (r *testReader) Read(b []byte) (int, error) {
+	n := copy(b, r.p[r.pos:])
+	if n < len(r.p) {
+		r.pos = r.pos + n
+	}
+
+	if r.pos >= len(r.p) {
+		r.pos = 0
+	}
+	return n, nil
 }
