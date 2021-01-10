@@ -252,15 +252,15 @@ var formats = [256]*struct {
 	},
 	fixMapCodeMin: {
 		t: MapLen,
-		n: func(d *Decoder, code byte) (uint64, error) { return uint64(code) - fixMapCodeMin, nil },
+		n: func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixMapCodeMin), nil },
 	},
 	fixArrayCodeMin: {
 		t: ArrayLen,
-		n: func(d *Decoder, code byte) (uint64, error) { return uint64(code) - fixArrayCodeMin, nil },
+		n: func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixArrayCodeMin), nil },
 	},
 	fixStringCodeMin: {
 		t:    String,
-		n:    func(d *Decoder, code byte) (uint64, error) { return uint64(code) - fixStringCodeMin, nil },
+		n:    func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixStringCodeMin), nil },
 		more: true,
 	},
 	negFixIntCodeMin: {
