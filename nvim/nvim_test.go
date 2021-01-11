@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"sort"
 	"strings"
 	"sync/atomic"
@@ -20,11 +21,15 @@ func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 	tb.Helper()
 
 	ctx := context.Background()
-	n, err := NewChildProcess(
+	opts := []ChildProcessOption{
 		ChildProcessArgs("-u", "NONE", "-n", "--embed", "--headless", "--noplugin"),
 		ChildProcessContext(ctx),
 		ChildProcessLogf(tb.Logf),
-	)
+	}
+	if runtime.GOOS == "windows" {
+		opts = append(opts, ChildProcessCommand("nvim.exe"))
+	}
+	n, err := NewChildProcess(opts...)
 	if err != nil {
 		tb.Fatal(err)
 	}
@@ -1554,6 +1559,10 @@ func clearBuffer(tb testing.TB, v *Nvim, buffer Buffer) {
 }
 
 func TestDial(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("not supported dial unix socket on windows GOOS")
+	}
+
 	t.Parallel()
 
 	v1, cleanup := newChildProcess(t)
