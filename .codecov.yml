@@ -45,6 +45,18 @@ coverage:
         <<: *projects
         flags:
           - "macos-1.15"
+      windows-1.13:
+        <<: *projects
+        flags:
+          - "windows-1.13"
+      windows-1.14:
+        <<: *projects
+        flags:
+          - "windows-1.14"
+      windows-1.15:
+        <<: *projects
+        flags:
+          - "windows-1.15"
     patch:
       default: false
       linux-1.13:
@@ -58,6 +70,12 @@ coverage:
       macos-1.14:
         <<: *patch
       macos-1.15:
+        <<: *patch
+      windows-1.13:
+        <<: *patch
+      windows-1.14:
+        <<: *patch
+      windows-1.15:
         <<: *patch
     changes:
       default:
@@ -73,6 +91,9 @@ coverage:
           - "macos-1.13"
           - "macos-1.14"
           - "macos-1.15"
+          - "windows-1.13"
+          - "windows-1.14"
+          - "windows-1.15"
 
 flags:
   linux-1.13:
@@ -96,6 +117,18 @@ flags:
       - /
     carryforward: true
   macos-1.15:
+    paths:
+      - /
+    carryforward: true
+  windows-1.13:
+    paths:
+      - /
+    carryforward: true
+  windows-1.14:
+    paths:
+      - /
+    carryforward: true
+  windows-1.15:
     paths:
       - /
     carryforward: true
