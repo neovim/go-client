@@ -263,13 +263,15 @@ var formats = [256]*struct {
 		n:    func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixStringCodeMin), nil },
 		more: true,
 	},
-	negFixIntCodeMin: {
-		t: Int,
-		n: func(d *Decoder, code byte) (uint64, error) { return uint64(int64(int8(code))), nil },
-	},
 	nilCode: {
 		t: Nil,
 		n: func(d *Decoder, code byte) (uint64, error) { return 0, nil },
+	},
+	unusedCode: {
+		t: Invalid,
+		n: func(d *Decoder, code byte) (uint64, error) {
+			return 0, fmt.Errorf("msgpack: unknown format code %x", code)
+		},
 	},
 	falseCode: {
 		t: Bool,
@@ -278,6 +280,36 @@ var formats = [256]*struct {
 	trueCode: {
 		t: Bool,
 		n: func(d *Decoder, code byte) (uint64, error) { return 1, nil },
+	},
+	binary8Code: {
+		t:    Binary,
+		n:    (*Decoder).read1,
+		more: true,
+	},
+	binary16Code: {
+		t:    Binary,
+		n:    (*Decoder).read2,
+		more: true,
+	},
+	binary32Code: {
+		t:    Binary,
+		n:    (*Decoder).read4,
+		more: true,
+	},
+	ext8Code: {
+		t:    Extension,
+		n:    (*Decoder).read1,
+		more: true,
+	},
+	ext16Code: {
+		t:    Extension,
+		n:    (*Decoder).read2,
+		more: true,
+	},
+	ext32Code: {
+		t:    Extension,
+		n:    (*Decoder).read4,
+		more: true,
 	},
 	float32Code: {
 		t: Float,
@@ -331,52 +363,6 @@ var formats = [256]*struct {
 		t: Int,
 		n: (*Decoder).read8,
 	},
-	string8Code: {
-		t:    String,
-		n:    (*Decoder).read1,
-		more: true,
-	},
-	string16Code: {
-		t:    String,
-		n:    (*Decoder).read2,
-		more: true,
-	},
-	string32Code: {
-		t:    String,
-		n:    (*Decoder).read4,
-		more: true,
-	},
-	binary8Code: {
-		t:    Binary,
-		n:    (*Decoder).read1,
-		more: true,
-	},
-	binary16Code: {
-		t:    Binary,
-		n:    (*Decoder).read2,
-		more: true,
-	},
-	binary32Code: {
-		t:    Binary,
-		n:    (*Decoder).read4,
-		more: true,
-	},
-	array16Code: {
-		t: ArrayLen,
-		n: (*Decoder).read2,
-	},
-	array32Code: {
-		t: ArrayLen,
-		n: (*Decoder).read4,
-	},
-	map16Code: {
-		t: MapLen,
-		n: (*Decoder).read2,
-	},
-	map32Code: {
-		t: MapLen,
-		n: (*Decoder).read4,
-	},
 	fixExt1Code: {
 		t:    Extension,
 		n:    func(d *Decoder, code byte) (uint64, error) { return 1, nil },
@@ -402,26 +388,40 @@ var formats = [256]*struct {
 		n:    func(d *Decoder, code byte) (uint64, error) { return 16, nil },
 		more: true,
 	},
-	ext8Code: {
-		t:    Extension,
+	string8Code: {
+		t:    String,
 		n:    (*Decoder).read1,
 		more: true,
 	},
-	ext16Code: {
-		t:    Extension,
+	string16Code: {
+		t:    String,
 		n:    (*Decoder).read2,
 		more: true,
 	},
-	ext32Code: {
-		t:    Extension,
+	string32Code: {
+		t:    String,
 		n:    (*Decoder).read4,
 		more: true,
 	},
-	unusedCode: {
-		t: Invalid,
-		n: func(d *Decoder, code byte) (uint64, error) {
-			return 0, fmt.Errorf("msgpack: unknown format code %x", code)
-		},
+	array16Code: {
+		t: ArrayLen,
+		n: (*Decoder).read2,
+	},
+	array32Code: {
+		t: ArrayLen,
+		n: (*Decoder).read4,
+	},
+	map16Code: {
+		t: MapLen,
+		n: (*Decoder).read2,
+	},
+	map32Code: {
+		t: MapLen,
+		n: (*Decoder).read4,
+	},
+	negFixIntCodeMin: {
+		t: Int,
+		n: func(d *Decoder, code byte) (uint64, error) { return uint64(int64(int8(code))), nil },
 	},
 }
 
