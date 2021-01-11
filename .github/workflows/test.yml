@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: "*"
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
     strategy:
@@ -17,6 +21,8 @@ jobs:
           - ubuntu-20.04
           # https://github.com/actions/virtual-environments/blob/macOS-10.15/20201212.1/images/macos/macos-10.15-Readme.md
           - macos-10.15
+          # https://github.com/actions/virtual-environments/blob/win19/20201210.0/images/win/Windows2019-Readme.md
+          - windows-2019
         go-version:
           - 1.13.x
           - 1.14.x
@@ -41,38 +47,56 @@ jobs:
       with:
         fetch-depth: 2
 
-    - uses: actions/cache@v2
+    - name: Cache Go module and build cache
+      uses: actions/cache@v2
       with:
+        key: ${{ env.OS }}-go-${{ hashFiles('**/go.sum') }}
         path: |
           ~/go/pkg/mod              # Module download cache
           ~/.cache/go-build         # Build cache (Linux)
           ~/Library/Caches/go-build # Build cache (Mac)
           '%LocalAppData%\go-build' # Build cache (Windows)
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
-          ${{ runner.os }}-go-
+          ${{ env.OS }}-go-
 
-    - name: Install nvim binary for Linux
-      if: runner.os == 'Linux'
-      run: |
-        curl -SLO https://github.com/go-nvim/neovim/releases/download/nightly/nvim-linux64.tar.gz
-        tar xzf nvim-linux64.tar.gz
-        mv nvim-linux64 /home/runner/nvim
-        echo "/home/runner/nvim/bin" >> $GITHUB_PATH
+    - name: Cache nvim binary for linux and darwin
+      uses: actions/cache@v2
+      id: cache-nvim
+      if: env.OS != 'windows'
+      with:
+        key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/bin/nvim') }}
+        path: |
+          ~/nvim
+        restore-keys: |
+          ${{ env.OS }}-nvim-
 
-    - name: Install nvim binary for macOS
-      if: runner.os == 'MacOS'
+    - name: Cache nvim binary for Windows
+      uses: actions/cache@v2
+      id: cache-nvim-windows
+      if: env.OS == 'windows'
+      with:
+        key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/nvim.exe') }}
+        path: |
+          ~/nvim
+        restore-keys: |
+          ${{ env.OS }}-nvim-
+
+    - name: Install nvim binary
+      uses: rhysd/action-setup-vim@v1
+      if: steps.cache-nvim.outputs.cache-hit != 'true' || steps.cache-nvim-windows.outputs.cache-hit != 'true'
+      with:
+        neovim: true
+        version: nightly
+
+    - name: gofmt
+      if: env.OS != 'windows'
       run: |
-        curl -SLO https://github.com/go-nvim/neovim/releases/download/nightly/nvim-macos.tar.gz
-        tar xzf nvim-macos.tar.gz
-        mv nvim-osx64 /Users/runner/nvim
-        echo "/Users/runner/nvim/bin" >> $GITHUB_PATH
+        diff -u <(echo -n) <(gofmt -s -d .)
 
     - name: Test and vet
       run: |
-        diff -u <(echo -n) <(gofmt -s -d .)
         go vet ./...
-        go test -v -race -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
+        go test -v -race -count=1 -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
     - uses: codecov/codecov-action@v1
       with:
