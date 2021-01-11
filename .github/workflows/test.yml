@@ -52,11 +52,21 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: Install nvim binary
-      uses: rhysd/action-setup-vim@v1
-      with:
-        neovim: true
-        version: nightly
+    - name: Install nvim binary for Linux
+      if: runner.os == 'Linux'
+      run: |
+        curl -SLO https://github.com/go-nvim/neovim/releases/download/nightly/nvim-linux64.tar.gz
+        tar xzf nvim-linux64.tar.gz
+        mv nvim-linux64 /home/runner/nvim
+        echo "/home/runner/nvim/bin" >> $GITHUB_PATH
+
+    - name: Install nvim binary for macOS
+      if: runner.os == 'MacOS'
+      run: |
+        curl -SLO https://github.com/go-nvim/neovim/releases/download/nightly/nvim-macos.tar.gz
+        tar xzf nvim-macos.tar.gz
+        mv nvim-osx64 /Users/runner/nvim
+        echo "/Users/runner/nvim/bin" >> $GITHUB_PATH
 
     - name: Test and vet
       run: |
