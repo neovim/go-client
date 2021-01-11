@@ -57,6 +57,13 @@ func (t Type) String() string {
 // ErrDataSizeTooLarge is the data size too large error.
 var ErrDataSizeTooLarge = errors.New("msgpack: data size too large")
 
+// ExtensionMap specifies functions for converting MessagePack extensions to Go
+// values.
+//
+// The key is the MessagePack extension type.
+// The value is a function that converts the extension data to a Go value.
+type ExtensionMap map[int]func([]byte) (interface{}, error)
+
 // Decoder reads MessagePack objects from an io.Reader.
 type Decoder struct {
 	extensions ExtensionMap
@@ -76,13 +83,6 @@ func NewDecoder(r io.Reader) *Decoder {
 		r: bufio.NewReaderSize(r, bufioReaderSize),
 	}
 }
-
-// ExtensionMap specifies functions for converting MessagePack extensions to Go
-// values.
-//
-// The key is the MessagePack extension type.
-// The value is a function that converts the extension data to a Go value.
-type ExtensionMap map[int]func([]byte) (interface{}, error)
 
 // SetExtensions specifies functions for converting MessagePack extensions to Go
 // values.
