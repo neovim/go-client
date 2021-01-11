@@ -457,13 +457,13 @@ func (d *Decoder) fatal(err error) error {
 	return err
 }
 
-func (d *Decoder) read1(format byte) (uint64, error) {
+func (d *Decoder) read1(byte) (uint64, error) {
 	b, err := d.r.ReadByte()
 
 	return uint64(b), err
 }
 
-func (d *Decoder) read2(format byte) (uint64, error) {
+func (d *Decoder) read2(byte) (uint64, error) {
 	p, err := d.r.Peek(2)
 	if err != nil {
 		return 0, err
@@ -473,7 +473,7 @@ func (d *Decoder) read2(format byte) (uint64, error) {
 	return uint64(p[1]) | uint64(p[0])<<8, nil
 }
 
-func (d *Decoder) read4(format byte) (uint64, error) {
+func (d *Decoder) read4(byte) (uint64, error) {
 	p, err := d.r.Peek(4)
 	if err != nil {
 		return 0, err
@@ -483,7 +483,7 @@ func (d *Decoder) read4(format byte) (uint64, error) {
 	return uint64(p[3]) | uint64(p[2])<<8 | uint64(p[1])<<16 | uint64(p[0])<<24, nil
 }
 
-func (d *Decoder) read8(format byte) (uint64, error) {
+func (d *Decoder) read8(byte) (uint64, error) {
 	p, err := d.r.Peek(8)
 	if err != nil {
 		return 0, err
