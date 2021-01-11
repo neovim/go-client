@@ -75,7 +75,7 @@ jobs:
       id: cache-nvim-windows
       if: env.OS == 'windows'
       with:
-        key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/nvim.exe') }}
+        key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/bin/nvim.exe') }}
         path: |
           ~/nvim
         restore-keys: |
