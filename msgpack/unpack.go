@@ -172,7 +172,7 @@ func (d *Decoder) Unpack() error {
 	f := formats[code]
 	d.t = f.t
 
-	d.n, err = f.n(d, code)
+	d.n, err = f.fn(d, code)
 	if err != nil {
 		return d.fatal(err)
 	}
@@ -243,185 +243,185 @@ func (d *Decoder) skipCount() int {
 
 var formats = [256]*struct {
 	t    Type
-	n    func(d *Decoder, code byte) (uint64, error)
+	fn   func(d *Decoder, code byte) (uint64, error)
 	more bool
 }{
 	fixIntCodeMin: {
-		t: Int,
-		n: func(d *Decoder, code byte) (uint64, error) { return uint64(code), nil },
+		t:  Int,
+		fn: func(d *Decoder, code byte) (uint64, error) { return uint64(code), nil },
 	},
 	fixMapCodeMin: {
-		t: MapLen,
-		n: func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixMapCodeMin), nil },
+		t:  MapLen,
+		fn: func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixMapCodeMin), nil },
 	},
 	fixArrayCodeMin: {
-		t: ArrayLen,
-		n: func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixArrayCodeMin), nil },
+		t:  ArrayLen,
+		fn: func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixArrayCodeMin), nil },
 	},
 	fixStringCodeMin: {
 		t:    String,
-		n:    func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixStringCodeMin), nil },
+		fn:   func(d *Decoder, code byte) (uint64, error) { return uint64(code) - uint64(fixStringCodeMin), nil },
 		more: true,
 	},
 	nilCode: {
-		t: Nil,
-		n: func(d *Decoder, code byte) (uint64, error) { return 0, nil },
+		t:  Nil,
+		fn: func(d *Decoder, code byte) (uint64, error) { return 0, nil },
 	},
 	unusedCode: {
 		t: Invalid,
-		n: func(d *Decoder, code byte) (uint64, error) {
+		fn: func(d *Decoder, code byte) (uint64, error) {
 			return 0, fmt.Errorf("msgpack: unknown format code %x", code)
 		},
 	},
 	falseCode: {
-		t: Bool,
-		n: func(d *Decoder, code byte) (uint64, error) { return 0, nil },
+		t:  Bool,
+		fn: func(d *Decoder, code byte) (uint64, error) { return 0, nil },
 	},
 	trueCode: {
-		t: Bool,
-		n: func(d *Decoder, code byte) (uint64, error) { return 1, nil },
+		t:  Bool,
+		fn: func(d *Decoder, code byte) (uint64, error) { return 1, nil },
 	},
 	binary8Code: {
 		t:    Binary,
-		n:    (*Decoder).read1,
+		fn:   (*Decoder).read1,
 		more: true,
 	},
 	binary16Code: {
 		t:    Binary,
-		n:    (*Decoder).read2,
+		fn:   (*Decoder).read2,
 		more: true,
 	},
 	binary32Code: {
 		t:    Binary,
-		n:    (*Decoder).read4,
+		fn:   (*Decoder).read4,
 		more: true,
 	},
 	ext8Code: {
 		t:    Extension,
-		n:    (*Decoder).read1,
+		fn:   (*Decoder).read1,
 		more: true,
 	},
 	ext16Code: {
 		t:    Extension,
-		n:    (*Decoder).read2,
+		fn:   (*Decoder).read2,
 		more: true,
 	},
 	ext32Code: {
 		t:    Extension,
-		n:    (*Decoder).read4,
+		fn:   (*Decoder).read4,
 		more: true,
 	},
 	float32Code: {
 		t: Float,
-		n: func(d *Decoder, code byte) (uint64, error) {
+		fn: func(d *Decoder, code byte) (uint64, error) {
 			n, err := d.read4(code)
 			return math.Float64bits(float64(math.Float32frombits(uint32(n)))), err
 		},
 	},
 	float64Code: {
-		t: Float,
-		n: (*Decoder).read8,
+		t:  Float,
+		fn: (*Decoder).read8,
 	},
 	uint8Code: {
-		t: Uint,
-		n: (*Decoder).read1,
+		t:  Uint,
+		fn: (*Decoder).read1,
 	},
 	uint16Code: {
-		t: Uint,
-		n: (*Decoder).read2,
+		t:  Uint,
+		fn: (*Decoder).read2,
 	},
 	uint32Code: {
-		t: Uint,
-		n: (*Decoder).read4,
+		t:  Uint,
+		fn: (*Decoder).read4,
 	},
 	uint64Code: {
-		t: Uint,
-		n: (*Decoder).read8,
+		t:  Uint,
+		fn: (*Decoder).read8,
 	},
 	int8Code: {
 		t: Int,
-		n: func(d *Decoder, code byte) (uint64, error) {
+		fn: func(d *Decoder, code byte) (uint64, error) {
 			n, err := d.read1(code)
 			return uint64(int64(int8(n))), err
 		},
 	},
 	int16Code: {
 		t: Int,
-		n: func(d *Decoder, code byte) (uint64, error) {
+		fn: func(d *Decoder, code byte) (uint64, error) {
 			n, err := d.read2(code)
 			return uint64(int64(int16(n))), err
 		},
 	},
 	int32Code: {
 		t: Int,
-		n: func(d *Decoder, code byte) (uint64, error) {
+		fn: func(d *Decoder, code byte) (uint64, error) {
 			n, err := d.read4(code)
 			return uint64(int64(int32(n))), err
 		},
 	},
 	int64Code: {
-		t: Int,
-		n: (*Decoder).read8,
+		t:  Int,
+		fn: (*Decoder).read8,
 	},
 	fixExt1Code: {
 		t:    Extension,
-		n:    func(d *Decoder, code byte) (uint64, error) { return 1, nil },
+		fn:   func(d *Decoder, code byte) (uint64, error) { return 1, nil },
 		more: true,
 	},
 	fixExt2Code: {
 		t:    Extension,
-		n:    func(d *Decoder, code byte) (uint64, error) { return 2, nil },
+		fn:   func(d *Decoder, code byte) (uint64, error) { return 2, nil },
 		more: true,
 	},
 	fixExt4Code: {
 		t:    Extension,
-		n:    func(d *Decoder, code byte) (uint64, error) { return 4, nil },
+		fn:   func(d *Decoder, code byte) (uint64, error) { return 4, nil },
 		more: true,
 	},
 	fixExt8Code: {
 		t:    Extension,
-		n:    func(d *Decoder, code byte) (uint64, error) { return 8, nil },
+		fn:   func(d *Decoder, code byte) (uint64, error) { return 8, nil },
 		more: true,
 	},
 	fixExt16Code: {
 		t:    Extension,
-		n:    func(d *Decoder, code byte) (uint64, error) { return 16, nil },
+		fn:   func(d *Decoder, code byte) (uint64, error) { return 16, nil },
 		more: true,
 	},
 	string8Code: {
 		t:    String,
-		n:    (*Decoder).read1,
+		fn:   (*Decoder).read1,
 		more: true,
 	},
 	string16Code: {
 		t:    String,
-		n:    (*Decoder).read2,
+		fn:   (*Decoder).read2,
 		more: true,
 	},
 	string32Code: {
 		t:    String,
-		n:    (*Decoder).read4,
+		fn:   (*Decoder).read4,
 		more: true,
 	},
 	array16Code: {
-		t: ArrayLen,
-		n: (*Decoder).read2,
+		t:  ArrayLen,
+		fn: (*Decoder).read2,
 	},
 	array32Code: {
-		t: ArrayLen,
-		n: (*Decoder).read4,
+		t:  ArrayLen,
+		fn: (*Decoder).read4,
 	},
 	map16Code: {
-		t: MapLen,
-		n: (*Decoder).read2,
+		t:  MapLen,
+		fn: (*Decoder).read2,
 	},
 	map32Code: {
-		t: MapLen,
-		n: (*Decoder).read4,
+		t:  MapLen,
+		fn: (*Decoder).read4,
 	},
 	negFixIntCodeMin: {
-		t: Int,
-		n: func(d *Decoder, code byte) (uint64, error) { return uint64(int64(int8(code))), nil },
+		t:  Int,
+		fn: func(d *Decoder, code byte) (uint64, error) { return uint64(int64(int8(code))), nil },
 	},
 }
 
