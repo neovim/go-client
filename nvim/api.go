@@ -201,6 +201,40 @@ func (b *Batch) SetBufferLines(buffer Buffer, start int, end int, strict bool, r
 	b.call("nvim_buf_set_lines", nil, buffer, start, end, strict, replacement)
 }
 
+// SetBufferText sets or replaces a range in the buffer.
+//
+// This is recommended over SetBufferLines when only modifying parts of a
+// line, as extmarks will be preserved on non-modified parts of the touched
+// lines.
+//
+// Indexing is zero-based and end-exclusive.
+//
+// To insert text at a given index, set `start` and `end` ranges to the same
+// index. To delete a range, set `replacement` to an array containing
+// an empty string, or simply an empty array.
+//
+// Prefer SetBufferLines when adding or deleting entire lines only.
+func (v *Nvim) SetBufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, replacement [][]byte) error {
+	return v.call("nvim_buf_set_text", nil, buffer, startRow, startCol, endRow, endCol, replacement)
+}
+
+// SetBufferText sets or replaces a range in the buffer.
+//
+// This is recommended over SetBufferLines when only modifying parts of a
+// line, as extmarks will be preserved on non-modified parts of the touched
+// lines.
+//
+// Indexing is zero-based and end-exclusive.
+//
+// To insert text at a given index, set `start` and `end` ranges to the same
+// index. To delete a range, set `replacement` to an array containing
+// an empty string, or simply an empty array.
+//
+// Prefer SetBufferLines when adding or deleting entire lines only.
+func (b *Batch) SetBufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, replacement [][]byte) {
+	b.call("nvim_buf_set_text", nil, buffer, startRow, startCol, endRow, endCol, replacement)
+}
+
 // BufferOffset returns the byte offset for a line.
 //
 // Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
@@ -1478,6 +1512,30 @@ func (v *Nvim) SetOption(name string, value interface{}) error {
 // SetOption sets an option.
 func (b *Batch) SetOption(name string, value interface{}) {
 	b.call("nvim_set_option", nil, name, value)
+}
+
+// Echo echo a message.
+//
+// The chunks is a list of [text, hl_group] arrays, each representing a
+// text chunk with specified highlight. hl_group element can be omitted for no highlight.
+//
+// If history is true, add to |message-history|.
+//
+// The opts arg is optional parameters. Reserved for future use.
+func (v *Nvim) Echo(chunks []EchoChunk, history bool, opts map[string]interface{}) error {
+	return v.call("nvim_echo", nil, chunks, history, opts)
+}
+
+// Echo echo a message.
+//
+// The chunks is a list of [text, hl_group] arrays, each representing a
+// text chunk with specified highlight. hl_group element can be omitted for no highlight.
+//
+// If history is true, add to |message-history|.
+//
+// The opts arg is optional parameters. Reserved for future use.
+func (b *Batch) Echo(chunks []EchoChunk, history bool, opts map[string]interface{}) {
+	b.call("nvim_echo", nil, chunks, history, opts)
 }
 
 // WriteOut writes a message to vim output buffer. The string is split and
