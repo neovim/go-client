@@ -372,6 +372,7 @@ var nvimTypes = map[string]string{
 	"[]*UI":              "Array",
 	"[]ExtMarks":         "Array",
 	"[]VirtualTextChunk": "Array",
+	"[]EchoChunk":        "Array",
 
 	"[2]int":     "ArrayOf(Integer, 2)",
 	"[]*Mapping": "ArrayOf(Dictionary)",

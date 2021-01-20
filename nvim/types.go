@@ -356,6 +356,15 @@ type VirtualTextChunk struct {
 	HLGroup string
 }
 
+// EchoChunk represents a echo chunk.
+type EchoChunk struct {
+	// Text is echo text.
+	Text string `msgpack:",array"`
+
+	// HLGroup is echo highlight group.
+	HLGroup string
+}
+
 // WindowConfig represents a configs of OpenWindow.
 //
 // Relative is the specifies the type of positioning method used for the floating window.
