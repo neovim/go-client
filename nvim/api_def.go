@@ -63,6 +63,23 @@ func SetBufferLines(buffer Buffer, start int, end int, strict bool, replacement 
 	name(nvim_buf_set_lines)
 }
 
+// SetBufferText sets or replaces a range in the buffer.
+//
+// This is recommended over SetBufferLines when only modifying parts of a
+// line, as extmarks will be preserved on non-modified parts of the touched
+// lines.
+//
+// Indexing is zero-based and end-exclusive.
+//
+// To insert text at a given index, set `start` and `end` ranges to the same
+// index. To delete a range, set `replacement` to an array containing
+// an empty string, or simply an empty array.
+//
+// Prefer SetBufferLines when adding or deleting entire lines only.
+func SetBufferText(buffer Buffer, startRow, startCol, endRow, endCol int, replacement [][]byte) {
+	name(nvim_buf_set_text)
+}
+
 // BufferOffset returns the byte offset for a line.
 //
 // Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
@@ -688,6 +705,18 @@ func Option(name string) (option interface{}) {
 // SetOption sets an option.
 func SetOption(name string, value interface{}) {
 	name(nvim_set_option)
+}
+
+// Echo echo a message.
+//
+// The chunks is a list of [text, hl_group] arrays, each representing a
+// text chunk with specified highlight. hl_group element can be omitted for no highlight.
+//
+// If history is true, add to |message-history|.
+//
+// The opts arg is optional parameters. Reserved for future use.
+func Echo(chunks []EchoChunk, history bool, opts map[string]interface{}) {
+	name(nvim_echo)
 }
 
 // WriteOut writes a message to vim output buffer. The string is split and
