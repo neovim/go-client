@@ -85,6 +85,7 @@ func TestAPI(t *testing.T) {
 	v, cleanup := newChildProcess(t)
 	defer cleanup()
 
+	t.Run("BufAttach", testBufAttach(v))
 	t.Run("SimpleHandler", testSimpleHandler(v))
 	t.Run("Buffer", testBuffer(v))
 	t.Run("Window", testWindow(v))
@@ -98,7 +99,6 @@ func TestAPI(t *testing.T) {
 	t.Run("Mode", testMode(v))
 	t.Run("ExecLua", testExecLua(v))
 	t.Run("Highlight", testHighlight(v))
-	t.Run("BufAttach", testBufAttach(v))
 	t.Run("VirtualText", testVirtualText(v))
 	t.Run("FloatingWindow", testFloatingWindow(v))
 	t.Run("Context", testContext(v))
@@ -106,6 +106,109 @@ func TestAPI(t *testing.T) {
 	t.Run("RuntimeFiles", testRuntimeFiles(v))
 	t.Run("AllOptionsInfo", testAllOptionsInfo(v))
 	t.Run("OptionsInfo", testOptionsInfo(v))
+}
+
+func testBufAttach(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		clearBuffer(t, v, 0) // clear curret buffer text
+
+		type ChangedtickEvent struct {
+			Buffer     Buffer
+			Changetick int64
+		}
+		type BufLinesEvent struct {
+			Buffer      Buffer
+			Changetick  int64
+			FirstLine   int64
+			LastLine    int64
+			LineData    string
+			IsMultipart bool
+		}
+
+		changedtickChan := make(chan *ChangedtickEvent)
+		v.RegisterHandler("nvim_buf_changedtick_event", func(changedtickEvent ...interface{}) {
+			ev := &ChangedtickEvent{
+				Buffer:     changedtickEvent[0].(Buffer),
+				Changetick: changedtickEvent[1].(int64),
+			}
+			changedtickChan <- ev
+		})
+
+		bufLinesChan := make(chan *BufLinesEvent)
+		v.RegisterHandler("nvim_buf_lines_event", func(bufLinesEvent ...interface{}) {
+			ev := &BufLinesEvent{
+				Buffer:      bufLinesEvent[0].(Buffer),
+				Changetick:  bufLinesEvent[1].(int64),
+				FirstLine:   bufLinesEvent[2].(int64),
+				LastLine:    bufLinesEvent[3].(int64),
+				LineData:    fmt.Sprint(bufLinesEvent[4]),
+				IsMultipart: bufLinesEvent[5].(bool),
+			}
+			bufLinesChan <- ev
+		})
+
+		ok, err := v.AttachBuffer(0, false, make(map[string]interface{})) // first 0 arg refers to the current buffer
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !ok {
+			t.Fatal(errors.New("could not attach buffer"))
+		}
+
+		changedtickExpected := &ChangedtickEvent{
+			Buffer:     1,
+			Changetick: 3,
+		}
+		bufLinesEventExpected := &BufLinesEvent{
+			Buffer:      1,
+			Changetick:  4,
+			FirstLine:   0,
+			LastLine:    1,
+			LineData:    "[test]",
+			IsMultipart: false,
+		}
+
+		var numEvent int64 // add and load should be atomically
+		errc := make(chan error)
+		done := make(chan struct{})
+		go func() {
+			for {
+				select {
+				default:
+					if atomic.LoadInt64(&numEvent) == 2 { // end buf_attach test when handle 2 event
+						done <- struct{}{}
+						return
+					}
+				case changedtick := <-changedtickChan:
+					if !reflect.DeepEqual(changedtick, changedtickExpected) {
+						errc <- fmt.Errorf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
+					}
+					atomic.AddInt64(&numEvent, 1)
+				case bufLines := <-bufLinesChan:
+					if expected := bufLinesEventExpected; !reflect.DeepEqual(bufLines, expected) {
+						errc <- fmt.Errorf("bufLines = %+v, want %+v", bufLines, expected)
+					}
+					atomic.AddInt64(&numEvent, 1)
+				}
+			}
+		}()
+
+		go func() {
+			<-done
+			close(errc)
+		}()
+
+		test := []byte("test")
+		if err := v.SetBufferLines(0, 0, -1, true, bytes.Fields(test)); err != nil { // first 0 arg refers to the current buffer
+			t.Fatal(err)
+		}
+
+		for err := range errc {
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
 }
 
 func testSimpleHandler(v *Nvim) func(*testing.T) {
@@ -1208,109 +1311,6 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatalf("SetHighlight:\n got %#v\nwant %#v", &got, want)
 			}
 		})
-	}
-}
-
-func testBufAttach(v *Nvim) func(*testing.T) {
-	return func(t *testing.T) {
-		clearBuffer(t, v, 0) // clear curret buffer text
-
-		type ChangedtickEvent struct {
-			Buffer     Buffer
-			Changetick int64
-		}
-		type BufLinesEvent struct {
-			Buffer      Buffer
-			Changetick  int64
-			FirstLine   int64
-			LastLine    int64
-			LineData    string
-			IsMultipart bool
-		}
-
-		changedtickChan := make(chan *ChangedtickEvent)
-		v.RegisterHandler("nvim_buf_changedtick_event", func(changedtickEvent ...interface{}) {
-			ev := &ChangedtickEvent{
-				Buffer:     changedtickEvent[0].(Buffer),
-				Changetick: changedtickEvent[1].(int64),
-			}
-			changedtickChan <- ev
-		})
-
-		bufLinesChan := make(chan *BufLinesEvent)
-		v.RegisterHandler("nvim_buf_lines_event", func(bufLinesEvent ...interface{}) {
-			ev := &BufLinesEvent{
-				Buffer:      bufLinesEvent[0].(Buffer),
-				Changetick:  bufLinesEvent[1].(int64),
-				FirstLine:   bufLinesEvent[2].(int64),
-				LastLine:    bufLinesEvent[3].(int64),
-				LineData:    fmt.Sprint(bufLinesEvent[4]),
-				IsMultipart: bufLinesEvent[5].(bool),
-			}
-			bufLinesChan <- ev
-		})
-
-		ok, err := v.AttachBuffer(0, false, make(map[string]interface{})) // first 0 arg refers to the current buffer
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !ok {
-			t.Fatal(errors.New("could not attach buffer"))
-		}
-
-		changedtickExpected := &ChangedtickEvent{
-			Buffer:     1,
-			Changetick: 5,
-		}
-		bufLinesEventExpected := &BufLinesEvent{
-			Buffer:      1,
-			Changetick:  6,
-			FirstLine:   0,
-			LastLine:    1,
-			LineData:    "[test]",
-			IsMultipart: false,
-		}
-
-		var numEvent int64 // add and load should be atomically
-		errc := make(chan error)
-		done := make(chan struct{})
-		go func() {
-			for {
-				select {
-				default:
-					if atomic.LoadInt64(&numEvent) == 2 { // end buf_attach test when handle 2 event
-						done <- struct{}{}
-						return
-					}
-				case changedtick := <-changedtickChan:
-					if !reflect.DeepEqual(changedtick, changedtickExpected) {
-						errc <- fmt.Errorf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
-					}
-					atomic.AddInt64(&numEvent, 1)
-				case bufLines := <-bufLinesChan:
-					if expected := bufLinesEventExpected; !reflect.DeepEqual(bufLines, expected) {
-						errc <- fmt.Errorf("bufLines = %+v, want %+v", bufLines, expected)
-					}
-					atomic.AddInt64(&numEvent, 1)
-				}
-			}
-		}()
-
-		go func() {
-			<-done
-			close(errc)
-		}()
-
-		test := []byte("test")
-		if err := v.SetBufferLines(0, 0, -1, true, bytes.Fields(test)); err != nil { // first 0 arg refers to the current buffer
-			t.Fatal(err)
-		}
-
-		for err := range errc {
-			if err != nil {
-				t.Fatal(err)
-			}
-		}
 	}
 }
 
