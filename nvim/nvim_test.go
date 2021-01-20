@@ -539,85 +539,191 @@ func testTabpage(v *Nvim) func(*testing.T) {
 func testLines(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			buf, err := v.CurrentBuffer()
-			if err != nil {
-				t.Fatal(err)
-			}
+			t.Run("BufferLines", func(t *testing.T) {
+				buf, err := v.CurrentBuffer()
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer clearBuffer(t, v, buf) // clear buffer after run sub-test.
 
-			lines := [][]byte{[]byte("hello"), []byte("world")}
-			if err := v.SetBufferLines(buf, 0, -1, true, lines); err != nil {
-				t.Fatal(err)
-			}
-			lines2, err := v.BufferLines(buf, 0, -1, true)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !reflect.DeepEqual(lines2, lines) {
-				t.Fatalf("lines = %+v, want %+v", lines2, lines)
-			}
+				lines := [][]byte{[]byte("hello"), []byte("world")}
+				if err := v.SetBufferLines(buf, 0, -1, true, lines); err != nil {
+					t.Fatal(err)
+				}
+				lines2, err := v.BufferLines(buf, 0, -1, true)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(lines2, lines) {
+					t.Fatalf("lines = %+v, want %+v", lines2, lines)
+				}
 
-			const wantCount = 2
-			count, err := v.BufferLineCount(buf)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if count != wantCount {
-				t.Fatalf("got count %d but want %d", count, wantCount)
-			}
+				const wantCount = 2
+				count, err := v.BufferLineCount(buf)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if count != wantCount {
+					t.Fatalf("got count %d but want %d", count, wantCount)
+				}
 
-			const wantOffset = 12 // [][]byte{[]byte("hello"), []byte("\n"), []byte("world"), []byte("\n")}
-			offset, err := v.BufferOffset(buf, count)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if offset != wantOffset {
-				t.Fatalf("got offset %d but want %d", offset, wantOffset)
-			}
+				const wantOffset = 12 // [][]byte{[]byte("hello"), []byte("\n"), []byte("world"), []byte("\n")}
+				offset, err := v.BufferOffset(buf, count)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if offset != wantOffset {
+					t.Fatalf("got offset %d but want %d", offset, wantOffset)
+				}
+			})
+
+			t.Run("SetBufferText", func(t *testing.T) {
+				buf, err := v.CurrentBuffer()
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer clearBuffer(t, v, buf) // clear buffer after run sub-test.
+
+				// sets test buffer text.
+				lines := [][]byte{[]byte("Vim is the"), []byte("Nvim-fork? focused on extensibility and usability")}
+				if err := v.SetBufferLines(buf, 0, -1, true, lines); err != nil {
+					t.Fatal(err)
+				}
+
+				// Replace `Vim is the` to `Neovim is the`
+				if err := v.SetBufferText(buf, 0, 0, 0, 3, [][]byte{[]byte("Neovim")}); err != nil {
+					t.Fatal(err)
+				}
+				// Replace `Nvim-fork?` to `Vim-fork`
+				if err := v.SetBufferText(buf, 1, 0, 1, 10, [][]byte{[]byte("Vim-fork")}); err != nil {
+					t.Fatal(err)
+				}
+
+				want := [2][]byte{
+					[]byte("Neovim is the"),
+					[]byte("Vim-fork focused on extensibility and usability"),
+				}
+				got, err := v.BufferLines(buf, 0, -1, true)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// assert buffer lines count.
+				const wantCount = 2
+				if len(got) != wantCount {
+					t.Fatalf("expected buffer lines rows is %d: got %d", wantCount, len(got))
+				}
+
+				// assert row 1 buffer text.
+				if !bytes.EqualFold(want[0], got[0]) {
+					t.Fatalf("row 1 is not equal: want: %q, got: %q", string(want[0]), string(got[0]))
+				}
+
+				// assert row 2 buffer text.
+				if !bytes.EqualFold(want[1], got[1]) {
+					t.Fatalf("row 2 is not equal: want: %q, got: %q", string(want[1]), string(got[1]))
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			b := v.NewBatch()
+			t.Run("BufferLines", func(t *testing.T) {
+				b := v.NewBatch()
 
-			var buf Buffer
-			b.CurrentBuffer(&buf)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
+				var buf Buffer
+				b.CurrentBuffer(&buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				defer clearBuffer(t, v, buf) // clear buffer after run sub-test.
 
-			lines := [][]byte{[]byte("hello"), []byte("world")}
-			b.SetBufferLines(buf, 0, -1, true, lines)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
+				lines := [][]byte{[]byte("hello"), []byte("world")}
+				b.SetBufferLines(buf, 0, -1, true, lines)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
 
-			var lines2 [][]byte
-			b.BufferLines(buf, 0, -1, true, &lines2)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if !reflect.DeepEqual(lines2, lines) {
-				t.Fatalf("lines = %+v, want %+v", lines2, lines)
-			}
+				var lines2 [][]byte
+				b.BufferLines(buf, 0, -1, true, &lines2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(lines2, lines) {
+					t.Fatalf("lines = %+v, want %+v", lines2, lines)
+				}
 
-			const wantCount = 2
-			var count int
-			b.BufferLineCount(buf, &count)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if count != wantCount {
-				t.Fatalf("count is not 2 %d", count)
-			}
+				const wantCount = 2
+				var count int
+				b.BufferLineCount(buf, &count)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if count != wantCount {
+					t.Fatalf("count is not 2 %d", count)
+				}
 
-			const wantOffset = 12 // [][]byte{[]byte("hello"), []byte("\n"), []byte("world"), []byte("\n")}
-			var offset int
-			b.BufferOffset(buf, count, &offset)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if offset != wantOffset {
-				t.Fatalf("got offset %d but want %d", offset, wantOffset)
-			}
+				const wantOffset = 12 // [][]byte{[]byte("hello"), []byte("\n"), []byte("world"), []byte("\n")}
+				var offset int
+				b.BufferOffset(buf, count, &offset)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if offset != wantOffset {
+					t.Fatalf("got offset %d but want %d", offset, wantOffset)
+				}
+			})
+
+			t.Run("SetBufferText", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var buf Buffer
+				b.CurrentBuffer(&buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				defer clearBuffer(t, v, buf) // clear buffer after run sub-test.
+
+				// sets test buffer text.
+				lines := [][]byte{[]byte("Vim is the"), []byte("Nvim-fork? focused on extensibility and usability")}
+				b.SetBufferLines(buf, 0, -1, true, lines)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				// Replace `Vim is the` to `Neovim is the`
+				b.SetBufferText(buf, 0, 0, 0, 3, [][]byte{[]byte("Neovim")})
+				// Replace `Nvim-fork?` to `Vim-fork`
+				b.SetBufferText(buf, 1, 0, 1, 10, [][]byte{[]byte("Vim-fork")})
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				want := [2][]byte{
+					[]byte("Neovim is the"),
+					[]byte("Vim-fork focused on extensibility and usability"),
+				}
+				var got [][]byte
+				b.BufferLines(buf, 0, -1, true, &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				// assert buffer lines count.
+				const wantCount = 2
+				if len(got) != wantCount {
+					t.Fatalf("expected buffer lines rows is %d: got %d", wantCount, len(got))
+				}
+
+				// assert row 1 buffer text.
+				if !bytes.EqualFold(want[0], got[0]) {
+					t.Fatalf("row 1 is not equal: want: %q, got: %q", string(want[0]), string(got[0]))
+				}
+
+				// assert row 1 buffer text.
+				if !bytes.EqualFold(want[1], got[1]) {
+					t.Fatalf("row 2 is not equal: want: %q, got: %q", string(want[1]), string(got[1]))
+				}
+			})
 		})
 	}
 }
@@ -1549,15 +1655,6 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 	}
 }
 
-// clearBuffer clears the buffer text.
-func clearBuffer(tb testing.TB, v *Nvim, buffer Buffer) {
-	tb.Helper()
-
-	if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
-		tb.Fatal(err)
-	}
-}
-
 func TestDial(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("not supported dial unix socket on windows GOOS")
@@ -1635,5 +1732,14 @@ func TestEmbedded(t *testing.T) {
 		}
 	case <-time.After(10 * time.Second):
 		t.Fatal("timeout waiting for serve to exit")
+	}
+}
+
+// clearBuffer clears the buffer lines.
+func clearBuffer(tb testing.TB, v *Nvim, buffer Buffer) {
+	tb.Helper()
+
+	if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
+		tb.Fatal(err)
 	}
 }
