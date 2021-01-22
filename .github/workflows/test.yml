@@ -2,11 +2,19 @@ name: Test
 
 on:
   push:
-    branches: "*"
-    tags:
-      - "v*"
+    branches:
+      - '**'
   pull_request:
-    branches: "*"
+    branches:
+      - "*"
+  release:
+    types:
+      - published
+      - created
+      - edited
+
+env:
+  GO111MODULE: "on"
 
 defaults:
   run:
@@ -17,17 +25,16 @@ jobs:
     strategy:
       matrix:
         os:
-          # https://github.com/actions/virtual-environments/blob/ubuntu20/20201210.0/images/linux/Ubuntu2004-README.md
-          - ubuntu-20.04
-          # https://github.com/actions/virtual-environments/blob/macOS-10.15/20201212.1/images/macos/macos-10.15-Readme.md
-          - macos-10.15
-          # https://github.com/actions/virtual-environments/blob/win19/20201210.0/images/win/Windows2019-Readme.md
-          - windows-2019
+          - ubuntu-20.04  # https://github.com/actions/virtual-environments/blob/ubuntu20/20201210.0/images/linux/Ubuntu2004-README.md
+          - macos-10.15   # https://github.com/actions/virtual-environments/blob/macOS-10.15/20201212.1/images/macos/macos-10.15-Readme.md
+          - windows-2019  # https://github.com/actions/virtual-environments/blob/win19/20201210.0/images/win/Windows2019-Readme.md
         go-version:
           - 1.13.x
           - 1.14.x
           - 1.15.x
           - 1.16.0-beta1
+      fail-fast: false
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -60,9 +67,9 @@ jobs:
           ${{ env.OS }}-go-
 
     - name: Cache nvim binary for linux and darwin
-      uses: actions/cache@v2
       id: cache-nvim
-      if: env.OS != 'windows'
+      uses: actions/cache@v2
+      if: ${{ env.OS != 'windows' }}
       with:
         key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/bin/nvim') }}
         path: |
@@ -71,9 +78,9 @@ jobs:
           ${{ env.OS }}-nvim-
 
     - name: Cache nvim binary for Windows
-      uses: actions/cache@v2
       id: cache-nvim-windows
-      if: env.OS == 'windows'
+      uses: actions/cache@v2
+      if: ${{ env.OS == 'windows' }}
       with:
         key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/bin/nvim.exe') }}
         path: |
@@ -89,7 +96,7 @@ jobs:
         version: nightly
 
     - name: gofmt
-      if: env.OS != 'windows'
+      if: ${{ env.OS != 'windows' }}
       run: |
         diff -u <(echo -n) <(gofmt -s -d .)
 
