@@ -795,7 +795,7 @@ func BenchmarkDecode(b *testing.B) {
 		m := map[string]string{
 			"foo": makeString(math.MaxUint8),
 			"bar": makeString(math.MaxUint8 + 1),
-			"baz": makeString(math.MaxUint16),
+			"baz": makeString(math.MaxUint8 + 2),
 		}
 		builder := NewTestMapBuilder(b)
 		for k, v := range m {
