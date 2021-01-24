@@ -72,7 +72,7 @@ func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 			}
 
 			return nil
-		}); walkErr != nil {
+		}); walkErr != nil && !os.IsNotExist(err) {
 			tb.Fatal(fmt.Errorf("walkErr: %w", errors.Unwrap(walkErr)))
 		}
 	}
