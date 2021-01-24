@@ -14,16 +14,21 @@ package main
 // vim.c
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
+// Exec executes Vimscript (multiline block of Ex-commands), like anonymous |:source|.
+//
+// Unlike Command, this function supports heredocs, script-scope (s:), etc.
+//
+// On execution error: fails with VimL error, does not update v:errmsg.
 func Exec(src string, output bool) (out string) {
 	name(nvim_exec)
 }
 
-// Command executes a single ex command.
+// Command executes an ex-command.
 func Command(cmd string) {
 	name(nvim_command)
 }
 
-// HLByID gets a highlight definition by id.
+// HLByID gets a highlight definition by name.
 func HLByID(id int, rgb bool) (highlight HLAttrs) {
 	name(nvim_get_hl_by_id)
 	returnPtr()
@@ -34,7 +39,7 @@ func HLIDByName(name string) (highlightID int) {
 	name(nvim_get_hl_id_by_name)
 }
 
-// HLByName gets a highlight definition by name.
+// HLByName gets a highlight definition by id.
 func HLByName(name string, rgb bool) (highlight HLAttrs) {
 	name(nvim_get_hl_by_name)
 	returnPtr()
@@ -45,6 +50,11 @@ func HLByName(name string, rgb bool) (highlight HLAttrs) {
 // name arg is highlight group name, like ErrorMsg.
 //
 // val arg is highlight definiton map, like HLByName.
+//
+// in addition the following keys are also recognized:
+//
+//  default
+// don't override existing definition, like `hi default`.
 func SetHighlight(nsID int, name string, val *HLAttrs) {
 	name(nvim_set_hl)
 }
@@ -56,13 +66,21 @@ func SetHighlight(nsID int, name string, val *HLAttrs) {
 // To start with SetDecorationProvider on_win and on_line callbacks
 // are explicitly allowed to change the namespace during a redraw cycle.
 //
-// The `nsID` arg is the namespace to activate.
+// The nsID arg is the namespace to activate.
 func SetHighlightNameSpace(nsID int) {
 	name(nvim_set_hl_ns)
 }
 
-// FeedKeys Pushes keys to the Nvim user input buffer. Options can be a string
-// with the following character flags:
+// FeedKeys sends input-keys to Nvim, subject to various quirks controlled by mode flags.
+// This is a blocking call, unlike Input.
+//
+// On execution error: does not fail, but updates v:errmsg.
+//
+// If you need to input sequences like <C-o> use ReplaceTermcodes to
+// replace the termcodes and then pass the resulting string to nvim_feedkeys.
+// You'll also want to enable escape_csi.
+//
+// mode is following character flags:
 //
 //  m
 // Remap keys. This is default.
@@ -71,28 +89,30 @@ func SetHighlightNameSpace(nsID int) {
 //  t
 // Handle keys as if typed; otherwise they are handled as if coming from a mapping.
 // This matters for undo, opening folds, etc.
+//
+// The escape_csi arg is whether the escape K_SPECIAL/CSI bytes in keys arg.
 func FeedKeys(keys, mode string, escapeCSI bool) {
 	name(nvim_feedkeys)
 }
 
-// Input pushes bytes to the Nvim low level input buffer.
+// Input queues raw user-input.
 //
-// Unlike FeedKeys, this uses the lowest level input buffer and the call is not
-// deferred. It returns the number of bytes actually written(which can be less
-// than what was requested if the buffer is full).
+// Unlike FeedKeys, this uses a low-level input buffer and the call
+// is non-blocking (input is processed asynchronously by the eventloop).
 func Input(keys string) (written int) {
 	name(nvim_input)
 }
 
 // InputMouse send mouse event from GUI.
 //
-// The call is non-blocking. It doesn't wait on any resulting action, but
+// This API is non-blocking. It doesn't wait on any resulting action, but
 // queues the event to be processed soon by the event loop.
 func InputMouse(button, action, modifier string, grid, row, col int) {
 	name(nvim_input_mouse)
 }
 
-// ReplaceTermcodes replaces any terminal code strings by byte sequences.
+// ReplaceTermcodes replaces terminal codes and |keycodes| (<CR>, <Esc>, ...) in a string with
+// the internal representation.
 //
 // The returned sequences are Nvim's internal representation of keys, for example:
 //
@@ -114,35 +134,23 @@ func CommandOutput(cmd string) (out string) {
 	deprecatedSince(7)
 }
 
-// Eval evaluates the expression expr using the Vim internal expression
-// evaluator.
+// Eval evaluates a VimL expression.
+//
+// Dictionaries and Lists are recursively expanded.
 //
 //  :help expression
 func Eval(expr string) (result interface{}) {
 	name(nvim_eval)
 }
 
-// SetPumBounds tells Nvim the geometry of the popumenu, to align floating windows with an
-// external popup menu.
+// StringWidth calculates the number of display cells occupied by `text`.
 //
-// Note that this method is not to be confused with SetPumHeight,
-// which sets the number of visible items in the popup menu, while this
-// function sets the bounding box of the popup menu, including visual
-// elements such as borders and sliders.
-//
-// Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
-// numbers to the popup menu geometry.
-func SetPumBounds(width, height, row, col float64) {
-	name(nvim_ui_pum_set_bounds)
-}
-
-// StringWidth returns the number of display cells the string occupies. Tab is
-// counted as one cell.
+// <Tab> counts as one cell.
 func StringWidth(s string) (width int) {
 	name(nvim_strwidth)
 }
 
-// RuntimePaths returns a list of paths contained in the runtimepath option.
+// RuntimePaths gets the paths contained in 'runtimepath'.
 func RuntimePaths() (paths []string) {
 	name(nvim_list_runtime_paths)
 }
@@ -150,7 +158,9 @@ func RuntimePaths() (paths []string) {
 // RuntimeFiles finds files in runtime directories and returns list of absolute paths to the found files.
 //
 // The name arg is can contain wildcards. For example,
+//
 //  RuntimeFiles("colors/*.vim", true)
+//
 // will return all color scheme files.
 //
 // The all arg is whether to return all matches or only the first.
@@ -158,22 +168,22 @@ func RuntimeFiles(name string, all bool) (files []string) {
 	name(nvim_get_runtime_file)
 }
 
-// SetCurrentDirectory changes the Vim working directory.
+// SetCurrentDirectory changes the global working directory.
 func SetCurrentDirectory(dir string) {
 	name(nvim_set_current_dir)
 }
 
-// CurrentLine gets the current line in the current buffer.
+// CurrentLine gets the current line.
 func CurrentLine() (line []byte) {
 	name(nvim_get_current_line)
 }
 
-// SetCurrentLine sets the current line in the current buffer.
+// SetCurrentLine sets the current line.
 func SetCurrentLine(line []byte) {
 	name(nvim_set_current_line)
 }
 
-// DeleteCurrentLine deletes the current line in the current buffer.
+// DeleteCurrentLine deletes the current line.
 func DeleteCurrentLine() {
 	name(nvim_del_current_line)
 }
@@ -193,7 +203,7 @@ func DeleteVar(name string) {
 	name(nvim_del_var)
 }
 
-// VVar gets a vim (v:) variable.
+// VVar gets a v: variable.
 func VVar(name string) (value interface{}) {
 	name(nvim_get_vvar)
 }
@@ -203,7 +213,7 @@ func SetVVar(name string, value interface{}) {
 	name(nvim_set_vvar)
 }
 
-// Option gets an option.
+// Option gets an option value string.
 func Option(name string) (option interface{}) {
 	name(nvim_get_option)
 }
@@ -217,26 +227,37 @@ func Option(name string) (option interface{}) {
 //
 //  name
 // Name of the option (like 'filetype').
+//
 //  shortname
 // Shortened name of the option (like 'ft').
+//
 //  type
 // type of option ("string", "number" or "boolean").
+//
 //  default
 // The default value for the option.
+//
 //  was_set
 // Whether the option was set.
+//
 //  last_set_sid
 // Last set script id (if any).
+//
 //  last_set_linenr
 // line number where option was set.
+//
 //  last_set_chan
 // Channel where option was set (0 for local).
+//
 //  scope
 // one of "global", "win", or "buf".
+//
 //  global_local
 // whether win or buf option has a global value.
+//
 //  commalist
 // List of comma separated values.
+//
 //  flaglist
 // List of single char flags.
 func AllOptionsInfo() (opinfo OptionInfo) {
@@ -244,40 +265,51 @@ func AllOptionsInfo() (opinfo OptionInfo) {
 	returnPtr()
 }
 
-// OptionInfo Gets the option information for one option.
+// OptionInfo gets the option information for one option.
 //
 // Resulting dictionary has keys:
 //
 //  name
 // Name of the option (like 'filetype').
+//
 //  shortname
 // Shortened name of the option (like 'ft').
+//
 //  type
 // type of option ("string", "number" or "boolean").
+//
 //  default
 // The default value for the option.
+//
 //  was_set
 // Whether the option was set.
+//
 //  last_set_sid
 // Last set script id (if any).
+//
 //  last_set_linenr
 // line number where option was set.
+//
 //  last_set_chan
 // Channel where option was set (0 for local).
+//
 //  scope
 // one of "global", "win", or "buf".
+//
 //  global_local
 // whether win or buf option has a global value.
+//
 //  commalist
 // List of comma separated values.
+//
 //  flaglist
-//  List of single char flags.
+// List of single char flags.
 func OptionInfo(name string) (opinfo OptionInfo) {
 	name(nvim_get_option_info)
 	returnPtr()
 }
 
-// SetOption sets an option.
+// SetOption sets an option value.
 func SetOption(name string, value interface{}) {
 	name(nvim_set_option)
 }
@@ -506,10 +538,11 @@ func ColorMap() (colorMap map[string]int) {
 // Context gets a map of the current editor state.
 // This API still under development.
 //
-// The `opts` is optional parameters.
+// The opts arg is optional parameters.
+// Key is `types`.
 //
-//  types
-// List of context-types to gather, or empty for all context.
+// List of context-types to gather, or empty for `all` context.
+//
 //  regs
 //  jumps
 //  bufs
@@ -525,7 +558,7 @@ func LoadContext(dict map[string]interface{}) (contextMap interface{}) {
 	name(nvim_load_context)
 }
 
-// Mode gets Nvim's current mode.
+// Mode gets the current mode.
 func Mode() (mode Mode) {
 	name(nvim_get_mode)
 	returnPtr()
@@ -586,11 +619,14 @@ func APIInfo() (apiInfo []interface{}) {
 	name(nvim_get_api_info)
 }
 
-// SetClientInfo identify the client for nvim.
+// SetClientInfo self-identifies the client.
 //
-// Can be called more than once, but subsequent calls will remove earlier info,
-// which should be resent if it is still valid. (This could happen if a library first identifies the channel,
-// and a plugin using that library later overrides that info.)
+// The client/plugin/application should call this after connecting, to provide
+// hints about its identity and purpose, for debugging and orchestration.
+//
+// Can be called more than once; the caller should merge old info if
+// appropriate. Example: library first identifies the channel, then a plugin
+// using that library later identifies itself.
 func SetClientInfo(name string, version *ClientVersion, typ string, methods map[string]*ClientMethod, attributes ClientAttributes) {
 	name(nvim_set_client_info)
 }
@@ -1212,4 +1248,18 @@ func TryResizeUIGrid(grid, width, height int) {
 // height is popupmenu height, must be greater than zero.
 func SetPumHeight(height int) {
 	name(nvim_ui_pum_set_height)
+}
+
+// SetPumBounds tells Nvim the geometry of the popumenu, to align floating windows with an
+// external popup menu.
+//
+// Note that this method is not to be confused with SetPumHeight,
+// which sets the number of visible items in the popup menu, while this
+// function sets the bounding box of the popup menu, including visual
+// elements such as borders and sliders.
+//
+// Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
+// numbers to the popup menu geometry.
+func SetPumBounds(width, height, row, col float64) {
+	name(nvim_ui_pum_set_bounds)
 }
