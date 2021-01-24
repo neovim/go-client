@@ -12,7 +12,6 @@ import (
 	"go/ast"
 	"go/format"
 	"go/parser"
-	"go/printer"
 	"go/token"
 	"io/ioutil"
 	"log"
@@ -96,8 +95,8 @@ var extensionTypes = map[string]ExtensionType{
 }
 
 func formatNode(fset *token.FileSet, node interface{}) string {
-	var buf bytes.Buffer
-	if err := printer.Fprint(&buf, fset, node); err != nil {
+	var buf strings.Builder
+	if err := format.Node(&buf, fset, node); err != nil {
 		panic(err)
 	}
 	return buf.String()
