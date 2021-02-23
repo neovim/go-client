@@ -2,11 +2,11 @@ name: Benchmark
 
 on:
   push:
-    branches: "*"
-    tags:
-      - "v*"
+    branches:
+      - "benchmark/*"
   pull_request:
-    branches: "*"
+    branches:
+      - "benchmark/*"
 
 defaults:
   run:
