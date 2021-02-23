@@ -3,18 +3,15 @@ name: Test
 on:
   push:
     branches:
-      - '**'
+      - master
   pull_request:
     branches:
-      - "*"
+      - master
   release:
     types:
       - published
       - created
       - edited
-
-env:
-  GO111MODULE: "on"
 
 defaults:
   run:
@@ -25,9 +22,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-20.04  # https://github.com/actions/virtual-environments/blob/ubuntu20/20201210.0/images/linux/Ubuntu2004-README.md
-          - macos-10.15   # https://github.com/actions/virtual-environments/blob/macOS-10.15/20201212.1/images/macos/macos-10.15-Readme.md
-          - windows-2019  # https://github.com/actions/virtual-environments/blob/win19/20201210.0/images/win/Windows2019-Readme.md
+          - ubuntu-20.04  # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
+          - macos-11.0    # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11.0-Readme.md
+          - windows-2019  # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
         go-version:
           - 1.14.x
           - 1.15.x
@@ -56,12 +53,12 @@ jobs:
     - name: Cache Go module and build cache
       uses: actions/cache@v2
       with:
-        key: ${{ env.OS }}-go-${{ hashFiles('**/go.sum') }}
+        key: ${{ env.OS }}-go-${{ hashFiles('**/go.mod') }}
         path: |
-          ~/go/pkg/mod              # Module download cache
-          ~/.cache/go-build         # Build cache (Linux)
-          ~/Library/Caches/go-build # Build cache (Mac)
-          '%LocalAppData%\go-build' # Build cache (Windows)
+          ~/go/pkg/mod               # Module download cache
+          ~/.cache/go-build          # Build cache (Linux)
+          ~/Library/Caches/go-build  # Build cache (Mac)
+          '%LocalAppData%\go-build'  # Build cache (Windows)
         restore-keys: |
           ${{ env.OS }}-go-
 
