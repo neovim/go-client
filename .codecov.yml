@@ -24,39 +24,39 @@ coverage:
       linux-1.13:
         <<: *projects
         flags:
-          - "linux-1.13"
+          - "linux-1.14"
       linux-1.14:
         <<: *projects
         flags:
-          - "linux-1.14"
+          - "linux-1.15"
       linux-1.15:
         <<: *projects
         flags:
-          - "linux-1.15"
+          - "linux-1.16"
       macos-1.13:
         <<: *projects
         flags:
-          - "macos-1.13"
+          - "macos-1.14"
       macos-1.14:
         <<: *projects
         flags:
-          - "macos-1.14"
+          - "macos-1.15"
       macos-1.15:
         <<: *projects
         flags:
-          - "macos-1.15"
+          - "macos-1.16"
       windows-1.13:
         <<: *projects
         flags:
-          - "windows-1.13"
+          - "windows-1.14"
       windows-1.14:
         <<: *projects
         flags:
-          - "windows-1.14"
+          - "windows-1.15"
       windows-1.15:
         <<: *projects
         flags:
-          - "windows-1.15"
+          - "windows-1.16"
     patch:
       default: false
       linux-1.13:
@@ -85,21 +85,17 @@ coverage:
         branches:
           - master
         flags:
-          - "linux-1.13"
           - "linux-1.14"
           - "linux-1.15"
-          - "macos-1.13"
+          - "linux-1.16"
           - "macos-1.14"
           - "macos-1.15"
-          - "windows-1.13"
+          - "macos-1.16"
           - "windows-1.14"
           - "windows-1.15"
+          - "windows-1.16"
 
 flags:
-  linux-1.13:
-    paths:
-      - /
-    carryforward: true
   linux-1.14:
     paths:
       - /
@@ -108,7 +104,7 @@ flags:
     paths:
       - /
     carryforward: true
-  macos-1.13:
+  linux-1.16:
     paths:
       - /
     carryforward: true
@@ -120,7 +116,7 @@ flags:
     paths:
       - /
     carryforward: true
-  windows-1.13:
+  macos-1.16:
     paths:
       - /
     carryforward: true
@@ -129,6 +125,10 @@ flags:
       - /
     carryforward: true
   windows-1.15:
+    paths:
+      - /
+    carryforward: true
+  windows-1.16:
     paths:
       - /
     carryforward: true

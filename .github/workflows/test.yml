@@ -53,36 +53,36 @@ jobs:
     - name: Cache Go module and build cache
       uses: actions/cache@v2
       with:
-        key: ${{ env.OS }}-go-${{ hashFiles('**/go.mod') }}
+        key: go-${{ env.OS }}-${{ hashFiles('**/go.mod') }}
         path: |
           ~/go/pkg/mod               # Module download cache
           ~/.cache/go-build          # Build cache (Linux)
           ~/Library/Caches/go-build  # Build cache (Mac)
           '%LocalAppData%\go-build'  # Build cache (Windows)
         restore-keys: |
-          ${{ env.OS }}-go-
+          go-${{ env.OS }}-
 
     - name: Cache nvim binary for linux and darwin
       id: cache-nvim
       uses: actions/cache@v2
       if: ${{ env.OS != 'windows' }}
       with:
-        key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/bin/nvim') }}
+        key: nvim-${{ env.OS }}-${{ hashFiles('~/nvim/bin/nvim') }}
         path: |
           ~/nvim
         restore-keys: |
-          ${{ env.OS }}-nvim-
+          nvim-${{ env.OS }}-
 
     - name: Cache nvim binary for Windows
       id: cache-nvim-windows
       uses: actions/cache@v2
       if: ${{ env.OS == 'windows' }}
       with:
-        key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/bin/nvim.exe') }}
+        key: nvim-${{ env.OS }}-${{ hashFiles('~/nvim/bin/nvim.exe') }}
         path: |
           ~/nvim
         restore-keys: |
-          ${{ env.OS }}-nvim-
+          nvim-${{ env.OS }}-
 
     - name: Install nvim binary
       uses: rhysd/action-setup-vim@v1
