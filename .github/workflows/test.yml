@@ -23,7 +23,7 @@ jobs:
       matrix:
         os:
           - ubuntu-20.04  # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
-          - macos-10.15   # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md
+          - macos-11.0    # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11.0-Readme.md
           - windows-2019  # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
         go-version:
           - 1.14.x
@@ -43,7 +43,6 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
-        stable: false
 
     - name: Checkout code
       uses: actions/checkout@v2
