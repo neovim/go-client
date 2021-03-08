@@ -94,7 +94,6 @@ func (x Window) String() string {
 }
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
-// Exec executes Vimscript (multiline block of Ex-commands), like anonymous |:source|.
 //
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
@@ -105,7 +104,6 @@ func (v *Nvim) Exec(src string, output bool) (out string, err error) {
 }
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
-// Exec executes Vimscript (multiline block of Ex-commands), like anonymous |:source|.
 //
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
@@ -710,7 +708,7 @@ func (b *Batch) SetOption(name string, value interface{}) {
 // If history is true, add to |message-history|.
 //
 // The opts arg is optional parameters. Reserved for future use.
-func (v *Nvim) Echo(chunks []EchoChunk, history bool, opts map[string]interface{}) error {
+func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) error {
 	return v.call("nvim_echo", nil, chunks, history, opts)
 }
 
@@ -722,7 +720,7 @@ func (v *Nvim) Echo(chunks []EchoChunk, history bool, opts map[string]interface{
 // If history is true, add to |message-history|.
 //
 // The opts arg is optional parameters. Reserved for future use.
-func (b *Batch) Echo(chunks []EchoChunk, history bool, opts map[string]interface{}) {
+func (b *Batch) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) {
 	b.call("nvim_echo", nil, chunks, history, opts)
 }
 
@@ -1933,7 +1931,7 @@ func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[strin
 //
 //  details
 // Whether to include the details dict. bool type.
-func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}) (marks []ExtMarks, err error) {
+func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}) (marks []ExtMark, err error) {
 	err = v.call("nvim_buf_get_extmarks", &marks, buffer, nsID, start, end, opt)
 	return marks, err
 }
@@ -1961,7 +1959,7 @@ func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end in
 //
 //  details
 // Whether to include the details dict. bool type.
-func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, marks *[]ExtMarks) {
+func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, marks *[]ExtMark) {
 	b.call("nvim_buf_get_extmarks", marks, buffer, nsID, start, end, opt)
 }
 
@@ -1992,7 +1990,7 @@ func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end i
 // Name ar ID of the highlight group used to highlight this mark. string or int type.
 //
 //  virt_text
-// virtual text to link to this mark. VirtualTextChunk type.
+// virtual text to link to this mark. TextChunk type.
 //
 //  ephemeral
 // For use with SetDecorationProvider callbacks. bool type.
@@ -2029,7 +2027,7 @@ func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts
 // Name ar ID of the highlight group used to highlight this mark. string or int type.
 //
 //  virt_text
-// virtual text to link to this mark. VirtualTextChunk type.
+// virtual text to link to this mark. TextChunk type.
 //
 //  ephemeral
 // For use with SetDecorationProvider callbacks. bool type.
@@ -2163,7 +2161,7 @@ func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, en
 // virtual text, the allocated id is then returned.
 //
 // The opts arg is reserved for future use.
-func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}) (id int, err error) {
+func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}) (id int, err error) {
 	err = v.call("nvim_buf_set_virtual_text", &id, buffer, nsID, line, chunks, opts)
 	return id, err
 }
@@ -2187,7 +2185,7 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 // virtual text, the allocated id is then returned.
 //
 // The opts arg is reserved for future use.
-func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []VirtualTextChunk, opts map[string]interface{}, id *int) {
+func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}, id *int) {
 	b.call("nvim_buf_set_virtual_text", id, buffer, nsID, line, chunks, opts)
 }
 

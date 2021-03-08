@@ -347,21 +347,12 @@ type Command struct {
 	Definition string `msgpack:"definition"`
 }
 
-// VirtualTextChunk represents a virtual text chunk.
-type VirtualTextChunk struct {
-	// Text is VirtualText text.
+// TextChunk represents a text chunk.
+type TextChunk struct {
+	// Text is text.
 	Text string `msgpack:",array"`
 
-	// HLGroup is VirtualText highlight group.
-	HLGroup string
-}
-
-// EchoChunk represents a echo chunk.
-type EchoChunk struct {
-	// Text is echo text.
-	Text string `msgpack:",array"`
-
-	// HLGroup is echo highlight group.
+	// HLGroup is text highlight group.
 	HLGroup string
 }
 
@@ -449,8 +440,8 @@ type WindowConfig struct {
 	Style string `msgpack:"style,omitempty"`
 }
 
-// ExtMarks represents a extmarks type.
-type ExtMarks struct {
+// ExtMark represents a extmarks type.
+type ExtMark struct {
 	// ID is the extmarks ID.
 	ID int `msgpack:",array"`
 
