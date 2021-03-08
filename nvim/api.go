@@ -94,7 +94,6 @@ func (x Window) String() string {
 }
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
-// Exec executes Vimscript (multiline block of Ex-commands), like anonymous |:source|.
 //
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
@@ -105,7 +104,6 @@ func (v *Nvim) Exec(src string, output bool) (out string, err error) {
 }
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
-// Exec executes Vimscript (multiline block of Ex-commands), like anonymous |:source|.
 //
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
