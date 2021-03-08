@@ -1,5 +1,37 @@
 package nvim
 
+const (
+	// EventBufChangedtick event name of "nvim_buf_changedtick_event".
+	EventBufChangedtick = "nvim_buf_changedtick_event"
+
+	// EventBufLines event name of "nvim_buf_lines_event".
+	EventBufLines = "nvim_buf_lines_event"
+
+	// EventBufDetach event name of "nvim_buf_detach_event".
+	EventBufDetach = "nvim_buf_detach_event"
+)
+
+// ChangedtickEvent represents a EventBufChangedtick type.
+type ChangedtickEvent struct {
+	Buffer     Buffer `msgpack:"buffer,omitempty"`
+	Changetick int64  `msgpack:"changetick,omitempty"`
+}
+
+// BufLinesEvent represents a EventBufLines type.
+type BufLinesEvent struct {
+	Buffer      Buffer   `msgpack:"buffer,omitempty"`
+	Changetick  int64    `msgpack:"changetick,omitempty"`
+	FirstLine   int64    `msgpack:"firstLine,omitempty"`
+	LastLine    int64    `msgpack:"lastLine,omitempty"`
+	LineData    []string `msgpack:",array"`
+	IsMultipart bool     `msgpack:"isMultipart,omitempty"`
+}
+
+// BufDetachEvent represents a EventBufDetach type.
+type BufDetachEvent struct {
+	Buffer Buffer `msgpack:"buffer,omitempty"`
+}
+
 // QuickfixError represents an item in a quickfix list.
 type QuickfixError struct {
 	// Buffer number
