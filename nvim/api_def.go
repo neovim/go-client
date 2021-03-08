@@ -927,7 +927,7 @@ func BufferExtmarkByID(buffer Buffer, nsID, id int, opt map[string]interface{}) 
 //
 //  details
 // Whether to include the details dict. bool type.
-func BufferExtmarks(buffer Buffer, nsID int, start, end interface{}, opt map[string]interface{}) (marks []ExtMarks) {
+func BufferExtmarks(buffer Buffer, nsID int, start, end interface{}, opt map[string]interface{}) (marks []ExtMark) {
 	name(nvim_buf_get_extmarks)
 }
 

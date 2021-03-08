@@ -440,8 +440,8 @@ type WindowConfig struct {
 	Style string `msgpack:"style,omitempty"`
 }
 
-// ExtMarks represents a extmarks type.
-type ExtMarks struct {
+// ExtMark represents a extmarks type.
+type ExtMark struct {
 	// ID is the extmarks ID.
 	ID int `msgpack:",array"`
 
