@@ -322,7 +322,7 @@ func SetOption(name string, value interface{}) {
 // If history is true, add to |message-history|.
 //
 // The opts arg is optional parameters. Reserved for future use.
-func Echo(chunks []EchoChunk, history bool, opts map[string]interface{}) {
+func Echo(chunks []TextChunk, history bool, opts map[string]interface{}) {
 	name(nvim_echo)
 }
 
@@ -958,7 +958,7 @@ func BufferExtmarks(buffer Buffer, nsID int, start, end interface{}, opt map[str
 // Name ar ID of the highlight group used to highlight this mark. string or int type.
 //
 //  virt_text
-// virtual text to link to this mark. VirtualTextChunk type.
+// virtual text to link to this mark. TextChunk type.
 //
 //  ephemeral
 // For use with SetDecorationProvider callbacks. bool type.
@@ -1039,7 +1039,7 @@ func ClearBufferHighlight(buffer Buffer, srcID, startLine, endLine int) {
 // virtual text, the allocated id is then returned.
 //
 // The opts arg is reserved for future use.
-func SetBufferVirtualText(buffer Buffer, nsID, line int, chunks []VirtualTextChunk, opts map[string]interface{}) (id int) {
+func SetBufferVirtualText(buffer Buffer, nsID, line int, chunks []TextChunk, opts map[string]interface{}) (id int) {
 	name(nvim_buf_set_virtual_text)
 }
 

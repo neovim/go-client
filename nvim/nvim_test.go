@@ -1466,7 +1466,7 @@ func testVirtualText(v *Nvim) func(*testing.T) {
 			t.Fatal(err)
 		}
 
-		chunks := []VirtualTextChunk{
+		chunks := []TextChunk{
 			{
 				Text:    "pong",
 				HLGroup: "String",
