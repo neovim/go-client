@@ -1933,7 +1933,7 @@ func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[strin
 //
 //  details
 // Whether to include the details dict. bool type.
-func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}) (marks []ExtMarks, err error) {
+func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}) (marks []ExtMark, err error) {
 	err = v.call("nvim_buf_get_extmarks", &marks, buffer, nsID, start, end, opt)
 	return marks, err
 }
@@ -1961,7 +1961,7 @@ func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end in
 //
 //  details
 // Whether to include the details dict. bool type.
-func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, marks *[]ExtMarks) {
+func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, marks *[]ExtMark) {
 	b.call("nvim_buf_get_extmarks", marks, buffer, nsID, start, end, opt)
 }
 
