@@ -366,12 +366,11 @@ var nvimTypes = map[string]string{
 	"Mode":                     "Dictionary",
 	"OptionInfo":               "Dictionary",
 
-	"[]*Channel":         "Array",
-	"[]*Process":         "Array",
-	"[]*UI":              "Array",
-	"[]ExtMarks":         "Array",
-	"[]VirtualTextChunk": "Array",
-	"[]EchoChunk":        "Array",
+	"[]*Channel":  "Array",
+	"[]*Process":  "Array",
+	"[]*UI":       "Array",
+	"[]ExtMark":   "Array",
+	"[]TextChunk": "Array",
 
 	"[2]int":     "ArrayOf(Integer, 2)",
 	"[]*Mapping": "ArrayOf(Dictionary)",
