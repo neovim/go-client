@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 // This file defines the Nvim remote API using Go syntax. Run the 'go generate'
@@ -53,7 +54,7 @@ func HLByName(name string, rgb bool) (highlight HLAttrs) {
 // in addition the following keys are also recognized:
 //
 //  default
-// don't override existing definition, like `hi default`.
+// don't override existing definition, like "hi default".
 func SetHighlight(nsID int, name string, val *HLAttrs) {
 	name(nvim_set_hl)
 }
@@ -89,7 +90,7 @@ func SetHighlightNameSpace(nsID int) {
 // Handle keys as if typed; otherwise they are handled as if coming from a mapping.
 // This matters for undo, opening folds, etc.
 //
-// The escape_csi arg is whether the escape K_SPECIAL/CSI bytes in keys arg.
+// The escapeCSI arg is whether the escape K_SPECIAL/CSI bytes in keys arg.
 func FeedKeys(keys, mode string, escapeCSI bool) {
 	name(nvim_feedkeys)
 }
@@ -106,6 +107,33 @@ func Input(keys string) (written int) {
 //
 // This API is non-blocking. It doesn't wait on any resulting action, but
 // queues the event to be processed soon by the event loop.
+//
+// The button arg is mouse button. One of
+//  "left"
+//  "right"
+//  "middle"
+//  "wheel"
+//
+// The action arg is for ordinary buttons. One of
+//  "press"
+//  "drag"
+//  "release"
+// For the wheel, One of
+//  "up"
+//  "down
+//  "left"
+//  "right"
+//
+// The modifier arg is string of modifiers each represented by a single char.
+// The same specifiers are used as for a key press, except
+// that the "-" separator is optional, so "C-A-", "c-a"
+// and "CA" can all be used to specify Ctrl+Alt+click.
+//
+// The grid arg is grid number if the client uses "ui-multigrid", else 0.
+//
+// The row arg is mouse row-position (zero-based, like redraw events).
+//
+// The col arg is mouse column-position (zero-based, like redraw events).
 func InputMouse(button, action, modifier string, grid, row, col int) {
 	name(nvim_input_mouse)
 }
@@ -121,6 +149,12 @@ func InputMouse(button, action, modifier string, grid, row, col int) {
 //  <up>  -> '\x80ku'
 //
 // The returned sequences can be used as input to feedkeys.
+//
+// The fromPart arg is legacy Vim parameter. Usually true.
+//
+// The doLT arg is also translate <lt>. Ignored if "special" is false.
+//
+// The special arg is replace "keycodes", e.g. <CR> becomes a "\n" char.
 func ReplaceTermcodes(str string, fromPart, doLT, special bool) (input string) {
 	name(nvim_replace_termcodes)
 }
@@ -136,6 +170,8 @@ func CommandOutput(cmd string) (out string) {
 // Eval evaluates a VimL expression.
 //
 // Dictionaries and Lists are recursively expanded.
+//
+// The expr arg is VimL expression string.
 //
 //  :help expression
 func Eval(expr string) (result interface{}) {
@@ -318,7 +354,7 @@ func SetOption(name string, value interface{}) {
 // The chunks is a list of [text, hl_group] arrays, each representing a
 // text chunk with specified highlight. hl_group element can be omitted for no highlight.
 //
-// If history is true, add to |message-history|.
+// If history is true, add to "message-history".
 //
 // The opts arg is optional parameters. Reserved for future use.
 func Echo(chunks []TextChunk, history bool, opts map[string]interface{}) {
@@ -380,8 +416,8 @@ func SetCurrentWindow(window Window) {
 //
 // The listed arg sets buflisted buffer opttion.
 //
-// The scratch arg creates a "throwaway" |scratch-buffer| for temporary work (always 'nomodified').
-// Also sets 'nomodeline' on the buffer.
+// The scratch arg creates a "throwaway" "scratch-buffer" for temporary work (always "nomodified").
+// Also sets "nomodeline" on the buffer.
 func CreateBuffer(listed, scratch bool) (buffer Buffer) {
 	name(nvim_create_buf)
 }
@@ -395,7 +431,7 @@ func CreateBuffer(listed, scratch bool) (buffer Buffer) {
 // External windows are only supported with multigrid GUIs, and are displayed as separate top-level windows.
 //
 // For a general overview of floats, see
-//  help api-floatwin
+//  :help api-floatwin
 //
 // Exactly one of `external` and `relative` must be specified.
 // The `width` and `height` of the new window must be specified.
@@ -408,6 +444,7 @@ func CreateBuffer(listed, scratch bool) (buffer Buffer) {
 //
 // Out-of-bounds values, and configurations that make the float not fit inside
 // the main editor, are allowed.
+//
 // The builtin implementation truncates values so floats are fully within the main screen grid.
 // External GUIs could let floats hover outside of the main window like a tooltip, but
 // this should not be used to specify arbitrary WM screen positions.
@@ -436,8 +473,8 @@ func SetCurrentTabpage(tabpage Tabpage) {
 // AddBufferHighlight and SetBufferVirtualText.
 //
 // Namespaces can be named or anonymous.
-// If `name` matches an existing namespace, the associated id is returned.
-// If `name` is an empty string a new, anonymous namespace is created.
+// If "name" matches an existing namespace, the associated id is returned.
+// If "name" is an empty string a new, anonymous namespace is created.
 //
 // The returns the namespace ID.
 func CreateNamespace(name string) (nsID int) {
@@ -471,13 +508,10 @@ func Namespaces() (namespaces map[string]int) {
 // -1 is paste in a single call (i.e. without streaming).
 //
 // To `stream` a paste, call Paste sequentially with these `phase` args:
-//
 //  1
 // starts the paste (exactly once)
-//
 //  2
 // continues the paste (zero or more times)
-//
 //  3
 // ends the paste (exactly once)
 //
@@ -498,14 +532,19 @@ func Paste(data string, crlf bool, phase int) (state bool) {
 //
 // lines is readfile() style list of lines.
 //
-// type is edit behavior: any getregtype() result, or:
-//   "b": blockwise-visual mode (may include width, e.g. "b3")
-//   "c": characterwise mode
-//   "l": linewise mode
-//   "" : guess by contents, see setreg()
-// after is insert after cursor (like `p`), or before (like `P`).
+// typ is edit behavior: any getregtype() result, or:
+//   "b"
+//  blockwise-visual mode (may include width, e.g. "b3")
+//   "c"
+//  characterwise mode
+//   "l"
+//  linewise mode
+//   ""
+// guess by contents, see setreg().
 //
-// follow is place cursor at end of inserted text.
+// After is insert after cursor (like `p`), or before (like `P`).
+//
+// follow arg is place cursor at end of inserted text.
 func Put(lines []string, typ string, after, follow bool) {
 	name(nvim_put)
 }
@@ -588,7 +627,7 @@ func KeyMap(mode string) (maps []*Mapping) {
 // Right-hand-side {rhs} of the mapping.
 //
 //  opts
-// Optional parameters map. Accepts all :map-arguments as keys excluding <buffer> but including noremap.
+// Optional parameters map. Accepts all ":map-arguments" as keys excluding "buffer" but including "noremap".
 // Values are Booleans. Unknown key is an error.
 func SetKeyMap(mode, lhs, rhs string, opts map[string]bool) {
 	name(nvim_set_keymap)
@@ -607,13 +646,16 @@ func DeleteKeyMap(mode, lhs string) {
 // Commands gets a map of global (non-buffer-local) Ex commands.
 // Currently only user-commands are supported, not builtin Ex commands.
 //
-// opts is optional parameters. Currently only supports {"builtin":false}.
+// opts is optional parameters. Currently only supports:
+//  {"builtin":false}
 func Commands(opts map[string]interface{}) (commands map[string]*Command) {
 	name(nvim_get_commands)
 }
 
 // APIInfo returns a 2-tuple (Array), where item 0 is the current channel id and item
-// 1 is the |api-metadata| map (Dictionary).
+// 1 is the "pi-metadata|" map (Dictionary).
+//
+// Returns 2-tuple [{channel-id}, {api-metadata}].
 func APIInfo() (apiInfo []interface{}) {
 	name(nvim_get_api_info)
 }
@@ -631,6 +673,40 @@ func SetClientInfo(name string, version *ClientVersion, typ string, methods map[
 }
 
 // ChannelInfo get information about a channel.
+//
+// Rreturns Dictionary describing a channel, with these keys:
+//
+//  "stream"
+// The stream underlying the channel. value are:
+//  "stdio"
+// stdin and stdout of this Nvim instance.
+//  "stderr"
+// stderr of this Nvim instance.
+//  "socket"
+// TCP/IP socket or named pipe.
+//  "job"
+// job with communication over its stdio.
+//
+//  "mode"
+// How data received on the channel is interpreted. value are:
+//  "bytes"
+// send and receive raw bytes.
+//  "terminal"
+// A terminal instance interprets ASCII sequences.
+//  "rpc"
+// RPC communication on the channel is active.
+//
+//  "pty"
+// Name of pseudoterminal, if one is used (optional).
+// On a POSIX system, this will be a device path like /dev/pts/1.
+// Even if the name is unknown, the key will still be present to indicate a pty is used.
+// This is currently the case when using winpty on windows.
+//
+//  "buffer"
+// Buffer with connected |terminal| instance (optional).
+//
+//  "client"
+// Information about the client on the other end of the RPC channel, if it has added it using SetClientInfo() (optional).
 func ChannelInfo(channelID int) (channel Channel) {
 	name(nvim_get_chan_info)
 	returnPtr()
@@ -945,23 +1021,53 @@ func BufferExtmarks(buffer Buffer, nsID int, start, end interface{}, opt map[str
 // The opts arg is optional parameters.
 //
 //  id
-// ID of the extmark to edit. int type.
+// ID of the extmark to edit.
 //
 //  end_line
-// Ending line of the mark, 0-based inclusive. int type.
+// Ending line of the mark, 0-based inclusive.
 //
 //  end_col
-// Ending col of the mark, 0-based inclusive. int type.
+// Ending col of the mark, 0-based inclusive.
 //
 //  hl_group
-// Name ar ID of the highlight group used to highlight this mark. string or int type.
+// Name of the highlight group used to highlight this mark.
 //
 //  virt_text
-// virtual text to link to this mark. TextChunk type.
+// Virtual text to link to this mark.
+//
+//  virt_text_pos
+// Positioning of virtual text.
+// Possible values:
+//  "eol"
+// right after eol character (default)
+//  "overlay"
+// display over the specified column, without shifting the underlying text.
+//
+//  virt_text_hide
+// Hide the virtual text when the background text is selected or hidden due to horizontal scroll 'nowrap'.
+//
+//  hl_mode
+// Control how highlights are combined with the highlights of the text. Currently only affects
+// virt_text highlights, but might affect "hl_group" in later versions.
+// Possible values:
+//  "replace"
+// only show the virt_text color. This is the default.
+//  "combine"
+// combine with background text color
+//  "blend"
+// blend with background text color.
 //
 //  ephemeral
-// For use with SetDecorationProvider callbacks. bool type.
-// The mark will only be used for the current redraw cycle, and not be permantently stored in the buffer.
+// For use with "nvim_set_decoration_provider" callbacks. The mark will only be used for the current redraw cycle,
+// and not be permantently stored in the buffer.
+//
+//  right_gravity
+// Boolean that indicates the direction the extmark will be shifted in when new text is
+// inserted (true for right, false for left).  defaults to true.
+//
+//  end_right_gravity
+// Boolean that indicates the direction the extmark end position (if it exists) will be
+// shifted in when new text is inserted (true for right, false for left). Defaults to false.
 func SetBufferExtmark(buffer Buffer, nsID, line, col int, opts map[string]interface{}) (id int) {
 	name(nvim_buf_set_extmark)
 }

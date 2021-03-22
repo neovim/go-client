@@ -433,10 +433,38 @@ type TextChunk struct {
 // Nvim will display the window with many UI options disabled.
 // This is useful when displaying a temporary float where the text should not be edited.
 //
-// Disables `number`, `relativenumber`, `cursorline`, `cursorcolumn`, `foldcolumn`, `spell` and `list` options.
-// And, `signcolumn` is changed to `auto` and `colorcolumn` is cleared.
+// Disables "number", "relativenumber", "cursorline", "cursorcolumn", "foldcolumn", "spell" and "list" options.
+// And, "signcolumn" is changed to "auto" and "colorcolumn" is cleared.
 //
-// The end-of-buffer region is hidden by setting `eob` flag of `fillchars` to a space char, and clearing the EndOfBuffer region in `winhighlight`.
+// The end-of-buffer region is hidden by setting "eob" flag of "fillchars" to a space char, and clearing the EndOfBuffer region in "winhighlight".
+//
+//  border
+// Style of (optional) window border. This can either be a string or an array.
+// The string values are:
+//  "none"
+// No border. This is the default.
+//  "single"
+// A single line box.
+//  "double"
+// A double line box.
+//
+// If it is an array it should be an array of eight items or any divisor of
+// eight. The array will specifify the eight chars building up the border
+// in a clockwise fashion starting with the top-left corner.
+// As, an example, the double box style could be specified as:
+//  [ "╔", "═" ,"╗", "║", "╝", "═", "╚", "║" ]
+//
+// If the number of chars are less than eight, they will be repeated.
+// Thus an ASCII border could be specified as:
+//  [ "/", "-", "\\", "|" ]
+//
+// Or all chars the same as:
+//  [ "x" ]
+//
+// By default "FloatBorder" highlight is used which links to "VertSplit"
+// when not defined.
+// It could also be specified by character:
+//  [ {"+", "MyCorner"}, {"x", "MyBorder"} ]
 type WindowConfig struct {
 	// Relative is the specifies the type of positioning method used for the floating window.
 	Relative string `msgpack:"relative,omitempty"`
@@ -470,6 +498,9 @@ type WindowConfig struct {
 
 	// Style is the Configure the appearance of the window.
 	Style string `msgpack:"style,omitempty"`
+
+	// Border is the style of window border.
+	Border []string `msgpack:"border,omitempty"`
 }
 
 // ExtMark represents a extmarks type.
