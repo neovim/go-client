@@ -28,13 +28,11 @@ var embedProcAttr *syscall.SysProcAttr
 type Nvim struct {
 	ep *rpc.Endpoint
 
-	channelIDMu sync.Mutex
-	channelID   int
-
 	// cmd is the child process, if any.
-	cmd *exec.Cmd
-
-	serveCh chan error
+	cmd         *exec.Cmd
+	serveCh     chan error
+	channelID   int
+	channelIDMu sync.Mutex
 
 	// readMu prevents concurrent calls to read on the child process stdout pipe and
 	// calls to cmd.Wait().
@@ -121,12 +119,12 @@ type ChildProcessOption struct {
 }
 
 type childProcessOptions struct {
-	args    []string
-	command string
 	ctx     context.Context
-	dir     string
-	env     []string
 	logf    func(string, ...interface{})
+	command string
+	dir     string
+	args    []string
+	env     []string
 	serve   bool
 }
 
@@ -235,23 +233,24 @@ func NewChildProcess(options ...ChildProcessOption) (*Nvim, error) {
 //
 // Deprecated: Use ChildProcessOption instead.
 type EmbedOptions struct {
-	// Args specifies the command line arguments. Do not include the program
-	// name (the first argument) or the --embed option.
-	Args []string
+	// Logf log function for rpc.WithLogf.
+	Logf func(string, ...interface{})
 
 	// Dir specifies the working directory of the command. The working
 	// directory in the current process is used if Dir is "".
 	Dir string
 
-	// Env specifies the environment of the Nvim process. The current process
-	// environment is used if Env is nil.
-	Env []string
-
 	// Path is the path of the command to run. If Path = "", then
 	// StartEmbeddedNvim searches for "nvim" on $PATH.
 	Path string
 
-	Logf func(string, ...interface{})
+	// Args specifies the command line arguments. Do not include the program
+	// name (the first argument) or the --embed option.
+	Args []string
+
+	// Env specifies the environment of the Nvim process. The current process
+	// environment is used if Env is nil.
+	Env []string
 }
 
 // NewEmbedded starts an embedded instance of Nvim using the specified options.
@@ -392,8 +391,8 @@ func (v *Nvim) ChannelID() int {
 		return v.channelID
 	}
 	var info struct {
-		ChannelID int `msgpack:",array"`
-		Info      interface{}
+		ChannelID int         `msgpack:",array"`
+		Info      interface{} `msgpack:"-"`
 	}
 	if err := v.ep.Call("nvim_get_api_info", &info); err != nil {
 		// TODO: log error and exit process?
@@ -427,12 +426,12 @@ func (v *Nvim) NewBatch() *Batch {
 //
 // A Batch does not support concurrent calls by the application.
 type Batch struct {
+	err     error
 	ep      *rpc.Endpoint
-	buf     bytes.Buffer
 	enc     *msgpack.Encoder
 	sms     []string
 	results []interface{}
-	err     error
+	buf     bytes.Buffer
 }
 
 // Execute executes the API function calls in the batch.
@@ -516,12 +515,12 @@ func (a *batchArg) MarshalMsgPack(enc *msgpack.Encoder) error {
 
 // BatchError represents an error from a API function call in a Batch.
 type BatchError struct {
+	// Err is the error.
+	Err error
+
 	// Index is a zero-based index of the function call which resulted in the
 	// error.
 	Index int
-
-	// Err is the error.
-	Err error
 }
 
 // Error implements the error interface.

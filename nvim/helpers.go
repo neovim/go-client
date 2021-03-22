@@ -5,10 +5,10 @@ import (
 )
 
 type bufferReader struct {
-	v     *Nvim
-	b     Buffer
-	lines [][]byte
 	err   error
+	v     *Nvim
+	lines [][]byte
+	b     Buffer
 }
 
 // compile time check whether the bufferReader implements io.Reader interface.
