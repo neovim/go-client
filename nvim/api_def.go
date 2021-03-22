@@ -67,7 +67,7 @@ func SetHighlight(nsID int, name string, val *HLAttrs) {
 //
 // The nsID arg is the namespace to activate.
 func SetHighlightNameSpace(nsID int) {
-	name(nvim_set_hl_ns)
+	name(nvim__set_hl_ns)
 }
 
 // FeedKeys sends input-keys to Nvim, subject to various quirks controlled by mode flags.
