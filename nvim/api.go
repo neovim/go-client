@@ -166,7 +166,7 @@ func (b *Batch) HLByName(name string, rgb bool, highlight *HLAttrs) {
 // in addition the following keys are also recognized:
 //
 //  default
-// don't override existing definition, like `hi default`.
+// don't override existing definition, like "hi default".
 func (v *Nvim) SetHighlight(nsID int, name string, val *HLAttrs) error {
 	return v.call("nvim_set_hl", nil, nsID, name, val)
 }
@@ -180,7 +180,7 @@ func (v *Nvim) SetHighlight(nsID int, name string, val *HLAttrs) error {
 // in addition the following keys are also recognized:
 //
 //  default
-// don't override existing definition, like `hi default`.
+// don't override existing definition, like "hi default".
 func (b *Batch) SetHighlight(nsID int, name string, val *HLAttrs) {
 	b.call("nvim_set_hl", nil, nsID, name, val)
 }
@@ -228,7 +228,7 @@ func (b *Batch) SetHighlightNameSpace(nsID int) {
 // Handle keys as if typed; otherwise they are handled as if coming from a mapping.
 // This matters for undo, opening folds, etc.
 //
-// The escape_csi arg is whether the escape K_SPECIAL/CSI bytes in keys arg.
+// The escapeCSI arg is whether the escape K_SPECIAL/CSI bytes in keys arg.
 func (v *Nvim) FeedKeys(keys string, mode string, escapeCSI bool) error {
 	return v.call("nvim_feedkeys", nil, keys, mode, escapeCSI)
 }
@@ -252,7 +252,7 @@ func (v *Nvim) FeedKeys(keys string, mode string, escapeCSI bool) error {
 // Handle keys as if typed; otherwise they are handled as if coming from a mapping.
 // This matters for undo, opening folds, etc.
 //
-// The escape_csi arg is whether the escape K_SPECIAL/CSI bytes in keys arg.
+// The escapeCSI arg is whether the escape K_SPECIAL/CSI bytes in keys arg.
 func (b *Batch) FeedKeys(keys string, mode string, escapeCSI bool) {
 	b.call("nvim_feedkeys", nil, keys, mode, escapeCSI)
 }
@@ -278,6 +278,33 @@ func (b *Batch) Input(keys string, written *int) {
 //
 // This API is non-blocking. It doesn't wait on any resulting action, but
 // queues the event to be processed soon by the event loop.
+//
+// The button arg is mouse button. One of
+//  "left"
+//  "right"
+//  "middle"
+//  "wheel"
+//
+// The action arg is for ordinary buttons. One of
+//  "press"
+//  "drag"
+//  "release"
+// For the wheel, One of
+//  "up"
+//  "down
+//  "left"
+//  "right"
+//
+// The modifier arg is string of modifiers each represented by a single char.
+// The same specifiers are used as for a key press, except
+// that the "-" separator is optional, so "C-A-", "c-a"
+// and "CA" can all be used to specify Ctrl+Alt+click.
+//
+// The grid arg is grid number if the client uses "ui-multigrid", else 0.
+//
+// The row arg is mouse row-position (zero-based, like redraw events).
+//
+// The col arg is mouse column-position (zero-based, like redraw events).
 func (v *Nvim) InputMouse(button string, action string, modifier string, grid int, row int, col int) error {
 	return v.call("nvim_input_mouse", nil, button, action, modifier, grid, row, col)
 }
@@ -286,6 +313,33 @@ func (v *Nvim) InputMouse(button string, action string, modifier string, grid in
 //
 // This API is non-blocking. It doesn't wait on any resulting action, but
 // queues the event to be processed soon by the event loop.
+//
+// The button arg is mouse button. One of
+//  "left"
+//  "right"
+//  "middle"
+//  "wheel"
+//
+// The action arg is for ordinary buttons. One of
+//  "press"
+//  "drag"
+//  "release"
+// For the wheel, One of
+//  "up"
+//  "down
+//  "left"
+//  "right"
+//
+// The modifier arg is string of modifiers each represented by a single char.
+// The same specifiers are used as for a key press, except
+// that the "-" separator is optional, so "C-A-", "c-a"
+// and "CA" can all be used to specify Ctrl+Alt+click.
+//
+// The grid arg is grid number if the client uses "ui-multigrid", else 0.
+//
+// The row arg is mouse row-position (zero-based, like redraw events).
+//
+// The col arg is mouse column-position (zero-based, like redraw events).
 func (b *Batch) InputMouse(button string, action string, modifier string, grid int, row int, col int) {
 	b.call("nvim_input_mouse", nil, button, action, modifier, grid, row, col)
 }
@@ -301,6 +355,12 @@ func (b *Batch) InputMouse(button string, action string, modifier string, grid i
 //  <up>  -> '\x80ku'
 //
 // The returned sequences can be used as input to feedkeys.
+//
+// The fromPart arg is legacy Vim parameter. Usually true.
+//
+// The doLT arg is also translate <lt>. Ignored if "special" is false.
+//
+// The special arg is replace "keycodes", e.g. <CR> becomes a "\n" char.
 func (v *Nvim) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool) (input string, err error) {
 	err = v.call("nvim_replace_termcodes", &input, str, fromPart, doLT, special)
 	return input, err
@@ -317,6 +377,12 @@ func (v *Nvim) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bo
 //  <up>  -> '\x80ku'
 //
 // The returned sequences can be used as input to feedkeys.
+//
+// The fromPart arg is legacy Vim parameter. Usually true.
+//
+// The doLT arg is also translate <lt>. Ignored if "special" is false.
+//
+// The special arg is replace "keycodes", e.g. <CR> becomes a "\n" char.
 func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool, input *string) {
 	b.call("nvim_replace_termcodes", input, str, fromPart, doLT, special)
 }
@@ -340,6 +406,8 @@ func (b *Batch) CommandOutput(cmd string, out *string) {
 //
 // Dictionaries and Lists are recursively expanded.
 //
+// The expr arg is VimL expression string.
+//
 //  :help expression
 func (v *Nvim) Eval(expr string, result interface{}) error {
 	return v.call("nvim_eval", result, expr)
@@ -348,6 +416,8 @@ func (v *Nvim) Eval(expr string, result interface{}) error {
 // Eval evaluates a VimL expression.
 //
 // Dictionaries and Lists are recursively expanded.
+//
+// The expr arg is VimL expression string.
 //
 //  :help expression
 func (b *Batch) Eval(expr string, result interface{}) {
@@ -705,7 +775,7 @@ func (b *Batch) SetOption(name string, value interface{}) {
 // The chunks is a list of [text, hl_group] arrays, each representing a
 // text chunk with specified highlight. hl_group element can be omitted for no highlight.
 //
-// If history is true, add to |message-history|.
+// If history is true, add to "message-history".
 //
 // The opts arg is optional parameters. Reserved for future use.
 func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) error {
@@ -717,7 +787,7 @@ func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{
 // The chunks is a list of [text, hl_group] arrays, each representing a
 // text chunk with specified highlight. hl_group element can be omitted for no highlight.
 //
-// If history is true, add to |message-history|.
+// If history is true, add to "message-history".
 //
 // The opts arg is optional parameters. Reserved for future use.
 func (b *Batch) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) {
@@ -834,8 +904,8 @@ func (b *Batch) SetCurrentWindow(window Window) {
 //
 // The listed arg sets buflisted buffer opttion.
 //
-// The scratch arg creates a "throwaway" |scratch-buffer| for temporary work (always 'nomodified').
-// Also sets 'nomodeline' on the buffer.
+// The scratch arg creates a "throwaway" "scratch-buffer" for temporary work (always "nomodified").
+// Also sets "nomodeline" on the buffer.
 func (v *Nvim) CreateBuffer(listed bool, scratch bool) (buffer Buffer, err error) {
 	err = v.call("nvim_create_buf", &buffer, listed, scratch)
 	return buffer, err
@@ -845,8 +915,8 @@ func (v *Nvim) CreateBuffer(listed bool, scratch bool) (buffer Buffer, err error
 //
 // The listed arg sets buflisted buffer opttion.
 //
-// The scratch arg creates a "throwaway" |scratch-buffer| for temporary work (always 'nomodified').
-// Also sets 'nomodeline' on the buffer.
+// The scratch arg creates a "throwaway" "scratch-buffer" for temporary work (always "nomodified").
+// Also sets "nomodeline" on the buffer.
 func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
 	b.call("nvim_create_buf", buffer, listed, scratch)
 }
@@ -860,7 +930,7 @@ func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
 // External windows are only supported with multigrid GUIs, and are displayed as separate top-level windows.
 //
 // For a general overview of floats, see
-//  help api-floatwin
+//  :help api-floatwin
 //
 // Exactly one of `external` and `relative` must be specified.
 // The `width` and `height` of the new window must be specified.
@@ -873,6 +943,7 @@ func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
 //
 // Out-of-bounds values, and configurations that make the float not fit inside
 // the main editor, are allowed.
+//
 // The builtin implementation truncates values so floats are fully within the main screen grid.
 // External GUIs could let floats hover outside of the main window like a tooltip, but
 // this should not be used to specify arbitrary WM screen positions.
@@ -890,7 +961,7 @@ func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *WindowConfig) (wind
 // External windows are only supported with multigrid GUIs, and are displayed as separate top-level windows.
 //
 // For a general overview of floats, see
-//  help api-floatwin
+//  :help api-floatwin
 //
 // Exactly one of `external` and `relative` must be specified.
 // The `width` and `height` of the new window must be specified.
@@ -903,6 +974,7 @@ func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *WindowConfig) (wind
 //
 // Out-of-bounds values, and configurations that make the float not fit inside
 // the main editor, are allowed.
+//
 // The builtin implementation truncates values so floats are fully within the main screen grid.
 // External GUIs could let floats hover outside of the main window like a tooltip, but
 // this should not be used to specify arbitrary WM screen positions.
@@ -948,8 +1020,8 @@ func (b *Batch) SetCurrentTabpage(tabpage Tabpage) {
 // AddBufferHighlight and SetBufferVirtualText.
 //
 // Namespaces can be named or anonymous.
-// If `name` matches an existing namespace, the associated id is returned.
-// If `name` is an empty string a new, anonymous namespace is created.
+// If "name" matches an existing namespace, the associated id is returned.
+// If "name" is an empty string a new, anonymous namespace is created.
 //
 // The returns the namespace ID.
 func (v *Nvim) CreateNamespace(name string) (nsID int, err error) {
@@ -963,8 +1035,8 @@ func (v *Nvim) CreateNamespace(name string) (nsID int, err error) {
 // AddBufferHighlight and SetBufferVirtualText.
 //
 // Namespaces can be named or anonymous.
-// If `name` matches an existing namespace, the associated id is returned.
-// If `name` is an empty string a new, anonymous namespace is created.
+// If "name" matches an existing namespace, the associated id is returned.
+// If "name" is an empty string a new, anonymous namespace is created.
 //
 // The returns the namespace ID.
 func (b *Batch) CreateNamespace(name string, nsID *int) {
@@ -1006,13 +1078,10 @@ func (b *Batch) Namespaces(namespaces *map[string]int) {
 // -1 is paste in a single call (i.e. without streaming).
 //
 // To `stream` a paste, call Paste sequentially with these `phase` args:
-//
 //  1
 // starts the paste (exactly once)
-//
 //  2
 // continues the paste (zero or more times)
-//
 //  3
 // ends the paste (exactly once)
 //
@@ -1048,13 +1117,10 @@ func (v *Nvim) Paste(data string, crlf bool, phase int) (state bool, err error) 
 // -1 is paste in a single call (i.e. without streaming).
 //
 // To `stream` a paste, call Paste sequentially with these `phase` args:
-//
 //  1
 // starts the paste (exactly once)
-//
 //  2
 // continues the paste (zero or more times)
-//
 //  3
 // ends the paste (exactly once)
 //
@@ -1075,14 +1141,19 @@ func (b *Batch) Paste(data string, crlf bool, phase int, state *bool) {
 //
 // lines is readfile() style list of lines.
 //
-// type is edit behavior: any getregtype() result, or:
-//   "b": blockwise-visual mode (may include width, e.g. "b3")
-//   "c": characterwise mode
-//   "l": linewise mode
-//   "" : guess by contents, see setreg()
-// after is insert after cursor (like `p`), or before (like `P`).
+// typ is edit behavior: any getregtype() result, or:
+//   "b"
+//  blockwise-visual mode (may include width, e.g. "b3")
+//   "c"
+//  characterwise mode
+//   "l"
+//  linewise mode
+//   ""
+// guess by contents, see setreg().
 //
-// follow is place cursor at end of inserted text.
+// After is insert after cursor (like `p`), or before (like `P`).
+//
+// follow arg is place cursor at end of inserted text.
 func (v *Nvim) Put(lines []string, typ string, after bool, follow bool) error {
 	return v.call("nvim_put", nil, lines, typ, after, follow)
 }
@@ -1093,14 +1164,19 @@ func (v *Nvim) Put(lines []string, typ string, after bool, follow bool) error {
 //
 // lines is readfile() style list of lines.
 //
-// type is edit behavior: any getregtype() result, or:
-//   "b": blockwise-visual mode (may include width, e.g. "b3")
-//   "c": characterwise mode
-//   "l": linewise mode
-//   "" : guess by contents, see setreg()
-// after is insert after cursor (like `p`), or before (like `P`).
+// typ is edit behavior: any getregtype() result, or:
+//   "b"
+//  blockwise-visual mode (may include width, e.g. "b3")
+//   "c"
+//  characterwise mode
+//   "l"
+//  linewise mode
+//   ""
+// guess by contents, see setreg().
 //
-// follow is place cursor at end of inserted text.
+// After is insert after cursor (like `p`), or before (like `P`).
+//
+// follow arg is place cursor at end of inserted text.
 func (b *Batch) Put(lines []string, typ string, after bool, follow bool) {
 	b.call("nvim_put", nil, lines, typ, after, follow)
 }
@@ -1247,7 +1323,7 @@ func (b *Batch) KeyMap(mode string, maps *[]*Mapping) {
 // Right-hand-side {rhs} of the mapping.
 //
 //  opts
-// Optional parameters map. Accepts all :map-arguments as keys excluding <buffer> but including noremap.
+// Optional parameters map. Accepts all ":map-arguments" as keys excluding "buffer" but including "noremap".
 // Values are Booleans. Unknown key is an error.
 func (v *Nvim) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bool) error {
 	return v.call("nvim_set_keymap", nil, mode, lhs, rhs, opts)
@@ -1271,7 +1347,7 @@ func (v *Nvim) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bo
 // Right-hand-side {rhs} of the mapping.
 //
 //  opts
-// Optional parameters map. Accepts all :map-arguments as keys excluding <buffer> but including noremap.
+// Optional parameters map. Accepts all ":map-arguments" as keys excluding "buffer" but including "noremap".
 // Values are Booleans. Unknown key is an error.
 func (b *Batch) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bool) {
 	b.call("nvim_set_keymap", nil, mode, lhs, rhs, opts)
@@ -1300,7 +1376,8 @@ func (b *Batch) DeleteKeyMap(mode string, lhs string) {
 // Commands gets a map of global (non-buffer-local) Ex commands.
 // Currently only user-commands are supported, not builtin Ex commands.
 //
-// opts is optional parameters. Currently only supports {"builtin":false}.
+// opts is optional parameters. Currently only supports:
+//  {"builtin":false}
 func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Command, err error) {
 	err = v.call("nvim_get_commands", &commands, opts)
 	return commands, err
@@ -1309,20 +1386,25 @@ func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Comma
 // Commands gets a map of global (non-buffer-local) Ex commands.
 // Currently only user-commands are supported, not builtin Ex commands.
 //
-// opts is optional parameters. Currently only supports {"builtin":false}.
+// opts is optional parameters. Currently only supports:
+//  {"builtin":false}
 func (b *Batch) Commands(opts map[string]interface{}, commands *map[string]*Command) {
 	b.call("nvim_get_commands", commands, opts)
 }
 
 // APIInfo returns a 2-tuple (Array), where item 0 is the current channel id and item
-// 1 is the |api-metadata| map (Dictionary).
+// 1 is the "pi-metadata|" map (Dictionary).
+//
+// Returns 2-tuple [{channel-id}, {api-metadata}].
 func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
 	err = v.call("nvim_get_api_info", &apiInfo)
 	return apiInfo, err
 }
 
 // APIInfo returns a 2-tuple (Array), where item 0 is the current channel id and item
-// 1 is the |api-metadata| map (Dictionary).
+// 1 is the "pi-metadata|" map (Dictionary).
+//
+// Returns 2-tuple [{channel-id}, {api-metadata}].
 func (b *Batch) APIInfo(apiInfo *[]interface{}) {
 	b.call("nvim_get_api_info", apiInfo)
 }
@@ -1352,6 +1434,40 @@ func (b *Batch) SetClientInfo(name string, version *ClientVersion, typ string, m
 }
 
 // ChannelInfo get information about a channel.
+//
+// Rreturns Dictionary describing a channel, with these keys:
+//
+//  "stream"
+// The stream underlying the channel. value are:
+//  "stdio"
+// stdin and stdout of this Nvim instance.
+//  "stderr"
+// stderr of this Nvim instance.
+//  "socket"
+// TCP/IP socket or named pipe.
+//  "job"
+// job with communication over its stdio.
+//
+//  "mode"
+// How data received on the channel is interpreted. value are:
+//  "bytes"
+// send and receive raw bytes.
+//  "terminal"
+// A terminal instance interprets ASCII sequences.
+//  "rpc"
+// RPC communication on the channel is active.
+//
+//  "pty"
+// Name of pseudoterminal, if one is used (optional).
+// On a POSIX system, this will be a device path like /dev/pts/1.
+// Even if the name is unknown, the key will still be present to indicate a pty is used.
+// This is currently the case when using winpty on windows.
+//
+//  "buffer"
+// Buffer with connected |terminal| instance (optional).
+//
+//  "client"
+// Information about the client on the other end of the RPC channel, if it has added it using SetClientInfo() (optional).
 func (v *Nvim) ChannelInfo(channelID int) (channel *Channel, err error) {
 	var result Channel
 	err = v.call("nvim_get_chan_info", &result, channelID)
@@ -1359,6 +1475,40 @@ func (v *Nvim) ChannelInfo(channelID int) (channel *Channel, err error) {
 }
 
 // ChannelInfo get information about a channel.
+//
+// Rreturns Dictionary describing a channel, with these keys:
+//
+//  "stream"
+// The stream underlying the channel. value are:
+//  "stdio"
+// stdin and stdout of this Nvim instance.
+//  "stderr"
+// stderr of this Nvim instance.
+//  "socket"
+// TCP/IP socket or named pipe.
+//  "job"
+// job with communication over its stdio.
+//
+//  "mode"
+// How data received on the channel is interpreted. value are:
+//  "bytes"
+// send and receive raw bytes.
+//  "terminal"
+// A terminal instance interprets ASCII sequences.
+//  "rpc"
+// RPC communication on the channel is active.
+//
+//  "pty"
+// Name of pseudoterminal, if one is used (optional).
+// On a POSIX system, this will be a device path like /dev/pts/1.
+// Even if the name is unknown, the key will still be present to indicate a pty is used.
+// This is currently the case when using winpty on windows.
+//
+//  "buffer"
+// Buffer with connected |terminal| instance (optional).
+//
+//  "client"
+// Information about the client on the other end of the RPC channel, if it has added it using SetClientInfo() (optional).
 func (b *Batch) ChannelInfo(channelID int, channel *Channel) {
 	b.call("nvim_get_chan_info", channel, channelID)
 }
@@ -1978,23 +2128,53 @@ func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end i
 // The opts arg is optional parameters.
 //
 //  id
-// ID of the extmark to edit. int type.
+// ID of the extmark to edit.
 //
 //  end_line
-// Ending line of the mark, 0-based inclusive. int type.
+// Ending line of the mark, 0-based inclusive.
 //
 //  end_col
-// Ending col of the mark, 0-based inclusive. int type.
+// Ending col of the mark, 0-based inclusive.
 //
 //  hl_group
-// Name ar ID of the highlight group used to highlight this mark. string or int type.
+// Name of the highlight group used to highlight this mark.
 //
 //  virt_text
-// virtual text to link to this mark. TextChunk type.
+// Virtual text to link to this mark.
+//
+//  virt_text_pos
+// Positioning of virtual text.
+// Possible values:
+//  "eol"
+// right after eol character (default)
+//  "overlay"
+// display over the specified column, without shifting the underlying text.
+//
+//  virt_text_hide
+// Hide the virtual text when the background text is selected or hidden due to horizontal scroll 'nowrap'.
+//
+//  hl_mode
+// Control how highlights are combined with the highlights of the text. Currently only affects
+// virt_text highlights, but might affect "hl_group" in later versions.
+// Possible values:
+//  "replace"
+// only show the virt_text color. This is the default.
+//  "combine"
+// combine with background text color
+//  "blend"
+// blend with background text color.
 //
 //  ephemeral
-// For use with SetDecorationProvider callbacks. bool type.
-// The mark will only be used for the current redraw cycle, and not be permantently stored in the buffer.
+// For use with "nvim_set_decoration_provider" callbacks. The mark will only be used for the current redraw cycle,
+// and not be permantently stored in the buffer.
+//
+//  right_gravity
+// Boolean that indicates the direction the extmark will be shifted in when new text is
+// inserted (true for right, false for left).  defaults to true.
+//
+//  end_right_gravity
+// Boolean that indicates the direction the extmark end position (if it exists) will be
+// shifted in when new text is inserted (true for right, false for left). Defaults to false.
 func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}) (id int, err error) {
 	err = v.call("nvim_buf_set_extmark", &id, buffer, nsID, line, col, opts)
 	return id, err
@@ -2015,23 +2195,53 @@ func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts
 // The opts arg is optional parameters.
 //
 //  id
-// ID of the extmark to edit. int type.
+// ID of the extmark to edit.
 //
 //  end_line
-// Ending line of the mark, 0-based inclusive. int type.
+// Ending line of the mark, 0-based inclusive.
 //
 //  end_col
-// Ending col of the mark, 0-based inclusive. int type.
+// Ending col of the mark, 0-based inclusive.
 //
 //  hl_group
-// Name ar ID of the highlight group used to highlight this mark. string or int type.
+// Name of the highlight group used to highlight this mark.
 //
 //  virt_text
-// virtual text to link to this mark. TextChunk type.
+// Virtual text to link to this mark.
+//
+//  virt_text_pos
+// Positioning of virtual text.
+// Possible values:
+//  "eol"
+// right after eol character (default)
+//  "overlay"
+// display over the specified column, without shifting the underlying text.
+//
+//  virt_text_hide
+// Hide the virtual text when the background text is selected or hidden due to horizontal scroll 'nowrap'.
+//
+//  hl_mode
+// Control how highlights are combined with the highlights of the text. Currently only affects
+// virt_text highlights, but might affect "hl_group" in later versions.
+// Possible values:
+//  "replace"
+// only show the virt_text color. This is the default.
+//  "combine"
+// combine with background text color
+//  "blend"
+// blend with background text color.
 //
 //  ephemeral
-// For use with SetDecorationProvider callbacks. bool type.
-// The mark will only be used for the current redraw cycle, and not be permantently stored in the buffer.
+// For use with "nvim_set_decoration_provider" callbacks. The mark will only be used for the current redraw cycle,
+// and not be permantently stored in the buffer.
+//
+//  right_gravity
+// Boolean that indicates the direction the extmark will be shifted in when new text is
+// inserted (true for right, false for left).  defaults to true.
+//
+//  end_right_gravity
+// Boolean that indicates the direction the extmark end position (if it exists) will be
+// shifted in when new text is inserted (true for right, false for left). Defaults to false.
 func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}, id *int) {
 	b.call("nvim_buf_set_extmark", id, buffer, nsID, line, col, opts)
 }
