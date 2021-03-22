@@ -61,28 +61,6 @@ jobs:
         restore-keys: |
           go-${{ env.OS }}-
 
-    - name: Cache nvim binary for linux and darwin
-      id: cache-nvim
-      uses: actions/cache@v2
-      if: ${{ env.OS != 'windows' }}
-      with:
-        key: nvim-${{ env.OS }}-${{ hashFiles('~/nvim/bin/nvim') }}
-        path: |
-          ~/nvim
-        restore-keys: |
-          nvim-${{ env.OS }}-
-
-    - name: Cache nvim binary for Windows
-      id: cache-nvim-windows
-      uses: actions/cache@v2
-      if: ${{ env.OS == 'windows' }}
-      with:
-        key: nvim-${{ env.OS }}-${{ hashFiles('~/nvim/bin/nvim.exe') }}
-        path: |
-          ~/nvim
-        restore-keys: |
-          nvim-${{ env.OS }}-
-
     - name: Install nvim binary
       uses: rhysd/action-setup-vim@v1
       if: steps.cache-nvim.outputs.cache-hit != 'true' || steps.cache-nvim-windows.outputs.cache-hit != 'true'
