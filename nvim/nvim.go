@@ -42,9 +42,8 @@ type Nvim struct {
 // Serve serves incoming mesages from the peer. Serve blocks until Nvim
 // disconnects or there is an error.
 //
-// By default, the NewChildProcess and Dial functions start a goroutine to run
-// Serve(). Callers of the low-level New function are responsible for running
-// Serve().
+// By default, the NewChildProcess and Dial functions start a goroutine to run Serve().
+// Callers of the low-level New function are responsible for running Serve().
 func (v *Nvim) Serve() error {
 	v.readMu.Lock()
 	defer v.readMu.Unlock()
@@ -483,6 +482,7 @@ func (b *Batch) Execute() error {
 	}
 }
 
+// emptyArgs represents a empty interface slice which use to empty args.
 var emptyArgs = []interface{}{}
 
 func (b *Batch) call(sm string, result interface{}, args ...interface{}) {
@@ -499,6 +499,7 @@ func (b *Batch) call(sm string, result interface{}, args ...interface{}) {
 	b.err = b.enc.Encode(args)
 }
 
+// batchArg represents a batch call arguments.
 type batchArg struct {
 	n int
 	p []byte
@@ -550,12 +551,25 @@ func (el ErrorList) Error() string {
 	return el[0].Error()
 }
 
-// Request makes a RPC request.
+// Request makes a any RPC request.
 func (v *Nvim) Request(procedure string, result interface{}, args ...interface{}) error {
 	return v.call(procedure, result, args...)
 }
 
-// Call calls a vimscript function.
+// Request makes a any RPC request atomically as a part of batch request.
+func (b *Batch) Request(procedure string, result interface{}, args ...interface{}) {
+	b.call(procedure, result, args...)
+}
+
+// Call calls a VimL function with the given arguments.
+//
+// On execution error: fails with VimL error, does not update v:errmsg.
+//
+// The fn arg is Function to call.
+//
+// The args arg is Function arguments packed in an Array.
+//
+// The result is result of the function call.
 func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error {
 	if args == nil {
 		args = []interface{}{}
@@ -563,12 +577,15 @@ func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error
 	return v.call("nvim_call_function", result, fname, args)
 }
 
-// Request makes a RPC request atomically as a part of batch request.
-func (b *Batch) Request(procedure string, result interface{}, args ...interface{}) {
-	b.call(procedure, result, args...)
-}
-
-// Call calls a vimscript function.
+// Call calls a VimL function with the given arguments.
+//
+// On execution error: fails with VimL error, does not update v:errmsg.
+//
+// The fn arg is Function to call.
+//
+// The args arg is Function arguments packed in an Array.
+//
+// The result is result of the function call.
 func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	if args == nil {
 		args = []interface{}{}
@@ -576,7 +593,15 @@ func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	b.call("nvim_call_function", result, fname, args)
 }
 
-// CallDict calls a vimscript Dictionary function.
+// CallDict calls a VimL Dictionary function with the given arguments.
+//
+// The dict arg is Dictionary, or String evaluating to a VimL "self" dict.
+//
+// The fn arg is name of the function defined on the VimL dict.
+//
+// The args arg is Function arguments packed in an Array.
+//
+// The result is result of the function call.
 func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) error {
 	if args == nil {
 		args = []interface{}{}
@@ -584,7 +609,15 @@ func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, ar
 	return v.call("nvim_call_dict_function", result, fname, dict, args)
 }
 
-// CallDict calls a vimscript Dictionary function.
+// CallDict calls a VimL Dictionary function with the given arguments.
+//
+// The dict arg is Dictionary, or String evaluating to a VimL "self" dict.
+//
+// The fn arg is name of the function defined on the VimL dict.
+//
+// The args arg is Function arguments packed in an Array.
+//
+// The result is result of the function call.
 func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) {
 	if args == nil {
 		args = []interface{}{}
@@ -592,7 +625,13 @@ func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, a
 	b.call("nvim_call_dict_function", result, fname, dict, args)
 }
 
-// ExecLua executes a Lua block.
+// ExecLua execute Lua code.
+//
+// The code arg is Lua code to execute.
+//
+// The args arg is arguments to the code.
+//
+// Parameters (if any) are available as "..." inside the chunk. The chunk can return a value.
 func (v *Nvim) ExecLua(code string, result interface{}, args ...interface{}) error {
 	if args == nil {
 		args = []interface{}{}
@@ -600,7 +639,13 @@ func (v *Nvim) ExecLua(code string, result interface{}, args ...interface{}) err
 	return v.call("nvim_exec_lua", result, code, args)
 }
 
-// ExecLua executes a Lua block.
+// ExecLua execute Lua code.
+//
+// The code arg is Lua code to execute.
+//
+// The args arg is arguments to the code.
+//
+// Parameters (if any) are available as "..." inside the chunk. The chunk can return a value.
 func (b *Batch) ExecLua(code string, result interface{}, args ...interface{}) {
 	if args == nil {
 		args = []interface{}{}
