@@ -420,6 +420,7 @@ var specialAPIs = map[string]bool{
 	"nvim_exec_lua":                true,
 	"nvim_buf_call":                true,
 	"nvim_set_decoration_provider": true,
+	"nvim_chan_send":               true, // FUNC_API_LUA_ONLY
 }
 
 func compareFunctions(functions []*Function) error {
