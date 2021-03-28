@@ -424,6 +424,34 @@ func (b *Batch) Eval(expr string, result interface{}) {
 	b.call("nvim_eval", &result, expr)
 }
 
+// Notify the user with a message.
+//
+// Relays the call to vim.notify. By default forwards your message in the
+// echo area but can be overriden to trigger desktop notifications.
+//
+// The msg arg is message to display to the user.
+//
+// The logLevel arg is the log level.
+//
+// The opts arg is reserved for future use.
+func (v *Nvim) Notify(msg string, logLevel int, opts map[string]interface{}, result interface{}) error {
+	return v.call("nvim_notify", result, msg, logLevel, opts)
+}
+
+// Notify the user with a message.
+//
+// Relays the call to vim.notify. By default forwards your message in the
+// echo area but can be overriden to trigger desktop notifications.
+//
+// The msg arg is message to display to the user.
+//
+// The logLevel arg is the log level.
+//
+// The opts arg is reserved for future use.
+func (b *Batch) Notify(msg string, logLevel int, opts map[string]interface{}, result interface{}) {
+	b.call("nvim_notify", &result, msg, logLevel, opts)
+}
+
 // StringWidth calculates the number of display cells occupied by `text`.
 //
 // <Tab> counts as one cell.
@@ -919,6 +947,50 @@ func (v *Nvim) CreateBuffer(listed bool, scratch bool) (buffer Buffer, err error
 // Also sets "nomodeline" on the buffer.
 func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
 	b.call("nvim_create_buf", buffer, listed, scratch)
+}
+
+// OpenTerm opens a terminal instance in a buffer.
+//
+// By default (and currently the only option) the terminal will not be
+// connected to an external process. Instead, input send on the channel
+// will be echoed directly by the terminal. This is useful to disply
+// ANSI terminal sequences returned as part of a rpc message, or similar.
+//
+// Note: to directly initiate the terminal using the right size, display the
+// buffer in a configured window before calling this. For instance, for a
+// floating display, first create an empty buffer using CreateBuffer,
+// then display it using OpenWindow, and then call this function.
+// Then "nvim_chan_send" cal be called immediately to process sequences
+// in a virtual terminal having the intended size.
+//
+// The buffer arg is the buffer to use (expected to be empty).
+//
+// The opts arg is optional parameters. Reserved for future use.
+func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]interface{}) (int, error) {
+	var result int
+	err := v.call("nvim_open_term", &result, buffer, opts)
+	return result, err
+}
+
+// OpenTerm opens a terminal instance in a buffer.
+//
+// By default (and currently the only option) the terminal will not be
+// connected to an external process. Instead, input send on the channel
+// will be echoed directly by the terminal. This is useful to disply
+// ANSI terminal sequences returned as part of a rpc message, or similar.
+//
+// Note: to directly initiate the terminal using the right size, display the
+// buffer in a configured window before calling this. For instance, for a
+// floating display, first create an empty buffer using CreateBuffer,
+// then display it using OpenWindow, and then call this function.
+// Then "nvim_chan_send" cal be called immediately to process sequences
+// in a virtual terminal having the intended size.
+//
+// The buffer arg is the buffer to use (expected to be empty).
+//
+// The opts arg is optional parameters. Reserved for future use.
+func (b *Batch) OpenTerm(buffer Buffer, opts map[string]interface{}, result *int) {
+	b.call("nvim_open_term", result, buffer, opts)
 }
 
 // OpenWindow open a new window.
@@ -2609,6 +2681,26 @@ func (v *Nvim) WindowConfig(window Window) (config *WindowConfig, err error) {
 // The `relative` will be an empty string for normal windows.
 func (b *Batch) WindowConfig(window Window, config *WindowConfig) {
 	b.call("nvim_win_get_config", config, window)
+}
+
+// HideWindow closes the window and hide the buffer it contains (like ":hide" with a
+// windowID).
+//
+// Like ":hide" the buffer becomes hidden unless another window is editing it,
+// or "bufhidden" is "unload", "delete" or "wipe" as opposed to ":close" or
+// CloseWindow, which will close the buffer.
+func (v *Nvim) HideWindow(window Window) error {
+	return v.call("nvim_win_hide", nil, window)
+}
+
+// HideWindow closes the window and hide the buffer it contains (like ":hide" with a
+// windowID).
+//
+// Like ":hide" the buffer becomes hidden unless another window is editing it,
+// or "bufhidden" is "unload", "delete" or "wipe" as opposed to ":close" or
+// CloseWindow, which will close the buffer.
+func (b *Batch) HideWindow(window Window) {
+	b.call("nvim_win_hide", nil, window)
 }
 
 // CloseWindow close a window.
