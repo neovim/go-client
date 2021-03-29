@@ -1235,6 +1235,11 @@ func IsWindowValid(window Window) (valid bool) {
 	name(nvim_win_is_valid)
 }
 
+// HideWindow closes the window and hide the buffer
+func HideWindow(window Window) {
+	name(nvim_win_hide)
+}
+
 // SetWindowConfig configure window position. Currently this is only used to configure
 // floating and external windows (including changing a split window to these types).
 //

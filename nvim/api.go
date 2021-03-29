@@ -2577,6 +2577,16 @@ func (b *Batch) IsWindowValid(window Window, valid *bool) {
 	b.call("nvim_win_is_valid", valid, window)
 }
 
+// HideWindow closes the window and hide the buffer
+func (v *Nvim) HideWindow(window Window) error {
+	return v.call("nvim_win_hide", nil, window)
+}
+
+// HideWindow closes the window and hide the buffer
+func (b *Batch) HideWindow(window Window) {
+	b.call("nvim_win_hide", nil, window)
+}
+
 // SetWindowConfig configure window position. Currently this is only used to configure
 // floating and external windows (including changing a split window to these types).
 //
