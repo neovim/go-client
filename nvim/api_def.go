@@ -770,14 +770,6 @@ func BufferLineCount(buffer Buffer) (count int) {
 // If false, the first notification will be a `nvim_buf_lines_event`.
 // Otherwise, the first notification will be a `nvim_buf_changedtick_event`
 //
-// The opts is optional parameters.
-//
-//  utf_sizes
-// Include UTF-32 and UTF-16 size of the replaced region, as args to `on_lines`.
-//
-//  preview
-// Also attach to command preview (i.e. 'inccommand') events.
-//
 // Returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
 func AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}) (attached bool) {
 	name(nvim_buf_attach)
