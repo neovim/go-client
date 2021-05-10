@@ -21,6 +21,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@main
+      with:
+        fetch-depth: 2
 
     - name: Install Go
       uses: actions/setup-go@main
