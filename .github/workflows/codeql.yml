@@ -1,4 +1,4 @@
-name: CodeQL
+name: "CodeQL"
 
 on:
   push:
@@ -15,24 +15,22 @@ jobs:
     name: Analyze
     runs-on: ubuntu-20.04
 
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
     strategy:
       fail-fast: false
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@main
-      with:
-        fetch-depth: 2
-
-    - name: Install Go
-      uses: actions/setup-go@main
-      with:
-        go-version: 1.16.x
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
-        languages: go
+        languages: 'go'
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
