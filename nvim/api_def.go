@@ -422,6 +422,27 @@ func CreateBuffer(listed, scratch bool) (buffer Buffer) {
 	name(nvim_create_buf)
 }
 
+// OpenTerm opens a terminal instance in a buffer.
+//
+// By default (and currently the only option) the terminal will not be
+// connected to an external process. Instead, input send on the channel
+// will be echoed directly by the terminal. This is useful to disply
+// ANSI terminal sequences returned as part of a rpc message, or similar.
+//
+// Note that to directly initiate the terminal using the right size, display the
+// buffer in a configured window before calling this. For instance, for a
+// floating display, first create an empty buffer using CreateBuffer,
+// then display it using OpenWindow, and then call this function.
+// Then "nvim_chan_send" cal be called immediately to process sequences
+// in a virtual terminal having the intended size.
+//
+// The buffer arg is the buffer to use (expected to be empty).
+//
+// The opts arg is optional parameters. Reserved for future use.
+func OpenTerm(buffer Buffer, opts map[string]interface{}) (channel int) {
+	name(nvim_open_term)
+}
+
 // OpenWindow open a new window.
 //
 // Currently this is used to open floating and external windows.
@@ -1250,6 +1271,16 @@ func SetWindowConfig(window Window, config *WindowConfig) {
 func WindowConfig(window Window) (config WindowConfig) {
 	name(nvim_win_get_config)
 	returnPtr()
+}
+
+// HideWindow closes the window and hide the buffer it contains (like ":hide" with a
+// windowID).
+//
+// Like ":hide" the buffer becomes hidden unless another window is editing it,
+// or "bufhidden" is "unload", "delete" or "wipe" as opposed to ":close" or
+// CloseWindow, which will close the buffer.
+func HideWindow(window Window) {
+	name(nvim_win_hide)
 }
 
 // CloseWindow close a window.
