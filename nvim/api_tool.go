@@ -421,6 +421,7 @@ var specialAPIs = map[string]bool{
 	"nvim_buf_call":                true,
 	"nvim_set_decoration_provider": true,
 	"nvim_chan_send":               true, // FUNC_API_LUA_ONLY
+	"nvim_notify":                  true, // implements underling nlua(vim.notify)
 }
 
 func compareFunctions(functions []*Function) error {
