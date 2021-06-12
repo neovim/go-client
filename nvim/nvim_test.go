@@ -507,13 +507,14 @@ func testBuffer(v *Nvim) func(*testing.T) {
 func testWindow(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			wins, err := v.Windows()
 			if err != nil {
 				t.Fatal(err)
 			}
 			if len(wins) != 1 {
+				for i := 0; i < len(wins); i++ {
+					t.Logf("wins[%d]: %v", i, wins[i])
+				}
 				t.Fatalf("expected one win, found %d wins", len(wins))
 			}
 			if wins[0] == 0 {
@@ -533,14 +534,40 @@ func testWindow(v *Nvim) func(*testing.T) {
 				t.Fatalf("got %s but want %s", got, want)
 			}
 
-			if err := v.SetCurrentWindow(win); err != nil {
+			win, err = v.CurrentWindow()
+			if err != nil {
 				t.Fatal(err)
+			}
+			if err := v.Command("split"); err != nil {
+				t.Fatal(err)
+			}
+			win2, err := v.CurrentWindow()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := v.HideWindow(win2); err != nil {
+				t.Fatalf("failed to HideWindow(%v)", win2)
+			}
+			wins2, err := v.Windows()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(wins2) != 1 {
+				for i := 0; i < len(wins2); i++ {
+					t.Logf("wins[%d]: %v", i, wins2[i])
+				}
+				t.Fatalf("expected one win, found %d wins", len(wins2))
+			}
+			if wins2[0] == 0 {
+				t.Fatalf("wins[0] == 0")
+			}
+			if win != wins2[0] {
+				t.Fatalf("win2 is not wins2[0]: want: %v, win2: %v ", wins2[0], win)
 			}
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var wins []Window
@@ -569,9 +596,35 @@ func testWindow(v *Nvim) func(*testing.T) {
 				t.Fatalf("got %s but want %s", got, want)
 			}
 
-			b.SetCurrentWindow(win)
+			b.CurrentWindow(&win)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
+			}
+
+			b.Command("split")
+			var win2 Window
+			b.CurrentWindow(&win2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			b.HideWindow(win2)
+			var wins2 []Window
+			b.Windows(&wins2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if len(wins2) != 1 {
+				for i := 0; i < len(wins2); i++ {
+					t.Logf("wins[%d]: %v", i, wins2[i])
+				}
+				t.Fatalf("expected one win, found %d wins", len(wins2))
+			}
+			if wins2[0] == 0 {
+				t.Fatalf("wins[0] == 0")
+			}
+			if win != wins2[0] {
+				t.Fatalf("win2 is not wins2[0]: want: %v, win2: %v ", wins2[0], win)
 			}
 		})
 	}
