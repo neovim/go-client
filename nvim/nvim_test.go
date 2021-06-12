@@ -107,6 +107,7 @@ func TestAPI(t *testing.T) {
 	t.Run("RuntimeFiles", testRuntimeFiles(v))
 	t.Run("AllOptionsInfo", testAllOptionsInfo(v))
 	t.Run("OptionsInfo", testOptionsInfo(v))
+	t.Run("OpenTerm", testTerm(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -1799,6 +1800,77 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 				}
 			})
 		}
+	}
+}
+
+// TODO(zchee): correct testcase
+func testTerm(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
+
+			buf, err := v.CreateBuffer(true, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			cfg := &WindowConfig{
+				Relative: "editor",
+				Width:    79,
+				Height:   31,
+				Row:      1,
+				Col:      1,
+			}
+			if _, err := v.OpenWindow(buf, false, cfg); err != nil {
+				t.Fatal(err)
+			}
+
+			termID, err := v.OpenTerm(buf, make(map[string]interface{}))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			data := "\x1b[38;2;00;00;255mTRUECOLOR\x1b[0m"
+			if err := v.Call("chansend", nil, termID, data); err != nil {
+				t.Fatal(err)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			var buf Buffer
+			b.CreateBuffer(true, true, &buf)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			cfg := &WindowConfig{
+				Relative: "editor",
+				Width:    79,
+				Height:   31,
+				Row:      1,
+				Col:      1,
+			}
+			var win Window
+			b.OpenWindow(buf, false, cfg, &win)
+
+			var termID int
+			b.OpenTerm(buf, make(map[string]interface{}), &termID)
+
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			data := "\x1b[38;2;00;00;255mTRUECOLOR\x1b[0m"
+			b.Call("chansend", nil, termID, data)
+
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
 
