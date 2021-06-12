@@ -473,7 +473,7 @@ type WindowConfig struct {
 	Win Window `msgpack:"win,omitempty"`
 
 	// Anchor is the decides which corner of the float to place at row and col.
-	Anchor string `msgpack:"anchor,omitempty" empty:"NW"`
+	Anchor string `msgpack:"anchor,omitempty"`
 
 	// Width is the window width (in character cells). Minimum of 1.
 	Width int `msgpack:"width" empty:"1"`
