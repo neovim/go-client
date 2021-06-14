@@ -107,6 +107,7 @@ func TestAPI(t *testing.T) {
 	t.Run("RuntimeFiles", testRuntimeFiles(v))
 	t.Run("AllOptionsInfo", testAllOptionsInfo(v))
 	t.Run("OptionsInfo", testOptionsInfo(v))
+	t.Run("OpenTerm", testTerm(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -506,13 +507,14 @@ func testBuffer(v *Nvim) func(*testing.T) {
 func testWindow(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			wins, err := v.Windows()
 			if err != nil {
 				t.Fatal(err)
 			}
 			if len(wins) != 1 {
+				for i := 0; i < len(wins); i++ {
+					t.Logf("wins[%d]: %v", i, wins[i])
+				}
 				t.Fatalf("expected one win, found %d wins", len(wins))
 			}
 			if wins[0] == 0 {
@@ -532,14 +534,40 @@ func testWindow(v *Nvim) func(*testing.T) {
 				t.Fatalf("got %s but want %s", got, want)
 			}
 
-			if err := v.SetCurrentWindow(win); err != nil {
+			win, err = v.CurrentWindow()
+			if err != nil {
 				t.Fatal(err)
+			}
+			if err := v.Command("split"); err != nil {
+				t.Fatal(err)
+			}
+			win2, err := v.CurrentWindow()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := v.HideWindow(win2); err != nil {
+				t.Fatalf("failed to HideWindow(%v)", win2)
+			}
+			wins2, err := v.Windows()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(wins2) != 1 {
+				for i := 0; i < len(wins2); i++ {
+					t.Logf("wins[%d]: %v", i, wins2[i])
+				}
+				t.Fatalf("expected one win, found %d wins", len(wins2))
+			}
+			if wins2[0] == 0 {
+				t.Fatalf("wins[0] == 0")
+			}
+			if win != wins2[0] {
+				t.Fatalf("win2 is not wins2[0]: want: %v, win2: %v ", wins2[0], win)
 			}
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var wins []Window
@@ -568,9 +596,35 @@ func testWindow(v *Nvim) func(*testing.T) {
 				t.Fatalf("got %s but want %s", got, want)
 			}
 
-			b.SetCurrentWindow(win)
+			b.CurrentWindow(&win)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
+			}
+
+			b.Command("split")
+			var win2 Window
+			b.CurrentWindow(&win2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			b.HideWindow(win2)
+			var wins2 []Window
+			b.Windows(&wins2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if len(wins2) != 1 {
+				for i := 0; i < len(wins2); i++ {
+					t.Logf("wins[%d]: %v", i, wins2[i])
+				}
+				t.Fatalf("expected one win, found %d wins", len(wins2))
+			}
+			if wins2[0] == 0 {
+				t.Fatalf("wins[0] == 0")
+			}
+			if win != wins2[0] {
+				t.Fatalf("win2 is not wins2[0]: want: %v, win2: %v ", wins2[0], win)
 			}
 		})
 	}
@@ -956,9 +1010,38 @@ func testMessage(v *Nvim) func(*testing.T) {
 				t.Fatalf("WritelnErr(%q) = %q, want: %q", wantWritelnErr, gotWritelnErr, wantWritelnErr)
 			}
 
-			// cleanup v:statusmsg
-			if err := v.SetVVar("statusmsg", ""); err != nil {
+			// clear messages
+			if _, err := v.Exec(":messages clear", false); err != nil {
 				t.Fatalf("failed to SetVVar: %v", err)
+			}
+
+			const wantNotifyMsg = `hello Notify`
+			if err := v.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]interface{})); err != nil {
+				t.Fatalf("failed to Notify: %v", err)
+			}
+			gotNotifyMsg, err := v.Exec(":messages", true)
+			if err != nil {
+				t.Fatalf("failed to messages command: %v", err)
+			}
+			if wantNotifyMsg != gotNotifyMsg {
+				t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyMsg, LogInfoLevel, gotNotifyMsg)
+			}
+
+			// clear messages
+			if _, err := v.Exec(":messages clear", false); err != nil {
+				t.Fatalf("failed to SetVVar: %v", err)
+			}
+
+			const wantNotifyErr = `hello Notify Error`
+			if err := v.Notify(wantNotifyErr, LogErrorLevel, make(map[string]interface{})); err != nil {
+				t.Fatalf("failed to Notify: %v", err)
+			}
+			var gotNotifyErr string
+			if err := v.VVar("errmsg", &gotNotifyErr); err != nil {
+				t.Fatalf("could not get v:errmsg nvim variable: %v", err)
+			}
+			if wantNotifyErr != gotNotifyErr {
+				t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyErr, LogErrorLevel, gotNotifyErr)
 			}
 
 			// clear messages
@@ -1023,9 +1106,51 @@ func testMessage(v *Nvim) func(*testing.T) {
 				t.Fatalf("b.WritelnErr(%q) = %q, want: %q", wantWritelnErr, gotWritelnErr, wantWritelnErr)
 			}
 
-			// cleanup v:statusmsg
-			if err := v.SetVVar("statusmsg", ""); err != nil {
-				t.Fatalf("failed to SetVVar: %v", err)
+			// clear messages
+			b.Exec(":messages clear", false, new(string))
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to \":messages clear\" command: %v", err)
+			}
+
+			const wantNotifyMsg = `hello Notify`
+			b.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]interface{}))
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to Notify: %v", err)
+			}
+			var gotNotifyMsg string
+			b.Exec(":messages", true, &gotNotifyMsg)
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to \":messages\" command: %v", err)
+			}
+			if wantNotifyMsg != gotNotifyMsg {
+				t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyMsg, LogInfoLevel, gotNotifyMsg)
+			}
+
+			// clear messages
+			b.Exec(":messages clear", false, new(string))
+			b.SetVVar("statusmsg", "")
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to \":messages clear\" command: %v", err)
+			}
+
+			const wantNotifyErr = `hello Notify Error`
+			b.Notify(wantNotifyErr, LogErrorLevel, make(map[string]interface{}))
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to Notify: %v", err)
+			}
+			var gotNotifyErr string
+			b.VVar("errmsg", &gotNotifyErr)
+			if err := b.Execute(); err != nil {
+				t.Fatalf("could not get v:errmsg nvim variable: %v", err)
+			}
+			if wantNotifyErr != gotNotifyErr {
+				t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyErr, LogErrorLevel, gotNotifyErr)
+			}
+
+			// clear messages
+			b.Exec(":messages clear", false, new(string))
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to \":messages clear\" command: %v", err)
 			}
 		})
 	}
@@ -1802,6 +1927,77 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 	}
 }
 
+// TODO(zchee): correct testcase
+func testTerm(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
+
+			buf, err := v.CreateBuffer(true, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			cfg := &WindowConfig{
+				Relative: "editor",
+				Width:    79,
+				Height:   31,
+				Row:      1,
+				Col:      1,
+			}
+			if _, err := v.OpenWindow(buf, false, cfg); err != nil {
+				t.Fatal(err)
+			}
+
+			termID, err := v.OpenTerm(buf, make(map[string]interface{}))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			data := "\x1b[38;2;00;00;255mTRUECOLOR\x1b[0m"
+			if err := v.Call("chansend", nil, termID, data); err != nil {
+				t.Fatal(err)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			var buf Buffer
+			b.CreateBuffer(true, true, &buf)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			cfg := &WindowConfig{
+				Relative: "editor",
+				Width:    79,
+				Height:   31,
+				Row:      1,
+				Col:      1,
+			}
+			var win Window
+			b.OpenWindow(buf, false, cfg, &win)
+
+			var termID int
+			b.OpenTerm(buf, make(map[string]interface{}), &termID)
+
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			data := "\x1b[38;2;00;00;255mTRUECOLOR\x1b[0m"
+			b.Call("chansend", nil, termID, data)
+
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func TestDial(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("not supported dial unix socket on windows GOOS")
@@ -1888,5 +2084,56 @@ func clearBuffer(tb testing.TB, v *Nvim, buffer Buffer) {
 
 	if err := v.SetBufferLines(buffer, 0, -1, true, bytes.Fields(nil)); err != nil {
 		tb.Fatal(err)
+	}
+}
+
+func TestLogLevel_String(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		level LogLevel
+		want  string
+	}{
+		{
+			name:  "Trace",
+			level: LogTraceLevel,
+			want:  "TraceLevel",
+		},
+		{
+			name:  "Debug",
+			level: LogDebugLevel,
+			want:  "DebugLevel",
+		},
+		{
+			name:  "Info",
+			level: LogInfoLevel,
+			want:  "InfoLevel",
+		},
+		{
+			name:  "Warn",
+			level: LogWarnLevel,
+			want:  "WarnLevel",
+		},
+		{
+			name:  "Error",
+			level: LogErrorLevel,
+			want:  "ErrorLevel",
+		},
+		{
+			name:  "unkonwn",
+			level: LogLevel(-1),
+			want:  "unkonwn Level",
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := tt.level.String(); got != tt.want {
+				t.Errorf("LogLevel.String() = %v, want %v", tt.want, got)
+			}
+		})
 	}
 }

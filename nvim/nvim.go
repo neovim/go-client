@@ -673,6 +673,53 @@ func (b *Batch) ExecuteLua(code string, result interface{}, args ...interface{})
 	b.call("nvim_execute_lua", result, code, args)
 }
 
+// Notify the user with a message.
+//
+// Relays the call to vim.notify. By default forwards your message in the
+// echo area but can be overriden to trigger desktop notifications.
+//
+// The msg arg is message to display to the user.
+//
+// The logLevel arg is the LogLevel.
+//
+// The opts arg is reserved for future use.
+func (v *Nvim) Notify(msg string, logLevel LogLevel, opts map[string]interface{}) error {
+	if logLevel == LogErrorLevel {
+		return v.WritelnErr(msg)
+	}
+
+	chunks := []TextChunk{
+		{
+			Text: msg,
+		},
+	}
+	return v.Echo(chunks, true, opts)
+}
+
+// Notify the user with a message.
+//
+// Relays the call to vim.notify. By default forwards your message in the
+// echo area but can be overriden to trigger desktop notifications.
+//
+// The msg arg is message to display to the user.
+//
+// The logLevel arg is the LogLevel.
+//
+// The opts arg is reserved for future use.
+func (b *Batch) Notify(msg string, logLevel LogLevel, opts map[string]interface{}) {
+	if logLevel == LogErrorLevel {
+		b.WritelnErr(msg)
+		return
+	}
+
+	chunks := []TextChunk{
+		{
+			Text: msg,
+		},
+	}
+	b.Echo(chunks, true, opts)
+}
+
 // decodeExt decodes a MsgPack encoded number to go int value.
 func decodeExt(p []byte) (int, error) {
 	switch {

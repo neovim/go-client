@@ -473,7 +473,7 @@ type WindowConfig struct {
 	Win Window `msgpack:"win,omitempty"`
 
 	// Anchor is the decides which corner of the float to place at row and col.
-	Anchor string `msgpack:"anchor,omitempty" empty:"NW"`
+	Anchor string `msgpack:"anchor,omitempty"`
 
 	// Width is the window width (in character cells). Minimum of 1.
 	Width int `msgpack:"width" empty:"1"`
@@ -552,4 +552,36 @@ type OptionInfo struct {
 
 	// FlagList whether the list of single char flags.
 	FlagList bool `msgpack:"flaglist"`
+}
+
+// LogLevel represents a nvim log level.
+type LogLevel int
+
+// list of LogLevels.
+//
+// Should kept sync neovim LogLevel.
+const (
+	LogTraceLevel LogLevel = iota
+	LogDebugLevel
+	LogInfoLevel
+	LogWarnLevel
+	LogErrorLevel
+)
+
+// String returns a string representation of the LogLevel.
+func (level LogLevel) String() string {
+	switch level {
+	case LogTraceLevel:
+		return "TraceLevel"
+	case LogDebugLevel:
+		return "DebugLevel"
+	case LogInfoLevel:
+		return "InfoLevel"
+	case LogWarnLevel:
+		return "WarnLevel"
+	case LogErrorLevel:
+		return "ErrorLevel"
+	default:
+		return "unkonwn Level"
+	}
 }
