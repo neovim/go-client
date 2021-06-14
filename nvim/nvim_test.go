@@ -1010,9 +1010,38 @@ func testMessage(v *Nvim) func(*testing.T) {
 				t.Fatalf("WritelnErr(%q) = %q, want: %q", wantWritelnErr, gotWritelnErr, wantWritelnErr)
 			}
 
-			// cleanup v:statusmsg
-			if err := v.SetVVar("statusmsg", ""); err != nil {
+			// clear messages
+			if _, err := v.Exec(":messages clear", false); err != nil {
 				t.Fatalf("failed to SetVVar: %v", err)
+			}
+
+			const wantNotifyMsg = `hello Notify`
+			if err := v.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]interface{})); err != nil {
+				t.Fatalf("failed to Notify: %v", err)
+			}
+			gotNotifyMsg, err := v.Exec(":messages", true)
+			if err != nil {
+				t.Fatalf("failed to messages command: %v", err)
+			}
+			if wantNotifyMsg != gotNotifyMsg {
+				t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyMsg, LogInfoLevel, gotNotifyMsg)
+			}
+
+			// clear messages
+			if _, err := v.Exec(":messages clear", false); err != nil {
+				t.Fatalf("failed to SetVVar: %v", err)
+			}
+
+			const wantNotifyErr = `hello Notify Error`
+			if err := v.Notify(wantNotifyErr, LogErrorLevel, make(map[string]interface{})); err != nil {
+				t.Fatalf("failed to Notify: %v", err)
+			}
+			var gotNotifyErr string
+			if err := v.VVar("errmsg", &gotNotifyErr); err != nil {
+				t.Fatalf("could not get v:errmsg nvim variable: %v", err)
+			}
+			if wantNotifyErr != gotNotifyErr {
+				t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyErr, LogErrorLevel, gotNotifyErr)
 			}
 
 			// clear messages
@@ -1077,9 +1106,51 @@ func testMessage(v *Nvim) func(*testing.T) {
 				t.Fatalf("b.WritelnErr(%q) = %q, want: %q", wantWritelnErr, gotWritelnErr, wantWritelnErr)
 			}
 
-			// cleanup v:statusmsg
-			if err := v.SetVVar("statusmsg", ""); err != nil {
-				t.Fatalf("failed to SetVVar: %v", err)
+			// clear messages
+			b.Exec(":messages clear", false, new(string))
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to \":messages clear\" command: %v", err)
+			}
+
+			const wantNotifyMsg = `hello Notify`
+			b.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]interface{}))
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to Notify: %v", err)
+			}
+			var gotNotifyMsg string
+			b.Exec(":messages", true, &gotNotifyMsg)
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to \":messages\" command: %v", err)
+			}
+			if wantNotifyMsg != gotNotifyMsg {
+				t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyMsg, LogInfoLevel, gotNotifyMsg)
+			}
+
+			// clear messages
+			b.Exec(":messages clear", false, new(string))
+			b.SetVVar("statusmsg", "")
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to \":messages clear\" command: %v", err)
+			}
+
+			const wantNotifyErr = `hello Notify Error`
+			b.Notify(wantNotifyErr, LogErrorLevel, make(map[string]interface{}))
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to Notify: %v", err)
+			}
+			var gotNotifyErr string
+			b.VVar("errmsg", &gotNotifyErr)
+			if err := b.Execute(); err != nil {
+				t.Fatalf("could not get v:errmsg nvim variable: %v", err)
+			}
+			if wantNotifyErr != gotNotifyErr {
+				t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyErr, LogErrorLevel, gotNotifyErr)
+			}
+
+			// clear messages
+			b.Exec(":messages clear", false, new(string))
+			if err := b.Execute(); err != nil {
+				t.Fatalf("failed to \":messages clear\" command: %v", err)
 			}
 		})
 	}
