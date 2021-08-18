@@ -126,13 +126,13 @@ type HLAttrs struct {
 	Nocombine int `msgpack:"nocombine,omitempty"`
 
 	// Foreground use normal foreground color.
-	Foreground int `msgpack:"foreground,omitempty" empty:"-1"`
+	Foreground int `msgpack:"foreground,omitempty" empty:-1`
 
 	// Background use normal background color.
-	Background int `msgpack:"background,omitempty" empty:"-1"`
+	Background int `msgpack:"background,omitempty" empty:-1`
 
 	// Special is used for undercurl and underline.
-	Special int `msgpack:"special,omitempty" empty:"-1"`
+	Special int `msgpack:"special,omitempty" empty:-1`
 
 	// Blend override the blend level for a highlight group within the popupmenu
 	// or floating windows.
@@ -175,7 +175,7 @@ type Mapping struct {
 // ClientVersion represents a version of client for nvim.
 type ClientVersion struct {
 	// Major major version. (defaults to 0 if not set, for no release yet)
-	Major int `msgpack:"major,omitempty" empty:"0"`
+	Major int `msgpack:"major"`
 
 	// Minor minor version.
 	Minor int `msgpack:"minor,omitempty"`
@@ -476,10 +476,10 @@ type WindowConfig struct {
 	Anchor string `msgpack:"anchor,omitempty"`
 
 	// Width is the window width (in character cells). Minimum of 1.
-	Width int `msgpack:"width" empty:"1"`
+	Width int `msgpack:"width" empty:1`
 
 	// Height is the window height (in character cells). Minimum of 1.
-	Height int `msgpack:"height" empty:"1"`
+	Height int `msgpack:"height" empty:1`
 
 	// BufPos places float relative to buffer text only when relative="win".
 	BufPos [2]int `msgpack:"bufpos,omitempty"`
@@ -491,7 +491,7 @@ type WindowConfig struct {
 	Col float64 `msgpack:"col,omitempty"`
 
 	// Focusable whether the enable focus by user actions (wincmds, mouse events).
-	Focusable bool `msgpack:"focusable,omitempty" empty:"true"`
+	Focusable bool `msgpack:"focusable,omitempty" empty:true`
 
 	// External is the GUI should display the window as an external top-level window.
 	External bool `msgpack:"external,omitempty"`
