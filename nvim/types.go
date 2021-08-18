@@ -201,7 +201,7 @@ type Mapping struct {
 // ClientVersion represents a version of client for nvim.
 type ClientVersion struct {
 	// Major major version. (defaults to 0 if not set, for no release yet)
-	Major int `msgpack:"major,omitempty" empty:"0"`
+	Major int `msgpack:"major"`
 
 	// Minor minor version.
 	Minor int `msgpack:"minor,omitempty"`
