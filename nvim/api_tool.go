@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 // Command apitool generates api.go from api_def.go. The command also has
