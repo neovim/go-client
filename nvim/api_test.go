@@ -1647,11 +1647,12 @@ func testKey(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("KeyMap", func(t *testing.T) {
-				if err := v.SetKeyMap("n", "y", "yy", make(map[string]bool)); err != nil {
+				mode := "n"
+				if err := v.SetKeyMap(mode, "y", "yy", make(map[string]bool)); err != nil {
 					t.Fatal(err)
 				}
 
-				wantMap := []*Mapping{
+				wantMaps := []*Mapping{
 					{
 						LHS:     "y",
 						RHS:     "yy",
@@ -1661,49 +1662,83 @@ func testKey(v *Nvim) func(*testing.T) {
 						Buffer:  0,
 						SID:     0,
 						NoWait:  0,
-						Mode:    "",
 					},
 				}
-				got, err := v.KeyMap("n")
+				wantMapsLen := 0
+				if nvimVersion.Minor >= 6 {
+					lastMap := wantMaps[0]
+					wantMaps = []*Mapping{
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate<CR><C-L>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						lastMap,
+					}
+					wantMapsLen = 2
+				}
+				got, err := v.KeyMap(mode)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !reflect.DeepEqual(wantMap, got) {
-					t.Fatalf("KeyMap(n) = %#v, want: %#v", got, wantMap)
+				if !reflect.DeepEqual(got, wantMaps) {
+					for i, gotmap := range got {
+						t.Logf(" got[%d]: %#v", i, gotmap)
+					}
+					for i, wantmap := range wantMaps {
+						t.Logf("want[%d]: %#v", i, wantmap)
+					}
+					t.Fatalf("KeyMap(%s) = %#v, want: %#v", mode, got, wantMaps)
 				}
 
-				if err := v.DeleteKeyMap("n", "y"); err != nil {
+				if err := v.DeleteKeyMap(mode, "y"); err != nil {
 					t.Fatal(err)
 				}
-				got2, err := v.KeyMap("n")
+
+				got2, err := v.KeyMap(mode)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if len(got2) > 0 {
-					t.Fatalf("expected 0 but got %#v", got2)
+				if len(got2) != wantMapsLen {
+					t.Fatalf("expected %d but got %#v", wantMapsLen, got2)
 				}
 			})
 
 			t.Run("BufferKeyMap", func(t *testing.T) {
+				mode := "n"
 				buffer := Buffer(0)
-				if err := v.SetBufferKeyMap(buffer, "n", "y", "yy", make(map[string]bool)); err != nil {
+				if err := v.SetBufferKeyMap(buffer, mode, "x", "xx", make(map[string]bool)); err != nil {
 					t.Fatal(err)
 				}
 
 				wantMap := []*Mapping{
 					{
-						LHS:     "y",
-						RHS:     "yy",
+						LHS:     "x",
+						RHS:     "xx",
 						Silent:  0,
 						NoRemap: 0,
 						Expr:    0,
 						Buffer:  1,
 						SID:     0,
 						NoWait:  0,
-						Mode:    "",
 					},
 				}
-				got, err := v.BufferKeyMap(buffer, "n")
+				got, err := v.BufferKeyMap(buffer, mode)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -1712,15 +1747,16 @@ func testKey(v *Nvim) func(*testing.T) {
 					t.Fatalf("KeyMap(n) = %#v, want: %#v", got[0], wantMap[0])
 				}
 
-				if err := v.DeleteBufferKeyMap(buffer, "n", "y"); err != nil {
+				if err := v.DeleteBufferKeyMap(buffer, mode, "x"); err != nil {
 					t.Fatal(err)
 				}
-				got2, err := v.BufferKeyMap(buffer, "n")
+
+				got2, err := v.BufferKeyMap(buffer, mode)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if len(got2) > 0 {
-					t.Fatalf("expected 0 but got %#v", got2)
+				if wantLen := 0; len(got2) != wantLen {
+					t.Fatalf("expected %d but got %#v", wantLen, got2)
 				}
 			})
 		})
@@ -1871,12 +1907,13 @@ func testKey(v *Nvim) func(*testing.T) {
 			t.Run("KeyMap", func(t *testing.T) {
 				b := v.NewBatch()
 
-				b.SetKeyMap("n", "y", "yy", make(map[string]bool))
+				mode := "n"
+				b.SetKeyMap(mode, "y", "yy", make(map[string]bool))
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
 
-				wantMap := []*Mapping{
+				wantMaps := []*Mapping{
 					{
 						LHS:     "y",
 						RHS:     "yy",
@@ -1886,56 +1923,90 @@ func testKey(v *Nvim) func(*testing.T) {
 						Buffer:  0,
 						SID:     0,
 						NoWait:  0,
-						Mode:    "",
 					},
 				}
+				wantMapsLen := 0
+				if nvimVersion.Minor >= 6 {
+					lastMap := wantMaps[0]
+					wantMaps = []*Mapping{
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate<CR><C-L>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						lastMap,
+					}
+					wantMapsLen = 2
+				}
 				var got []*Mapping
-				b.KeyMap("n", &got)
+				b.KeyMap(mode, &got)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				if !reflect.DeepEqual(wantMap, got) {
-					t.Fatalf("KeyMap(n) = %#v, want: %#v", got, wantMap)
+				if !reflect.DeepEqual(got, wantMaps) {
+					for i, gotmap := range got {
+						t.Logf(" got[%d]: %#v", i, gotmap)
+					}
+					for i, wantmap := range wantMaps {
+						t.Logf("want[%d]: %#v", i, wantmap)
+					}
+					t.Fatalf("KeyMap(%s) = %#v, want: %#v", mode, got, wantMaps)
 				}
 
-				b.DeleteKeyMap("n", "y")
+				b.DeleteKeyMap(mode, "y")
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
+
 				var got2 []*Mapping
-				b.KeyMap("n", &got2)
+				b.KeyMap(mode, &got2)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				if len(got2) > 0 {
-					t.Fatalf("expected 0 but got %#v", got2)
+				if len(got2) != wantMapsLen {
+					t.Fatalf("expected %d but got %#v", wantMapsLen, got2)
 				}
 			})
 
 			t.Run("BufferKeyMap", func(t *testing.T) {
+				mode := "n"
 				b := v.NewBatch()
 
 				buffer := Buffer(0)
-				b.SetBufferKeyMap(buffer, "n", "y", "yy", make(map[string]bool))
+				b.SetBufferKeyMap(buffer, mode, "x", "xx", make(map[string]bool))
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
 
 				wantMap := []*Mapping{
 					{
-						LHS:     "y",
-						RHS:     "yy",
+						LHS:     "x",
+						RHS:     "xx",
 						Silent:  0,
 						NoRemap: 0,
 						Expr:    0,
 						Buffer:  1,
 						SID:     0,
 						NoWait:  0,
-						Mode:    "",
 					},
 				}
 				var got []*Mapping
-				b.BufferKeyMap(buffer, "n", &got)
+				b.BufferKeyMap(buffer, mode, &got)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
@@ -1944,13 +2015,13 @@ func testKey(v *Nvim) func(*testing.T) {
 					t.Fatalf("KeyMap(n) = %#v, want: %#v", got[0], wantMap[0])
 				}
 
-				b.DeleteBufferKeyMap(buffer, "n", "y")
+				b.DeleteBufferKeyMap(buffer, mode, "x")
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
 
 				var got2 []*Mapping
-				b.BufferKeyMap(buffer, "n", &got2)
+				b.BufferKeyMap(buffer, mode, &got2)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
