@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -79,11 +80,70 @@ func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 	return v, cleanup
 }
 
+type version struct {
+	Major int
+	Minor int
+	Patch int
+}
+
+var nvimVersion version
+
+func parseVersion(tb testing.TB, version string) (major, minor, patch int) {
+	tb.Helper()
+
+	version = strings.TrimPrefix(version, "v")
+	vpair := strings.Split(version, ".")
+	if len(vpair) != 3 {
+		tb.Fatal("could not parse neovim version")
+	}
+
+	var err error
+	major, err = strconv.Atoi(vpair[0])
+	if err != nil {
+		tb.Fatal(err)
+	}
+	minor, err = strconv.Atoi(vpair[1])
+	if err != nil {
+		tb.Fatal(err)
+	}
+	patch, err = strconv.Atoi(vpair[2])
+	if err != nil {
+		tb.Fatal(err)
+	}
+
+	return major, minor, patch
+}
+
+func skipVersion(tb testing.TB, version string) {
+	major, minor, patch := parseVersion(tb, version)
+
+	const skipFmt = "skip test: current neovim version v%d.%d.%d but expected version %s"
+	if nvimVersion.Major < major || nvimVersion.Minor < minor || nvimVersion.Patch < patch {
+		tb.Skipf(skipFmt, nvimVersion.Major, nvimVersion.Minor, nvimVersion.Patch, version)
+	}
+}
+
 func TestAPI(t *testing.T) {
 	t.Parallel()
 
 	v, cleanup := newChildProcess(t)
 	defer cleanup()
+
+	apiInfo, err := v.APIInfo()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(apiInfo) != 2 {
+		t.Fatalf("unknown APIInfo: %#v", apiInfo)
+	}
+	info, ok := apiInfo[1].(map[string]interface{})
+	if !ok {
+		t.Fatalf("apiInfo[1] is not map[string]interface{} type: %T", apiInfo[1])
+	}
+	infoV := info["version"].(map[string]interface{})
+	nvimVersion.Major = int(infoV["major"].(int64))
+	nvimVersion.Minor = int(infoV["minor"].(int64))
+	nvimVersion.Patch = int(infoV["patch"].(int64))
 
 	t.Run("BufAttach", testBufAttach(v))
 	t.Run("SimpleHandler", testSimpleHandler(v))
