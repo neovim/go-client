@@ -2244,10 +2244,12 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			const (
-				HLIDName      = "Error"
-				wantErrorHLID = 140
-			)
+			const HLIDName = `Error`
+			var wantErrorHLID = 140
+			if nvimVersion.Minor >= 6 {
+				wantErrorHLID = 64
+			}
+
 			goHLID, err := v.HLIDByName(HLIDName)
 			if err != nil {
 				t.Fatal(err)
@@ -2367,10 +2369,12 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			const (
-				HLIDName      = `Error`
-				wantErrorHLID = 140
-			)
+			const HLIDName = `Error`
+			var wantErrorHLID = 140
+			if nvimVersion.Minor >= 6 {
+				wantErrorHLID = 64
+			}
+
 			var goHLID int
 			b.HLIDByName(HLIDName, &goHLID)
 			if err := b.Execute(); err != nil {
