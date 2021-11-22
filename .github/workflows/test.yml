@@ -29,6 +29,9 @@ jobs:
           - 1.15.x
           - 1.16.x
           - 1.17.x
+        neovim-version:
+          - v0.5.1
+          - nightly
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
@@ -52,19 +55,52 @@ jobs:
       with:
         key: go-${{ env.OS }}-${{ hashFiles('**/go.mod') }}
         path: |
-          ~/go/pkg/mod               # Module download cache
-          ~/.cache/go-build          # Build cache (Linux)
-          ~/Library/Caches/go-build  # Build cache (Mac)
-          '%LocalAppData%\go-build'  # Build cache (Windows)
+          ~/go/pkg/mod
+          ~/.cache/go-build
+          ~/Library/Caches/go-build
+          '%LocalAppData%\go-build'
         restore-keys: |
           go-${{ env.OS }}-
 
-    - name: Install nvim binary
+    - name: Cache neovim binary (linux)
+      id: cache-nvim-linux
+      uses: actions/cache@v2
+      if: ${{ env.OS == 'linux' && matrix.neovim-version != 'nightly' }}
+      with:
+        key: nvim-${{ env.OS }}-${{ matrix.neovim-version }}-no2f8ibgdwqj
+        path: |
+          /home/runner/nvim-${{ matrix.neovim-version }}
+        restore-keys: |
+          nvim-${{ env.OS }}-${{ matrix.neovim-version }}
+
+    - name: Cache neovim binary (macOS)
+      id: cache-nvim-macos
+      uses: actions/cache@v2
+      if: ${{ env.OS == 'macos' && matrix.neovim-version != 'nightly' }}
+      with:
+        key: nvim-${{ env.OS }}-${{ matrix.neovim-version }}-no2f8ibgdwqj
+        path: |
+          /Users/runner/nvim-${{ matrix.neovim-version }}
+        restore-keys: |
+          nvim-${{ env.OS }}-${{ matrix.neovim-version }}
+
+    - name: Cache neovim binary (Windows)
+      id: cache-nvim-windows
+      uses: actions/cache@v2
+      if: ${{ env.OS == 'windows' && matrix.neovim-version != 'nightly' }}
+      with:
+        key: nvim-${{ env.OS }}-${{ matrix.neovim-version }}-no2f8ibgdwqj
+        path: |
+          C:\Users\runneradmin\nvim-${{ matrix.neovim-version }}
+        restore-keys: |
+          nvim-${{ env.OS }}-${{ matrix.neovim-version }}
+
+    - name: Install neovim binary
       uses: rhysd/action-setup-vim@v1
-      if: steps.cache-nvim.outputs.cache-hit != 'true' || steps.cache-nvim-windows.outputs.cache-hit != 'true'
+      if: steps.cache-nvim-linux.outputs.cache-hit != 'true' || steps.cache-nvim-macos.outputs.cache-hit != 'true' || steps.cache-nvim-windows.outputs.cache-hit != 'true'
       with:
         neovim: true
-        version: nightly
+        version: ${{ matrix.neovim-version }}
 
     - name: gofmt
       if: ${{ env.OS != 'windows' }}
