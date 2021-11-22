@@ -1939,7 +1939,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 					Name:          "hidden",
 					ShortName:     "hid",
 					Type:          "boolean",
-					Default:       false,
+					Default:       true,
 					WasSet:        false,
 					LastSetSid:    0,
 					LastSetLinenr: 0,
@@ -1953,9 +1953,14 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 		}
 
 		for name, tt := range tests {
+			name := name
 			tt := tt
 			t.Run("Nvim/"+name, func(t *testing.T) {
 				t.Parallel()
+
+				if name == "hidden" {
+					skipVersion(t, "v0.6.0")
+				}
 
 				got, err := v.OptionInfo(tt.name)
 				if err != nil {
@@ -1968,9 +1973,14 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 		}
 
 		for name, tt := range tests {
+			name := name
 			tt := tt
 			t.Run("Batch/"+name, func(t *testing.T) {
 				t.Parallel()
+
+				if name == "hidden" {
+					skipVersion(t, "v0.6.0")
+				}
 
 				b := v.NewBatch()
 
