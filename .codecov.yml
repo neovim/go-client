@@ -1,137 +1,322 @@
-projects: *projects
-  target: auto
-  threshold: 1%
-  if_ci_failed: error
-  if_not_found: success
-patch: *patch
-  only_pulls: true
-  target: auto
-  threshold: 10%
-  if_ci_failed: error
-  if_not_found: failure
-
 codecov:
   allow_coverage_offsets: true
 
+parsers:
+  go:
+    partials_as_hits: true
+
 coverage:
   precision: 1
-  round: down
   range: "70...100"
+  round: down
 
   status:
+    default_rules:
+      flag_coverage_not_uploaded_behavior: include
+
     project:
       default: false
-      linux-1.13:
-        <<: *projects
+      linux-1.15-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "linux-1.14"
-      linux-1.14:
-        <<: *projects
+          - linux-1.15-stable
+      linux-1.15-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "linux-1.15"
-      linux-1.15:
-        <<: *projects
+          - linux-1.15-nightly
+      linux-1.16-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "linux-1.16"
-      macos-1.13:
-        <<: *projects
+          - linux-1.16-stable
+      linux-1.16-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "macos-1.14"
-      macos-1.14:
-        <<: *projects
+          - linux-1.16-nightly
+      linux-1.17-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "macos-1.15"
-      macos-1.15:
-        <<: *projects
+          - linux-1.17-stable
+      linux-1.17-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "macos-1.16"
-      windows-1.13:
-        <<: *projects
+          - linux-1.17-nightly
+      macos-1.15-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "windows-1.14"
-      windows-1.14:
-        <<: *projects
+          - macos-1.15-stable
+      macos-1.15-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "windows-1.15"
-      windows-1.15:
-        <<: *projects
+          - macos-1.15-nightly
+      macos-1.16-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
         flags:
-          - "windows-1.16"
+          - macos-1.16-stable
+      macos-1.16-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - macos-1.16-nightly
+      macos-1.17-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - macos-1.17-stable
+      macos-1.17-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - macos-1.17-nightly
+      windows-1.15-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - windows-1.15-stable
+      windows-1.15-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - windows-1.15-nightly
+      windows-1.16-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - windows-1.16-stable
+      windows-1.16-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - windows-1.16-nightly
+      windows-1.17-stable:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - windows-1.17-stable
+      windows-1.17-nightly:
+        target: auto
+        threshold: 1.0
+        if_not_found: success
+        flags:
+          - windows-1.17-nightly
+
     patch:
       default: false
-      linux-1.13:
-        <<: *patch
-      linux-1.14:
-        <<: *patch
-      linux-1.15:
-        <<: *patch
-      macos-1.13:
-        <<: *patch
-      macos-1.14:
-        <<: *patch
-      macos-1.15:
-        <<: *patch
-      windows-1.13:
-        <<: *patch
-      windows-1.14:
-        <<: *patch
-      windows-1.15:
-        <<: *patch
+      linux-1.15-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      linux-1.15-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      linux-1.16-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      linux-1.16-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      linux-1.17-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      linux-1.17-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      macos-1.15-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      macos-1.15-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      macos-1.16-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      macos-1.16-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      macos-1.17-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      macos-1.17-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      windows-1.15-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      windows-1.15-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      windows-1.16-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      windows-1.16-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      windows-1.17-stable:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+      windows-1.17-nightly:
+        target: auto
+        threshold: 10.0
+        only_pulls: true
+        if_not_found: failure
+
     changes:
       default:
-        if_ci_failed: error
         if_not_found: success
         only_pulls: false
         branches:
           - master
         flags:
-          - "linux-1.14"
-          - "linux-1.15"
-          - "linux-1.16"
-          - "macos-1.14"
-          - "macos-1.15"
-          - "macos-1.16"
-          - "windows-1.14"
-          - "windows-1.15"
-          - "windows-1.16"
+          - "linux-1.15-stable"
+          - "linux-1.15-nightly"
+          - "linux-1.16-stable"
+          - "linux-1.16-nightly"
+          - "linux-1.17-stable"
+          - "linux-1.17-nightly"
+          - "macos-1.15-stable"
+          - "macos-1.15-nightly"
+          - "macos-1.16-stable"
+          - "macos-1.16-nightly"
+          - "macos-1.17-stable"
+          - "macos-1.17-nightly"
+          - "windows-1.15-stable"
+          - "windows-1.15-nightly"
+          - "windows-1.16-stable"
+          - "windows-1.16-nightly"
+          - "windows-1.17-stable"
+          - "windows-1.17-nightly"
 
 flags:
-  linux-1.14:
+  linux-1.15-nightly:
+    carryforward: true
     paths:
       - /
+  linux-1.15-stable:
     carryforward: true
-  linux-1.15:
     paths:
       - /
+  linux-1.16-nightly:
     carryforward: true
-  linux-1.16:
     paths:
       - /
+  linux-1.16-stable:
     carryforward: true
-  macos-1.14:
     paths:
       - /
+  linux-1.17-nightly:
     carryforward: true
-  macos-1.15:
     paths:
       - /
+  linux-1.17-stable:
     carryforward: true
-  macos-1.16:
     paths:
       - /
+  macos-1.15-nightly:
     carryforward: true
-  windows-1.14:
     paths:
       - /
+  macos-1.15-stable:
     carryforward: true
-  windows-1.15:
     paths:
       - /
+  macos-1.16-nightly:
     carryforward: true
-  windows-1.16:
     paths:
       - /
+  macos-1.16-stable:
     carryforward: true
+    paths:
+      - /
+  macos-1.17-nightly:
+    carryforward: true
+    paths:
+      - /
+  macos-1.17-stable:
+    carryforward: true
+    paths:
+      - /
+  windows-1.15-nightly:
+    carryforward: true
+    paths:
+      - /
+  windows-1.15-stable:
+    carryforward: true
+    paths:
+      - /
+  windows-1.16-nightly:
+    carryforward: true
+    paths:
+      - /
+  windows-1.16-stable:
+    carryforward: true
+    paths:
+      - /
+  windows-1.17-nightly:
+    carryforward: true
+    paths:
+      - /
+  windows-1.17-stable:
+    carryforward: true
+    paths:
+      - /
 
 comment:
   behavior: default
