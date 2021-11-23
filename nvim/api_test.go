@@ -256,8 +256,6 @@ func testAPIInfo(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var apiinfo []interface{}
@@ -748,8 +746,6 @@ func testWindow(v *Nvim) func(*testing.T) {
 func testTabpage(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			pages, err := v.Tabpages()
 			if err != nil {
 				t.Fatal(err)
@@ -780,8 +776,6 @@ func testTabpage(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var pages []Tabpage
@@ -1086,8 +1080,6 @@ func testLines(v *Nvim) func(*testing.T) {
 func testCommands(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			opts := map[string]interface{}{
 				"builtin": false,
 			}
@@ -1101,8 +1093,6 @@ func testCommands(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			opts := map[string]interface{}{
@@ -2070,8 +2060,6 @@ func testKey(v *Nvim) func(*testing.T) {
 func testEval(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			var a, b string
 			if err := v.Eval(`["hello", "world"]`, []*string{&a, &b}); err != nil {
 				t.Fatal(err)
@@ -2082,8 +2070,6 @@ func testEval(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var x, y string
@@ -2185,8 +2171,6 @@ func testBatch(v *Nvim) func(*testing.T) {
 func testMode(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			m, err := v.Mode()
 			if err != nil {
 				t.Fatal(err)
@@ -2197,8 +2181,6 @@ func testMode(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var m Mode
@@ -2216,8 +2198,6 @@ func testMode(v *Nvim) func(*testing.T) {
 func testExecLua(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			var n int
 			err := v.ExecLua("local a, b = ... return a + b", &n, 1, 2)
 			if err != nil {
@@ -2229,8 +2209,6 @@ func testExecLua(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var n int
@@ -2248,8 +2226,6 @@ func testExecLua(v *Nvim) func(*testing.T) {
 func testHighlight(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			cm, err := v.ColorMap()
 			if err != nil {
 				t.Fatal(err)
@@ -2371,8 +2347,6 @@ func testHighlight(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var cm map[string]int
@@ -3054,11 +3028,7 @@ func testPutPaste(v *Nvim) func(*testing.T) {
 func testNamespace(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Namespace", func(t *testing.T) {
-			t.Parallel()
-
 			t.Run("Nvim", func(t *testing.T) {
-				t.Parallel()
-
 				const nsName = "test-nvim"
 				nsID, err := v.CreateNamespace(nsName)
 				if err != nil {
@@ -3081,8 +3051,6 @@ func testNamespace(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("Batch", func(t *testing.T) {
-				t.Parallel()
-
 				b := v.NewBatch()
 
 				const nsName = "test-batch"
@@ -3125,10 +3093,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 			}
 
 			for name, tt := range tests {
-				tt := tt
 				t.Run("Nvim/"+name, func(t *testing.T) {
-					t.Parallel()
-
 					var got interface{}
 					if err := v.Option(tt.name, &got); err != nil {
 						t.Fatal(err)
@@ -3140,10 +3105,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 			}
 
 			for name, tt := range tests {
-				tt := tt
 				t.Run("Batch/"+name, func(t *testing.T) {
-					t.Parallel()
-
 					b := v.NewBatch()
 
 					var got interface{}
@@ -3171,10 +3133,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 			}
 
 			for name, tt := range tests {
-				tt := tt
 				t.Run("Nvim/"+name, func(t *testing.T) {
-					t.Parallel()
-
 					if err := v.SetOption(tt.name, tt.want); err != nil {
 						t.Fatal(err)
 					}
@@ -3190,10 +3149,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 			}
 
 			for name, tt := range tests {
-				tt := tt
 				t.Run("Batch/"+name, func(t *testing.T) {
-					t.Parallel()
-
 					b := v.NewBatch()
 					b.SetOption(tt.name, tt.want)
 					if err := b.Execute(); err != nil {
@@ -3271,11 +3227,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 			}
 
 			for name, tt := range tests {
-				name := name
-				tt := tt
 				t.Run("Nvim/"+name, func(t *testing.T) {
-					t.Parallel()
-
 					if name == "hidden" {
 						skipVersion(t, "v0.6.0")
 					}
@@ -3291,11 +3243,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 			}
 
 			for name, tt := range tests {
-				name := name
-				tt := tt
 				t.Run("Batch/"+name, func(t *testing.T) {
-					t.Parallel()
-
 					if name == "hidden" {
 						skipVersion(t, "v0.6.0")
 					}
@@ -3413,11 +3361,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 		}
 
 		for name, tt := range tests {
-			name := name
-			tt := tt
 			t.Run("Nvim/"+name, func(t *testing.T) {
-				t.Parallel()
-
 				if name == "hidden" {
 					skipVersion(t, "v0.6.0")
 				}
@@ -3433,11 +3377,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 		}
 
 		for name, tt := range tests {
-			name := name
-			tt := tt
 			t.Run("Batch/"+name, func(t *testing.T) {
-				t.Parallel()
-
 				if name == "hidden" {
 					skipVersion(t, "v0.6.0")
 				}
@@ -3461,8 +3401,6 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 func testTerm(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			buf, err := v.CreateBuffer(true, true)
 			if err != nil {
 				t.Fatal(err)
@@ -3491,8 +3429,6 @@ func testTerm(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			var buf Buffer
