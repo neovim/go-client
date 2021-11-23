@@ -321,6 +321,7 @@ flags:
 comment:
   behavior: default
   require_changes: true
+  show_carryforward_flags: true
 
 github_checks:
   annotations: true
