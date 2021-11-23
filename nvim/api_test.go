@@ -118,6 +118,7 @@ func TestAPI(t *testing.T) {
 	t.Run("AllOptionsInfo", testAllOptionsInfo(v))
 	t.Run("OptionsInfo", testOptionsInfo(v))
 	t.Run("OpenTerm", testTerm(v))
+	t.Run("ClientInfo", testClientInfo(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -3509,6 +3510,64 @@ func testTerm(v *Nvim) func(*testing.T) {
 
 			data := "\x1b[38;2;00;00;255mTRUECOLOR\x1b[0m"
 			b.Call("chansend", nil, termID, data)
+
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func testClientInfo(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		const clientNamePrefix = "testClient"
+
+		var (
+			clientVersion = &ClientVersion{
+				Major:      1,
+				Minor:      2,
+				Patch:      3,
+				Prerelease: "-dev",
+				Commit:     "e07b9dde387bc817d36176bbe1ce58acd3c81921",
+			}
+			clientType    = string(RemoteClientType)
+			clientMethods = map[string]*ClientMethod{
+				"foo": {
+					Async: true,
+					NArgs: ClientMethodNArgs{
+						Min: 0,
+						Max: 1,
+					},
+				},
+				"bar": {
+					Async: false,
+					NArgs: ClientMethodNArgs{
+						Min: 0,
+						Max: 0,
+					},
+				},
+			}
+			clientAttributes = ClientAttributes{
+				ClientAttributeKeyLicense: "Apache-2.0",
+			}
+		)
+
+		t.Run("Nvim", func(t *testing.T) {
+			t.Parallel()
+
+			clientName := clientNamePrefix + "Nvim"
+			if err := v.SetClientInfo(clientName, clientVersion, clientType, clientMethods, clientAttributes); err != nil {
+				t.Fatal(err)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Parallel()
+
+			b := v.NewBatch()
+
+			clientName := clientNamePrefix + "Batch"
+			b.SetClientInfo(clientName, clientVersion, clientType, clientMethods, clientAttributes)
 
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
