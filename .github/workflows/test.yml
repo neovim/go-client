@@ -41,6 +41,7 @@ jobs:
       run: |
         echo "OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         echo "GO_VERSION=$(echo ${{ matrix.go-version }} | cut -d. -f-2)" >> $GITHUB_ENV
+        echo "NVIM_VERSION=$(if [ ${{ matrix.neovim-version }} != 'nightly' ]; then echo 'stable'; else echo 'nightly'; fi)" >> $GITHUB_ENV
 
     - name: Install Go
       uses: actions/setup-go@v2
@@ -112,8 +113,8 @@ jobs:
         go vet ./...
         go test -v -race -count=1 -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v2
       with:
         file: coverage.out
-        flags: ${{ env.OS }}-${{ env.GO_VERSION }}
+        flags: ${{ env.OS }}-${{ env.GO_VERSION }}-${{ env.NVIM_VERSION }}
         fail_ci_if_error: true
