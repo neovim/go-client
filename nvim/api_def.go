@@ -689,7 +689,7 @@ func APIInfo() (apiInfo []interface{}) {
 // Can be called more than once; the caller should merge old info if
 // appropriate. Example: library first identifies the channel, then a plugin
 // using that library later identifies itself.
-func SetClientInfo(name string, version *ClientVersion, typ string, methods map[string]*ClientMethod, attributes ClientAttributes) {
+func SetClientInfo(name string, version ClientVersion, typ ClientType, methods map[string]*ClientMethod, attributes ClientAttributes) {
 	name(nvim_set_client_info)
 }
 
