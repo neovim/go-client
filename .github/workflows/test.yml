@@ -117,4 +117,4 @@ jobs:
       with:
         file: coverage.out
         flags: ${{ env.OS }}-${{ env.GO_VERSION }}-${{ env.NVIM_VERSION }}
-        fail_ci_if_error: true
+        env_vars: OS,GO_VERSION,NVIM_VERSION
