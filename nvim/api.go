@@ -1445,7 +1445,7 @@ func (b *Batch) APIInfo(apiInfo *[]interface{}) {
 // Can be called more than once; the caller should merge old info if
 // appropriate. Example: library first identifies the channel, then a plugin
 // using that library later identifies itself.
-func (v *Nvim) SetClientInfo(name string, version *ClientVersion, typ string, methods map[string]*ClientMethod, attributes ClientAttributes) error {
+func (v *Nvim) SetClientInfo(name string, version ClientVersion, typ ClientType, methods map[string]*ClientMethod, attributes ClientAttributes) error {
 	return v.call("nvim_set_client_info", nil, name, version, typ, methods, attributes)
 }
 
@@ -1457,7 +1457,7 @@ func (v *Nvim) SetClientInfo(name string, version *ClientVersion, typ string, me
 // Can be called more than once; the caller should merge old info if
 // appropriate. Example: library first identifies the channel, then a plugin
 // using that library later identifies itself.
-func (b *Batch) SetClientInfo(name string, version *ClientVersion, typ string, methods map[string]*ClientMethod, attributes ClientAttributes) {
+func (b *Batch) SetClientInfo(name string, version ClientVersion, typ ClientType, methods map[string]*ClientMethod, attributes ClientAttributes) {
 	b.call("nvim_set_client_info", nil, name, version, typ, methods, attributes)
 }
 
