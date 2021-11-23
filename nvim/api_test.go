@@ -627,6 +627,18 @@ func testWindow(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
+			if err := v.SetCurrentWindow(win); err != nil {
+				t.Fatal(err)
+			}
+
+			gotwin, err := v.CurrentWindow()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if gotwin != win {
+				t.Fatalf("expected current window %s but got %s", win, gotwin)
+			}
+
 			if err := v.HideWindow(win2); err != nil {
 				t.Fatalf("failed to HideWindow(%v)", win2)
 			}
@@ -687,6 +699,17 @@ func testWindow(v *Nvim) func(*testing.T) {
 			b.CurrentWindow(&win2)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
+			}
+
+			b.SetCurrentWindow(win)
+
+			var gotwin Window
+			b.CurrentWindow(&gotwin)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if gotwin != win {
+				t.Fatalf("expected current window %s but got %s", win, gotwin)
 			}
 
 			b.HideWindow(win2)
