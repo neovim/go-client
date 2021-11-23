@@ -128,7 +128,7 @@ func TestAPI(t *testing.T) {
 	t.Run("AllOptionsInfo", testAllOptionsInfo(v))
 	t.Run("OptionsInfo", testOptionsInfo(v))
 	t.Run("OpenTerm", testTerm(v))
-	t.Run("ClientInfo", testClientInfo(v))
+	t.Run("ChannelClientInfo", testChannelClientInfo(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -3528,7 +3528,7 @@ func testTerm(v *Nvim) func(*testing.T) {
 	}
 }
 
-func testClientInfo(v *Nvim) func(*testing.T) {
+func testChannelClientInfo(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		const clientNamePrefix = "testClient"
 
@@ -3560,28 +3560,31 @@ func testClientInfo(v *Nvim) func(*testing.T) {
 			clientAttributes = ClientAttributes{
 				ClientAttributeKeyLicense: "Apache-2.0",
 			}
-			client = &Client{
-				Version:    clientVersion,
-				Type:       clientType,
-				Methods:    clientMethods,
-				Attributes: clientAttributes,
-			}
 		)
 
 		t.Run("Nvim", func(t *testing.T) {
 			clientName := clientNamePrefix + "Nvim"
-			if err := v.SetClientInfo(clientName, &clientVersion, string(clientType), clientMethods, clientAttributes); err != nil {
-				t.Fatal(err)
-			}
 
-			t.Run("Channel", func(t *testing.T) {
-				client := client // shallow copy
-				client.Name = clientName
+			t.Run("SetClientInfo", func(t *testing.T) {
+				if err := v.SetClientInfo(clientName, clientVersion, clientType, clientMethods, clientAttributes); err != nil {
+					t.Fatal(err)
+				}
+			})
+
+			t.Run("ChannelInfo", func(t *testing.T) {
+				wantClient := &Client{
+					Name:       clientName,
+					Version:    clientVersion,
+					Type:       clientType,
+					Methods:    clientMethods,
+					Attributes: clientAttributes,
+				}
 				wantChannel := &Channel{
 					Stream: "stdio",
 					Mode:   "rpc",
-					Client: client,
+					Client: wantClient,
 				}
+
 				gotChannel, err := v.ChannelInfo(int(channelID))
 				if err != nil {
 					t.Fatal(err)
@@ -3594,21 +3597,29 @@ func testClientInfo(v *Nvim) func(*testing.T) {
 
 		t.Run("Batch", func(t *testing.T) {
 			b := v.NewBatch()
-
 			clientName := clientNamePrefix + "Batch"
-			b.SetClientInfo(clientName, &clientVersion, string(clientType), clientMethods, clientAttributes)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
 
-			t.Run("Channel", func(t *testing.T) {
-				client := client // shallow copy
-				client.Name = clientName
+			t.Run("SetClientInfo", func(t *testing.T) {
+				b.SetClientInfo(clientName, clientVersion, clientType, clientMethods, clientAttributes)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+			})
+
+			t.Run("ChannelInfo", func(t *testing.T) {
+				wantClient := &Client{
+					Name:       clientName,
+					Version:    clientVersion,
+					Type:       clientType,
+					Methods:    clientMethods,
+					Attributes: clientAttributes,
+				}
 				wantChannel := &Channel{
 					Stream: "stdio",
 					Mode:   "rpc",
-					Client: client,
+					Client: wantClient,
 				}
+
 				var gotChannel Channel
 				b.ChannelInfo(int(channelID), &gotChannel)
 				if err := b.Execute(); err != nil {
