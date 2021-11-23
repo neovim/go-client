@@ -23,7 +23,10 @@ type version struct {
 	Patch int
 }
 
-var nvimVersion version
+var (
+	channelID   int64
+	nvimVersion version
+)
 
 func parseVersion(tb testing.TB, version string) (major, minor, patch int) {
 	tb.Helper()
@@ -82,6 +85,13 @@ func TestAPI(t *testing.T) {
 	if len(apiInfo) != 2 {
 		t.Fatalf("unknown APIInfo: %#v", apiInfo)
 	}
+
+	var ok bool
+	channelID, ok = apiInfo[0].(int64)
+	if !ok {
+		t.Fatalf("apiInfo[0] is not int64 type: %T", apiInfo[0])
+	}
+
 	info, ok := apiInfo[1].(map[string]interface{})
 	if !ok {
 		t.Fatalf("apiInfo[1] is not map[string]interface{} type: %T", apiInfo[1])
@@ -3523,14 +3533,14 @@ func testClientInfo(v *Nvim) func(*testing.T) {
 		const clientNamePrefix = "testClient"
 
 		var (
-			clientVersion = &ClientVersion{
+			clientVersion = ClientVersion{
 				Major:      1,
 				Minor:      2,
 				Patch:      3,
 				Prerelease: "-dev",
 				Commit:     "e07b9dde387bc817d36176bbe1ce58acd3c81921",
 			}
-			clientType    = string(RemoteClientType)
+			clientType    = RemoteClientType
 			clientMethods = map[string]*ClientMethod{
 				"foo": {
 					Async: true,
@@ -3550,28 +3560,64 @@ func testClientInfo(v *Nvim) func(*testing.T) {
 			clientAttributes = ClientAttributes{
 				ClientAttributeKeyLicense: "Apache-2.0",
 			}
+			client = &Client{
+				Version:    clientVersion,
+				Type:       clientType,
+				Methods:    clientMethods,
+				Attributes: clientAttributes,
+			}
 		)
 
 		t.Run("Nvim", func(t *testing.T) {
-			t.Parallel()
-
 			clientName := clientNamePrefix + "Nvim"
-			if err := v.SetClientInfo(clientName, clientVersion, clientType, clientMethods, clientAttributes); err != nil {
+			if err := v.SetClientInfo(clientName, &clientVersion, string(clientType), clientMethods, clientAttributes); err != nil {
 				t.Fatal(err)
 			}
+
+			t.Run("Channel", func(t *testing.T) {
+				client := client // shallow copy
+				client.Name = clientName
+				wantChannel := &Channel{
+					Stream: "stdio",
+					Mode:   "rpc",
+					Client: client,
+				}
+				gotChannel, err := v.ChannelInfo(int(channelID))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(gotChannel, wantChannel) {
+					t.Fatalf("got %#v channel but want %#v channel", gotChannel, wantChannel)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Parallel()
-
 			b := v.NewBatch()
 
 			clientName := clientNamePrefix + "Batch"
-			b.SetClientInfo(clientName, clientVersion, clientType, clientMethods, clientAttributes)
-
+			b.SetClientInfo(clientName, &clientVersion, string(clientType), clientMethods, clientAttributes)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
+
+			t.Run("Channel", func(t *testing.T) {
+				client := client // shallow copy
+				client.Name = clientName
+				wantChannel := &Channel{
+					Stream: "stdio",
+					Mode:   "rpc",
+					Client: client,
+				}
+				var gotChannel Channel
+				b.ChannelInfo(int(channelID), &gotChannel)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(&gotChannel, wantChannel) {
+					t.Fatalf("got %#v channel but want %#v channel", &gotChannel, wantChannel)
+				}
+			})
 		})
 	}
 }
