@@ -982,6 +982,8 @@ func testWindow(v *Nvim) func(*testing.T) {
 			}
 
 			t.Run("WindowBuffer", func(t *testing.T) {
+				skipVersion(t, "v0.6.0")
+
 				gotBuf, err := v.WindowBuffer(Window(0))
 				if err != nil {
 					t.Fatal(err)
@@ -991,6 +993,38 @@ func testWindow(v *Nvim) func(*testing.T) {
 				if gotBuf != wantBuffer {
 					t.Fatalf("want %s buffer but got %s", wantBuffer, gotBuf)
 				}
+
+				buf, err := v.CreateBuffer(true, true)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.SetBufferToWindow(Window(0), buf); err != nil {
+					t.Fatal(err)
+				}
+
+				gotBuf2, err := v.WindowBuffer(Window(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if gotBuf2 != buf {
+					t.Fatalf("want %s buffer but got %s", buf, gotBuf2)
+				}
+
+				t.Cleanup(func() {
+					if err := v.SetBufferToWindow(Window(0), gotBuf); err != nil {
+						t.Fatal(err)
+					}
+
+					deleteBufferOpts := map[string]bool{
+						"force":  true,
+						"unload": false,
+					}
+					if err := v.DeleteBuffer(buf, deleteBufferOpts); err != nil {
+						t.Fatal(err)
+					}
+				})
 			})
 		})
 
@@ -1066,6 +1100,8 @@ func testWindow(v *Nvim) func(*testing.T) {
 			}
 
 			t.Run("WindowBuffer", func(t *testing.T) {
+				skipVersion(t, "v0.6.0")
+
 				b := v.NewBatch()
 
 				var gotBuf Buffer
@@ -1078,6 +1114,43 @@ func testWindow(v *Nvim) func(*testing.T) {
 				if gotBuf != wantBuffer {
 					t.Fatalf("want %s buffer but got %s", wantBuffer, gotBuf)
 				}
+
+				var buf Buffer
+				b.CreateBuffer(true, true, &buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.SetBufferToWindow(Window(0), buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var gotBuf2 Buffer
+				b.WindowBuffer(Window(0), &gotBuf2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if gotBuf2 != buf {
+					t.Fatalf("want %s buffer but got %s", buf, gotBuf2)
+				}
+
+				t.Cleanup(func() {
+					b.SetBufferToWindow(Window(0), gotBuf)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+
+					deleteBufferOpts := map[string]bool{
+						"force":  true,
+						"unload": false,
+					}
+					b.DeleteBuffer(buf, deleteBufferOpts)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				})
 			})
 		})
 	}
