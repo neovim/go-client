@@ -74,6 +74,8 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		}
 
 		if len(index) == d {
+			_ = fields[len(fields)-1] // bounds check hint to compiler
+
 			// There is another field with same name and same depth
 			// Remove that field and skip this field
 			j := 0
