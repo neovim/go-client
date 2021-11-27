@@ -57,7 +57,7 @@ func parseVersion(tb testing.TB, version string) (major, minor, patch int) {
 func skipVersion(tb testing.TB, version string) {
 	major, minor, patch := parseVersion(tb, version)
 
-	const skipFmt = "skip test: current neovim version v%d.%d.%d but expected version %s"
+	const skipFmt = "SKIP: current neovim version v%d.%d.%d but expected version %s"
 	if nvimVersion.Major < major || nvimVersion.Minor < minor || nvimVersion.Patch < patch {
 		tb.Skipf(skipFmt, nvimVersion.Major, nvimVersion.Minor, nvimVersion.Patch, version)
 	}
