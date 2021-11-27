@@ -1052,6 +1052,30 @@ func testWindow(v *Nvim) func(*testing.T) {
 					t.Fatalf("want %#v position buf got %#v", wantPos, gotPos)
 				}
 			})
+
+			t.Run("WindowVar", func(t *testing.T) {
+				wantValue := []int{1, 2}
+				if err := v.SetWindowVar(Window(0), "lua", wantValue); err != nil {
+					t.Fatal(err)
+				}
+
+				var gotValue []int
+				if err := v.WindowVar(Window(0), "lua", &gotValue); err != nil {
+					t.Fatal(err)
+				}
+
+				if !reflect.DeepEqual(gotValue, wantValue) {
+					t.Fatalf("want %#v but got %#v", wantValue, gotValue)
+				}
+
+				if err := v.DeleteWindowVar(Window(0), "lua"); err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.WindowVar(Window(0), "lua", nil); err == nil {
+					t.Fatalf("expect Key not found but fonud key")
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1180,6 +1204,8 @@ func testWindow(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("WindowCursor", func(t *testing.T) {
+				b := v.NewBatch()
+
 				wantLine := []byte("hello world")
 				b.SetCurrentLine(wantLine)
 				if err := b.Execute(); err != nil {
@@ -1206,6 +1232,36 @@ func testWindow(v *Nvim) func(*testing.T) {
 
 				if wantPos != gotPos {
 					t.Fatalf("want %#v position buf got %#v", wantPos, gotPos)
+				}
+			})
+
+			t.Run("WindowVar", func(t *testing.T) {
+				b := v.NewBatch()
+
+				wantValue := []int{1, 2}
+				b.SetWindowVar(Window(0), "lua", wantValue)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var gotValue []int
+				b.WindowVar(Window(0), "lua", &gotValue)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if !reflect.DeepEqual(gotValue, wantValue) {
+					t.Fatalf("want %#v but got %#v", wantValue, gotValue)
+				}
+
+				b.DeleteWindowVar(Window(0), "lua")
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.WindowVar(Window(0), "lua", nil)
+				if err := b.Execute(); err == nil {
+					t.Fatalf("expect Key not found but fonud key")
 				}
 			})
 		})
