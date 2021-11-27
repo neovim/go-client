@@ -3095,7 +3095,6 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				t.Fatalf("got %d height but want %d", gotHeight, wantHeight)
 			}
 
-			batch := v.NewBatch()
 			var (
 				numberOpt         bool
 				relativenumberOpt bool
@@ -3106,15 +3105,28 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				signcolumnOpt     string
 				colorcolumnOpt    string
 			)
-			batch.WindowOption(w, "number", &numberOpt)
-			batch.WindowOption(w, "relativenumber", &relativenumberOpt)
-			batch.WindowOption(w, "cursorline", &cursorlineOpt)
-			batch.WindowOption(w, "cursorcolumn", &cursorcolumnOpt)
-			batch.WindowOption(w, "spell", &spellOpt)
-			batch.WindowOption(w, "list", &listOpt)
-			batch.WindowOption(w, "signcolumn", &signcolumnOpt)
-			batch.WindowOption(w, "colorcolumn", &colorcolumnOpt)
-			if err := batch.Execute(); err != nil {
+			if err := v.WindowOption(w, "number", &numberOpt); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.WindowOption(w, "relativenumber", &relativenumberOpt); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.WindowOption(w, "cursorline", &cursorlineOpt); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.WindowOption(w, "cursorcolumn", &cursorcolumnOpt); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.WindowOption(w, "spell", &spellOpt); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.WindowOption(w, "list", &listOpt); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.WindowOption(w, "signcolumn", &signcolumnOpt); err != nil {
+				t.Fatal(err)
+			}
+			if err := v.WindowOption(w, "colorcolumn", &colorcolumnOpt); err != nil {
 				t.Fatal(err)
 			}
 			if numberOpt || relativenumberOpt || cursorlineOpt || cursorcolumnOpt || spellOpt || listOpt || signcolumnOpt != "auto" || colorcolumnOpt != "" {
