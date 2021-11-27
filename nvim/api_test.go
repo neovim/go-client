@@ -2994,14 +2994,14 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			wantWidth := 40
+			wantWidth := 50
 			wantHeight := 20
 
 			cfg := &WindowConfig{
 				Relative:  "cursor",
 				Anchor:    "NW",
-				Width:     wantWidth,
-				Height:    wantHeight,
+				Width:     40,
+				Height:    10,
 				Row:       1,
 				Col:       0,
 				Focusable: true,
@@ -3013,6 +3013,14 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 			}
 			if curwin == w {
 				t.Fatal("same window number: floating window not focused")
+			}
+
+			if err := v.SetWindowWidth(w, wantWidth); err != nil {
+				t.Fatal(err)
+			}
+
+			if err := v.SetWindowHeight(w, wantHeight); err != nil {
+				t.Fatal(err)
 			}
 
 			gotWidth, err := v.WindowWidth(w)
@@ -3068,14 +3076,14 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			wantWidth := 40
+			wantWidth := 50
 			wantHeight := 20
 
 			cfg := &WindowConfig{
 				Relative:  "cursor",
 				Anchor:    "NW",
-				Width:     wantWidth,
-				Height:    wantHeight,
+				Width:     40,
+				Height:    10,
 				Row:       1,
 				Col:       0,
 				Focusable: true,
@@ -3089,6 +3097,12 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 
 			if curwin == w {
 				t.Fatal("same window number: floating window not focused")
+			}
+
+			b.SetWindowWidth(w, wantWidth)
+			b.SetWindowHeight(w, wantHeight)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
 			}
 
 			var gotWidth int
