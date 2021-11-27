@@ -130,6 +130,7 @@ func TestAPI(t *testing.T) {
 	t.Run("OpenTerm", testTerm(v))
 	t.Run("ChannelClientInfo", testChannelClientInfo(v))
 	t.Run("UI", testUI(v))
+	t.Run("Proc", testProc(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -3597,6 +3598,79 @@ func testUI(v *Nvim) func(*testing.T) {
 
 				if len(gotUIs) > 0 || gotUIs != nil {
 					t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
+				}
+			})
+		})
+	}
+}
+
+func testProc(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			t.Run("Proc", func(t *testing.T) {
+				pid := os.Getpid()
+				ppid := os.Getppid()
+
+				wantProcess := &Process{
+					Name: "nvim.test",
+					PID:  pid,
+					PPID: ppid,
+				}
+				if runtime.GOOS == "windows" {
+					wantProcess.Name = "nvim.test.exe"
+				}
+
+				gotProc, err := v.Proc(pid)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if gotProc.Name != wantProcess.Name {
+					t.Fatalf("got %s Process.Name but want %s", gotProc.Name, wantProcess.Name)
+				}
+
+				if gotProc.PID != wantProcess.PID {
+					t.Fatalf("got %d Process.PID but want %d", gotProc.PID, wantProcess.PID)
+				}
+
+				if gotProc.PPID != wantProcess.PPID {
+					t.Fatalf("got %d Process.PPID but want %d", gotProc.PPID, wantProcess.PPID)
+				}
+			})
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Run("Proc", func(t *testing.T) {
+				b := v.NewBatch()
+
+				pid := os.Getpid()
+				ppid := os.Getppid()
+
+				wantProcess := &Process{
+					Name: "nvim.test",
+					PID:  pid,
+					PPID: ppid,
+				}
+				if runtime.GOOS == "windows" {
+					wantProcess.Name = "nvim.test.exe"
+				}
+
+				var gotProc Process
+				b.Proc(pid, &gotProc)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if gotProc.Name != wantProcess.Name {
+					t.Fatalf("got %s Process.Name but want %s", gotProc.Name, wantProcess.Name)
+				}
+
+				if gotProc.PID != wantProcess.PID {
+					t.Fatalf("got %d Process.PID but want %d", gotProc.PID, wantProcess.PID)
+				}
+
+				if gotProc.PPID != wantProcess.PPID {
+					t.Fatalf("got %d Process.PPID but want %d", gotProc.PPID, wantProcess.PPID)
 				}
 			})
 		})
