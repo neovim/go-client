@@ -558,6 +558,17 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					t.Fatalf("SetCurrentDirectory(%s) = %s, want: %s", wantDir, got, wantDir)
 				}
 			})
+
+			t.Run("BufferCommands", func(t *testing.T) {
+				commands, err := v.BufferCommands(Buffer(0), make(map[string]interface{}))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if len(commands) > 0 {
+					t.Fatalf("expected commands empty but non-zero: %#v", commands)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -707,6 +718,20 @@ func testBuffer(v *Nvim) func(*testing.T) {
 
 				if got != wantDir {
 					t.Fatalf("SetCurrentDirectory(%s) = %s, want: %s", wantDir, got, wantDir)
+				}
+			})
+
+			t.Run("BufferCommands", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var commands map[string]*Command
+				b.BufferCommands(Buffer(0), make(map[string]interface{}), &commands)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if len(commands) > 0 {
+					t.Fatalf("expected commands empty but non-zero: %#v", commands)
 				}
 			})
 		})
