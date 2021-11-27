@@ -135,113 +135,230 @@ func TestAPI(t *testing.T) {
 
 func testBufAttach(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		clearBuffer(t, v, 0) // clear curret buffer text
+		t.Run("Nvim", func(t *testing.T) {
+			clearBuffer(t, v, 0) // clear curret buffer text
 
-		changedtickChan := make(chan *ChangedtickEvent)
-		v.RegisterHandler(EventBufChangedtick, func(changedtickEvent ...interface{}) {
-			ev := &ChangedtickEvent{
-				Buffer:     changedtickEvent[0].(Buffer),
-				Changetick: changedtickEvent[1].(int64),
-			}
-			changedtickChan <- ev
-		})
-
-		bufLinesChan := make(chan *BufLinesEvent)
-		v.RegisterHandler(EventBufLines, func(bufLinesEvent ...interface{}) {
-			ev := &BufLinesEvent{
-				Buffer:      bufLinesEvent[0].(Buffer),
-				Changetick:  bufLinesEvent[1].(int64),
-				FirstLine:   bufLinesEvent[2].(int64),
-				LastLine:    bufLinesEvent[3].(int64),
-				IsMultipart: bufLinesEvent[5].(bool),
-			}
-			for _, line := range bufLinesEvent[4].([]interface{}) {
-				ev.LineData = append(ev.LineData, line.(string))
-			}
-			bufLinesChan <- ev
-		})
-
-		bufDetachChan := make(chan *BufDetachEvent)
-		v.RegisterHandler(EventBufDetach, func(bufDetachEvent ...interface{}) {
-			ev := &BufDetachEvent{
-				Buffer: bufDetachEvent[0].(Buffer),
-			}
-			bufDetachChan <- ev
-		})
-
-		ok, err := v.AttachBuffer(0, false, make(map[string]interface{})) // first 0 arg refers to the current buffer
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !ok {
-			t.Fatal(errors.New("could not attach buffer"))
-		}
-
-		changedtickExpected := &ChangedtickEvent{
-			Buffer:     Buffer(1),
-			Changetick: 3,
-		}
-		bufLinesEventExpected := &BufLinesEvent{
-			Buffer:      Buffer(1),
-			Changetick:  4,
-			FirstLine:   0,
-			LastLine:    1,
-			LineData:    []string{"foo", "bar", "baz", "qux", "quux", "quuz"},
-			IsMultipart: false,
-		}
-		bufDetachEventExpected := &BufDetachEvent{
-			Buffer: Buffer(1),
-		}
-
-		var numEvent int64 // add and load should be atomically
-		errc := make(chan error)
-		done := make(chan struct{})
-		go func() {
-			for {
-				select {
-				default:
-					if atomic.LoadInt64(&numEvent) == 3 { // end buf_attach test when handle 2 event
-						done <- struct{}{}
-						return
-					}
-				case changedtick := <-changedtickChan:
-					if !reflect.DeepEqual(changedtick, changedtickExpected) {
-						errc <- fmt.Errorf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
-					}
-					atomic.AddInt64(&numEvent, 1)
-				case bufLines := <-bufLinesChan:
-					if expected := bufLinesEventExpected; !reflect.DeepEqual(bufLines, expected) {
-						errc <- fmt.Errorf("bufLines = %+v, want %+v", bufLines, expected)
-					}
-					atomic.AddInt64(&numEvent, 1)
-				case detach := <-bufDetachChan:
-					if expected := bufDetachEventExpected; !reflect.DeepEqual(detach, expected) {
-						errc <- fmt.Errorf("bufDetach = %+v, want %+v", detach, expected)
-					}
-					atomic.AddInt64(&numEvent, 1)
+			changedtickChan := make(chan *ChangedtickEvent)
+			v.RegisterHandler(EventBufChangedtick, func(changedtickEvent ...interface{}) {
+				ev := &ChangedtickEvent{
+					Buffer:     changedtickEvent[0].(Buffer),
+					Changetick: changedtickEvent[1].(int64),
 				}
-			}
-		}()
+				changedtickChan <- ev
+			})
 
-		go func() {
-			<-done
-			close(errc)
-		}()
+			bufLinesChan := make(chan *BufLinesEvent)
+			v.RegisterHandler(EventBufLines, func(bufLinesEvent ...interface{}) {
+				ev := &BufLinesEvent{
+					Buffer:      bufLinesEvent[0].(Buffer),
+					Changetick:  bufLinesEvent[1].(int64),
+					FirstLine:   bufLinesEvent[2].(int64),
+					LastLine:    bufLinesEvent[3].(int64),
+					IsMultipart: bufLinesEvent[5].(bool),
+				}
+				for _, line := range bufLinesEvent[4].([]interface{}) {
+					ev.LineData = append(ev.LineData, line.(string))
+				}
+				bufLinesChan <- ev
+			})
 
-		test := [][]byte{[]byte("foo"), []byte("bar"), []byte("baz"), []byte("qux"), []byte("quux"), []byte("quuz")}
-		if err := v.SetBufferLines(Buffer(0), 0, -1, true, test); err != nil { // first 0 arg refers to the current buffer
-			t.Fatal(err)
-		}
+			bufDetachChan := make(chan *BufDetachEvent)
+			v.RegisterHandler(EventBufDetach, func(bufDetachEvent ...interface{}) {
+				ev := &BufDetachEvent{
+					Buffer: bufDetachEvent[0].(Buffer),
+				}
+				bufDetachChan <- ev
+			})
 
-		if detached, err := v.DetachBuffer(Buffer(0)); err != nil || !detached {
-			t.Fatal(err)
-		}
-
-		for err := range errc {
+			ok, err := v.AttachBuffer(0, false, make(map[string]interface{})) // first 0 arg refers to the current buffer
 			if err != nil {
 				t.Fatal(err)
 			}
-		}
+			if !ok {
+				t.Fatal(errors.New("could not attach buffer"))
+			}
+
+			changedtickExpected := &ChangedtickEvent{
+				Buffer:     Buffer(1),
+				Changetick: 3,
+			}
+			bufLinesEventExpected := &BufLinesEvent{
+				Buffer:      Buffer(1),
+				Changetick:  4,
+				FirstLine:   0,
+				LastLine:    1,
+				LineData:    []string{"foo", "bar", "baz", "qux", "quux", "quuz"},
+				IsMultipart: false,
+			}
+			bufDetachEventExpected := &BufDetachEvent{
+				Buffer: Buffer(1),
+			}
+
+			var numEvent int64 // add and load should be atomically
+			errc := make(chan error)
+			done := make(chan struct{})
+			go func() {
+				for {
+					select {
+					default:
+						if atomic.LoadInt64(&numEvent) == 3 { // end buf_attach test when handle 2 event
+							done <- struct{}{}
+							return
+						}
+					case changedtick := <-changedtickChan:
+						if !reflect.DeepEqual(changedtick, changedtickExpected) {
+							errc <- fmt.Errorf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
+						}
+						atomic.AddInt64(&numEvent, 1)
+					case bufLines := <-bufLinesChan:
+						if expected := bufLinesEventExpected; !reflect.DeepEqual(bufLines, expected) {
+							errc <- fmt.Errorf("bufLines = %+v, want %+v", bufLines, expected)
+						}
+						atomic.AddInt64(&numEvent, 1)
+					case detach := <-bufDetachChan:
+						if expected := bufDetachEventExpected; !reflect.DeepEqual(detach, expected) {
+							errc <- fmt.Errorf("bufDetach = %+v, want %+v", detach, expected)
+						}
+						atomic.AddInt64(&numEvent, 1)
+					}
+				}
+			}()
+
+			go func() {
+				<-done
+				close(errc)
+			}()
+
+			test := [][]byte{[]byte("foo"), []byte("bar"), []byte("baz"), []byte("qux"), []byte("quux"), []byte("quuz")}
+			if err := v.SetBufferLines(Buffer(0), 0, -1, true, test); err != nil { // first 0 arg refers to the current buffer
+				t.Fatal(err)
+			}
+
+			if detached, err := v.DetachBuffer(Buffer(0)); err != nil || !detached {
+				t.Fatal(err)
+			}
+
+			for err := range errc {
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			clearBuffer(t, v, 0) // clear curret buffer text
+
+			changedtickChan := make(chan *ChangedtickEvent)
+			v.RegisterHandler(EventBufChangedtick, func(changedtickEvent ...interface{}) {
+				ev := &ChangedtickEvent{
+					Buffer:     changedtickEvent[0].(Buffer),
+					Changetick: changedtickEvent[1].(int64),
+				}
+				changedtickChan <- ev
+			})
+
+			bufLinesChan := make(chan *BufLinesEvent)
+			v.RegisterHandler(EventBufLines, func(bufLinesEvent ...interface{}) {
+				ev := &BufLinesEvent{
+					Buffer:      bufLinesEvent[0].(Buffer),
+					Changetick:  bufLinesEvent[1].(int64),
+					FirstLine:   bufLinesEvent[2].(int64),
+					LastLine:    bufLinesEvent[3].(int64),
+					IsMultipart: bufLinesEvent[5].(bool),
+				}
+				for _, line := range bufLinesEvent[4].([]interface{}) {
+					ev.LineData = append(ev.LineData, line.(string))
+				}
+				bufLinesChan <- ev
+			})
+
+			bufDetachChan := make(chan *BufDetachEvent)
+			v.RegisterHandler(EventBufDetach, func(bufDetachEvent ...interface{}) {
+				ev := &BufDetachEvent{
+					Buffer: bufDetachEvent[0].(Buffer),
+				}
+				bufDetachChan <- ev
+			})
+
+			b := v.NewBatch()
+
+			var attached bool
+			b.AttachBuffer(0, false, make(map[string]interface{}), &attached) // first 0 arg refers to the current buffer
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if !attached {
+				t.Fatal(errors.New("could not attach buffer"))
+			}
+
+			changedtickExpected := &ChangedtickEvent{
+				Buffer:     Buffer(1),
+				Changetick: 5,
+			}
+			bufLinesEventExpected := &BufLinesEvent{
+				Buffer:      Buffer(1),
+				Changetick:  6,
+				FirstLine:   0,
+				LastLine:    1,
+				LineData:    []string{"foo", "bar", "baz", "qux", "quux", "quuz"},
+				IsMultipart: false,
+			}
+			bufDetachEventExpected := &BufDetachEvent{
+				Buffer: Buffer(1),
+			}
+
+			var numEvent int64 // add and load should be atomically
+			errc := make(chan error)
+			done := make(chan struct{})
+			go func() {
+				for {
+					select {
+					default:
+						if atomic.LoadInt64(&numEvent) == 3 { // end buf_attach test when handle 2 event
+							done <- struct{}{}
+							return
+						}
+					case changedtick := <-changedtickChan:
+						if !reflect.DeepEqual(changedtick, changedtickExpected) {
+							errc <- fmt.Errorf("changedtick = %+v, want %+v", changedtick, changedtickExpected)
+						}
+						atomic.AddInt64(&numEvent, 1)
+					case bufLines := <-bufLinesChan:
+						if expected := bufLinesEventExpected; !reflect.DeepEqual(bufLines, expected) {
+							errc <- fmt.Errorf("bufLines = %+v, want %+v", bufLines, expected)
+						}
+						atomic.AddInt64(&numEvent, 1)
+					case detach := <-bufDetachChan:
+						if expected := bufDetachEventExpected; !reflect.DeepEqual(detach, expected) {
+							errc <- fmt.Errorf("bufDetach = %+v, want %+v", detach, expected)
+						}
+						atomic.AddInt64(&numEvent, 1)
+					}
+				}
+			}()
+
+			go func() {
+				<-done
+				close(errc)
+			}()
+
+			test := [][]byte{[]byte("foo"), []byte("bar"), []byte("baz"), []byte("qux"), []byte("quux"), []byte("quuz")}
+			if err := v.SetBufferLines(Buffer(0), 0, -1, true, test); err != nil { // first 0 arg refers to the current buffer
+				t.Fatal(err)
+			}
+
+			var detached bool
+			b.DetachBuffer(Buffer(0), &detached)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			for err := range errc {
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+		})
 	}
 }
 
