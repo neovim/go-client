@@ -623,6 +623,28 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected cindent is true but got %t", cindent)
 				}
 			})
+
+			t.Run("IsBufferLoaded", func(t *testing.T) {
+				loaded, err := v.IsBufferLoaded(Buffer(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if !loaded {
+					t.Fatalf("expected buffer is loaded but got %t", loaded)
+				}
+			})
+
+			t.Run("IsBufferValid", func(t *testing.T) {
+				valid, err := v.IsBufferValid(Buffer(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if !valid {
+					t.Fatalf("expected buffer is valid but got %t", valid)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -849,6 +871,34 @@ func testBuffer(v *Nvim) func(*testing.T) {
 
 				if !cindent {
 					t.Fatalf("expected cindent is true but got %t", cindent)
+				}
+			})
+
+			t.Run("IsBufferLoaded", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var loaded bool
+				b.IsBufferLoaded(Buffer(0), &loaded)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if !loaded {
+					t.Fatalf("expected buffer is loaded but got %t", loaded)
+				}
+			})
+
+			t.Run("IsBufferValid", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var valid bool
+				b.IsBufferValid(Buffer(0), &valid)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if !valid {
+					t.Fatalf("expected buffer is valid but got %t", valid)
 				}
 			})
 		})
