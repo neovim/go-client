@@ -389,7 +389,7 @@ func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special b
 
 // CommandOutput executes a single ex command and returns the output.
 //
-// Deprecated: Use Exec() instead.
+// Deprecated: Use Exec instead.
 func (v *Nvim) CommandOutput(cmd string) (out string, err error) {
 	err = v.call("nvim_command_output", &out, cmd)
 	return out, err
@@ -397,7 +397,7 @@ func (v *Nvim) CommandOutput(cmd string) (out string, err error) {
 
 // CommandOutput executes a single ex command and returns the output.
 //
-// Deprecated: Use Exec() instead.
+// Deprecated: Use Exec instead.
 func (b *Batch) CommandOutput(cmd string, out *string) {
 	b.call("nvim_command_output", out, cmd)
 }
@@ -2360,7 +2360,7 @@ func (b *Batch) ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lin
 // The lineStart and lineEnd parameters specify the range of lines to clear.
 // The end of range is exclusive. Specify -1 to clear to the end of the file.
 //
-// Deprecated: Use ClearBufferNamespace() instead.
+// Deprecated: Use ClearBufferNamespace instead.
 func (v *Nvim) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) error {
 	return v.call("nvim_buf_clear_highlight", nil, buffer, srcID, startLine, endLine)
 }
@@ -2374,7 +2374,7 @@ func (v *Nvim) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, end
 // The lineStart and lineEnd parameters specify the range of lines to clear.
 // The end of range is exclusive. Specify -1 to clear to the end of the file.
 //
-// Deprecated: Use ClearBufferNamespace() instead.
+// Deprecated: Use ClearBufferNamespace instead.
 func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) {
 	b.call("nvim_buf_clear_highlight", nil, buffer, srcID, startLine, endLine)
 }
@@ -2398,6 +2398,8 @@ func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, en
 // virtual text, the allocated id is then returned.
 //
 // The opts arg is reserved for future use.
+//
+// Deprecated: Use SetBufferExtmark instead.
 func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}) (id int, err error) {
 	err = v.call("nvim_buf_set_virtual_text", &id, buffer, nsID, line, chunks, opts)
 	return id, err
@@ -2422,6 +2424,8 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 // virtual text, the allocated id is then returned.
 //
 // The opts arg is reserved for future use.
+//
+// Deprecated: Use SetBufferExtmark instead.
 func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}, id *int) {
 	b.call("nvim_buf_set_virtual_text", id, buffer, nsID, line, chunks, opts)
 }
