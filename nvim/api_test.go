@@ -980,6 +980,18 @@ func testWindow(v *Nvim) func(*testing.T) {
 			if win != wins2[0] {
 				t.Fatalf("win2 is not wins2[0]: want: %v, win2: %v ", wins2[0], win)
 			}
+
+			t.Run("WindowBuffer", func(t *testing.T) {
+				gotBuf, err := v.WindowBuffer(Window(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				wantBuffer := Buffer(1)
+				if gotBuf != wantBuffer {
+					t.Fatalf("want %s buffer but got %s", wantBuffer, gotBuf)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1052,6 +1064,21 @@ func testWindow(v *Nvim) func(*testing.T) {
 			if win != wins2[0] {
 				t.Fatalf("win2 is not wins2[0]: want: %v, win2: %v ", wins2[0], win)
 			}
+
+			t.Run("WindowBuffer", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var gotBuf Buffer
+				b.WindowBuffer(Window(0), &gotBuf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				wantBuffer := Buffer(1)
+				if gotBuf != wantBuffer {
+					t.Fatalf("want %s buffer but got %s", wantBuffer, gotBuf)
+				}
+			})
 		})
 	}
 }
