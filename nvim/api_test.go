@@ -1026,6 +1026,32 @@ func testWindow(v *Nvim) func(*testing.T) {
 					}
 				})
 			})
+
+			t.Run("WindowCursor", func(t *testing.T) {
+				wantLine := []byte("hello world")
+				if err := v.SetCurrentLine(wantLine); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					if err := v.DeleteCurrentLine(); err != nil {
+						t.Fatal(err)
+					}
+				})
+
+				wantPos := [2]int{1, 5}
+				if err := v.SetWindowCursor(Window(0), wantPos); err != nil {
+					t.Fatal(err)
+				}
+
+				gotPos, err := v.WindowCursor(Window(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if wantPos != gotPos {
+					t.Fatalf("want %#v position buf got %#v", wantPos, gotPos)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1151,6 +1177,36 @@ func testWindow(v *Nvim) func(*testing.T) {
 						t.Fatal(err)
 					}
 				})
+			})
+
+			t.Run("WindowCursor", func(t *testing.T) {
+				wantLine := []byte("hello world")
+				b.SetCurrentLine(wantLine)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					b.DeleteCurrentLine()
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				})
+
+				wantPos := [2]int{1, 5}
+				b.SetWindowCursor(Window(0), wantPos)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var gotPos [2]int
+				b.WindowCursor(Window(0), &gotPos)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if wantPos != gotPos {
+					t.Fatalf("want %#v position buf got %#v", wantPos, gotPos)
+				}
 			})
 		})
 	}
