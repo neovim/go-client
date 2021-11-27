@@ -431,13 +431,6 @@ func testBuffer(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
 			t.Run("BufferName", func(t *testing.T) {
-				defer func() {
-					// cleanup cindent option
-					if err := v.SetBufferName(Buffer(0), ""); err != nil {
-						t.Fatal(err)
-					}
-				}()
-
 				cwd, _ := os.Getwd() // buffer name is full path
 				wantBufName := filepath.Join(cwd, "/test_buffer")
 				if err := v.SetBufferName(Buffer(0), wantBufName); err != nil {
@@ -452,6 +445,13 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				if bufName != wantBufName {
 					t.Fatalf("want %s buffer name but got %s", wantBufName, bufName)
 				}
+
+				t.Cleanup(func() {
+					// cleanup cindent option
+					if err := v.SetBufferName(Buffer(0), ""); err != nil {
+						t.Fatal(err)
+					}
+				})
 			})
 
 			t.Run("Buffers", func(t *testing.T) {
@@ -595,13 +595,6 @@ func testBuffer(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("BufferOption", func(t *testing.T) {
-				defer func() {
-					// cleanup cindent option
-					if err := v.SetBufferOption(Buffer(0), "cindent", false); err != nil {
-						t.Fatal(err)
-					}
-				}()
-
 				var cindent bool
 				if err := v.BufferOption(Buffer(0), "cindent", &cindent); err != nil {
 					t.Fatal(err)
@@ -622,6 +615,13 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				if !cindent {
 					t.Fatalf("expected cindent is true but got %t", cindent)
 				}
+
+				t.Cleanup(func() {
+					// cleanup cindent option
+					if err := v.SetBufferOption(Buffer(0), "cindent", false); err != nil {
+						t.Fatal(err)
+					}
+				})
 			})
 
 			t.Run("IsBufferLoaded", func(t *testing.T) {
@@ -650,13 +650,6 @@ func testBuffer(v *Nvim) func(*testing.T) {
 		t.Run("Batch", func(t *testing.T) {
 			t.Run("BufferName", func(t *testing.T) {
 				b := v.NewBatch()
-				defer func() {
-					// cleanup cindent option
-					b.SetBufferName(Buffer(0), "")
-					if err := b.Execute(); err != nil {
-						t.Fatal(err)
-					}
-				}()
 
 				cwd, _ := os.Getwd() // buffer name is full path
 				wantBufName := filepath.Join(cwd, "/test_buffer")
@@ -674,6 +667,14 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				if bufName != wantBufName {
 					t.Fatalf("want %s buffer name but got %s", wantBufName, bufName)
 				}
+
+				t.Cleanup(func() {
+					// cleanup cindent option
+					b.SetBufferName(Buffer(0), "")
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				})
 			})
 
 			t.Run("Buffers", func(t *testing.T) {
@@ -841,13 +842,6 @@ func testBuffer(v *Nvim) func(*testing.T) {
 
 			t.Run("BufferOption", func(t *testing.T) {
 				b := v.NewBatch()
-				defer func() {
-					// cleanup cindent option
-					b.SetBufferOption(Buffer(0), "cindent", false)
-					if err := b.Execute(); err != nil {
-						t.Fatal(err)
-					}
-				}()
 
 				var cindent bool
 				b.BufferOption(Buffer(0), "cindent", &cindent)
@@ -872,6 +866,14 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				if !cindent {
 					t.Fatalf("expected cindent is true but got %t", cindent)
 				}
+
+				t.Cleanup(func() {
+					// cleanup cindent option
+					b.SetBufferOption(Buffer(0), "cindent", false)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				})
 			})
 
 			t.Run("IsBufferLoaded", func(t *testing.T) {
