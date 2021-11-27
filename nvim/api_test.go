@@ -569,6 +569,26 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected commands empty but non-zero: %#v", commands)
 				}
 			})
+
+			t.Run("BufferOption", func(t *testing.T) {
+				var cindent bool
+				if err := v.BufferOption(Buffer(0), "cindent", &cindent); err != nil {
+					t.Fatal(err)
+				}
+
+				if cindent {
+					t.Fatalf("expected cindent is false but got %t", cindent)
+				}
+
+				var buftype string
+				if err := v.BufferOption(Buffer(0), "buftype", &buftype); err != nil {
+					t.Fatal(err)
+				}
+
+				if buftype != "" {
+					t.Fatalf("expected buftype is empty but got %s", buftype)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -732,6 +752,30 @@ func testBuffer(v *Nvim) func(*testing.T) {
 
 				if len(commands) > 0 {
 					t.Fatalf("expected commands empty but non-zero: %#v", commands)
+				}
+			})
+
+			t.Run("BufferOption", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var cindent bool
+				b.BufferOption(Buffer(0), "cindent", &cindent)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if cindent {
+					t.Fatalf("expected cindent is false but got %t", cindent)
+				}
+
+				var buftype string
+				b.BufferOption(Buffer(0), "buftype", &buftype)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if buftype != "" {
+					t.Fatalf("expected buftype is empty but got %s", buftype)
 				}
 			})
 		})
