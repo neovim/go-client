@@ -39,5 +39,8 @@ comment:
   require_changes: true
   show_carryforward_flags: true
 
+ignore:
+  - "nvim/api_deprecated.go" 
+
 github_checks:
   annotations: true
