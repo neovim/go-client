@@ -430,12 +430,36 @@ func testSimpleHandler(v *Nvim) func(*testing.T) {
 func testBuffer(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
+			t.Run("BufferName", func(t *testing.T) {
+				defer func() {
+					// cleanup cindent option
+					if err := v.SetBufferName(Buffer(0), ""); err != nil {
+						t.Fatal(err)
+					}
+				}()
+
+				cwd, _ := os.Getwd() // buffer name is full path
+				wantBufName := filepath.Join(cwd, "/test_buffer")
+				if err := v.SetBufferName(Buffer(0), wantBufName); err != nil {
+					t.Fatal(err)
+				}
+
+				bufName, err := v.BufferName(Buffer(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if bufName != wantBufName {
+					t.Fatalf("want %s buffer name but got %s", wantBufName, bufName)
+				}
+			})
+
 			t.Run("Buffers", func(t *testing.T) {
 				bufs, err := v.Buffers()
 				if err != nil {
 					t.Fatal(err)
 				}
-				if len(bufs) != 1 {
+				if len(bufs) != 2 {
 					t.Fatalf("expected one buf, found %d bufs", len(bufs))
 				}
 				if bufs[0] == 0 {
@@ -602,6 +626,34 @@ func testBuffer(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("Batch", func(t *testing.T) {
+			t.Run("BufferName", func(t *testing.T) {
+				b := v.NewBatch()
+				defer func() {
+					// cleanup cindent option
+					b.SetBufferName(Buffer(0), "")
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				}()
+
+				cwd, _ := os.Getwd() // buffer name is full path
+				wantBufName := filepath.Join(cwd, "/test_buffer")
+				b.SetBufferName(Buffer(0), wantBufName)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var bufName string
+				b.BufferName(Buffer(0), &bufName)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if bufName != wantBufName {
+					t.Fatalf("want %s buffer name but got %s", wantBufName, bufName)
+				}
+			})
+
 			t.Run("Buffers", func(t *testing.T) {
 				b := v.NewBatch()
 
@@ -610,7 +662,7 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				if len(bufs) != 1 {
+				if len(bufs) != 2 {
 					t.Fatalf("expected one buf, found %d bufs", len(bufs))
 				}
 				if bufs[0] == Buffer(0) {
