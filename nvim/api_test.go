@@ -571,6 +571,13 @@ func testBuffer(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("BufferOption", func(t *testing.T) {
+				defer func() {
+					// cleanup cindent option
+					if err := v.SetBufferOption(Buffer(0), "cindent", false); err != nil {
+						t.Fatal(err)
+					}
+				}()
+
 				var cindent bool
 				if err := v.BufferOption(Buffer(0), "cindent", &cindent); err != nil {
 					t.Fatal(err)
@@ -580,13 +587,16 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected cindent is false but got %t", cindent)
 				}
 
-				var buftype string
-				if err := v.BufferOption(Buffer(0), "buftype", &buftype); err != nil {
+				if err := v.SetBufferOption(Buffer(0), "cindent", true); err != nil {
 					t.Fatal(err)
 				}
 
-				if buftype != "" {
-					t.Fatalf("expected buftype is empty but got %s", buftype)
+				if err := v.BufferOption(Buffer(0), "cindent", &cindent); err != nil {
+					t.Fatal(err)
+				}
+
+				if !cindent {
+					t.Fatalf("expected cindent is true but got %t", cindent)
 				}
 			})
 		})
@@ -757,6 +767,13 @@ func testBuffer(v *Nvim) func(*testing.T) {
 
 			t.Run("BufferOption", func(t *testing.T) {
 				b := v.NewBatch()
+				defer func() {
+					// cleanup cindent option
+					b.SetBufferOption(Buffer(0), "cindent", false)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				}()
 
 				var cindent bool
 				b.BufferOption(Buffer(0), "cindent", &cindent)
@@ -768,14 +785,18 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected cindent is false but got %t", cindent)
 				}
 
-				var buftype string
-				b.BufferOption(Buffer(0), "buftype", &buftype)
+				b.SetBufferOption(Buffer(0), "cindent", true)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
 
-				if buftype != "" {
-					t.Fatalf("expected buftype is empty but got %s", buftype)
+				b.BufferOption(Buffer(0), "cindent", &cindent)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if !cindent {
+					t.Fatalf("expected cindent is true but got %t", cindent)
 				}
 			})
 		})
