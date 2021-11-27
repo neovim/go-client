@@ -749,7 +749,7 @@ func UIs() (uis []*UI) {
 }
 
 // ProcChildren gets the immediate children of process `pid`.
-func ProcChildren(pid int) (processes []*Process) {
+func ProcChildren(pid int) (processes []uint) {
 	name(nvim_get_proc_children)
 }
 
