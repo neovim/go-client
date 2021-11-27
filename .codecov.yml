@@ -22,7 +22,7 @@ coverage:
 
     patch:
       default:
-        target: auto
+        target: 50%
         threshold: 10.0
         only_pulls: true
         if_not_found: failure
