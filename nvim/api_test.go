@@ -129,6 +129,7 @@ func TestAPI(t *testing.T) {
 	t.Run("OptionsInfo", testOptionsInfo(v))
 	t.Run("OpenTerm", testTerm(v))
 	t.Run("ChannelClientInfo", testChannelClientInfo(v))
+	t.Run("UI", testUI(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -3563,6 +3564,39 @@ func testChannelClientInfo(v *Nvim) func(*testing.T) {
 				}
 				if !reflect.DeepEqual(&gotChannel, wantChannel) {
 					t.Fatalf("got %#v channel but want %#v channel", &gotChannel, wantChannel)
+				}
+			})
+		})
+	}
+}
+
+func testUI(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			t.Run("UIs", func(t *testing.T) {
+				gotUIs, err := v.UIs()
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if len(gotUIs) > 0 || gotUIs != nil {
+					t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
+				}
+			})
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Run("UIs", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var gotUIs []*UI
+				b.UIs(&gotUIs)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if len(gotUIs) > 0 || gotUIs != nil {
+					t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
 				}
 			})
 		})
