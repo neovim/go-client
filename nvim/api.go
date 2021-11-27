@@ -1575,13 +1575,13 @@ func (b *Batch) UIs(uis *[]*UI) {
 }
 
 // ProcChildren gets the immediate children of process `pid`.
-func (v *Nvim) ProcChildren(pid int) (processes []*Process, err error) {
+func (v *Nvim) ProcChildren(pid int) (processes []uint, err error) {
 	err = v.call("nvim_get_proc_children", &processes, pid)
 	return processes, err
 }
 
 // ProcChildren gets the immediate children of process `pid`.
-func (b *Batch) ProcChildren(pid int, processes *[]*Process) {
+func (b *Batch) ProcChildren(pid int, processes *[]uint) {
 	b.call("nvim_get_proc_children", processes, pid)
 }
 
