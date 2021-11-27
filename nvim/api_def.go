@@ -161,7 +161,7 @@ func ReplaceTermcodes(str string, fromPart, doLT, special bool) (input string) {
 
 // CommandOutput executes a single ex command and returns the output.
 //
-// Deprecated: Use Exec() instead.
+// Deprecated: Use Exec instead.
 func CommandOutput(cmd string) (out string) {
 	name(nvim_command_output)
 	deprecatedSince(7)
@@ -1132,7 +1132,7 @@ func ClearBufferNamespace(buffer Buffer, nsID, lineStart, lineEnd int) {
 // The lineStart and lineEnd parameters specify the range of lines to clear.
 // The end of range is exclusive. Specify -1 to clear to the end of the file.
 //
-// Deprecated: Use ClearBufferNamespace() instead.
+// Deprecated: Use ClearBufferNamespace instead.
 func ClearBufferHighlight(buffer Buffer, srcID, startLine, endLine int) {
 	name(nvim_buf_clear_highlight)
 	deprecatedSince(7)
@@ -1157,8 +1157,11 @@ func ClearBufferHighlight(buffer Buffer, srcID, startLine, endLine int) {
 // virtual text, the allocated id is then returned.
 //
 // The opts arg is reserved for future use.
+//
+// Deprecated: Use SetBufferExtmark instead.
 func SetBufferVirtualText(buffer Buffer, nsID, line int, chunks []TextChunk, opts map[string]interface{}) (id int) {
 	name(nvim_buf_set_virtual_text)
+	deprecatedSince(8)
 }
 
 // window.c
