@@ -76,7 +76,9 @@ func TestAPI(t *testing.T) {
 	t.Parallel()
 
 	v, cleanup := newChildProcess(t)
-	defer cleanup()
+	t.Cleanup(func() {
+		cleanup()
+	})
 
 	apiInfo, err := v.APIInfo()
 	if err != nil {
