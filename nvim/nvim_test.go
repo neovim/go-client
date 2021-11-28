@@ -16,12 +16,19 @@ import (
 func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 	tb.Helper()
 
+	envs := os.Environ()
+	envs = append(envs, []string{
+		"XDG_CONFIG_HOME=",
+		"XDG_DATA_HOME=",
+	}...)
+
 	ctx := context.Background()
 	opts := []ChildProcessOption{
 		ChildProcessCommand(BinaryName),
 		ChildProcessArgs("-u", "NONE", "-n", "-i", "NONE", "--embed", "--headless"),
 		ChildProcessContext(ctx),
 		ChildProcessLogf(tb.Logf),
+		ChildProcessEnv(envs),
 	}
 	n, err := NewChildProcess(opts...)
 	if err != nil {
