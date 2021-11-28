@@ -3841,33 +3841,24 @@ func testRuntime(v *Nvim) func(*testing.T) {
 		switch runtime.GOOS {
 		case "linux", "darwin":
 			if nvimVersion.Minor <= 5 {
-				home, err := os.UserHomeDir()
-				if err != nil {
-					t.Fatal(err)
-				}
 				oldRuntimePaths := []string{
-					filepath.Join(home, ".config", "nvim"),
 					filepath.Join("/etc", "xdg", "nvim"),
-					filepath.Join(home, ".local", "share", "nvim", "site"),
+					filepath.Join("/etc", "xdg", "nvim", "after"),
 					filepath.Join("/usr", "local", "share", "nvim", "site"),
+					filepath.Join("/usr", "local", "share", "nvim", "site", "after"),
 					filepath.Join("/usr", "share", "nvim", "site"),
 					filepath.Join("/usr", "share", "nvim", "site", "after"),
-					filepath.Join("/usr", "local", "share", "nvim", "site", "after"),
-					filepath.Join(home, ".local", "share", "nvim", "site", "after"),
-					filepath.Join("/etc", "xdg", "nvim", "after"),
-					filepath.Join(home, ".config", "nvim", "after"),
 				}
 				wantPaths = append(wantPaths, oldRuntimePaths...)
 			}
-
 		case "windows":
 			if nvimVersion.Minor <= 5 {
 				localAppDataDir := os.Getenv("LocalAppData")
 				oldRuntimePaths := []string{
 					filepath.Join(localAppDataDir, "nvim"),
+					filepath.Join(localAppDataDir, "nvim", "after"),
 					filepath.Join(localAppDataDir, "nvim-data", "site"),
 					filepath.Join(localAppDataDir, "nvim-data", "site", "after"),
-					filepath.Join(localAppDataDir, "nvim", "after"),
 				}
 				wantPaths = append(wantPaths, oldRuntimePaths...)
 			}
