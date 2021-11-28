@@ -1076,6 +1076,28 @@ func testWindow(v *Nvim) func(*testing.T) {
 					t.Fatalf("expect Key not found but fonud key")
 				}
 			})
+
+			t.Run("WindowOption", func(t *testing.T) {
+				wantValue := "+1"
+				if err := v.SetWindowOption(Window(0), "colorcolumn", &wantValue); err != nil {
+					t.Fatal(err)
+				}
+
+				var gotValue string
+				if err := v.WindowOption(Window(0), "colorcolumn", &gotValue); err != nil {
+					t.Fatal(err)
+				}
+
+				if gotValue != wantValue {
+					t.Fatalf("expected %s but got %s", wantValue, gotValue)
+				}
+
+				t.Cleanup(func() {
+					if err := v.SetWindowOption(Window(0), "colorcolumn", ""); err != nil {
+						t.Fatal(err)
+					}
+				})
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1263,6 +1285,33 @@ func testWindow(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err == nil {
 					t.Fatalf("expect Key not found but fonud key")
 				}
+			})
+
+			t.Run("WindowOption", func(t *testing.T) {
+				b := v.NewBatch()
+
+				wantValue := "+1"
+				b.SetWindowOption(Window(0), "colorcolumn", &wantValue)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var gotValue string
+				b.WindowOption(Window(0), "colorcolumn", &gotValue)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if gotValue != wantValue {
+					t.Fatalf("expected %s but got %s", wantValue, gotValue)
+				}
+
+				t.Cleanup(func() {
+					b.SetWindowOption(Window(0), "colorcolumn", "")
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				})
 			})
 		})
 	}
