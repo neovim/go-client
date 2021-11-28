@@ -1477,6 +1477,29 @@ func testTabpage(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected %v but got %v", wantWins, gotWins)
 				}
 			})
+
+			t.Run("TabpageNumber", func(t *testing.T) {
+				gotTabpageNum, err := v.TabpageNumber(Tabpage(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				wantTabpageNum := 1
+				if gotTabpageNum != wantTabpageNum {
+					t.Fatalf("expected %v but got %v", wantTabpageNum, gotTabpageNum)
+				}
+			})
+
+			t.Run("IsTabpageValid", func(t *testing.T) {
+				valid, err := v.IsTabpageValid(Tabpage(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if !valid {
+					t.Fatalf("expected valid but got %t", valid)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1540,6 +1563,35 @@ func testTabpage(v *Nvim) func(*testing.T) {
 				wantWins := []Window{Window(1000)}
 				if !reflect.DeepEqual(gotWins, wantWins) {
 					t.Fatalf("expected %v but got %v", wantWins, gotWins)
+				}
+			})
+
+			t.Run("TabpageNumber", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var gotTabpageNum int
+				b.TabpageNumber(Tabpage(0), &gotTabpageNum)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				wantTabpageNum := 1
+				if gotTabpageNum != wantTabpageNum {
+					t.Fatalf("expected %v but got %v", wantTabpageNum, gotTabpageNum)
+				}
+			})
+
+			t.Run("IsWindowValid", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var valid bool
+				b.IsTabpageValid(Tabpage(0), &valid)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if !valid {
+					t.Fatalf("expected valid but got %t", valid)
 				}
 			})
 		})
