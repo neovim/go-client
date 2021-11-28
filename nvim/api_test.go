@@ -1454,6 +1454,18 @@ func testTabpage(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
+			t.Run("TabpageWindow", func(t *testing.T) {
+				gotWin, err := v.TabpageWindow(Tabpage(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				wantWin := Window(1000)
+				if !reflect.DeepEqual(gotWin, wantWin) {
+					t.Fatalf("expected %v but got %v", wantWin, gotWin)
+				}
+			})
+
 			t.Run("TabpageWindows", func(t *testing.T) {
 				gotWins, err := v.TabpageWindows(Tabpage(0))
 				if err != nil {
@@ -1500,6 +1512,21 @@ func testTabpage(v *Nvim) func(*testing.T) {
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
+
+			t.Run("TabpageWindow", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var gotWin Window
+				b.TabpageWindow(Tabpage(0), &gotWin)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				wantWin := Window(1000)
+				if gotWin != wantWin {
+					t.Fatalf("expected %v but got %v", wantWin, gotWin)
+				}
+			})
 
 			t.Run("TabpageWindows", func(t *testing.T) {
 				b := v.NewBatch()
