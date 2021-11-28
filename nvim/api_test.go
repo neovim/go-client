@@ -3287,6 +3287,10 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 			if numberOpt || relativenumberOpt || cursorlineOpt || cursorcolumnOpt || spellOpt || listOpt || signcolumnOpt != "auto" || colorcolumnOpt != "" {
 				t.Fatal("expected minimal style")
 			}
+
+			if err := v.CloseWindow(w, true); err != nil {
+				t.Fatal(err)
+			}
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -3366,6 +3370,11 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 			}
 			if numberOpt || relativenumberOpt || cursorlineOpt || cursorcolumnOpt || spellOpt || listOpt || signcolumnOpt != "auto" || colorcolumnOpt != "" {
 				t.Fatal("expected minimal style")
+			}
+
+			b.CloseWindow(w, true)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
