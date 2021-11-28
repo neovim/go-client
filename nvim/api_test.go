@@ -3485,6 +3485,25 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				t.Fatalf("got %d height but want %d", gotHeight, wantHeight)
 			}
 
+			wantWinConfig := &WindowConfig{
+				Relative:  "editor",
+				Anchor:    "NW",
+				Width:     40,
+				Height:    10,
+				Row:       1,
+				Focusable: false,
+			}
+			if err := v.SetWindowConfig(w, wantWinConfig); err != nil {
+				t.Fatal(err)
+			}
+			gotWinConfig, err := v.WindowConfig(w)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(gotWinConfig, wantWinConfig) {
+				t.Fatalf("want %#v but got %#v", wantWinConfig, gotWinConfig)
+			}
+
 			var (
 				numberOpt         bool
 				relativenumberOpt bool
@@ -3580,6 +3599,28 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 			}
 			if gotHeight != wantHeight {
 				t.Fatalf("got %d height but want %d", gotHeight, wantHeight)
+			}
+
+			wantWinConfig := &WindowConfig{
+				Relative:  "editor",
+				Anchor:    "NW",
+				Width:     40,
+				Height:    10,
+				Row:       1,
+				Focusable: false,
+			}
+			b.SetWindowConfig(w, wantWinConfig)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			gotWinConfig := new(WindowConfig)
+			b.WindowConfig(w, gotWinConfig)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(gotWinConfig, wantWinConfig) {
+				t.Fatalf("want %#v but got %#v", wantWinConfig, gotWinConfig)
 			}
 
 			var (
