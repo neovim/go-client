@@ -70,6 +70,10 @@ func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 		}
 	}
 
+	if err := v.Command("set packpath="); err != nil {
+		tb.Fatal(err)
+	}
+
 	return v, cleanup
 }
 
