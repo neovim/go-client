@@ -1098,6 +1098,18 @@ func testWindow(v *Nvim) func(*testing.T) {
 					}
 				})
 			})
+
+			t.Run("WindowPosition", func(t *testing.T) {
+				gotPos, err := v.WindowPosition(Window(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				wantPos := [2]int{0, 0}
+				if gotPos != wantPos {
+					t.Fatalf("expected %v but got %v", wantPos, gotPos)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1312,6 +1324,21 @@ func testWindow(v *Nvim) func(*testing.T) {
 						t.Fatal(err)
 					}
 				})
+			})
+
+			t.Run("WindowPosition", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var gotPos [2]int
+				b.WindowPosition(Window(0), &gotPos)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				wantPos := [2]int{0, 0}
+				if gotPos != wantPos {
+					t.Fatalf("expected %v but got %v", wantPos, gotPos)
+				}
 			})
 		})
 	}
