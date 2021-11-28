@@ -1110,6 +1110,18 @@ func testWindow(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected %v but got %v", wantPos, gotPos)
 				}
 			})
+
+			t.Run("WindowTabpage", func(t *testing.T) {
+				gotTabpage, err := v.WindowTabpage(Window(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				wantTabpage := Tabpage(1)
+				if gotTabpage != wantTabpage {
+					t.Fatalf("expected %v but got %v", wantTabpage, gotTabpage)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1338,6 +1350,21 @@ func testWindow(v *Nvim) func(*testing.T) {
 				wantPos := [2]int{0, 0}
 				if gotPos != wantPos {
 					t.Fatalf("expected %v but got %v", wantPos, gotPos)
+				}
+			})
+
+			t.Run("WindowTabpage", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var gotTabpage Tabpage
+				b.WindowTabpage(Window(0), &gotTabpage)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				wantTabpage := Tabpage(1)
+				if gotTabpage != wantTabpage {
+					t.Fatalf("expected %v but got %v", wantTabpage, gotTabpage)
 				}
 			})
 		})
