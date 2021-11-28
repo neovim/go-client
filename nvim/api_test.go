@@ -645,6 +645,42 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected buffer is valid but got %t", valid)
 				}
 			})
+
+			t.Run("BufferMark", func(t *testing.T) {
+				lines := [][]byte{
+					[]byte("a"),
+					[]byte("bit of"),
+					[]byte("text"),
+				}
+				if err := v.SetBufferLines(Buffer(0), -1, -1, true, lines); err != nil {
+					t.Fatal(err)
+				}
+				if err := v.SetWindowCursor(Window(0), [2]int{3, 4}); err != nil {
+					t.Fatal(err)
+				}
+				if err := v.Command("mark v"); err != nil {
+					t.Fatal(err)
+				}
+
+				const (
+					wantLine = 3
+					wantCol  = 0
+				)
+				pos, err := v.BufferMark(Buffer(0), "v")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if pos[0] != wantLine {
+					t.Fatalf("got %d extMark line but want %d", pos[0], wantLine)
+				}
+				if pos[1] != wantCol {
+					t.Fatalf("got %d extMark col but want %d", pos[1], wantCol)
+				}
+
+				t.Cleanup(func() {
+					clearBuffer(t, v, Buffer(0))
+				})
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -902,6 +938,45 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				if !valid {
 					t.Fatalf("expected buffer is valid but got %t", valid)
 				}
+			})
+
+			t.Run("BufferMark", func(t *testing.T) {
+				b := v.NewBatch()
+
+				lines := [][]byte{
+					[]byte("a"),
+					[]byte("bit of"),
+					[]byte("text"),
+				}
+				b.SetBufferLines(Buffer(0), -1, -1, true, lines)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				b.SetWindowCursor(Window(0), [2]int{3, 4})
+				b.Command("mark v")
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				const (
+					wantLine = 3
+					wantCol  = 0
+				)
+				var pos [2]int
+				b.BufferMark(Buffer(0), "v", &pos)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if pos[0] != wantLine {
+					t.Fatalf("got %d extMark line but want %d", pos[0], wantLine)
+				}
+				if pos[1] != wantCol {
+					t.Fatalf("got %d extMark col but want %d", pos[1], wantCol)
+				}
+
+				t.Cleanup(func() {
+					clearBuffer(t, v, Buffer(0))
+				})
 			})
 		})
 	}
