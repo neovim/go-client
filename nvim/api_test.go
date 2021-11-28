@@ -1500,6 +1500,30 @@ func testTabpage(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected valid but got %t", valid)
 				}
 			})
+
+			t.Run("TabpageVar", func(t *testing.T) {
+				wantValue := []int{1, 2}
+				if err := v.SetTabpageVar(Tabpage(0), "lua", wantValue); err != nil {
+					t.Fatal(err)
+				}
+
+				var gotValue []int
+				if err := v.TabpageVar(Tabpage(0), "lua", &gotValue); err != nil {
+					t.Fatal(err)
+				}
+
+				if !reflect.DeepEqual(gotValue, wantValue) {
+					t.Fatalf("want %#v but got %#v", wantValue, gotValue)
+				}
+
+				if err := v.DeleteTabpageVar(Tabpage(0), "lua"); err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.TabpageVar(Tabpage(0), "lua", nil); err == nil {
+					t.Fatalf("expect Key not found but fonud key")
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1592,6 +1616,36 @@ func testTabpage(v *Nvim) func(*testing.T) {
 
 				if !valid {
 					t.Fatalf("expected valid but got %t", valid)
+				}
+			})
+
+			t.Run("TabpageVar", func(t *testing.T) {
+				b := v.NewBatch()
+
+				wantValue := []int{1, 2}
+				b.SetTabpageVar(Tabpage(0), "lua", wantValue)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var gotValue []int
+				b.TabpageVar(Tabpage(0), "lua", &gotValue)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if !reflect.DeepEqual(gotValue, wantValue) {
+					t.Fatalf("want %#v but got %#v", wantValue, gotValue)
+				}
+
+				b.DeleteTabpageVar(Tabpage(0), "lua")
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.TabpageVar(Tabpage(0), "lua", nil)
+				if err := b.Execute(); err == nil {
+					t.Fatalf("expect Key not found but fonud key")
 				}
 			})
 		})
