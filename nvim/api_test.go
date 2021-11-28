@@ -1134,6 +1134,17 @@ func testWindow(v *Nvim) func(*testing.T) {
 					t.Fatalf("expected %v but got %v", wantWinNum, gotWinNum)
 				}
 			})
+
+			t.Run("IsWindowValid", func(t *testing.T) {
+				valid, err := v.IsWindowValid(Window(0))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if !valid {
+					t.Fatalf("expected valid but got %t", valid)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -1392,6 +1403,20 @@ func testWindow(v *Nvim) func(*testing.T) {
 				wantWinNum := 1
 				if gotWinNum != wantWinNum {
 					t.Fatalf("expected %v but got %v", wantWinNum, gotWinNum)
+				}
+			})
+
+			t.Run("IsWindowValid", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var valid bool
+				b.IsWindowValid(Window(0), &valid)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if !valid {
+					t.Fatalf("expected valid but got %t", valid)
 				}
 			})
 		})
