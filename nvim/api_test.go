@@ -3655,61 +3655,166 @@ func testContext(v *Nvim) func(*testing.T) {
 
 func testExtmarks(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		clearBuffer(t, v, 0) // clear curret buffer text
+		t.Run("Nvim", func(t *testing.T) {
+			// setup buffer lines
+			lines := [][]byte{
+				[]byte("hello"),
+				[]byte("world"),
+			}
+			if err := v.SetBufferLines(Buffer(0), 0, -1, true, lines); err != nil {
+				t.Fatal(err)
+			}
 
-		lines := [][]byte{[]byte("hello"), []byte("world")}
-		if err := v.SetBufferLines(Buffer(0), 0, -1, true, lines); err != nil {
-			t.Fatal(err)
-		}
+			// create namespace for test extmarks
+			const extMarkName = "test_extmarks"
+			nsID, err := v.CreateNamespace(extMarkName)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		nsID, err := v.CreateNamespace("test_extmarks")
-		if err != nil {
-			t.Fatal(err)
-		}
-		const (
-			extMarkID = 1
-			wantLine  = 1
-			wantCol   = 3
-		)
-		gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if gotExtMarkID != extMarkID {
-			t.Fatalf("got %d extMarkID but want %d", gotExtMarkID, extMarkID)
-		}
+			const (
+				wantExtMarkID = 1
+				wantLine      = 1
+				wantCol       = 3
+			)
+			gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if gotExtMarkID != wantExtMarkID {
+				t.Fatalf("got %d extMarkID but want %d", gotExtMarkID, wantExtMarkID)
+			}
 
-		extmarks, err := v.BufferExtmarks(Buffer(0), nsID, 0, -1, make(map[string]interface{}))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(extmarks) > 1 {
-			t.Fatalf("expected extmarks length to 1 but %d", len(extmarks))
-		}
-		if extmarks[0].ID != gotExtMarkID {
-			t.Fatalf("got %d extMarkID but want %d", extmarks[0].ID, extMarkID)
-		}
-		if extmarks[0].Row != wantLine {
-			t.Fatalf("got %d extmarks Row but want %d", extmarks[0].Row, wantLine)
-		}
-		if extmarks[0].Col != wantCol {
-			t.Fatalf("got %d extmarks Col but want %d", extmarks[0].Col, wantCol)
-		}
+			extmarks, err := v.BufferExtmarks(Buffer(0), nsID, 0, -1, make(map[string]interface{}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(extmarks) > 1 {
+				t.Fatalf("expected extmarks length to 1 but got %d", len(extmarks))
+			}
+			if extmarks[0].ID != gotExtMarkID {
+				t.Fatalf("got %d extMarkID but want %d", extmarks[0].ID, wantExtMarkID)
+			}
+			if extmarks[0].Row != wantLine {
+				t.Fatalf("got %d extmarks Row but want %d", extmarks[0].Row, wantLine)
+			}
+			if extmarks[0].Col != wantCol {
+				t.Fatalf("got %d extmarks Col but want %d", extmarks[0].Col, wantCol)
+			}
 
-		pos, err := v.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]interface{}))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if pos[0] != wantLine {
-			t.Fatalf("got %d extMark line but want %d", pos[0], wantLine)
-		}
-		if pos[1] != wantCol {
-			t.Fatalf("got %d extMark col but want %d", pos[1], wantCol)
-		}
+			pos, err := v.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]interface{}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if pos[0] != wantLine {
+				t.Fatalf("got %d extMark line but want %d", pos[0], wantLine)
+			}
+			if pos[1] != wantCol {
+				t.Fatalf("got %d extMark col but want %d", pos[1], wantCol)
+			}
 
-		if err := v.ClearBufferNamespace(Buffer(0), nsID, 0, -1); err != nil {
-			t.Fatal(err)
-		}
+			deleted, err := v.DeleteBufferExtmark(Buffer(0), nsID, gotExtMarkID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !deleted {
+				t.Fatalf("expected deleted but got %t", deleted)
+			}
+
+			if err := v.ClearBufferNamespace(Buffer(0), nsID, 0, -1); err != nil {
+				t.Fatal(err)
+			}
+
+			t.Cleanup(func() {
+				clearBuffer(t, v, Buffer(0)) // clear curret buffer text
+			})
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			b := v.NewBatch()
+
+			// setup buffer lines
+			lines := [][]byte{
+				[]byte("hello"),
+				[]byte("world"),
+			}
+			b.SetBufferLines(Buffer(0), 0, -1, true, lines)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			// create namespace for test extmarks
+			const extMarkName = "test_extmarks"
+			var nsID int
+			b.CreateNamespace(extMarkName, &nsID)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			const (
+				wantExtMarkID = 2
+				wantLine      = 1
+				wantCol       = 3
+			)
+			var gotExtMarkID int
+			b.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}), &gotExtMarkID)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if gotExtMarkID != wantExtMarkID {
+				t.Fatalf("got %d extMarkID but want %d", gotExtMarkID, wantExtMarkID)
+			}
+
+			var extmarks []ExtMark
+			b.BufferExtmarks(Buffer(0), nsID, 0, -1, make(map[string]interface{}), &extmarks)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			if len(extmarks) > 1 {
+				t.Fatalf("expected extmarks length to 1 but got %d", len(extmarks))
+			}
+			if extmarks[0].ID != gotExtMarkID {
+				t.Fatalf("got %d extMarkID but want %d", extmarks[0].ID, wantExtMarkID)
+			}
+			if extmarks[0].Row != wantLine {
+				t.Fatalf("got %d extmarks Row but want %d", extmarks[0].Row, wantLine)
+			}
+			if extmarks[0].Col != wantCol {
+				t.Fatalf("got %d extmarks Col but want %d", extmarks[0].Col, wantCol)
+			}
+
+			var pos []int
+			b.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]interface{}), &pos)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			if pos[0] != wantLine {
+				t.Fatalf("got %d extMark line but want %d", pos[0], wantLine)
+			}
+			if pos[1] != wantCol {
+				t.Fatalf("got %d extMark col but want %d", pos[1], wantCol)
+			}
+
+			var deleted bool
+			b.DeleteBufferExtmark(Buffer(0), nsID, gotExtMarkID, &deleted)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if !deleted {
+				t.Fatalf("expected deleted but got %t", deleted)
+			}
+
+			b.ClearBufferNamespace(Buffer(0), nsID, 0, -1)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			t.Cleanup(func() {
+				clearBuffer(t, v, Buffer(0)) // clear curret buffer text
+			})
+		})
 	}
 }
 
