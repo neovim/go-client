@@ -4606,6 +4606,17 @@ func testChannelClientInfo(v *Nvim) func(*testing.T) {
 		)
 
 		t.Run("Nvim", func(t *testing.T) {
+			t.Run("Channels", func(t *testing.T) {
+				chans, err := v.Channels()
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if len(chans) == 0 {
+					t.Fatalf("want any channels but got %d", len(chans))
+				}
+			})
+
 			clientName := clientNamePrefix + "Nvim"
 
 			t.Run("SetClientInfo", func(t *testing.T) {
@@ -4640,6 +4651,19 @@ func testChannelClientInfo(v *Nvim) func(*testing.T) {
 
 		t.Run("Batch", func(t *testing.T) {
 			b := v.NewBatch()
+
+			t.Run("Channels", func(t *testing.T) {
+				var chans []*Channel
+				b.Channels(&chans)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if len(chans) == 0 {
+					t.Fatalf("want any channels but got %d", len(chans))
+				}
+			})
+
 			clientName := clientNamePrefix + "Batch"
 
 			t.Run("SetClientInfo", func(t *testing.T) {
