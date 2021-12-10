@@ -3172,9 +3172,9 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			const HLIDName = `Error`
-			var wantErrorHLID = 140
-			if nvimVersion.Minor >= 6 {
-				wantErrorHLID = 64
+			var wantErrorHLID = 64
+			if nvimVersion.Minor >= 7 {
+				wantErrorHLID = 66
 			}
 
 			goHLID, err := v.HLIDByName(HLIDName)
@@ -3295,9 +3295,9 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			const HLIDName = `Error`
-			var wantErrorHLID = 140
-			if nvimVersion.Minor >= 6 {
-				wantErrorHLID = 64
+			var wantErrorHLID = 64
+			if nvimVersion.Minor >= 7 {
+				wantErrorHLID = 66
 			}
 
 			var goHLID int
