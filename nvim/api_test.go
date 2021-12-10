@@ -3261,6 +3261,14 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			if wantRedColor != gotColor {
 				t.Fatalf("expected red color %d but got %d", wantRedColor, gotColor)
 			}
+
+			id, err := v.AddBufferHighlight(Buffer(0), 0, `NewHighlight2`, 0, 0, -1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if id < 0 {
+				t.Fatalf("want id is not negative but got %d", id)
+			}
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -3393,6 +3401,16 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 			if wantRedColor != gotColor {
 				t.Fatalf("expected red color %d but got %d", wantRedColor, gotColor)
+			}
+
+			var id int
+			b.AddBufferHighlight(Buffer(0), 0, `NewHighlight2`, 0, 0, -1, &id)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			if id < 0 {
+				t.Fatalf("want id is not negative but got %d", id)
 			}
 		})
 	}
