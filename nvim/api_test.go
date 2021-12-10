@@ -4679,32 +4679,77 @@ func testChannelClientInfo(v *Nvim) func(*testing.T) {
 func testUI(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			t.Run("UIs", func(t *testing.T) {
-				gotUIs, err := v.UIs()
-				if err != nil {
+			gotUIs, err := v.UIs()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if len(gotUIs) > 0 || gotUIs != nil {
+				t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
+			}
+
+			v.RegisterHandler("redraw", func(updates ...[]interface{}) {})
+			if err := v.AttachUI(500, 400, make(map[string]interface{})); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				if err := v.DetachUI(); err != nil {
 					t.Fatal(err)
 				}
-
-				if len(gotUIs) > 0 || gotUIs != nil {
-					t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
-				}
 			})
+
+			if err := v.TryResizeUI(50, 40); err != nil {
+				t.Fatal(err)
+			}
+
+			if err := v.SetUIOption("rgb", true); err != nil {
+				t.Fatal(err)
+			}
+
+			if err := v.TryResizeUIGrid(1, 50, 40); err != nil {
+				t.Fatal(err)
+			}
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			t.Run("UIs", func(t *testing.T) {
-				b := v.NewBatch()
+			b := v.NewBatch()
 
-				var gotUIs []*UI
-				b.UIs(&gotUIs)
+			var gotUIs []*UI
+			b.UIs(&gotUIs)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			if len(gotUIs) > 0 || gotUIs != nil {
+				t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
+			}
+
+			v.RegisterHandler("redraw", func(updates ...[]interface{}) {})
+			b.AttachUI(500, 400, make(map[string]interface{}))
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				b.DetachUI()
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-
-				if len(gotUIs) > 0 || gotUIs != nil {
-					t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
-				}
 			})
+
+			b.TryResizeUI(50, 40)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			b.SetUIOption("rgb", true)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			b.TryResizeUIGrid(1, 50, 40)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
 		})
 	}
 }
