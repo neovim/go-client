@@ -430,6 +430,7 @@ func readAPIInfo() (*APIInfo, error) {
 var nvimTypes = map[string]string{
 	"":              "void",
 	"[]byte":        "String",
+	"[]uint":        "Array",
 	"[]interface{}": "Array",
 	"bool":          "Boolean",
 	"int":           "Integer",
@@ -437,10 +438,11 @@ var nvimTypes = map[string]string{
 	"Process":       "Object",
 	"string":        "String",
 	"float64":       "Float",
+	"ClientType":    "String",
 
 	"Channel":                  "Dictionary",
 	"*Channel":                 "Dictionary",
-	"*ClientVersion":           "Dictionary",
+	"ClientVersion":            "Dictionary",
 	"HLAttrs":                  "Dictionary",
 	"*HLAttrs":                 "Dictionary",
 	"WindowConfig":             "Dictionary",
