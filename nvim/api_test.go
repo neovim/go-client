@@ -4787,6 +4787,14 @@ func testProc(v *Nvim) func(*testing.T) {
 					t.Fatalf("got %d Process.PPID but want %d", gotProc.PPID, wantProcess.PPID)
 				}
 			})
+
+			t.Run("ProcChildren", func(t *testing.T) {
+				_, err := v.ProcChildren(os.Getpid())
+				if err != nil {
+					t.Fatal(err)
+				}
+				// TODO(zchee): assert processes
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -4822,6 +4830,17 @@ func testProc(v *Nvim) func(*testing.T) {
 				if gotProc.PPID != wantProcess.PPID {
 					t.Fatalf("got %d Process.PPID but want %d", gotProc.PPID, wantProcess.PPID)
 				}
+			})
+
+			t.Run("ProcChildren", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var processes []uint
+				b.ProcChildren(os.Getpid(), &processes)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				// TODO(zchee): assert processes
 			})
 		})
 	}
