@@ -3224,7 +3224,7 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatalf("SetHighlight:\nwant %#v\n got %#v", wantErrorMsgEHL, errorMsgHL)
 			}
 
-			const cmd2 = "hi NewHighlight2 guifg=yellow guibg=red gui=bold"
+			const cmd2 = `hi NewHighlight2 guifg=yellow guibg=red gui=bold`
 			if err := v.Command(cmd2); err != nil {
 				t.Fatal(err)
 			}
