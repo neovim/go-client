@@ -661,18 +661,28 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				if err := v.SetBufferLines(Buffer(0), -1, -1, true, lines); err != nil {
 					t.Fatal(err)
 				}
+				t.Cleanup(func() {
+					clearBuffer(t, v, Buffer(0))
+				})
+
 				if err := v.SetWindowCursor(Window(0), [2]int{3, 4}); err != nil {
-					t.Fatal(err)
-				}
-				if err := v.Command("mark v"); err != nil {
 					t.Fatal(err)
 				}
 
 				const (
+					mark     = "V"
 					wantLine = 3
 					wantCol  = 0
 				)
-				pos, err := v.BufferMark(Buffer(0), "v")
+				set, err := v.SetBufferMark(Buffer(0), mark, wantLine, wantCol, make(map[string]interface{}))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !set {
+					t.Fatalf("could not set %s mark", mark)
+				}
+
+				pos, err := v.BufferMark(Buffer(0), mark)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -683,9 +693,21 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					t.Fatalf("got %d extMark col but want %d", pos[1], wantCol)
 				}
 
-				t.Cleanup(func() {
-					clearBuffer(t, v, Buffer(0))
-				})
+				deleted, err := v.DeleteBufferMark(Buffer(0), mark)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !deleted {
+					t.Fatalf("could not delete %s mark", mark)
+				}
+
+				pos2, err := v.BufferMark(Buffer(0), mark)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if pos2[0] != 0 || pos2[1] != 0 {
+					t.Fatalf("got %d mark but want zero", pos2)
+				}
 			})
 		})
 
@@ -961,18 +983,28 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
+				t.Cleanup(func() {
+					clearBuffer(t, v, Buffer(0))
+				})
+
 				b.SetWindowCursor(Window(0), [2]int{3, 4})
-				b.Command("mark v")
-				if err := b.Execute(); err != nil {
-					t.Fatal(err)
-				}
 
 				const (
+					mark     = "V"
 					wantLine = 3
 					wantCol  = 0
 				)
+				var set bool
+				b.SetBufferMark(Buffer(0), mark, wantLine, wantCol, make(map[string]interface{}), &set)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if !set {
+					t.Fatalf("could not set %s mark", mark)
+				}
+
 				var pos [2]int
-				b.BufferMark(Buffer(0), "v", &pos)
+				b.BufferMark(Buffer(0), mark, &pos)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
@@ -983,9 +1015,23 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					t.Fatalf("got %d extMark col but want %d", pos[1], wantCol)
 				}
 
-				t.Cleanup(func() {
-					clearBuffer(t, v, Buffer(0))
-				})
+				var deleted bool
+				b.DeleteBufferMark(Buffer(0), mark, &deleted)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if !deleted {
+					t.Fatalf("could not delete %s mark", mark)
+				}
+
+				var pos2 [2]int
+				b.BufferMark(Buffer(0), mark, &pos2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if pos2[0] != 0 || pos2[1] != 0 {
+					t.Fatalf("got %d mark but want zero", pos2)
+				}
 			})
 		})
 	}
