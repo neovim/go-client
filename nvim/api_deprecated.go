@@ -139,9 +139,9 @@ func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, en
 //
 // The same nsID can be used for both virtual text and highlights added by AddBufferHighlight,
 // both can then be cleared with a single call to ClearBufferNamespace.
-// If the virtual text never will be cleared by an API call, pass `nsID = -1`.
+// If the virtual text never will be cleared by an API call, pass "nsID = -1".
 //
-// As a shorthand, `nsID = 0` can be used to create a new namespace for the
+// As a shorthand, "nsID = 0" can be used to create a new namespace for the
 // virtual text, the allocated id is then returned.
 //
 // The opts arg is reserved for future use.
@@ -165,9 +165,9 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 //
 // The same nsID can be used for both virtual text and highlights added by AddBufferHighlight,
 // both can then be cleared with a single call to ClearBufferNamespace.
-// If the virtual text never will be cleared by an API call, pass `nsID = -1`.
+// If the virtual text never will be cleared by an API call, pass "nsID = -1".
 //
-// As a shorthand, `nsID = 0` can be used to create a new namespace for the
+// As a shorthand, "nsID = 0" can be used to create a new namespace for the
 // virtual text, the allocated id is then returned.
 //
 // The opts arg is reserved for future use.
