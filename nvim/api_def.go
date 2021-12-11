@@ -822,6 +822,39 @@ func SelectPopupmenuItem(item int, insert, finish bool, opts map[string]interfac
 	name(nvim_select_popupmenu_item)
 }
 
+// DeleteMark deletes a uppercase/file named mark.
+// See |help mark-motions|.
+func DeleteMark(name string) (deleted bool) {
+	name(nvim_del_mark)
+}
+
+// Mark returns a tuple (row, col, buffer, buffername) representing the position of
+// the uppercase/file named mark.
+// See |help mark-motions|.
+//
+// opts is optional parameters. Reserved for future use.
+func Mark(name string, opts map[string]interface{}) (mark Mark) {
+	name(nvim_get_mark)
+	returnPtr()
+}
+
+// EvalStatusLine evaluates statusline string.
+//
+// opts optional parameters.
+//  winid (int)
+// Window ID of the window to use as context for statusline.
+//  maxwidth (int)
+// Maximum width of statusline.
+//  fillchar (string)
+// Character to fill blank spaces in the statusline (see 'fillchars').
+//  highlights (bool)
+// Return highlight information.
+//  use_tabline (bool)
+// Evaluate tabline instead of statusline. When true, {winid} is ignored.
+func EvalStatusLine(name string, opts map[string]interface{}) (statusline map[string]interface{}) {
+	name(nvim_eval_statusline)
+}
+
 // buffer.c
 
 // BufferLineCount gets the buffer line count.
@@ -1020,6 +1053,23 @@ func DeleteBuffer(buffer Buffer, opts map[string]bool) {
 // See |help api-buffer| for more info about unloaded buffers.
 func IsBufferValid(buffer Buffer) (valied bool) {
 	name(nvim_buf_is_valid)
+}
+
+// DeleteBufferMark deletes a named mark in the buffer.
+// See |help mark-motions|.
+func DeleteBufferMark(buffer Buffer, name string) (deleted bool) {
+	name(nvim_buf_del_mark)
+}
+
+// SetBufferMark sets a named mark in the given buffer, all marks are allowed
+// file/uppercase, visual, last change, etc.
+// See |help mark-motions|.
+//
+// line and col are (1,0)-indexed.
+//
+// opts is optional parameters. Reserved for future use.
+func SetBufferMark(buffer Buffer, name string, line, col int, opts map[string]interface{}) (set bool) {
+	name(nvim_buf_set_mark)
 }
 
 // BufferMark return a tuple (row,col) representing the position of the named mark.
