@@ -463,6 +463,7 @@ var nvimTypes = map[string]string{
 	"[]*UI":       "Array",
 	"[]ExtMark":   "Array",
 	"[]TextChunk": "Array",
+	"Mark":        "Array",
 
 	"[2]int":     "ArrayOf(Integer, 2)",
 	"[]*Mapping": "ArrayOf(Dictionary)",
@@ -513,6 +514,7 @@ var specialAPIs = map[string]bool{
 	"nvim_buf_call":                true,
 	"nvim_set_decoration_provider": true,
 	"nvim_chan_send":               true, // FUNC_API_LUA_ONLY
+	"nvim_win_call":                true, // FUNC_API_LUA_ONLY
 	"nvim_notify":                  true, // implements underling nlua(vim.notify)
 }
 
