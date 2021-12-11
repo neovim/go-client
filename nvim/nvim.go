@@ -526,7 +526,7 @@ func (b *Batch) Request(procedure string, result interface{}, args ...interface{
 // result is the result of the function call.
 func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error {
 	if args == nil {
-		args = []interface{}{}
+		args = emptyArgs
 	}
 	return v.call("nvim_call_function", result, fname, args)
 }
@@ -542,7 +542,7 @@ func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error
 // result is the result of the function call.
 func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 	if args == nil {
-		args = []interface{}{}
+		args = emptyArgs
 	}
 	b.call("nvim_call_function", result, fname, args)
 }
@@ -560,7 +560,7 @@ func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 // result is the result of the function call.
 func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) error {
 	if args == nil {
-		args = []interface{}{}
+		args = emptyArgs
 	}
 	return v.call("nvim_call_dict_function", result, fname, dict, args)
 }
@@ -578,7 +578,7 @@ func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, ar
 // result is the result of the function call.
 func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) {
 	if args == nil {
-		args = []interface{}{}
+		args = emptyArgs
 	}
 	b.call("nvim_call_dict_function", result, fname, dict, args)
 }
@@ -597,7 +597,7 @@ func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, a
 // The returned result value of Lua code if present or nil.
 func (v *Nvim) ExecLua(code string, result interface{}, args ...interface{}) error {
 	if args == nil {
-		args = []interface{}{}
+		args = emptyArgs
 	}
 	return v.call("nvim_exec_lua", result, code, args)
 }
@@ -616,7 +616,7 @@ func (v *Nvim) ExecLua(code string, result interface{}, args ...interface{}) err
 // The returned result value of Lua code if present or nil.
 func (b *Batch) ExecLua(code string, result interface{}, args ...interface{}) {
 	if args == nil {
-		args = []interface{}{}
+		args = emptyArgs
 	}
 	b.call("nvim_exec_lua", result, code, args)
 }

@@ -370,7 +370,7 @@ func NewEmbedded(options *EmbedOptions) (*Nvim, error) {
 // Deprecated: Use ExecLua instead.
 func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) error {
 	if args == nil {
-		args = []interface{}{}
+		args = emptyArgs
 	}
 	return v.call("nvim_execute_lua", result, code, args)
 }
@@ -380,7 +380,7 @@ func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) 
 // Deprecated: Use ExecLua instead.
 func (b *Batch) ExecuteLua(code string, result interface{}, args ...interface{}) {
 	if args == nil {
-		args = []interface{}{}
+		args = emptyArgs
 	}
 	b.call("nvim_execute_lua", result, code, args)
 }
