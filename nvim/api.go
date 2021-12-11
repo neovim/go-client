@@ -1724,6 +1724,74 @@ func (b *Batch) SelectPopupmenuItem(item int, insert bool, finish bool, opts map
 	b.call("nvim_select_popupmenu_item", nil, item, insert, finish, opts)
 }
 
+// DeleteMark deletes a uppercase/file named mark.
+// See |help mark-motions|.
+func (v *Nvim) DeleteMark(name string) (deleted bool, err error) {
+	err = v.call("nvim_del_mark", &deleted, name)
+	return deleted, err
+}
+
+// DeleteMark deletes a uppercase/file named mark.
+// See |help mark-motions|.
+func (b *Batch) DeleteMark(name string, deleted *bool) {
+	b.call("nvim_del_mark", deleted, name)
+}
+
+// Mark returns a tuple (row, col, buffer, buffername) representing the position of
+// the uppercase/file named mark.
+// See |help mark-motions|.
+//
+// opts is optional parameters. Reserved for future use.
+func (v *Nvim) Mark(name string, opts map[string]interface{}) (mark *Mark, err error) {
+	var result Mark
+	err = v.call("nvim_get_mark", &result, name, opts)
+	return &result, err
+}
+
+// Mark returns a tuple (row, col, buffer, buffername) representing the position of
+// the uppercase/file named mark.
+// See |help mark-motions|.
+//
+// opts is optional parameters. Reserved for future use.
+func (b *Batch) Mark(name string, opts map[string]interface{}, mark *Mark) {
+	b.call("nvim_get_mark", mark, name, opts)
+}
+
+// EvalStatusLine evaluates statusline string.
+//
+// opts optional parameters.
+//  winid (int)
+// Window ID of the window to use as context for statusline.
+//  maxwidth (int)
+// Maximum width of statusline.
+//  fillchar (string)
+// Character to fill blank spaces in the statusline (see 'fillchars').
+//  highlights (bool)
+// Return highlight information.
+//  use_tabline (bool)
+// Evaluate tabline instead of statusline. When true, {winid} is ignored.
+func (v *Nvim) EvalStatusLine(name string, opts map[string]interface{}) (statusline map[string]interface{}, err error) {
+	err = v.call("nvim_eval_statusline", &statusline, name, opts)
+	return statusline, err
+}
+
+// EvalStatusLine evaluates statusline string.
+//
+// opts optional parameters.
+//  winid (int)
+// Window ID of the window to use as context for statusline.
+//  maxwidth (int)
+// Maximum width of statusline.
+//  fillchar (string)
+// Character to fill blank spaces in the statusline (see 'fillchars').
+//  highlights (bool)
+// Return highlight information.
+//  use_tabline (bool)
+// Evaluate tabline instead of statusline. When true, {winid} is ignored.
+func (b *Batch) EvalStatusLine(name string, opts map[string]interface{}, statusline *map[string]interface{}) {
+	b.call("nvim_eval_statusline", statusline, name, opts)
+}
+
 // BufferLineCount gets the buffer line count.
 //
 // The buffer arg is specific Buffer, or 0 for current buffer.
@@ -2115,6 +2183,42 @@ func (v *Nvim) IsBufferValid(buffer Buffer) (valied bool, err error) {
 // See |help api-buffer| for more info about unloaded buffers.
 func (b *Batch) IsBufferValid(buffer Buffer, valied *bool) {
 	b.call("nvim_buf_is_valid", valied, buffer)
+}
+
+// DeleteBufferMark deletes a named mark in the buffer.
+// See |help mark-motions|.
+func (v *Nvim) DeleteBufferMark(buffer Buffer, name string) (deleted bool, err error) {
+	err = v.call("nvim_buf_del_mark", &deleted, buffer, name)
+	return deleted, err
+}
+
+// DeleteBufferMark deletes a named mark in the buffer.
+// See |help mark-motions|.
+func (b *Batch) DeleteBufferMark(buffer Buffer, name string, deleted *bool) {
+	b.call("nvim_buf_del_mark", deleted, buffer, name)
+}
+
+// SetBufferMark sets a named mark in the given buffer, all marks are allowed
+// file/uppercase, visual, last change, etc.
+// See |help mark-motions|.
+//
+// line and col are (1,0)-indexed.
+//
+// opts is optional parameters. Reserved for future use.
+func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]interface{}) (set bool, err error) {
+	err = v.call("nvim_buf_set_mark", &set, buffer, name, line, col, opts)
+	return set, err
+}
+
+// SetBufferMark sets a named mark in the given buffer, all marks are allowed
+// file/uppercase, visual, last change, etc.
+// See |help mark-motions|.
+//
+// line and col are (1,0)-indexed.
+//
+// opts is optional parameters. Reserved for future use.
+func (b *Batch) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]interface{}, set *bool) {
+	b.call("nvim_buf_set_mark", set, buffer, name, line, col, opts)
 }
 
 // BufferMark return a tuple (row,col) representing the position of the named mark.
