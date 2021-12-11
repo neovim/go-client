@@ -3160,16 +3160,20 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			wantCTerm := &HLAttrs{
-				Underline:  true,
-				Foreground: -1,
-				Background: 10,
-				Special:    -1,
+				Underline:       true,
+				Foreground:      -1,
+				Background:      10,
+				Special:         -1,
+				CtermForeground: -1,
+				CtermBackground: -1,
 			}
 			wantGUI := &HLAttrs{
-				Bold:       true,
-				Foreground: cm["Red"],
-				Background: cm["Yellow"],
-				Special:    cm["Blue"],
+				Bold:            true,
+				Foreground:      cm["Red"],
+				Background:      cm["Yellow"],
+				Special:         cm["Blue"],
+				CtermForeground: -1,
+				CtermBackground: -1,
 			}
 
 			var nsID int
@@ -3219,12 +3223,14 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			wantErrorMsgEHL := &HLAttrs{
-				Bold:       true,
-				Underline:  true,
-				Italic:     true,
-				Foreground: 16777215,
-				Background: 16711680,
-				Special:    -1,
+				Bold:            true,
+				Underline:       true,
+				Italic:          true,
+				Foreground:      16777215,
+				Background:      16711680,
+				Special:         -1,
+				CtermForeground: -1,
+				CtermBackground: -1,
 			}
 			if !reflect.DeepEqual(wantErrorMsgEHL, errorMsgHL) {
 				t.Fatalf("SetHighlight:\nwant %#v\n got %#v", wantErrorMsgEHL, errorMsgHL)
@@ -3242,14 +3248,16 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 			want := &HLAttrs{
-				Bold:       true,
-				Underline:  false,
-				Undercurl:  false,
-				Italic:     false,
-				Reverse:    false,
-				Foreground: 16776960,
-				Background: 16711680,
-				Special:    -1,
+				Bold:            true,
+				Underline:       false,
+				Undercurl:       false,
+				Italic:          false,
+				Reverse:         false,
+				Foreground:      16776960,
+				Background:      16711680,
+				Special:         -1,
+				CtermForeground: -1,
+				CtermBackground: -1,
 			}
 			got, err := v.HLByID(nsID2, true)
 			if err != nil {
@@ -3290,16 +3298,20 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			wantCTerm := &HLAttrs{
-				Underline:  true,
-				Foreground: -1,
-				Background: 10,
-				Special:    -1,
+				Underline:       true,
+				Foreground:      -1,
+				Background:      10,
+				Special:         -1,
+				CtermForeground: -1,
+				CtermBackground: -1,
 			}
 			wantGUI := &HLAttrs{
-				Bold:       true,
-				Foreground: cm[`Red`],
-				Background: cm[`Yellow`],
-				Special:    cm[`Blue`],
+				Bold:            true,
+				Foreground:      cm[`Red`],
+				Background:      cm[`Yellow`],
+				Special:         cm[`Blue`],
+				CtermForeground: -1,
+				CtermBackground: -1,
 			}
 
 			var nsID int
@@ -3356,12 +3368,14 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			wantErrorMsgEHL := &HLAttrs{
-				Bold:       true,
-				Underline:  true,
-				Italic:     true,
-				Foreground: 16777215,
-				Background: 16711680,
-				Special:    -1,
+				Bold:            true,
+				Underline:       true,
+				Italic:          true,
+				Foreground:      16777215,
+				Background:      16711680,
+				Special:         -1,
+				CtermForeground: -1,
+				CtermBackground: -1,
 			}
 			if !reflect.DeepEqual(&errorMsgHL, wantErrorMsgEHL) {
 				t.Fatalf("SetHighlight:\ngot %#v\nwant %#v", &errorMsgHL, wantErrorMsgEHL)
@@ -3380,14 +3394,16 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 			want := &HLAttrs{
-				Bold:       true,
-				Underline:  false,
-				Undercurl:  false,
-				Italic:     false,
-				Reverse:    false,
-				Foreground: 16776960,
-				Background: 16711680,
-				Special:    -1,
+				Bold:            true,
+				Underline:       false,
+				Undercurl:       false,
+				Italic:          false,
+				Reverse:         false,
+				Foreground:      16776960,
+				Background:      16711680,
+				Special:         -1,
+				CtermForeground: -1,
+				CtermBackground: -1,
 			}
 
 			var got HLAttrs
@@ -3478,6 +3494,7 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				Col:       0,
 				Focusable: true,
 				Style:     "minimal",
+				ZIndex:    50,
 			}
 			w, err := v.OpenWindow(Buffer(0), true, cfg)
 			if err != nil {
@@ -3518,6 +3535,7 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				Height:    10,
 				Row:       1,
 				Focusable: false,
+				ZIndex:    50,
 			}
 			if err := v.SetWindowConfig(w, wantWinConfig); err != nil {
 				t.Fatal(err)
@@ -3595,6 +3613,7 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				Col:       0,
 				Focusable: true,
 				Style:     "minimal",
+				ZIndex:    50,
 			}
 			var w Window
 			b.OpenWindow(Buffer(0), true, cfg, &w)
@@ -3634,6 +3653,7 @@ func testFloatingWindow(v *Nvim) func(*testing.T) {
 				Height:    10,
 				Row:       1,
 				Focusable: false,
+				ZIndex:    50,
 			}
 			b.SetWindowConfig(w, wantWinConfig)
 			if err := b.Execute(); err != nil {
@@ -4525,6 +4545,7 @@ func testTerm(v *Nvim) func(*testing.T) {
 				Height:   31,
 				Row:      1,
 				Col:      1,
+				ZIndex:   50,
 			}
 			if _, err := v.OpenWindow(buf, false, cfg); err != nil {
 				t.Fatal(err)
@@ -4556,6 +4577,7 @@ func testTerm(v *Nvim) func(*testing.T) {
 				Height:   31,
 				Row:      1,
 				Col:      1,
+				ZIndex:   50,
 			}
 			var win Window
 			b.OpenWindow(buf, false, cfg, &win)
