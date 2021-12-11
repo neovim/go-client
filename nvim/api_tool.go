@@ -130,7 +130,7 @@ func parseAPIDef() ([]*Function, []*Function, error) {
 	}
 
 	var functions []*Function
-	var deprecateds []*Function
+	var deprecated []*Function
 
 	for _, decl := range file.Decls {
 		fdecl, ok := decl.(*ast.FuncDecl)
@@ -191,13 +191,13 @@ func parseAPIDef() ([]*Function, []*Function, error) {
 		}
 
 		if m.DeprecatedSince > 0 {
-			deprecateds = append(deprecateds, m)
+			deprecated = append(deprecated, m)
 			continue
 		}
 		functions = append(functions, m)
 	}
 
-	return functions, deprecateds, nil
+	return functions, deprecated, nil
 }
 
 const genTemplate = `
@@ -622,27 +622,30 @@ func main() {
 		return
 	}
 
-	functions, deprecateds, err := parseAPIDef()
+	functions, deprecated, err := parseAPIDef()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	switch {
 	case *compareFlag:
-		functions = append(functions, deprecateds...)
-		err = compareFunctions(functions)
-	default:
-		if *generateFlag != "" {
-			if *deprecatedFlag == "" {
-				functions = append(functions, deprecateds...)
-			}
-			err = printImplementation(functions, implementationTemplate, *generateFlag)
+		functions = append(functions, deprecated...)
+		if err := compareFunctions(functions); err != nil {
+			log.Fatal(err)
 		}
+
+	case *generateFlag != "":
+		if *deprecatedFlag == "" {
+			functions = append(functions, deprecated...)
+		}
+		if err := printImplementation(functions, implementationTemplate, *generateFlag); err != nil {
+			log.Fatal(err)
+		}
+
 		if *deprecatedFlag != "" {
-			err = printImplementation(deprecateds, deprecatedTemplate, *deprecatedFlag)
+			if err := printImplementation(deprecated, deprecatedTemplate, *deprecatedFlag); err != nil {
+				log.Fatal(err)
+			}
 		}
-	}
-	if err != nil {
-		log.Fatal(err)
 	}
 }
