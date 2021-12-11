@@ -38,9 +38,9 @@ func TestLogLevel_String(t *testing.T) {
 			want:  "ErrorLevel",
 		},
 		{
-			name:  "unkonwn",
+			name:  "unknown",
 			level: LogLevel(-1),
-			want:  "unkonwn Level",
+			want:  "unknown Level",
 		},
 	}
 	for _, tt := range tests {

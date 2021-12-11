@@ -104,6 +104,9 @@ type HLAttrs struct {
 	// Bold is the bold font style.
 	Bold bool `msgpack:"bold,omitempty"`
 
+	// Standout is the standout font style.
+	Standout int `msgpack:"standout,omitempty"`
+
 	// Underline is the underline font style.
 	Underline bool `msgpack:"underline,omitempty"`
 
@@ -116,19 +119,17 @@ type HLAttrs struct {
 	// Reverse is the reverse to foreground and background.
 	Reverse bool `msgpack:"reverse,omitempty"`
 
-	// Inverse same as Reverse.
-	Inverse bool `msgpack:"inverse,omitempty"`
+	// Strikethrough is the strikethrough font style.
+	Strikethrough bool `msgpack:"strikethrough,omitempty"`
 
-	// Standout is the standout font style.
-	Standout int `msgpack:"standout,omitempty"`
+	ForegroundIndexed bool `msgpack:"fg_indexed,omitempty"`
 
-	// Nocombine override attributes instead of combining them.
-	Nocombine int `msgpack:"nocombine,omitempty"`
+	BackgroundIndexed bool `msgpack:"bg_indexed,omitempty"`
 
-	// Foreground use normal foreground color.
+	// Foreground is foreground color of RGB color.
 	Foreground int `msgpack:"foreground,omitempty" empty:"-1"`
 
-	// Background use normal background color.
+	// Background is background color of RGB color.
 	Background int `msgpack:"background,omitempty" empty:"-1"`
 
 	// Special is used for undercurl and underline.
@@ -140,6 +141,31 @@ type HLAttrs struct {
 	// Only takes effect if 'pumblend' or 'winblend' is set for the menu or window.
 	// See the help at the respective option.
 	Blend int `msgpack:"blend,omitempty"`
+
+	// Nocombine override attributes instead of combining them.
+	Nocombine bool `msgpack:"nocombine,omitempty"`
+
+	// Default don't override existing definition, like "hi default".
+	//
+	// This value is used only SetHighlight.
+	Default bool `msgpack:"default,omitempty"`
+
+	// Cterm is cterm attribute map. Sets attributed for cterm colors.
+	//
+	// Note thet by default cterm attributes are same as attributes of gui color.
+	//
+	// This value is used only SetHighlight.
+	Cterm *HLAttrs `msgpack:"cterm,omitempty"`
+
+	// CtermForeground is the foreground of cterm color.
+	//
+	// This value is used only SetHighlight.
+	CtermForeground int `msgpack:"ctermfg,omitempty" empty:"-1"`
+
+	// CtermBackground is the background of cterm color.
+	//
+	// This value is used only SetHighlight.
+	CtermBackground int `msgpack:"ctermbg,omitempty" empty:"-1"`
 }
 
 // Mapping represents a nvim mapping options.
@@ -400,6 +426,8 @@ type TextChunk struct {
 //  cursor
 // Cursor position in current window.
 //
+// Win is window ID for Relative="win".
+//
 // Anchor is the decides which corner of the float to place at row and col.
 //
 //  NW
@@ -413,7 +441,6 @@ type TextChunk struct {
 //
 // BufPos places float relative to buffer text only when Relative == "win".
 // Takes a tuple of zero-indexed [line, column].
-//
 // Row and Col if given are applied relative to this position, else they default to Row=1 and Col=0 (thus like a tooltip near the buffer text).
 //
 // Row is the row position in units of "screen cell height", may be fractional.
@@ -426,6 +453,9 @@ type TextChunk struct {
 // External is the GUI should display the window as an external top-level window.
 // Currently accepts no other positioning configuration together with this.
 //
+// ZIndex is stacking order. floats with higher "zindex" go on top on floats with lower indices. Must be larger than zero.
+// The default value for floats are 50. In general, values below 100 are recommended, unless there is a good reason to overshadow builtin elements.
+//
 // Style is the Configure the appearance of the window.
 // Currently only takes one non-empty value:
 //
@@ -435,18 +465,24 @@ type TextChunk struct {
 //
 // Disables "number", "relativenumber", "cursorline", "cursorcolumn", "foldcolumn", "spell" and "list" options.
 // And, "signcolumn" is changed to "auto" and "colorcolumn" is cleared.
-//
 // The end-of-buffer region is hidden by setting "eob" flag of "fillchars" to a space char, and clearing the EndOfBuffer region in "winhighlight".
 //
 //  border
 // Style of (optional) window border. This can either be a string or an array.
 // The string values are:
-//  "none"
+//
+//  none
 // No border. This is the default.
-//  "single"
+//  single
 // A single line box.
-//  "double"
+//  double
 // A double line box.
+//  rounded
+// Like "single", but with rounded corners ("╭" etc.).
+//  solid
+// Adds padding by a single whitespace cell.
+//  shadow
+// A drop shadow effect by blending with the background.
 //
 // If it is an array it should be an array of eight items or any divisor of
 // eight. The array will specifify the eight chars building up the border
@@ -461,10 +497,15 @@ type TextChunk struct {
 // Or all chars the same as:
 //  [ "x" ]
 //
+// An empty string can be used to turn off a specific border, for instance,
+//  [ "", "", "", ">", "", "", "", "<" ]
+//
 // By default "FloatBorder" highlight is used which links to "VertSplit"
 // when not defined.
 // It could also be specified by character:
 //  [ {"+", "MyCorner"}, {"x", "MyBorder"} ]
+//
+// NoAutocmd is if true then no buffer-related autocommand events such as BufEnter, BufLeave or BufWinEnter may fire from calling this function.
 type WindowConfig struct {
 	// Relative is the specifies the type of positioning method used for the floating window.
 	Relative string `msgpack:"relative,omitempty"`
@@ -496,12 +537,37 @@ type WindowConfig struct {
 	// External is the GUI should display the window as an external top-level window.
 	External bool `msgpack:"external,omitempty"`
 
+	// ZIndex stacking order. floats with higher `zindex` go on top on floats with lower indices. Must be larger than zero.
+	ZIndex int `msgpack:"zindex,omitempty" empty:"50"`
+
 	// Style is the Configure the appearance of the window.
 	Style string `msgpack:"style,omitempty"`
 
 	// Border is the style of window border.
-	Border []string `msgpack:"border,omitempty"`
+	Border interface{} `msgpack:"border,omitempty"`
+
+	// NoAutocmd whether the fire buffer-related autocommand events
+	NoAutocmd bool `msgpack:"noautocmd,omitempty"`
 }
+
+// BorderStyle represents a WindowConfig.Border style.
+type BorderStyle string
+
+// list of BorderStyle.
+const (
+	// BorderStyleNone is the no border. This is the default.
+	BorderStyleNone = BorderStyle("none")
+	// BorderStyleSingle is a single line box.
+	BorderStyleSingle = BorderStyle("single")
+	// BorderStyleDouble a double line box.
+	BorderStyleDouble = BorderStyle("double")
+	// BorderStyleRounded like "single", but with rounded corners ("╭" etc.).
+	BorderStyleRounded = BorderStyle("rounded")
+	// BorderStyleSolid adds padding by a single whitespace cell.
+	BorderStyleSolid = BorderStyle("solid")
+	// BorderStyleShadow a drop shadow effect by blending with the background.
+	BorderStyleShadow = BorderStyle("shadow")
+)
 
 // ExtMark represents a extmarks type.
 type ExtMark struct {
@@ -582,6 +648,6 @@ func (level LogLevel) String() string {
 	case LogErrorLevel:
 		return "ErrorLevel"
 	default:
-		return "unkonwn Level"
+		return "unknown Level"
 	}
 }
