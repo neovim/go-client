@@ -134,6 +134,7 @@ func TestAPI(t *testing.T) {
 	t.Run("UI", testUI(v))
 	t.Run("Proc", testProc(v))
 	t.Run("Mark", testMark(v))
+	t.Run("StatusLine", testStatusLine(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -5105,6 +5106,97 @@ func testMark(v *Nvim) func(*testing.T) {
 
 			if !reflect.DeepEqual(gotMark2, wantMark2) {
 				t.Fatalf("got %#v mark but want %#v", gotMark2, wantMark2)
+			}
+		})
+	}
+}
+
+func testStatusLine(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			opts := map[string]interface{}{
+				"highlights": true,
+			}
+			gotStatusLine, err := v.EvalStatusLine("TextWithNoHighlight", opts)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			wantStatusLine := map[string]interface{}{
+				"highlights": []interface{}{
+					map[string]interface{}{
+						"group": "StatusLine",
+						"start": int64(0),
+					},
+				},
+				"str":   "TextWithNoHighlight",
+				"width": 19,
+			}
+
+			gotHighlight := gotStatusLine["highlights"].([]interface{})[0].(map[string]interface{})
+			wantHighlight := wantStatusLine["highlights"].([]interface{})[0].(map[string]interface{})
+			if !reflect.DeepEqual(gotHighlight["group"], wantHighlight["group"]) {
+				t.Fatalf("got %#v highlight group but want %#v", gotHighlight["group"], wantHighlight["group"])
+			}
+			if gotHighlight["start"] != wantHighlight["start"] {
+				t.Fatalf("got %#v highlight start but want %#v", gotHighlight["start"], wantHighlight["start"])
+			}
+
+			gotStr := gotStatusLine["str"]
+			wantStr := gotStatusLine["str"]
+			if gotStr != wantStr {
+				t.Fatalf("got %#v str but want %#v", gotStr, wantStr)
+			}
+
+			gotWidth := gotStatusLine["width"]
+			wantWidth := gotStatusLine["width"]
+			if gotWidth != wantWidth {
+				t.Fatalf("got %#v width but want %#v", gotWidth, wantWidth)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			b := v.NewBatch()
+
+			opts := map[string]interface{}{
+				"highlights": true,
+			}
+			var gotStatusLine map[string]interface{}
+			b.EvalStatusLine("TextWithNoHighlight", opts, &gotStatusLine)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			wantStatusLine := map[string]interface{}{
+				"highlights": []interface{}{
+					map[string]interface{}{
+						"group": "StatusLine",
+						"start": int64(0),
+					},
+				},
+				"str":   "TextWithNoHighlight",
+				"width": 19,
+			}
+
+			gotHighlight := gotStatusLine["highlights"].([]interface{})[0].(map[string]interface{})
+			wantHighlight := wantStatusLine["highlights"].([]interface{})[0].(map[string]interface{})
+			if !reflect.DeepEqual(gotHighlight["group"], wantHighlight["group"]) {
+				t.Fatalf("got %#v highlight group but want %#v", gotHighlight["group"], wantHighlight["group"])
+			}
+			if gotHighlight["start"] != wantHighlight["start"] {
+				t.Fatalf("got %#v highlight start but want %#v", gotHighlight["start"], wantHighlight["start"])
+			}
+
+			gotStr := gotStatusLine["str"]
+			wantStr := gotStatusLine["str"]
+			if gotStr != wantStr {
+				t.Fatalf("got %#v str but want %#v", gotStr, wantStr)
+			}
+
+			gotWidth := gotStatusLine["width"]
+			wantWidth := gotStatusLine["width"]
+			if gotWidth != wantWidth {
+				t.Fatalf("got %#v width but want %#v", gotWidth, wantWidth)
 			}
 		})
 	}
