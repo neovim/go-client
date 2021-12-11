@@ -581,6 +581,14 @@ type ExtMark struct {
 	Col int
 }
 
+// Mark represents a mark.
+type Mark struct {
+	Row        int `msgpack:",array"`
+	Col        int
+	Buffer     Buffer
+	BufferName string
+}
+
 // OptionInfo represents a option information.
 type OptionInfo struct {
 	// Name is the name of the option (like 'filetype').
