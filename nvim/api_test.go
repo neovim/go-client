@@ -177,7 +177,7 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 			if !ok {
-				t.Fatal(errors.New("could not attach buffer"))
+				t.Fatal("could not attach buffer")
 			}
 
 			changedtickExpected := &ChangedtickEvent{
@@ -290,7 +290,7 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 			if !attached {
-				t.Fatal(errors.New("could not attach buffer"))
+				t.Fatal("could not attach buffer")
 			}
 
 			changedtickExpected := &ChangedtickEvent{
