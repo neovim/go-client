@@ -133,6 +133,7 @@ func TestAPI(t *testing.T) {
 	t.Run("ChannelClientInfo", testChannelClientInfo(v))
 	t.Run("UI", testUI(v))
 	t.Run("Proc", testProc(v))
+	t.Run("Mark", testMark(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -4894,6 +4895,171 @@ func testProc(v *Nvim) func(*testing.T) {
 				}
 				// TODO(zchee): assert processes
 			})
+		})
+	}
+}
+
+func testMark(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			// set dummy lines
+			lines := [][]byte{
+				[]byte("a"),
+				[]byte("bit of"),
+				[]byte("text"),
+			}
+			if err := v.SetBufferLines(Buffer(0), 0, -1, true, lines); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				clearBuffer(t, v, Buffer(0))
+			})
+
+			// set cursor position
+			if err := v.SetWindowCursor(Window(0), [2]int{3, 0}); err != nil {
+				t.Fatal(err)
+			}
+
+			// set buffer name
+			cwd, err := os.Getwd() // buffer name is full path
+			if err != nil {
+				t.Fatal(err)
+			}
+			// shrink home path
+			cwd = strings.ReplaceAll(cwd, os.Getenv("HOME"), "~")
+			bufName := filepath.Join(cwd, "test_mark_buffer")
+			if err := v.SetBufferName(Buffer(0), bufName); err != nil {
+				t.Fatal(err)
+			}
+
+			// set mark
+			const mark = "X"
+			if err := v.Command(fmt.Sprintf("mark %s", mark)); err != nil {
+				t.Fatal(err)
+			}
+
+			gotMark, err := v.Mark(mark, make(map[string]interface{}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantMark := &Mark{
+				Row:        3,
+				Col:        0,
+				Buffer:     0,
+				BufferName: bufName,
+			}
+
+			if !reflect.DeepEqual(gotMark, wantMark) {
+				t.Fatalf("got %#v mark but want %#v", gotMark, wantMark)
+			}
+
+			deleted, err := v.DeleteMark(mark)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !deleted {
+				t.Fatalf("could not delete %s mark", mark)
+			}
+
+			gotMark2, err := v.Mark(mark, make(map[string]interface{}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantMark2 := &Mark{
+				Row:        0,
+				Col:        0,
+				Buffer:     0,
+				BufferName: "",
+			}
+
+			if !reflect.DeepEqual(gotMark2, wantMark2) {
+				t.Fatalf("got %#v mark but want %#v", gotMark2, wantMark2)
+			}
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			b := v.NewBatch()
+
+			// set dummy lines
+			lines := [][]byte{
+				[]byte("a"),
+				[]byte("bit of"),
+				[]byte("text"),
+			}
+			b.SetBufferLines(Buffer(0), 0, -1, true, lines)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				clearBuffer(t, v, Buffer(0))
+			})
+
+			// set cursor position
+			b.SetWindowCursor(Window(0), [2]int{3, 0})
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			// set buffer name
+			cwd, err := os.Getwd() // buffer name is full path
+			if err != nil {
+				t.Fatal(err)
+			}
+			// shrink home path
+			cwd = strings.ReplaceAll(cwd, os.Getenv("HOME"), "~")
+			bufName := filepath.Join(cwd, "test_mark_buffer")
+			b.SetBufferName(Buffer(0), bufName)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			// set mark
+			const mark = "X"
+			b.Command(fmt.Sprintf("mark %s", mark))
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			gotMark := new(Mark)
+			b.Mark(mark, make(map[string]interface{}), gotMark)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			wantMark := &Mark{
+				Row:        3,
+				Col:        0,
+				Buffer:     0,
+				BufferName: bufName,
+			}
+
+			if !reflect.DeepEqual(gotMark, wantMark) {
+				t.Fatalf("got %#v mark but want %#v", gotMark, wantMark)
+			}
+
+			var deleted bool
+			b.DeleteMark(mark, &deleted)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if !deleted {
+				t.Fatalf("could not delete %s mark", mark)
+			}
+
+			gotMark2 := new(Mark)
+			b.Mark(mark, make(map[string]interface{}), gotMark2)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			wantMark2 := &Mark{
+				Row:        0,
+				Col:        0,
+				Buffer:     0,
+				BufferName: "",
+			}
+
+			if !reflect.DeepEqual(gotMark2, wantMark2) {
+				t.Fatalf("got %#v mark but want %#v", gotMark2, wantMark2)
+			}
 		})
 	}
 }
