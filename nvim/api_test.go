@@ -449,7 +449,7 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				}
 
 				t.Cleanup(func() {
-					// cleanup cindent option
+					// cleanup buffer name
 					if err := v.SetBufferName(Buffer(0), ""); err != nil {
 						t.Fatal(err)
 					}
@@ -707,7 +707,7 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				}
 
 				t.Cleanup(func() {
-					// cleanup cindent option
+					// cleanup buffer name
 					b.SetBufferName(Buffer(0), "")
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
