@@ -433,8 +433,11 @@ func testBuffer(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
 			t.Run("BufferName", func(t *testing.T) {
-				cwd, _ := os.Getwd() // buffer name is full path
-				wantBufName := filepath.Join(cwd, "/test_buffer")
+				cwd, err := os.Getwd() // buffer name is full path
+				if err != nil {
+					t.Fatal(err)
+				}
+				wantBufName := filepath.Join(cwd, "test_buffer")
 				if err := v.SetBufferName(Buffer(0), wantBufName); err != nil {
 					t.Fatal(err)
 				}
@@ -689,8 +692,11 @@ func testBuffer(v *Nvim) func(*testing.T) {
 			t.Run("BufferName", func(t *testing.T) {
 				b := v.NewBatch()
 
-				cwd, _ := os.Getwd() // buffer name is full path
-				wantBufName := filepath.Join(cwd, "/test_buffer")
+				cwd, err := os.Getwd() // buffer name is full path
+				if err != nil {
+					t.Fatal(err)
+				}
+				wantBufName := filepath.Join(cwd, "test_buffer")
 				b.SetBufferName(Buffer(0), wantBufName)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
