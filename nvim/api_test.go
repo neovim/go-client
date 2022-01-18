@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -125,6 +126,7 @@ func TestAPI(t *testing.T) {
 	t.Run("Options", testOptions(v))
 	t.Run("AllOptionsInfo", testAllOptionsInfo(v))
 	t.Run("OptionsInfo", testOptionsInfo(v))
+	t.Run("OptionsValue", testOptionsValue(v))
 	t.Run("OpenTerm", testTerm(v))
 	t.Run("ChannelClientInfo", testChannelClientInfo(v))
 	t.Run("UI", testUI(v))
@@ -4568,6 +4570,99 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 				}
 				if !reflect.DeepEqual(tt.want, &got) {
 					t.Fatalf("got %#v but want %#v", &got, tt.want)
+				}
+			})
+		}
+	}
+}
+
+func testOptionsValue(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		tests := map[string]struct {
+			name  string
+			opts  map[string]OptionValueScope
+			want  interface{}
+			value interface{}
+		}{
+			"equalalways": {
+				name: "equalalways",
+				opts: map[string]OptionValueScope{
+					"scope": GlobalScope,
+				},
+				want:  true,
+				value: false,
+			},
+			"lazyredraw": {
+				name: "lazyredraw",
+				opts: map[string]OptionValueScope{
+					"scope": LocalScope,
+				},
+				want:  false,
+				value: true,
+			},
+		}
+		for name, tt := range tests {
+			t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
+				skipVersion(t, "v0.7.0")
+
+				var result interface{}
+				if err := v.OptionValue(tt.name, tt.opts, &result); err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(result, tt.want) {
+					t.Fatalf("got %#v but want %#v", result, tt.want)
+				}
+
+				if err := v.SetOptionValue(tt.name, tt.value, tt.opts); err != nil {
+					t.Fatal(err)
+				}
+
+				var result2 interface{}
+				if err := v.OptionValue(tt.name, tt.opts, &result2); err != nil {
+					t.Fatal(err)
+				}
+				if reflect.DeepEqual(result, result2) {
+					t.Fatalf("got %#v but want %#v", result, result2)
+				}
+
+				if err := v.SetOptionValue(tt.name, result, tt.opts); err != nil {
+					t.Fatal(err)
+				}
+			})
+		}
+
+		for name, tt := range tests {
+			t.Run(path.Join(name, "Batch"), func(t *testing.T) {
+				skipVersion(t, "v0.7.0")
+
+				b := v.NewBatch()
+
+				var result interface{}
+				b.OptionValue(tt.name, tt.opts, &result)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(result, tt.want) {
+					t.Fatalf("got %#v but want %#v", result, tt.want)
+				}
+
+				b.SetOptionValue(tt.name, tt.value, tt.opts)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var result2 interface{}
+				b.OptionValue(tt.name, tt.opts, &result2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if reflect.DeepEqual(result, result2) {
+					t.Fatalf("got %#v but want %#v", result, result2)
+				}
+
+				b.SetOptionValue(tt.name, result, tt.opts)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
 				}
 			})
 		}
