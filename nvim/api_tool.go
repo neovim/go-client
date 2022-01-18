@@ -438,9 +438,9 @@ var nvimTypes = map[string]string{
 	"string":        "String",
 	"float64":       "Float",
 
-	"ClientType":   "String",
-	"Process":      "Object",
-	"*UserCommand": "Object",
+	"ClientType":  "String",
+	"Process":     "Object",
+	"UserCommand": "Object",
 
 	"Channel":                     "Dictionary",
 	"*Channel":                    "Dictionary",
