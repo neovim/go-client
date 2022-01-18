@@ -405,6 +405,33 @@ type Command struct {
 	Definition string `msgpack:"definition"`
 }
 
+// UserCommand is replacement command to execute when this user command is executed.
+type UserCommand struct {
+	// Args passed to the command, if any.
+	Args string `msgpack:"args"`
+
+	// Bang true if the command was executed with a ! modifier.
+	Bang bool `msgpack:"bang"`
+
+	// StartLine is the starting line of the command range.
+	StartLine int `msgpack:"line1"`
+
+	// FinalLine is the final line of the command range.
+	FinalLine int `msgpack:"line2"`
+
+	// Range is the number of items in the command range: 0, 1, or 2.
+	Range int `msgpack:"range"`
+
+	// Count is the any count supplied.
+	Count int `msgpack:"count"`
+
+	// Reg is the optional register, if specified.
+	Reg string `msgpack:"reg"`
+
+	// Mode is the command modifiers, if any.
+	Mode string `msgpack:"mods"`
+}
+
 // TextChunk represents a text chunk.
 type TextChunk struct {
 	// Text is text.
@@ -627,6 +654,15 @@ type OptionInfo struct {
 	// FlagList whether the list of single char flags.
 	FlagList bool `msgpack:"flaglist"`
 }
+
+// OptionValueScope represents a OptionValue scope optional parameter value.
+type OptionValueScope string
+
+// list of OptionValueScope.
+const (
+	GlobalScope = OptionValueScope("global")
+	LocalScope  = OptionValueScope("global")
+)
 
 // LogLevel represents a nvim log level.
 type LogLevel int
