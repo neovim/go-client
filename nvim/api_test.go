@@ -18,35 +18,32 @@ import (
 )
 
 type version struct {
-	Major int
-	Minor int
-	Patch int
+	Major int64
+	Minor int64
+	Patch int64
 }
 
-var (
-	channelID   int64
-	nvimVersion version
-)
+var nvimVersion version
 
-func parseVersion(tb testing.TB, version string) (major, minor, patch int) {
+func parseVersion(tb testing.TB, version string) (major, minor, patch int64) {
 	tb.Helper()
 
 	version = strings.TrimPrefix(version, "v")
 	vpair := strings.Split(version, ".")
 	if len(vpair) != 3 {
-		tb.Fatal("could not parse neovim version")
+		tb.Fatalf("could not parse neovim version: %s", version)
 	}
 
 	var err error
-	major, err = strconv.Atoi(vpair[0])
+	major, err = strconv.ParseInt(vpair[0], 10, 0)
 	if err != nil {
 		tb.Fatal(err)
 	}
-	minor, err = strconv.Atoi(vpair[1])
+	minor, err = strconv.ParseInt(vpair[1], 10, 0)
 	if err != nil {
 		tb.Fatal(err)
 	}
-	patch, err = strconv.Atoi(vpair[2])
+	patch, err = strconv.ParseInt(vpair[2], 10, 0)
 	if err != nil {
 		tb.Fatal(err)
 	}
@@ -72,6 +69,8 @@ func clearBuffer(tb testing.TB, v *Nvim, buffer Buffer) {
 	}
 }
 
+var channelID int64
+
 func TestAPI(t *testing.T) {
 	t.Parallel()
 
@@ -96,9 +95,9 @@ func TestAPI(t *testing.T) {
 		t.Fatalf("apiInfo[1] is not map[string]interface{} type: %T", apiInfo[1])
 	}
 	infoV := info["version"].(map[string]interface{})
-	nvimVersion.Major = int(infoV["major"].(int64))
-	nvimVersion.Minor = int(infoV["minor"].(int64))
-	nvimVersion.Patch = int(infoV["patch"].(int64))
+	nvimVersion.Major = infoV["major"].(int64)
+	nvimVersion.Minor = infoV["minor"].(int64)
+	nvimVersion.Patch = infoV["patch"].(int64)
 
 	t.Run("BufAttach", testBufAttach(v))
 	t.Run("APIInfo", testAPIInfo(v))
