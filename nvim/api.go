@@ -833,6 +833,72 @@ func (b *Batch) OptionInfo(name string, opinfo *OptionInfo) {
 	b.call("nvim_get_option_info", opinfo, name)
 }
 
+// OptionValue gets the value of an option.
+//
+// The behavior of this function matches that of |:set|: the local value of an option is returned if it exists; otherwise,
+// the global value is returned.
+// Local values always correspond to the current buffer or window.
+//
+// To get a buffer-local or window-local option for a specific buffer or window, use BufferOption() or WindowOption().
+//
+// name is the option name.
+//
+// opts is the Optional parameters.
+//
+//  scope
+//
+// Analogous to |:setglobal| and |:setlocal|, respectively.
+func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result interface{}) error {
+	return v.call("nvim_get_option_value", result, name, opts)
+}
+
+// OptionValue gets the value of an option.
+//
+// The behavior of this function matches that of |:set|: the local value of an option is returned if it exists; otherwise,
+// the global value is returned.
+// Local values always correspond to the current buffer or window.
+//
+// To get a buffer-local or window-local option for a specific buffer or window, use BufferOption() or WindowOption().
+//
+// name is the option name.
+//
+// opts is the Optional parameters.
+//
+//  scope
+//
+// Analogous to |:setglobal| and |:setlocal|, respectively.
+func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, result interface{}) {
+	b.call("nvim_get_option_value", &result, name, opts)
+}
+
+// SetOptionValue sets the value of an option. The behavior of this function matches that of
+// |:set|: for global-local options, both the global and local value are set
+// unless otherwise specified with {scope}.
+// name is the option name.
+//
+// opts is the Optional parameters.
+//
+//  scope
+//
+// Analogous to |:setglobal| and |:setlocal|, respectively.
+func (v *Nvim) SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) error {
+	return v.call("nvim_set_option_value", nil, name, value, opts)
+}
+
+// SetOptionValue sets the value of an option. The behavior of this function matches that of
+// |:set|: for global-local options, both the global and local value are set
+// unless otherwise specified with {scope}.
+// name is the option name.
+//
+// opts is the Optional parameters.
+//
+//  scope
+//
+// Analogous to |:setglobal| and |:setlocal|, respectively.
+func (b *Batch) SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) {
+	b.call("nvim_set_option_value", nil, name, value, opts)
+}
+
 // SetOption sets an option value.
 func (v *Nvim) SetOption(name string, value interface{}) error {
 	return v.call("nvim_set_option", nil, name, value)
@@ -1792,6 +1858,60 @@ func (b *Batch) EvalStatusLine(name string, opts map[string]interface{}, statusl
 	b.call("nvim_eval_statusline", statusline, name, opts)
 }
 
+// AddUserCommand create a new user command.
+//
+// name is name of the new user command. Must begin with an uppercase letter.
+//
+// command is replacement command to execute when this user command is executed.
+// When called from Lua, the command can also be a Lua function.
+//
+// opts is optional command attributes. See |command-attributes| for more details.
+//
+// To use boolean attributes (such as |:command-bang| or |:command-bar|) set the value to "true".
+// In addition to the string options listed in |:command-complete|,
+// the "complete" key also accepts a Lua function which works like the "customlist" completion mode |:command-completion-customlist|.
+//
+//  desc (string)
+// Used for listing the command when a Lua function is used for {command}.
+//
+//  force (bool, default true)
+// Override any previous definition.
+func (v *Nvim) AddUserCommand(name string, command UserCommand, opts map[string]interface{}) error {
+	return v.call("nvim_add_user_command", nil, name, command, opts)
+}
+
+// AddUserCommand create a new user command.
+//
+// name is name of the new user command. Must begin with an uppercase letter.
+//
+// command is replacement command to execute when this user command is executed.
+// When called from Lua, the command can also be a Lua function.
+//
+// opts is optional command attributes. See |command-attributes| for more details.
+//
+// To use boolean attributes (such as |:command-bang| or |:command-bar|) set the value to "true".
+// In addition to the string options listed in |:command-complete|,
+// the "complete" key also accepts a Lua function which works like the "customlist" completion mode |:command-completion-customlist|.
+//
+//  desc (string)
+// Used for listing the command when a Lua function is used for {command}.
+//
+//  force (bool, default true)
+// Override any previous definition.
+func (b *Batch) AddUserCommand(name string, command UserCommand, opts map[string]interface{}) {
+	b.call("nvim_add_user_command", nil, name, command, opts)
+}
+
+// DeleteUserCommand delete a user-defined command.
+func (v *Nvim) DeleteUserCommand(name string) error {
+	return v.call("nvim_del_user_command", nil, name)
+}
+
+// DeleteUserCommand delete a user-defined command.
+func (b *Batch) DeleteUserCommand(name string) {
+	b.call("nvim_del_user_command", nil, name)
+}
+
 // BufferLineCount gets the buffer line count.
 //
 // The buffer arg is specific Buffer, or 0 for current buffer.
@@ -2234,6 +2354,34 @@ func (v *Nvim) BufferMark(buffer Buffer, name string) (pos [2]int, err error) {
 // Marks are (1,0)-indexed.
 func (b *Batch) BufferMark(buffer Buffer, name string, pos *[2]int) {
 	b.call("nvim_buf_get_mark", pos, buffer, name)
+}
+
+// AddBufferUserCommand create a new user command |user-commands| in the given buffer.
+//
+// Only commands created with |:command-buffer| or this function can be deleted with this function.
+func (v *Nvim) AddBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) error {
+	return v.call("nvim_buf_add_user_command", nil, buffer, name, command, opts)
+}
+
+// AddBufferUserCommand create a new user command |user-commands| in the given buffer.
+//
+// Only commands created with |:command-buffer| or this function can be deleted with this function.
+func (b *Batch) AddBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
+	b.call("nvim_buf_add_user_command", nil, buffer, name, command, opts)
+}
+
+// DeleteBufferUserCommand create a new user command |user-commands| in the given buffer.
+//
+// Only commands created with |:command-buffer| or this function can be deleted with this function.
+func (v *Nvim) DeleteBufferUserCommand(buffer Buffer, name string) error {
+	return v.call("nvim_buf_del_user_command", nil, buffer, name)
+}
+
+// DeleteBufferUserCommand create a new user command |user-commands| in the given buffer.
+//
+// Only commands created with |:command-buffer| or this function can be deleted with this function.
+func (b *Batch) DeleteBufferUserCommand(buffer Buffer, name string) {
+	b.call("nvim_buf_del_user_command", nil, buffer, name)
 }
 
 // BufferExtmarkByID beturns position for a given extmark id.
