@@ -2144,6 +2144,72 @@ func testCommand(v *Nvim) func(*testing.T) {
 				})
 			}
 		})
+
+		t.Run("BufferUserCommand", func(t *testing.T) {
+			tests := map[string]struct {
+				name    string
+				command UserCommand
+				opts    map[string]interface{}
+				want    string
+			}{
+				"SayHello": {
+					name:    "SayHello",
+					command: UserVimCommand(`echo "Hello world!"`),
+					opts: map[string]interface{}{
+						"force": false,
+					},
+					want: "Hello world!",
+				},
+			}
+			for name, tt := range tests {
+				t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
+					skipVersion(t, "v0.7.0")
+
+					if err := v.AddBufferUserCommand(Buffer(0), tt.name, tt.command, tt.opts); err != nil {
+						t.Fatal(err)
+					}
+					t.Cleanup(func() {
+						if err := v.DeleteBufferUserCommand(Buffer(0), tt.name); err != nil {
+							t.Fatal(err)
+						}
+					})
+
+					got, err := v.Exec(tt.name, true)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !strings.EqualFold(tt.want, got) {
+						t.Fatalf("expected %s but got %s", tt.want, got)
+					}
+				})
+
+				t.Run(path.Join(name, "Batch"), func(t *testing.T) {
+					skipVersion(t, "v0.7.0")
+
+					b := v.NewBatch()
+
+					b.AddBufferUserCommand(Buffer(0), tt.name, tt.command, tt.opts)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+					t.Cleanup(func() {
+						b.DeleteBufferUserCommand(Buffer(0), tt.name)
+						if err := b.Execute(); err != nil {
+							t.Fatal(err)
+						}
+					})
+
+					var got string
+					b.Exec(tt.name, true, &got)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+					if !strings.EqualFold(tt.want, got) {
+						t.Fatalf("expected %s but got %s", tt.want, got)
+					}
+				})
+			}
+		})
 	}
 }
 
