@@ -107,7 +107,7 @@ func TestAPI(t *testing.T) {
 	t.Run("Window", testWindow(v))
 	t.Run("Tabpage", testTabpage(v))
 	t.Run("Lines", testLines(v))
-	t.Run("Commands", testCommands(v))
+	t.Run("Command", testCommand(v))
 	t.Run("Var", testVar(v))
 	t.Run("Message", testMessage(v))
 	t.Run("Key", testKey(v))
@@ -2046,34 +2046,102 @@ func testLines(v *Nvim) func(*testing.T) {
 	}
 }
 
-func testCommands(v *Nvim) func(*testing.T) {
+func testCommand(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
-		t.Run("Nvim", func(t *testing.T) {
-			opts := map[string]interface{}{
-				"builtin": false,
-			}
-			cmds, err := v.Commands(opts)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if len(cmds) > 0 {
-				t.Fatalf("expected 0 length but got %#v", cmds)
-			}
+		t.Run("Commands", func(t *testing.T) {
+			t.Run("Nvim", func(t *testing.T) {
+				opts := map[string]interface{}{
+					"builtin": false,
+				}
+				cmds, err := v.Commands(opts)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(cmds) > 0 {
+					t.Fatalf("expected 0 length but got %#v", cmds)
+				}
+			})
+
+			t.Run("Batch", func(t *testing.T) {
+				b := v.NewBatch()
+
+				opts := map[string]interface{}{
+					"builtin": false,
+				}
+				var cmds map[string]*Command
+				b.Commands(opts, &cmds)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if len(cmds) > 0 {
+					t.Fatalf("expected 0 length but got %#v", cmds)
+				}
+			})
 		})
 
-		t.Run("Batch", func(t *testing.T) {
-			b := v.NewBatch()
+		t.Run("UserCommand", func(t *testing.T) {
+			tests := map[string]struct {
+				name    string
+				command UserCommand
+				opts    map[string]interface{}
+				want    string
+			}{
+				"SayHello": {
+					name:    "SayHello",
+					command: UserVimCommand(`echo "Hello world!"`),
+					opts: map[string]interface{}{
+						"force": false,
+					},
+					want: "Hello world!",
+				},
+			}
+			for name, tt := range tests {
+				t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
+					skipVersion(t, "v0.7.0")
 
-			opts := map[string]interface{}{
-				"builtin": false,
-			}
-			var cmds map[string]*Command
-			b.Commands(opts, &cmds)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if len(cmds) > 0 {
-				t.Fatalf("expected 0 length but got %#v", cmds)
+					if err := v.AddUserCommand(tt.name, tt.command, tt.opts); err != nil {
+						t.Fatal(err)
+					}
+					t.Cleanup(func() {
+						if err := v.DeleteUserCommand(tt.name); err != nil {
+							t.Fatal(err)
+						}
+					})
+
+					got, err := v.Exec(tt.name, true)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !strings.EqualFold(tt.want, got) {
+						t.Fatalf("expected %s but got %s", tt.want, got)
+					}
+				})
+
+				t.Run(path.Join(name, "Batch"), func(t *testing.T) {
+					skipVersion(t, "v0.7.0")
+
+					b := v.NewBatch()
+
+					b.AddUserCommand(tt.name, tt.command, tt.opts)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+					t.Cleanup(func() {
+						b.DeleteUserCommand(tt.name)
+						if err := b.Execute(); err != nil {
+							t.Fatal(err)
+						}
+					})
+
+					var got string
+					b.Exec(tt.name, true, &got)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+					if !strings.EqualFold(tt.want, got) {
+						t.Fatalf("expected %s but got %s", tt.want, got)
+					}
+				})
 			}
 		})
 	}
