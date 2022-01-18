@@ -388,6 +388,39 @@ func OptionInfo(name string) (opinfo OptionInfo) {
 	returnPtr()
 }
 
+// OptionValue gets the value of an option.
+//
+// The behavior of this function matches that of |:set|: the local value of an option is returned if it exists; otherwise,
+// the global value is returned.
+// Local values always correspond to the current buffer or window.
+//
+// To get a buffer-local or window-local option for a specific buffer or window, use BufferOption() or WindowOption().
+//
+// name is the option name.
+//
+// opts is the Optional parameters.
+//
+//  scope
+//
+// Analogous to |:setglobal| and |:setlocal|, respectively.
+func OptionValue(name string, opts map[string]OptionValueScope) (optionValue interface{}) {
+	name(nvim_get_option_value)
+}
+
+// SetOptionValue sets the value of an option. The behavior of this function matches that of
+// |:set|: for global-local options, both the global and local value are set
+// unless otherwise specified with {scope}.
+// name is the option name.
+//
+// opts is the Optional parameters.
+//
+//  scope
+//
+// Analogous to |:setglobal| and |:setlocal|, respectively.
+func SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) {
+	name(nvim_set_option_value)
+}
+
 // SetOption sets an option value.
 func SetOption(name string, value interface{}) {
 	name(nvim_set_option)
@@ -855,6 +888,33 @@ func EvalStatusLine(name string, opts map[string]interface{}) (statusline map[st
 	name(nvim_eval_statusline)
 }
 
+// AddUserCommand create a new user command.
+//
+// name is name of the new user command. Must begin with an uppercase letter.
+//
+// command is replacement command to execute when this user command is executed.
+// When called from Lua, the command can also be a Lua function.
+//
+// opts is optional command attributes. See |command-attributes| for more details.
+//
+// To use boolean attributes (such as |:command-bang| or |:command-bar|) set the value to "true".
+// In addition to the string options listed in |:command-complete|,
+// the "complete" key also accepts a Lua function which works like the "customlist" completion mode |:command-completion-customlist|.
+//
+//  desc (string)
+// Used for listing the command when a Lua function is used for {command}.
+//
+//  force (bool, default true)
+// Override any previous definition.
+func AddUserCommand(name string, command UserCommand, opts map[string]interface{}) {
+	name(nvim_add_user_command)
+}
+
+// DeleteUserCommand delete a user-defined command.
+func DeleteUserCommand(name string) {
+	name(nvim_del_user_command)
+}
+
 // buffer.c
 
 // BufferLineCount gets the buffer line count.
@@ -1077,6 +1137,20 @@ func SetBufferMark(buffer Buffer, name string, line, col int, opts map[string]in
 // Marks are (1,0)-indexed.
 func BufferMark(buffer Buffer, name string) (pos [2]int) {
 	name(nvim_buf_get_mark)
+}
+
+// AddBufferUserCommand create a new user command |user-commands| in the given buffer.
+//
+// Only commands created with |:command-buffer| or this function can be deleted with this function.
+func AddBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
+	name(nvim_buf_add_user_command)
+}
+
+// DeleteBufferUserCommand create a new user command |user-commands| in the given buffer.
+//
+// Only commands created with |:command-buffer| or this function can be deleted with this function.
+func DeleteBufferUserCommand(buffer Buffer, name string) {
+	name(nvim_buf_del_user_command)
 }
 
 // BufferExtmarkByID beturns position for a given extmark id.

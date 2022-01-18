@@ -405,32 +405,52 @@ type Command struct {
 	Definition string `msgpack:"definition"`
 }
 
-// UserCommand is replacement command to execute when this user command is executed.
-type UserCommand struct {
+// UserCommand represesents a user command.
+type UserCommand interface {
+	command()
+}
+
+// UserVimCommand is a user Vim command executed at UserCommand.
+type UserVimCommand string
+
+// make sure UserVimCommand implements the UserCommand interface.
+var _ UserCommand = (*UserVimCommand)(nil)
+
+// command implements UserCommand.command.
+func (UserVimCommand) command() {}
+
+// UserLuaCommand is a user Lua command executed at UserCommand.
+type UserLuaCommand struct {
 	// Args passed to the command, if any.
-	Args string `msgpack:"args"`
+	Args string `msgpack:"args,omitempty"`
 
 	// Bang true if the command was executed with a ! modifier.
 	Bang bool `msgpack:"bang"`
 
 	// StartLine is the starting line of the command range.
-	StartLine int `msgpack:"line1"`
+	StartLine int `msgpack:"line1,omitempty"`
 
 	// FinalLine is the final line of the command range.
-	FinalLine int `msgpack:"line2"`
+	FinalLine int `msgpack:"line2,omitempty"`
 
 	// Range is the number of items in the command range: 0, 1, or 2.
-	Range int `msgpack:"range"`
+	Range int `msgpack:"range,omitempty"`
 
 	// Count is the any count supplied.
-	Count int `msgpack:"count"`
+	Count int `msgpack:"count,omitempty"`
 
 	// Reg is the optional register, if specified.
-	Reg string `msgpack:"reg"`
+	Reg string `msgpack:"reg,omitempty"`
 
 	// Mode is the command modifiers, if any.
-	Mode string `msgpack:"mods"`
+	Mode string `msgpack:"mode,omitempty"`
 }
+
+// make sure UserLuaCommand implements the UserCommand interface.
+var _ UserCommand = (*UserLuaCommand)(nil)
+
+// command implements UserCommand.command.
+func (UserLuaCommand) command() {}
 
 // TextChunk represents a text chunk.
 type TextChunk struct {
@@ -661,7 +681,7 @@ type OptionValueScope string
 // list of OptionValueScope.
 const (
 	GlobalScope = OptionValueScope("global")
-	LocalScope  = OptionValueScope("global")
+	LocalScope  = OptionValueScope("local")
 )
 
 // LogLevel represents a nvim log level.
