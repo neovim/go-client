@@ -1,6 +1,7 @@
 package nvim
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -51,6 +52,36 @@ func TestLogLevel_String(t *testing.T) {
 			if got := tt.level.String(); got != tt.want {
 				t.Fatalf("LogLevel.String() = %v, want %v", tt.want, got)
 			}
+		})
+	}
+}
+
+func TestUserCommand(t *testing.T) {
+	t.Parallel()
+
+	uc := reflect.TypeOf((*UserCommand)(nil)).Elem()
+
+	tests := map[string]struct {
+		u UserCommand
+	}{
+		"UserVimCommand": {
+			u: UserVimCommand(""),
+		},
+		"UserLuaCommand": {
+			u: UserLuaCommand{},
+		},
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			v := reflect.TypeOf(tt.u)
+			if !v.Implements(uc) {
+				t.Fatalf("%s type not implements %q interface", v.Name(), "UserCommand")
+			}
+
+			tt.u.command()
 		})
 	}
 }
