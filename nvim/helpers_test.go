@@ -16,8 +16,7 @@ var readerData = []string{
 }
 
 func TestBufferReader(t *testing.T) {
-	v, cleanup := newChildProcess(t)
-	defer cleanup()
+	v := newChildProcess(t)
 	b, err := v.CurrentBuffer()
 	if err != nil {
 		t.Fatal(err)

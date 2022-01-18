@@ -75,10 +75,7 @@ func clearBuffer(tb testing.TB, v *Nvim, buffer Buffer) {
 func TestAPI(t *testing.T) {
 	t.Parallel()
 
-	v, cleanup := newChildProcess(t)
-	t.Cleanup(func() {
-		cleanup()
-	})
+	v := newChildProcess(t)
 
 	apiInfo, err := v.APIInfo()
 	if err != nil {

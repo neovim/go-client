@@ -13,7 +13,8 @@ import (
 	"time"
 )
 
-func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
+// newChildProcess returns the new *Nvim, and registers cleanup to tb.Cleanup.
+func newChildProcess(tb testing.TB) (v *Nvim) {
 	tb.Helper()
 
 	envs := os.Environ()
@@ -41,7 +42,7 @@ func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 		done <- v.Serve()
 	}()
 
-	cleanup = func() {
+	tb.Cleanup(func() {
 		if err := v.Close(); err != nil {
 			tb.Fatal(err)
 		}
@@ -75,13 +76,13 @@ func newChildProcess(tb testing.TB) (v *Nvim, cleanup func()) {
 		}); walkErr != nil && !os.IsNotExist(err) {
 			tb.Fatal(fmt.Errorf("walkErr: %w", errors.Unwrap(walkErr)))
 		}
-	}
+	})
 
 	if err := v.Command("set packpath="); err != nil {
 		tb.Fatal(err)
 	}
 
-	return v, cleanup
+	return v
 }
 
 func TestDial(t *testing.T) {
@@ -91,9 +92,7 @@ func TestDial(t *testing.T) {
 
 	t.Parallel()
 
-	v1, cleanup := newChildProcess(t)
-	defer cleanup()
-
+	v1 := newChildProcess(t)
 	var addr string
 	if err := v1.Eval("$NVIM_LISTEN_ADDRESS", &addr); err != nil {
 		t.Fatal(err)
@@ -168,8 +167,7 @@ func TestEmbedded(t *testing.T) {
 func TestCallWithNoArgs(t *testing.T) {
 	t.Parallel()
 
-	v, cleanup := newChildProcess(t)
-	defer cleanup()
+	v := newChildProcess(t)
 
 	var wd string
 	err := v.Call("getcwd", &wd)
@@ -181,8 +179,7 @@ func TestCallWithNoArgs(t *testing.T) {
 func TestStructValue(t *testing.T) {
 	t.Parallel()
 
-	v, cleanup := newChildProcess(t)
-	defer cleanup()
+	v := newChildProcess(t)
 
 	t.Run("Nvim", func(t *testing.T) {
 		var expected, actual struct {
