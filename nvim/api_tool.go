@@ -504,6 +504,11 @@ var compareTemplate = template.Must(template.New("").Funcs(template.FuncMap{
     {{- print " {"}} name({{.Name}}){{with .DeprecatedSince}}; deprecatedSince({{.}});{{end}}{{print " }"}}
 {{end}}`))
 
+// hiddenAPIs list of hidden API.
+var hiddenAPIs = map[string]bool{
+	"nvim__set_hl_ns": true,
+}
+
 // specialAPIs lists API calls that are implemented by hand.
 var specialAPIs = map[string]bool{
 	"nvim_call_atomic":             true,
@@ -538,8 +543,11 @@ func compareFunctions(functions []*Function) error {
 	for i < len(functions) && j < len(info.Functions) {
 		a := convertToNvimTypes(functions[i])
 		b := info.Functions[j]
+
 		if a.Name < b.Name {
-			data.Extra = append(data.Extra, a)
+			if !hiddenAPIs[a.Name] {
+				data.Extra = append(data.Extra, a)
+			}
 			i++
 			continue
 		}
@@ -550,6 +558,7 @@ func compareFunctions(functions []*Function) error {
 			j++
 			continue
 		}
+
 		equal := len(a.Parameters) == len(b.Parameters) && a.ReturnType == b.ReturnType && a.DeprecatedSince == b.DeprecatedSince
 		if equal {
 			for i := range a.Parameters {
