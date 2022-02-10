@@ -94,6 +94,15 @@ func (v *Nvim) Close() error {
 	return err
 }
 
+// ExitCode returns the exit code of the exited nvim process.
+func (v *Nvim) ExitCode() int {
+	if v.cmd.ProcessState == nil {
+		return -1
+	}
+
+	return v.cmd.ProcessState.ExitCode()
+}
+
 // New creates an Nvim client. When connecting to Nvim over stdio, use stdin as
 // r and stdout as w and c, When connecting to Nvim over a network connection,
 // use the connection for r, w and c.
