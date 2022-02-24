@@ -291,6 +291,11 @@ type AutocmdOptions struct {
 	//  :help autocmd-nested
 	Nested bool
 
+	// Once supplys the command is executed once, then removed ("one shot").
+	//
+	//  :help autocmd-once
+	Once bool
+
 	// Eval is evaluated in Nvim and the result is passed the the handler
 	// function.
 	Eval string
@@ -313,6 +318,9 @@ func (p *Plugin) HandleAutocmd(options *AutocmdOptions, fn interface{}) {
 	}
 	if options.Nested {
 		m["nested"] = "1"
+	}
+	if options.Once {
+		m["once"] = "1"
 	}
 	if options.Eval != "" {
 		m["eval"] = eval(options.Eval, fn)
