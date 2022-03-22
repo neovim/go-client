@@ -47,11 +47,13 @@ func (spec *pluginSpec) path() string {
 	if i := strings.Index(spec.sm, ":"); i > 0 {
 		return spec.sm[:i]
 	}
+
 	return ""
 }
 
 func isSync(f interface{}) bool {
 	t := reflect.TypeOf(f)
+
 	return t.Kind() == reflect.Func && t.NumOut() > 0
 }
 
@@ -60,6 +62,7 @@ func (p *Plugin) handle(fn interface{}, spec *pluginSpec) {
 	if p.Nvim == nil {
 		return
 	}
+
 	if err := p.Nvim.RegisterHandler(spec.sm, fn); err != nil {
 		panic(err)
 	}
@@ -82,6 +85,7 @@ func (p *Plugin) Handle(method string, fn interface{}) {
 	if p.Nvim == nil {
 		return
 	}
+
 	if err := p.Nvim.RegisterHandler(method, fn); err != nil {
 		panic(err)
 	}
@@ -124,9 +128,11 @@ type FunctionOptions struct {
 //  {'GOPATH': $GOPATH, Cwd: getcwd()}
 func (p *Plugin) HandleFunction(options *FunctionOptions, fn interface{}) {
 	m := make(map[string]string)
+
 	if options.Eval != "" {
-		m[`eval`] = eval(options.Eval, fn)
+		m["eval"] = eval(options.Eval, fn)
 	}
+
 	p.handle(fn, &pluginSpec{
 		sm:   `0:function:` + options.Name,
 		Type: `function`,
@@ -231,12 +237,13 @@ func (p *Plugin) HandleCommand(options *CommandOptions, fn interface{}) {
 		m[`nargs`] = options.NArgs
 	}
 
-	if options.Range != "" {
-		if options.Range == `.` {
-			options.Range = ""
-		}
+	switch {
+	case options.Range == `.`:
+		options.Range = ""
+		fallthrough
+	case options.Range != "":
 		m[`range`] = options.Range
-	} else if options.Count != "" {
+	case options.Count != "":
 		m[`count`] = options.Count
 	}
 
@@ -308,20 +315,26 @@ type AutocmdOptions struct {
 // documentation for information on how the expression is generated.
 func (p *Plugin) HandleAutocmd(options *AutocmdOptions, fn interface{}) {
 	pattern := ""
+
 	m := make(map[string]string)
+
 	if options.Group != "" {
 		m[`group`] = options.Group
 	}
+
 	if options.Pattern != "" {
 		m[`pattern`] = options.Pattern
 		pattern = options.Pattern
 	}
+
 	if options.Nested {
-		m[`nested`] = "1"
+		m[`nested`] = `1`
 	}
+
 	if options.Once {
-		m[`once`] = "1"
+		m[`once`] = `1`
 	}
+
 	if options.Eval != "" {
 		m[`eval`] = eval(options.Eval, fn)
 	}
@@ -330,6 +343,7 @@ func (p *Plugin) HandleAutocmd(options *AutocmdOptions, fn interface{}) {
 	ep := options.Event + ":" + pattern
 	i := p.eventPathCounts[ep]
 	p.eventPathCounts[ep] = i + 1
+
 	sm := fmt.Sprintf(`%d:autocmd:%s`, i, ep)
 
 	p.handle(fn, &pluginSpec{
@@ -348,6 +362,7 @@ func (p *Plugin) RegisterForTests() error {
 	for _, spec := range p.pluginSpecs {
 		specs[spec.path()] = append(specs[spec.path()], spec)
 	}
+
 	const host = "nvim-go-test"
 	for path, specs := range specs {
 		if err := p.Nvim.Call(`remote#host#RegisterPlugin`, nil, host, path, specs); err != nil {
@@ -363,20 +378,26 @@ func eval(eval string, f interface{}) string {
 	if eval != `*` {
 		return eval
 	}
+
 	ft := reflect.TypeOf(f)
 	if ft.Kind() != reflect.Func || ft.NumIn() < 1 {
 		panic(`Eval: "*" option requires function with at least one argument`)
 	}
+
 	argt := ft.In(ft.NumIn() - 1)
 	if argt.Kind() != reflect.Ptr || argt.Elem().Kind() != reflect.Struct {
 		panic(`Eval: "*" option requires function with pointer to struct as last argument`)
 	}
+
 	return structEval(argt.Elem())
 }
 
 func structEval(t reflect.Type) string {
-	buf := []byte{'{'}
+	var sb strings.Builder
+
+	sb.WriteByte('{')
 	sep := ""
+
 	for i := 0; i < t.NumField(); i++ {
 		sf := t.Field(i)
 		if sf.Anonymous {
@@ -389,11 +410,11 @@ func structEval(t reflect.Type) string {
 			if ft.Kind() == reflect.Ptr {
 				ft = ft.Elem()
 			}
+
 			if ft.Kind() == reflect.Struct {
 				eval = structEval(ft)
 			}
 		}
-
 		if eval == "" {
 			continue
 		}
@@ -403,15 +424,16 @@ func structEval(t reflect.Type) string {
 			name = sf.Name
 		}
 
-		buf = append(buf, sep...)
-		buf = append(buf, `'`...)
-		buf = append(buf, name...)
-		buf = append(buf, `':`...)
-		buf = append(buf, eval...)
-		sep = `, `
+		sb.WriteString(sep)
+		sb.WriteByte('\'')
+		sb.WriteString(name)
+		sb.WriteString("': ")
+		sb.WriteString(eval)
+		sep = ", "
 	}
-	buf = append(buf, '}')
-	return string(buf)
+	sb.WriteByte('}')
+
+	return sb.String()
 }
 
 type byServiceMethod []*pluginSpec
@@ -432,18 +454,18 @@ func (p *Plugin) Manifest(host string) []byte {
 		path := spec.path()
 		if path != prevPath {
 			if prevPath != "" {
-				fmt.Fprintf(&buf, `\\ )`)
+				fmt.Fprintf(&buf, "\\ )")
 			}
-			fmt.Fprintf(&buf, `call remote#host#RegisterPlugin('%s', '%s', [\n`, host, path)
+			fmt.Fprintf(&buf, "call remote#host#RegisterPlugin('%s', '%s', [\n", host, path)
 			prevPath = path
 		}
 
-		sync := `0`
+		sync := "0"
 		if spec.Sync {
-			sync = `1`
+			sync = "1"
 		}
 
-		fmt.Fprintf(&buf, `\\ {'type': '%s', 'name': '%s', 'sync': %s, 'opts': {`, spec.Type, spec.Name, sync)
+		fmt.Fprintf(&buf, "\\ {'type': '%s', 'name': '%s', 'sync': %s, 'opts': {", spec.Type, spec.Name, sync)
 
 		var keys []string
 		for k := range spec.Opts {
@@ -453,14 +475,15 @@ func (p *Plugin) Manifest(host string) []byte {
 
 		optDelim := ""
 		for _, k := range keys {
-			fmt.Fprintf(&buf, `%s'%s': '%s'`, optDelim, k, escape(spec.Opts[k]))
-			optDelim = `,`
+			fmt.Fprintf(&buf, "%s'%s': '%s'", optDelim, k, escape(spec.Opts[k]))
+			optDelim = ","
 		}
 
-		fmt.Fprintf(&buf, `}},\n`)
+		fmt.Fprintf(&buf, "}},\n")
 	}
 	if prevPath != "" {
-		fmt.Fprintf(&buf, `\\ ])\n`)
+		fmt.Fprintf(&buf, "\\ ])\n")
 	}
+
 	return buf.Bytes()
 }
