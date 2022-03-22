@@ -29,15 +29,15 @@ jobs:
         echo "GO_VERSION=$(echo ${{ matrix.go-version }} | cut -d. -f-2)" >> $GITHUB_ENV
 
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go-version }}
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Cache Go module and build cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         key: ${{ env.OS }}-go-${{ hashFiles('**/go.sum') }}
         path: |
@@ -47,7 +47,7 @@ jobs:
           ${{ env.OS }}-go-
 
     - name: Cache nvim binary for linux and darwin
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-nvim
       with:
         key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/bin/nvim') }}
@@ -68,7 +68,7 @@ jobs:
         go test -v -count=3 -run=none -bench=. -benchmem -timeout=15m ./... | tee bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt
 
     - name: 'Upload benchmark Artifact'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt
         path: bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt

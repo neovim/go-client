@@ -44,15 +44,15 @@ jobs:
         echo "NVIM_VERSION=$(if [ ${{ matrix.neovim-version }} != 'nightly' ]; then echo 'stable'; else echo 'nightly'; fi)" >> $GITHUB_ENV
 
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go-version }}
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Cache Go module and build cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         key: go-${{ env.OS }}-${{ hashFiles('**/go.mod') }}
         path: |
