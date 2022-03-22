@@ -2819,6 +2819,11 @@ func testKey(v *Nvim) func(*testing.T) {
 					}
 					wantMapsLen = 2
 				}
+				if nvimVersion.Minor >= 7 {
+					wantMaps[0].RHS = "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>"
+					wantMaps[2].SID = -9
+				}
+
 				got, err := v.KeyMap(mode)
 				if err != nil {
 					t.Fatal(err)
@@ -2864,6 +2869,9 @@ func testKey(v *Nvim) func(*testing.T) {
 						SID:     0,
 						NoWait:  0,
 					},
+				}
+				if nvimVersion.Minor >= 7 {
+					wantMap[0].SID = -9
 				}
 				got, err := v.BufferKeyMap(buffer, mode)
 				if err != nil {
@@ -3080,6 +3088,10 @@ func testKey(v *Nvim) func(*testing.T) {
 					}
 					wantMapsLen = 2
 				}
+				if nvimVersion.Minor >= 7 {
+					wantMaps[0].RHS = "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>"
+					wantMaps[2].SID = -9
+				}
 				var got []*Mapping
 				b.KeyMap(mode, &got)
 				if err := b.Execute(); err != nil {
@@ -3131,6 +3143,9 @@ func testKey(v *Nvim) func(*testing.T) {
 						SID:     0,
 						NoWait:  0,
 					},
+				}
+				if nvimVersion.Minor >= 7 {
+					wantMap[0].SID = -9
 				}
 				var got []*Mapping
 				b.BufferKeyMap(buffer, mode, &got)
@@ -3364,7 +3379,7 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			const HLIDName = `Error`
 			var wantErrorHLID = 64
 			if nvimVersion.Minor >= 7 {
-				wantErrorHLID = 66
+				wantErrorHLID = 67
 			}
 
 			goHLID, err := v.HLIDByName(HLIDName)
@@ -3503,7 +3518,7 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			const HLIDName = `Error`
 			var wantErrorHLID = 64
 			if nvimVersion.Minor >= 7 {
-				wantErrorHLID = 66
+				wantErrorHLID = 67
 			}
 
 			var goHLID int
@@ -4301,7 +4316,10 @@ func testPutPaste(v *Nvim) func(*testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				const want = "!foobarbaz!"
+				var want = "!foobarbaz!"
+				if nvimVersion.Minor >= 7 {
+					want = "!!foobarbaz"
+				}
 				if want != string(lines) {
 					t.Fatalf("got %s current lines but want %s", string(lines), want)
 				}
@@ -4329,7 +4347,10 @@ func testPutPaste(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				const want = "!foobarbaz!"
+				var want = "!foobarbaz!"
+				if nvimVersion.Minor >= 7 {
+					want = "!!foobarbaz"
+				}
 				if want != string(lines) {
 					t.Fatalf("got %s current lines but want %s", string(lines), want)
 				}
