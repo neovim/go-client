@@ -40,7 +40,8 @@ comment:
   show_carryforward_flags: true
 
 ignore:
-  - "nvim/api_deprecated.go" 
+  - "nvim/api_deprecated.go"
+  - "nvim/nvimtest"  # for testing
 
 github_checks:
   annotations: true
