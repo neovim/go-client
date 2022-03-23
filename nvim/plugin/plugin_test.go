@@ -1,131 +1,52 @@
 package plugin_test
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/neovim/go-client/nvim"
+	"github.com/neovim/go-client/nvim/nvimtest"
 	"github.com/neovim/go-client/nvim/plugin"
 )
 
-func newChildProcess(tb testing.TB) (p *plugin.Plugin, cleanup func()) {
-	tb.Helper()
-
-	env := []string{}
-	if v := os.Getenv("VIM"); v != "" {
-		env = append(env, "VIM="+v)
-	}
-
-	ctx := context.Background()
-	opts := []nvim.ChildProcessOption{
-		nvim.ChildProcessCommand(nvim.BinaryName),
-		nvim.ChildProcessArgs("-u", "NONE", "-n", "-i", "NONE", "--embed", "--headless"),
-		nvim.ChildProcessContext(ctx),
-		nvim.ChildProcessLogf(tb.Logf),
-		nvim.ChildProcessEnv(env),
-	}
-	v, err := nvim.NewChildProcess(opts...)
-	if err != nil {
-		tb.Fatal(err)
-	}
-
-	done := make(chan error, 1)
-	go func() {
-		done <- v.Serve()
-	}()
-
-	cleanup = func() {
-		if err := v.Close(); err != nil {
-			tb.Fatal(err)
-		}
-
-		err := <-done
-		if err != nil {
-			tb.Fatal(err)
-		}
-
-		const nvimlogFile = ".nvimlog"
-		wd, err := os.Getwd()
-		if err != nil {
-			tb.Fatal(err)
-		}
-		if walkErr := filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if info.IsDir() {
-				return nil
-			}
-
-			if fname := info.Name(); fname == nvimlogFile {
-				if err := os.RemoveAll(path); err != nil {
-					return fmt.Errorf("failed to remove %s file: %w", path, err)
-				}
-			}
-
-			return nil
-		}); walkErr != nil && !os.IsNotExist(err) {
-			tb.Fatal(fmt.Errorf("walkErr: %w", errors.Unwrap(walkErr)))
-		}
-	}
-
-	return plugin.New(v), cleanup
-}
-
 func TestRegister(t *testing.T) {
-	p, cleanup := newChildProcess(t)
-	t.Cleanup(func() {
-		cleanup()
-	})
+	p := plugin.New(nvimtest.NewChildProcess(t))
 
 	p.Handle("hello", func(s string) (string, error) {
 		return "Hello, " + s, nil
 	})
+
 	p.HandleFunction(&plugin.FunctionOptions{Name: "Hello"}, func(args []string) (string, error) {
 		return "Hello, " + strings.Join(args, " "), nil
 	})
 
 	if err := p.RegisterForTests(); err != nil {
-		t.Fatal(err)
+		t.Fatalf("register for test: %v", err)
 	}
 
-	{
-		result, err := p.Nvim.CommandOutput(":echo Hello('John', 'Doe')")
-		if err != nil {
-			t.Error(err)
-		}
-		expected := "Hello, John Doe"
-		if result != expected {
-			t.Errorf("Hello returned %q, want %q", result, expected)
-		}
+	result, err := p.Nvim.Exec(`:echo Hello('John', 'Doe')`, true)
+	if err != nil {
+		t.Fatalf("exec echo command: %v", err)
+	}
+	expected := `Hello, John Doe`
+	if result != expected {
+		t.Fatalf("Hello returned %q, want %q", result, expected)
 	}
 
-	{
-		cid := p.Nvim.ChannelID()
-
-		var result string
-		if err := p.Nvim.Call("rpcrequest", &result, cid, "hello", "world"); err != nil {
-			t.Fatal(err)
-		}
-
-		expected := "Hello, world"
-		if result != expected {
-			t.Errorf("hello returned %q, want %q", result, expected)
-		}
+	cid := p.Nvim.ChannelID()
+	var result2 string
+	if err := p.Nvim.Call("rpcrequest", &result2, cid, "hello", "world"); err != nil {
+		t.Fatalf("call rpcrequest(%v, %v, %v, %v): %v", &result2, cid, "hello", "world", err)
+	}
+	expected2 := "Hello, world"
+	if result2 != expected2 {
+		t.Fatalf("hello returned %q, want %q", result2, expected2)
 	}
 }
 
 func TestSubscribe(t *testing.T) {
-	p, cleanup := newChildProcess(t)
-	t.Cleanup(func() {
-		cleanup()
-	})
+	p := plugin.New(nvimtest.NewChildProcess(t))
 
 	const event1 = "event1"
 	eventFn1 := func(t *testing.T, v *nvim.Nvim) error {
@@ -141,6 +62,8 @@ func TestSubscribe(t *testing.T) {
 			}
 		})
 	}
+	p.Handle(event1, func() error { return eventFn1(t, p.Nvim) })
+
 	const event2 = "event2"
 	eventFn2 := func(t *testing.T, v *nvim.Nvim) error {
 		return v.RegisterHandler(event1, func(event ...interface{}) {
@@ -155,26 +78,26 @@ func TestSubscribe(t *testing.T) {
 			}
 		})
 	}
-	p.Handle(event1, func() error { return eventFn1(t, p.Nvim) })
 	p.Handle(event2, func() error { return eventFn2(t, p.Nvim) })
 
 	if err := p.RegisterForTests(); err != nil {
-		t.Fatal(err)
+		t.Fatalf("register for test: %v", err)
 	}
 
 	if err := p.Nvim.Subscribe(event1); err != nil {
-		t.Fatal(err)
+		t.Fatalf("subscribe(%v): %v", event1, err)
 	}
+
 	b := p.Nvim.NewBatch()
 	b.Subscribe(event2)
 	if err := b.Execute(); err != nil {
-		t.Fatal(err)
+		t.Fatalf("batch execute: %v", err)
 	}
 
 	// warm-up
 	var result int
 	if err := p.Nvim.Eval(fmt.Sprintf(`rpcnotify(0, %q)`, event1), &result); err != nil {
-		t.Fatal(err)
+		t.Fatalf("eval rpcnotify for warm-up of event1: %v", err)
 	}
 	if result != 1 {
 		t.Fatalf("expect 1 but got %d", result)
@@ -182,7 +105,7 @@ func TestSubscribe(t *testing.T) {
 
 	var result2 int
 	if err := p.Nvim.Eval(fmt.Sprintf(`rpcnotify(0, %q, 1, 2, 3)`, event1), &result2); err != nil {
-		t.Fatal(err)
+		t.Fatalf("eval rpcnotify for event1: %v", err)
 	}
 	if result2 != 1 {
 		t.Fatalf("expect 1 but got %d", result2)
@@ -190,25 +113,26 @@ func TestSubscribe(t *testing.T) {
 
 	var result3 int
 	if err := p.Nvim.Eval(fmt.Sprintf(`rpcnotify(0, %q, 4, 5, 6)`, event2), &result3); err != nil {
-		t.Fatal(err)
+		t.Fatalf("eval rpcnotify for event2: %v", err)
 	}
 	if result3 != 1 {
 		t.Fatalf("expect 1 but got %d", result3)
 	}
 
 	if err := p.Nvim.Unsubscribe(event1); err != nil {
-		t.Fatal(err)
+		t.Fatalf("unsubscribe event1: %v", err)
 	}
+
 	b.Unsubscribe(event2)
 	if err := b.Execute(); err != nil {
-		t.Fatal(err)
+		t.Fatalf("unsubscribe event2: %v", err)
 	}
 
 	if err := p.Nvim.Eval(fmt.Sprintf(`rpcnotify(0, %q, 7, 8, 9)`, event1), nil); err != nil {
-		t.Fatal(err)
+		t.Fatalf("ensure rpcnotify to event1 is no-op: %v", err)
 	}
 
 	if err := p.Nvim.Eval(fmt.Sprintf(`rpcnotify(0, %q, 10, 11, 12)`, event2), nil); err != nil {
-		t.Fatal(err)
+		t.Fatalf("ensure rpcnotify to event2 is no-op: %v", err)
 	}
 }
