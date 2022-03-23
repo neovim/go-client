@@ -21,13 +21,20 @@ func TestRegister(t *testing.T) {
 		return "Hello, " + strings.Join(args, " "), nil
 	})
 
+	type testEval struct {
+		BaseDir string `eval:"fnamemodify(getcwd(), ':t')"`
+	}
+	p.HandleFunction(&plugin.FunctionOptions{Name: "EvalTest", Eval: "*"}, func(args []string, eval *testEval) (string, error) {
+		return fmt.Sprintf("BaseDir: %s", eval.BaseDir), nil
+	})
+
 	if err := p.RegisterForTests(); err != nil {
 		t.Fatalf("register for test: %v", err)
 	}
 
 	result, err := p.Nvim.Exec(`:echo Hello('John', 'Doe')`, true)
 	if err != nil {
-		t.Fatalf("exec echo command: %v", err)
+		t.Fatalf("exec 'echo Hello' function: %v", err)
 	}
 	expected := `Hello, John Doe`
 	if result != expected {
@@ -42,6 +49,16 @@ func TestRegister(t *testing.T) {
 	expected2 := "Hello, world"
 	if result2 != expected2 {
 		t.Fatalf("hello returned %q, want %q", result2, expected2)
+	}
+
+	var result3 string
+	if err := p.Nvim.Eval(`EvalTest()`, &result3); err != nil {
+		t.Fatalf("eval 'EvalTest()' function: %v", err)
+	}
+
+	expected3 := "BaseDir: plugin"
+	if result3 != expected3 {
+		t.Fatalf("EvalTest returned %q, want %q", result3, expected3)
 	}
 }
 
