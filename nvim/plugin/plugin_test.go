@@ -42,7 +42,16 @@ func TestRegister(t *testing.T) {
 	)
 
 	p.HandleCommand(
-		&plugin.CommandOptions{Name: "Hello", NArgs: "*"},
+		&plugin.CommandOptions{
+			Name:     "Hello",
+			NArgs:    "*",
+			Range:    "%",
+			Addr:     "buffers",
+			Complete: "buffer",
+			Bang:     true,
+			Register: true,
+			Bar:      true,
+		},
 		func(n *nvim.Nvim, args []string) error {
 			chunks := []nvim.TextChunk{
 				{
@@ -104,7 +113,7 @@ func TestRegister(t *testing.T) {
 			t.Fatalf("exec 'Hello' command: %v", err)
 		}
 
-		expected := `HelloWorld`
+		expected := `Helloorld`
 		if result != expected {
 			t.Fatalf("Hello returned %q, want %q", result, expected)
 		}
@@ -112,6 +121,8 @@ func TestRegister(t *testing.T) {
 }
 
 func TestSubscribe(t *testing.T) {
+	t.Parallel()
+
 	p := plugin.New(nvimtest.NewChildProcess(t))
 
 	const event1 = "event1"
