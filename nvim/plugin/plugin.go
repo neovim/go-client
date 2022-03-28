@@ -365,11 +365,11 @@ func (p *Plugin) RegisterForTests() error {
 
 	const host = "nvim-go-test"
 	for path, specs := range specs {
-		if err := p.Nvim.Call(`remote#host#RegisterPlugin`, nil, host, path, specs); err != nil {
+		if err := p.Nvim.Call("remote#host#RegisterPlugin", nil, host, path, specs); err != nil {
 			return err
 		}
 	}
-	err := p.Nvim.Call(`remote#host#Register`, nil, host, `x`, p.Nvim.ChannelID())
+	err := p.Nvim.Call("remote#host#Register", nil, host, "x", p.Nvim.ChannelID())
 
 	return err
 }

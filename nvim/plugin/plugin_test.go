@@ -13,20 +13,25 @@ import (
 func TestRegister(t *testing.T) {
 	p := plugin.New(nvimtest.NewChildProcess(t))
 
+	// simple handler
 	p.Handle("hello", func(s string) (string, error) {
 		return "Hello, " + s, nil
 	})
 
-	p.HandleFunction(&plugin.FunctionOptions{Name: "Hello"}, func(args []string) (string, error) {
-		return "Hello, " + strings.Join(args, " "), nil
-	})
+	// function handler
+	p.HandleFunction(&plugin.FunctionOptions{Name: "Hello"},
+		func(args []string) (string, error) {
+			return "Hello, " + strings.Join(args, " "), nil
+		})
 
+	// function handler with eval
 	type testEval struct {
 		BaseDir string `eval:"fnamemodify(getcwd(), ':t')"`
 	}
-	p.HandleFunction(&plugin.FunctionOptions{Name: "EvalTest", Eval: "*"}, func(args []string, eval *testEval) (string, error) {
-		return fmt.Sprintf("BaseDir: %s", eval.BaseDir), nil
-	})
+	p.HandleFunction(&plugin.FunctionOptions{Name: "TestEval", Eval: "*"},
+		func(_ []string, eval *testEval) (string, error) {
+			return eval.BaseDir, nil
+		})
 
 	if err := p.RegisterForTests(); err != nil {
 		t.Fatalf("register for test: %v", err)
@@ -46,17 +51,16 @@ func TestRegister(t *testing.T) {
 	if err := p.Nvim.Call("rpcrequest", &result2, cid, "hello", "world"); err != nil {
 		t.Fatalf("call rpcrequest(%v, %v, %v, %v): %v", &result2, cid, "hello", "world", err)
 	}
-	expected2 := "Hello, world"
+	expected2 := `Hello, world`
 	if result2 != expected2 {
 		t.Fatalf("hello returned %q, want %q", result2, expected2)
 	}
 
 	var result3 string
-	if err := p.Nvim.Eval(`EvalTest()`, &result3); err != nil {
-		t.Fatalf("eval 'EvalTest()' function: %v", err)
+	if err := p.Nvim.Eval(`TestEval()`, &result3); err != nil {
+		t.Fatalf("eval 'TestEval()' function: %v", err)
 	}
-
-	expected3 := "BaseDir: plugin"
+	expected3 := `plugin`
 	if result3 != expected3 {
 		t.Fatalf("EvalTest returned %q, want %q", result3, expected3)
 	}
