@@ -13,6 +13,10 @@ import (
 func TestRegister(t *testing.T) {
 	t.Parallel()
 
+	type testEval struct {
+		BaseDir string `eval:"fnamemodify(getcwd(), ':t')"`
+	}
+
 	p := plugin.New(nvimtest.NewChildProcess(t))
 
 	// SimpleHandler
@@ -31,9 +35,6 @@ func TestRegister(t *testing.T) {
 	)
 
 	// FunctionEvalHandler
-	type testEval struct {
-		BaseDir string `eval:"fnamemodify(getcwd(), ':t')"`
-	}
 	p.HandleFunction(
 		&plugin.FunctionOptions{Name: "TestEval", Eval: "*"},
 		func(_ []string, eval *testEval) (string, error) {
@@ -41,6 +42,7 @@ func TestRegister(t *testing.T) {
 		},
 	)
 
+	// CommandHandler
 	p.HandleCommand(
 		&plugin.CommandOptions{
 			Name:     "Hello",
@@ -60,6 +62,23 @@ func TestRegister(t *testing.T) {
 			}
 			for _, arg := range args {
 				chunks = append(chunks, nvim.TextChunk{Text: arg})
+			}
+
+			return n.Echo(chunks, true, make(map[string]interface{}))
+		},
+	)
+
+	// CommandEvalHandler
+	p.HandleCommand(
+		&plugin.CommandOptions{
+			Name: "HelloEval",
+			Eval: "*",
+		},
+		func(n *nvim.Nvim, eval *testEval) error {
+			chunks := []nvim.TextChunk{
+				{
+					Text: eval.BaseDir,
+				},
 			}
 
 			return n.Echo(chunks, true, make(map[string]interface{}))
@@ -114,6 +133,18 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `Helloorld`
+		if result != expected {
+			t.Fatalf("Hello returned %q, want %q", result, expected)
+		}
+	})
+
+	t.Run("CommandEvalHandler", func(t *testing.T) {
+		result, err := p.Nvim.Exec(`HelloEval`, true)
+		if err != nil {
+			t.Fatalf("exec 'Hello' command: %v", err)
+		}
+
+		expected := `plugin`
 		if result != expected {
 			t.Fatalf("Hello returned %q, want %q", result, expected)
 		}
