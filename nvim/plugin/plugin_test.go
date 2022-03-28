@@ -56,12 +56,40 @@ func TestRegister(t *testing.T) {
 		},
 		func(n *nvim.Nvim, args []string) error {
 			chunks := []nvim.TextChunk{
-				{
-					Text: `Hello`,
-				},
+				{Text: `Hello`},
 			}
 			for _, arg := range args {
 				chunks = append(chunks, nvim.TextChunk{Text: arg})
+			}
+
+			return n.Echo(chunks, true, make(map[string]interface{}))
+		},
+	)
+
+	// CommandRangeDotHandler
+	p.HandleCommand(
+		&plugin.CommandOptions{
+			Name:  "HelloRangeDot",
+			Range: ".",
+		},
+		func(n *nvim.Nvim) error {
+			chunks := []nvim.TextChunk{
+				{Text: `Hello`},
+			}
+
+			return n.Echo(chunks, true, make(map[string]interface{}))
+		},
+	)
+
+	// CommandCountHandler
+	p.HandleCommand(
+		&plugin.CommandOptions{
+			Name:  "HelloCount",
+			Count: "0",
+		},
+		func(n *nvim.Nvim) error {
+			chunks := []nvim.TextChunk{
+				{Text: `Hello`},
 			}
 
 			return n.Echo(chunks, true, make(map[string]interface{}))
@@ -86,7 +114,7 @@ func TestRegister(t *testing.T) {
 	)
 
 	if err := p.RegisterForTests(); err != nil {
-		t.Fatalf("register for test: %v", err)
+		t.Fatalf("register handlers for test: %v", err)
 	}
 
 	t.Run("SimpleHandler", func(t *testing.T) {
@@ -133,6 +161,30 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `Helloorld`
+		if result != expected {
+			t.Fatalf("Hello returned %q, want %q", result, expected)
+		}
+	})
+
+	t.Run("CommandRangeDotHandler", func(t *testing.T) {
+		result, err := p.Nvim.Exec(`HelloRangeDot`, true)
+		if err != nil {
+			t.Fatalf("exec 'Hello' command: %v", err)
+		}
+
+		expected := `Hello`
+		if result != expected {
+			t.Fatalf("Hello returned %q, want %q", result, expected)
+		}
+	})
+
+	t.Run("CommandCountHandler", func(t *testing.T) {
+		result, err := p.Nvim.Exec(`HelloCount`, true)
+		if err != nil {
+			t.Fatalf("exec 'Hello' command: %v", err)
+		}
+
+		expected := `Hello`
 		if result != expected {
 			t.Fatalf("Hello returned %q, want %q", result, expected)
 		}
