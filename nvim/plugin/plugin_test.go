@@ -11,59 +11,104 @@ import (
 )
 
 func TestRegister(t *testing.T) {
+	t.Parallel()
+
 	p := plugin.New(nvimtest.NewChildProcess(t))
 
-	// simple handler
-	p.Handle("hello", func(s string) (string, error) {
-		return "Hello, " + s, nil
-	})
+	// SimpleHandler
+	p.Handle("hello",
+		func(s string) (string, error) {
+			return "Hello, " + s, nil
+		},
+	)
 
-	// function handler
-	p.HandleFunction(&plugin.FunctionOptions{Name: "Hello"},
+	// FunctionHandler
+	p.HandleFunction(
+		&plugin.FunctionOptions{Name: "Hello"},
 		func(args []string) (string, error) {
 			return "Hello, " + strings.Join(args, " "), nil
-		})
+		},
+	)
 
-	// function handler with eval
+	// FunctionEvalHandler
 	type testEval struct {
 		BaseDir string `eval:"fnamemodify(getcwd(), ':t')"`
 	}
-	p.HandleFunction(&plugin.FunctionOptions{Name: "TestEval", Eval: "*"},
+	p.HandleFunction(
+		&plugin.FunctionOptions{Name: "TestEval", Eval: "*"},
 		func(_ []string, eval *testEval) (string, error) {
 			return eval.BaseDir, nil
-		})
+		},
+	)
+
+	p.HandleCommand(
+		&plugin.CommandOptions{Name: "Hello", NArgs: "*"},
+		func(n *nvim.Nvim, args []string) error {
+			chunks := []nvim.TextChunk{
+				{
+					Text: `Hello`,
+				},
+			}
+			for _, arg := range args {
+				chunks = append(chunks, nvim.TextChunk{Text: arg})
+			}
+
+			return n.Echo(chunks, true, make(map[string]interface{}))
+		},
+	)
 
 	if err := p.RegisterForTests(); err != nil {
 		t.Fatalf("register for test: %v", err)
 	}
 
-	result, err := p.Nvim.Exec(`:echo Hello('John', 'Doe')`, true)
-	if err != nil {
-		t.Fatalf("exec 'echo Hello' function: %v", err)
-	}
-	expected := `Hello, John Doe`
-	if result != expected {
-		t.Fatalf("Hello returned %q, want %q", result, expected)
-	}
+	t.Run("SimpleHandler", func(t *testing.T) {
+		result, err := p.Nvim.Exec(`:echo Hello('John', 'Doe')`, true)
+		if err != nil {
+			t.Fatalf("exec 'echo Hello' function: %v", err)
+		}
 
-	cid := p.Nvim.ChannelID()
-	var result2 string
-	if err := p.Nvim.Call("rpcrequest", &result2, cid, "hello", "world"); err != nil {
-		t.Fatalf("call rpcrequest(%v, %v, %v, %v): %v", &result2, cid, "hello", "world", err)
-	}
-	expected2 := `Hello, world`
-	if result2 != expected2 {
-		t.Fatalf("hello returned %q, want %q", result2, expected2)
-	}
+		expected := `Hello, John Doe`
+		if result != expected {
+			t.Fatalf("Hello returned %q, want %q", result, expected)
+		}
+	})
 
-	var result3 string
-	if err := p.Nvim.Eval(`TestEval()`, &result3); err != nil {
-		t.Fatalf("eval 'TestEval()' function: %v", err)
-	}
-	expected3 := `plugin`
-	if result3 != expected3 {
-		t.Fatalf("EvalTest returned %q, want %q", result3, expected3)
-	}
+	t.Run("FunctionHandler", func(t *testing.T) {
+		cid := p.Nvim.ChannelID()
+		var result string
+		if err := p.Nvim.Call(`rpcrequest`, &result, cid, `hello`, `world`); err != nil {
+			t.Fatalf("call rpcrequest(%v, %v, %v, %v): %v", &result, cid, "hello", "world", err)
+		}
+
+		expected2 := `Hello, world`
+		if result != expected2 {
+			t.Fatalf("hello returned %q, want %q", result, expected2)
+		}
+	})
+
+	t.Run("FunctionEvalHandler", func(t *testing.T) {
+		var result string
+		if err := p.Nvim.Eval(`TestEval()`, &result); err != nil {
+			t.Fatalf("eval 'TestEval()' function: %v", err)
+		}
+
+		expected3 := `plugin`
+		if result != expected3 {
+			t.Fatalf("EvalTest returned %q, want %q", result, expected3)
+		}
+	})
+
+	t.Run("CommandHandler", func(t *testing.T) {
+		result, err := p.Nvim.Exec(`Hello World`, true)
+		if err != nil {
+			t.Fatalf("exec 'Hello' command: %v", err)
+		}
+
+		expected := `HelloWorld`
+		if result != expected {
+			t.Fatalf("Hello returned %q, want %q", result, expected)
+		}
+	})
 }
 
 func TestSubscribe(t *testing.T) {
