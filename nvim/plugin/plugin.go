@@ -476,7 +476,7 @@ func (p *Plugin) Manifest(host string) []byte {
 		optDelim := ""
 		for _, k := range keys {
 			fmt.Fprintf(&buf, "%s'%s': '%s'", optDelim, k, escape(spec.Opts[k]))
-			optDelim = ","
+			optDelim = ", "
 		}
 
 		fmt.Fprintf(&buf, "}},\n")
