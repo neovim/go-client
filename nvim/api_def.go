@@ -888,7 +888,7 @@ func EvalStatusLine(name string, opts map[string]interface{}) (statusline map[st
 	name(nvim_eval_statusline)
 }
 
-// AddUserCommand create a new user command.
+// CreateUserCommand create a new user command.
 //
 // name is name of the new user command. Must begin with an uppercase letter.
 //
@@ -906,8 +906,8 @@ func EvalStatusLine(name string, opts map[string]interface{}) (statusline map[st
 //
 //  force (bool, default true)
 // Override any previous definition.
-func AddUserCommand(name string, command UserCommand, opts map[string]interface{}) {
-	name(nvim_add_user_command)
+func CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) {
+	name(nvim_create_user_command)
 }
 
 // DeleteUserCommand delete a user-defined command.
@@ -1139,11 +1139,11 @@ func BufferMark(buffer Buffer, name string) (pos [2]int) {
 	name(nvim_buf_get_mark)
 }
 
-// AddBufferUserCommand create a new user command |user-commands| in the given buffer.
+// CreateBufferUserCommand create a new user command |user-commands| in the given buffer.
 //
 // Only commands created with |:command-buffer| or this function can be deleted with this function.
-func AddBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
-	name(nvim_buf_add_user_command)
+func CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
+	name(nvim_buf_create_user_command)
 }
 
 // DeleteBufferUserCommand create a new user command |user-commands| in the given buffer.
