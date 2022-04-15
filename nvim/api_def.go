@@ -990,6 +990,20 @@ func SetBufferText(buffer Buffer, startRow, startCol, endRow, endCol int, replac
 	name(nvim_buf_set_text)
 }
 
+// BufferText gets a range from the buffer.
+//
+// This differs from BufferLines in that it allows retrieving only
+// portions of a line.
+//
+// Indexing is zero-based. Column indices are end-exclusive.
+//
+// Prefer BufferLines when retrieving entire lines.
+//
+// opts is optional parameters. Currently unused.
+func BufferText(buffer Buffer, startRow, startCol, endRow, endCol int, opts map[string]interface{}) [][]byte {
+	name(nvim_buf_get_text)
+}
+
 // BufferOffset returns the byte offset of a line (0-indexed).
 //
 // Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
