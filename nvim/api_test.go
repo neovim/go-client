@@ -1855,6 +1855,37 @@ func testLines(v *Nvim) func(*testing.T) {
 				}
 			})
 
+			t.Run("BufferText", func(t *testing.T) {
+				buf, err := v.CurrentBuffer()
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					clearBuffer(t, v, buf)
+				})
+
+				// sets test buffer text.
+				lines := [][]byte{[]byte("Neovim is the"), []byte("Vim-fork focused on extensibility and usability")}
+				if err := v.SetBufferLines(buf, 0, -1, true, lines); err != nil {
+					t.Fatal(err)
+				}
+
+				got, err := v.BufferText(buf, 0, 0, 1, -1, make(map[string]interface{}))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// assert row 1 buffer text.
+				if !bytes.EqualFold(lines[0], got[0]) {
+					t.Fatalf("row 1 is not equal: got: %q, want: %q", string(got[0]), string(lines[0]))
+				}
+
+				// assert row 2 buffer text.
+				if !bytes.EqualFold(lines[1], got[1]) {
+					t.Fatalf("row 2 is not equal: got: %q, want: %q", string(got[1]), string(lines[1]))
+				}
+			})
+
 			t.Run("SetBufferText", func(t *testing.T) {
 				buf, err := v.CurrentBuffer()
 				if err != nil {
@@ -1988,6 +2019,42 @@ func testLines(v *Nvim) func(*testing.T) {
 				}
 				if offset != wantOffset {
 					t.Fatalf("got offset %d but want %d", offset, wantOffset)
+				}
+			})
+
+			t.Run("BufferText", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var buf Buffer
+				b.CurrentBuffer(&buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					clearBuffer(t, v, buf)
+				})
+
+				// sets test buffer text.
+				lines := [][]byte{[]byte("Neovim is the"), []byte("Vim-fork focused on extensibility and usability")}
+				b.SetBufferLines(buf, 0, -1, true, lines)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var got [][]byte
+				b.BufferText(buf, 0, 0, 1, -1, make(map[string]interface{}), &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				// assert row 1 buffer text.
+				if !bytes.EqualFold(lines[0], got[0]) {
+					t.Fatalf("row 1 is not equal: got: %q, want: %q", string(got[0]), string(lines[0]))
+				}
+
+				// assert row 2 buffer text.
+				if !bytes.EqualFold(lines[1], got[1]) {
+					t.Fatalf("row 2 is not equal: got: %q, want: %q", string(got[1]), string(lines[1]))
 				}
 			})
 
