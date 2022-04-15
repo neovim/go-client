@@ -2236,6 +2236,36 @@ func (b *Batch) SetBufferText(buffer Buffer, startRow int, startCol int, endRow 
 	b.call("nvim_buf_set_text", nil, buffer, startRow, startCol, endRow, endCol, replacement)
 }
 
+// BufferText gets a range from the buffer.
+//
+// This differs from BufferLines in that it allows retrieving only
+// portions of a line.
+//
+// Indexing is zero-based. Column indices are end-exclusive.
+//
+// Prefer BufferLines when retrieving entire lines.
+//
+// opts is optional parameters. Currently unused.
+func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}) ([][]byte, error) {
+	var result [][]byte
+	err := v.call("nvim_buf_get_text", &result, buffer, startRow, startCol, endRow, endCol, opts)
+	return result, err
+}
+
+// BufferText gets a range from the buffer.
+//
+// This differs from BufferLines in that it allows retrieving only
+// portions of a line.
+//
+// Indexing is zero-based. Column indices are end-exclusive.
+//
+// Prefer BufferLines when retrieving entire lines.
+//
+// opts is optional parameters. Currently unused.
+func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}, result *[][]byte) {
+	b.call("nvim_buf_get_text", result, buffer, startRow, startCol, endRow, endCol, opts)
+}
+
 // BufferOffset returns the byte offset of a line (0-indexed).
 //
 // Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
