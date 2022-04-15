@@ -30,7 +30,7 @@ jobs:
           - 1.17.x
           - 1.18.x
         neovim-version:
-          - v0.6.1
+          - v0.7.0
           - nightly
       fail-fast: false
 

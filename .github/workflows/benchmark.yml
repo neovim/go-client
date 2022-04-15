@@ -61,7 +61,7 @@ jobs:
       if: steps.cache-nvim.outputs.cache-hit != 'true'
       with:
         neovim: true
-        version: v0.6.1
+        version: v0.7.0
 
     - name: Run Benchmark
       run: |
