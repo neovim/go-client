@@ -23,7 +23,7 @@ jobs:
       matrix:
         os:
           - ubuntu-20.04  # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
-          - macos-11.0    # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
+          - macos-12      # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-12-Readme.md
           - windows-2022  # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
         go-version:
           - 1.16.x
@@ -61,7 +61,7 @@ jobs:
           ~/Library/Caches/go-build
           '%LocalAppData%\go-build'
         restore-keys: |
-          go-${{ env.OS }}-
+          go-${{ env.OS }}-${{ hashFiles('**/go.mod') }}
 
     - name: Install neovim binary
       uses: rhysd/action-setup-vim@v1
