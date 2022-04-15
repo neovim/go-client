@@ -2099,7 +2099,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 				t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
 					skipVersion(t, "v0.7.0")
 
-					if err := v.AddUserCommand(tt.name, tt.command, tt.opts); err != nil {
+					if err := v.CreateUserCommand(tt.name, tt.command, tt.opts); err != nil {
 						t.Fatal(err)
 					}
 					t.Cleanup(func() {
@@ -2122,7 +2122,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 
 					b := v.NewBatch()
 
-					b.AddUserCommand(tt.name, tt.command, tt.opts)
+					b.CreateUserCommand(tt.name, tt.command, tt.opts)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
 					}
@@ -2165,7 +2165,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 				t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
 					skipVersion(t, "v0.7.0")
 
-					if err := v.AddBufferUserCommand(Buffer(0), tt.name, tt.command, tt.opts); err != nil {
+					if err := v.CreateBufferUserCommand(Buffer(0), tt.name, tt.command, tt.opts); err != nil {
 						t.Fatal(err)
 					}
 					t.Cleanup(func() {
@@ -2188,7 +2188,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 
 					b := v.NewBatch()
 
-					b.AddBufferUserCommand(Buffer(0), tt.name, tt.command, tt.opts)
+					b.CreateBufferUserCommand(Buffer(0), tt.name, tt.command, tt.opts)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
 					}
