@@ -20,17 +20,39 @@ jobs:
       contents: read
       security-events: write
 
-    strategy:
-      fail-fast: false
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.17.x'
+
+    - name: Cache Go module and build cache
+      uses: actions/cache@v3
+      with:
+        key: go-${{ hashFiles('go.mod') }}
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        restore-keys: |
+          go-${{ hashFiles('go.mod') }}
+
+    - name: Fetch modules
+      run: |
+        go mod download
+        go mod vendor -v
+
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: 'go'
+        setup-python-dependencies: false
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
+      env:
+        # hack for fetch dependencies when failed to go-autobuilder 'make' command
+        # https://github.com/github/codeql-go/blob/b953fe39c2cb/extractor/cli/go-autobuilder/go-autobuilder.go#L409
+        CODEQL_EXTRACTOR_GO_BUILD_COMMAND: 'true'
