@@ -113,6 +113,74 @@ func TestRegister(t *testing.T) {
 		},
 	)
 
+	// AutocmdHandler
+	p.HandleAutocmd(
+		&plugin.AutocmdOptions{
+			Event:   "User",
+			Group:   "Test",
+			Pattern: "Test",
+			Nested:  true,
+			Once:    false,
+		},
+		func(n *nvim.Nvim, args []string) error {
+			chunks := []nvim.TextChunk{
+				{
+					Text: "Hello",
+				},
+				{
+					Text: "Autocmd",
+				},
+			}
+
+			return n.Echo(chunks, true, make(map[string]interface{}))
+		},
+	)
+
+	// AutocmdEvalHandler
+	p.HandleAutocmd(
+		&plugin.AutocmdOptions{
+			Event:   "User",
+			Group:   "Eval",
+			Pattern: "Eval",
+			Eval:    "*",
+		},
+		func(n *nvim.Nvim, eval *testEval) error {
+			chunks := []nvim.TextChunk{
+				{
+					Text: eval.BaseDir,
+				},
+			}
+
+			return n.Echo(chunks, true, make(map[string]interface{}))
+		},
+	)
+
+	// AutocmdOnceHandler
+	p.HandleAutocmd(
+		&plugin.AutocmdOptions{
+			Event:   "User",
+			Group:   "TestOnce",
+			Pattern: "Once",
+			Nested:  true,
+			Once:    true,
+		},
+		func(n *nvim.Nvim, args []string) error {
+			chunks := []nvim.TextChunk{
+				{
+					Text: "Hello",
+				},
+				{
+					Text: "Autocmd",
+				},
+				{
+					Text: "Once",
+				},
+			}
+
+			return n.Echo(chunks, true, make(map[string]interface{}))
+		},
+	)
+
 	if err := p.RegisterForTests(); err != nil {
 		t.Fatalf("register handlers for test: %v", err)
 	}
@@ -199,6 +267,60 @@ func TestRegister(t *testing.T) {
 		expected := `plugin`
 		if result != expected {
 			t.Fatalf("Hello returned %q, want %q", result, expected)
+		}
+	})
+
+	t.Run("AutocmdHandler", func(t *testing.T) {
+		result, err := p.Nvim.Exec(`doautocmd User Test`, true)
+		if err != nil {
+			t.Fatalf("exec 'doautocmd User Test' command: %v", err)
+		}
+
+		expected := `HelloAutocmd`
+		if result != expected {
+			t.Fatalf("'doautocmd User Test' returned %q, want %q", result, expected)
+		}
+
+		result2, err := p.Nvim.Exec(`doautocmd User Test`, true)
+		if err != nil {
+			t.Fatalf("exec 'doautocmd User Test' command: %v", err)
+		}
+
+		if result2 != expected {
+			t.Fatalf("'doautocmd User Test' returned %q, want %q", result, expected)
+		}
+	})
+
+	t.Run("AutocmdEvalHandler", func(t *testing.T) {
+		result, err := p.Nvim.Exec(`doautocmd User Eval`, true)
+		if err != nil {
+			t.Fatalf("exec 'doautocmd User Eval' command: %v", err)
+		}
+
+		expected := `plugin`
+		if result != expected {
+			t.Fatalf("'doautocmd User Eval' returned %q, want %q", result, expected)
+		}
+	})
+
+	t.Run("AutocmdOnceHandler", func(t *testing.T) {
+		result, err := p.Nvim.Exec(`doautocmd User Once`, true)
+		if err != nil {
+			t.Fatalf("exec 'doautocmd User Once' command: %v", err)
+		}
+
+		expected := `HelloAutocmdOnce`
+		if result != expected {
+			t.Fatalf("'doautocmd User Once' returned %q, want %q", result, expected)
+		}
+
+		result2, err := p.Nvim.Exec(`doautocmd User Once`, true)
+		if err != nil {
+			t.Fatalf("exec 'doautocmd User Once' command: %v", err)
+		}
+
+		if result2 == expected {
+			t.Fatalf("'doautocmd User Once' returned %q, want %q", result, "")
 		}
 	})
 }
