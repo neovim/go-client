@@ -1516,6 +1516,59 @@ func IsTabpageValid(tabpage Tabpage) (valid bool) {
 	name(nvim_tabpage_is_valid)
 }
 
+// autocmd.c
+
+// Autocmds get all autocommands that match the corresponding {opts}.
+//
+// Note that when multiple patterns or events are provided, it will find all the autocommands that
+// match any combination of them.
+func Autocmds(opts map[string]interface{}) (result []*AutocmdType) {
+	name(nvim_get_autocmds)
+}
+
+
+// CreateAutocmd create an autocommand.
+//
+// The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
+// triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
+func CreateAutocmd(event interface{}, opts map[string]interface{}) (id int) {
+	name(nvim_create_autocmd)
+}
+
+// DeleteAutocmd delete an autocommand by id.
+//
+// NOTE: Only autocommands created via the API have an id.
+func DeleteAutocmd(id int) {
+	name(nvim_del_autocmd)
+}
+
+// ClearAutocmds clear all autocommands that match the corresponding {opts}.
+//
+// To delete a particular autocmd, see DeleteAutocmd.
+func ClearAutocmds(opts map[string]interface{}) {
+	name(nvim_clear_autocmds)
+}
+
+// CreateAugroup create or get an autocommand group(autocmd-groups).
+func CreateAugroup(name string, opts map[string]interface{}) (id int) {
+	name(nvim_create_augroup)
+}
+
+// DeleteAugroupByID delete an autocommand group by id.
+func DeleteAugroupByID(id int) {
+	name(nvim_del_augroup_by_id)
+}
+
+// DeleteAugroupByID delete an autocommand group by name.
+func DeleteAugroupByName(name string) {
+	name(nvim_del_augroup_by_name)
+}
+
+// ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
+func ExecAutocmds(event interface{}, opts map[string]interface{}) {
+	name(nvim_exec_autocmds)
+}
+
 // ui.c
 
 // AttachUI registers the client as a remote UI. After this method is called,

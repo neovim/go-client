@@ -3284,6 +3284,109 @@ func (b *Batch) IsTabpageValid(tabpage Tabpage, valid *bool) {
 	b.call("nvim_tabpage_is_valid", valid, tabpage)
 }
 
+// Autocmds get all autocommands that match the corresponding {opts}.
+//
+// Note that when multiple patterns or events are provided, it will find all the autocommands that
+// match any combination of them.
+func (v *Nvim) Autocmds(opts map[string]interface{}) (result []*AutocmdType, err error) {
+	err = v.call("nvim_get_autocmds", &result, opts)
+	return result, err
+}
+
+// Autocmds get all autocommands that match the corresponding {opts}.
+//
+// Note that when multiple patterns or events are provided, it will find all the autocommands that
+// match any combination of them.
+func (b *Batch) Autocmds(opts map[string]interface{}, result *[]*AutocmdType) {
+	b.call("nvim_get_autocmds", result, opts)
+}
+
+// CreateAutocmd create an autocommand.
+//
+// The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
+// triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
+func (v *Nvim) CreateAutocmd(event interface{}, opts map[string]interface{}) (id int, err error) {
+	err = v.call("nvim_create_autocmd", &id, event, opts)
+	return id, err
+}
+
+// CreateAutocmd create an autocommand.
+//
+// The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
+// triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
+func (b *Batch) CreateAutocmd(event interface{}, opts map[string]interface{}, id *int) {
+	b.call("nvim_create_autocmd", id, event, opts)
+}
+
+// DeleteAutocmd delete an autocommand by id.
+//
+// NOTE: Only autocommands created via the API have an id.
+func (v *Nvim) DeleteAutocmd(id int) error {
+	return v.call("nvim_del_autocmd", nil, id)
+}
+
+// DeleteAutocmd delete an autocommand by id.
+//
+// NOTE: Only autocommands created via the API have an id.
+func (b *Batch) DeleteAutocmd(id int) {
+	b.call("nvim_del_autocmd", nil, id)
+}
+
+// ClearAutocmds clear all autocommands that match the corresponding {opts}.
+//
+// To delete a particular autocmd, see DeleteAutocmd.
+func (v *Nvim) ClearAutocmds(opts map[string]interface{}) error {
+	return v.call("nvim_clear_autocmds", nil, opts)
+}
+
+// ClearAutocmds clear all autocommands that match the corresponding {opts}.
+//
+// To delete a particular autocmd, see DeleteAutocmd.
+func (b *Batch) ClearAutocmds(opts map[string]interface{}) {
+	b.call("nvim_clear_autocmds", nil, opts)
+}
+
+// CreateAugroup create or get an autocommand group(autocmd-groups).
+func (v *Nvim) CreateAugroup(name string, opts map[string]interface{}) (id int, err error) {
+	err = v.call("nvim_create_augroup", &id, name, opts)
+	return id, err
+}
+
+// CreateAugroup create or get an autocommand group(autocmd-groups).
+func (b *Batch) CreateAugroup(name string, opts map[string]interface{}, id *int) {
+	b.call("nvim_create_augroup", id, name, opts)
+}
+
+// DeleteAugroupByID delete an autocommand group by id.
+func (v *Nvim) DeleteAugroupByID(id int) error {
+	return v.call("nvim_del_augroup_by_id", nil, id)
+}
+
+// DeleteAugroupByID delete an autocommand group by id.
+func (b *Batch) DeleteAugroupByID(id int) {
+	b.call("nvim_del_augroup_by_id", nil, id)
+}
+
+// DeleteAugroupByID delete an autocommand group by name.
+func (v *Nvim) DeleteAugroupByName(name string) error {
+	return v.call("nvim_del_augroup_by_name", nil, name)
+}
+
+// DeleteAugroupByID delete an autocommand group by name.
+func (b *Batch) DeleteAugroupByName(name string) {
+	b.call("nvim_del_augroup_by_name", nil, name)
+}
+
+// ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
+func (v *Nvim) ExecAutocmds(event interface{}, opts map[string]interface{}) error {
+	return v.call("nvim_exec_autocmds", nil, event, opts)
+}
+
+// ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
+func (b *Batch) ExecAutocmds(event interface{}, opts map[string]interface{}) {
+	b.call("nvim_exec_autocmds", nil, event, opts)
+}
+
 // AttachUI registers the client as a remote UI. After this method is called,
 // the client will receive redraw notifications.
 //
