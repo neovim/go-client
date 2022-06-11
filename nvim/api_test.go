@@ -2867,8 +2867,9 @@ func testKey(v *Nvim) func(*testing.T) {
 					},
 				}
 				wantMapsLen := 0
-				if nvimVersion.Minor >= 6 {
-					lastMap := wantMaps[0]
+
+				switch nvimVersion.Minor {
+				case 6:
 					wantMaps = []*Mapping{
 						{
 							LHS:     "<C-L>",
@@ -2890,13 +2891,86 @@ func testKey(v *Nvim) func(*testing.T) {
 							SID:     0,
 							NoWait:  0,
 						},
-						lastMap,
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
 					}
 					wantMapsLen = 2
-				}
-				if nvimVersion.Minor >= 7 {
-					wantMaps[0].RHS = "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>"
-					wantMaps[2].SID = -9
+				case 7:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 2
+				case 8:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 2
 				}
 
 				got, err := v.KeyMap(mode)
@@ -3136,8 +3210,8 @@ func testKey(v *Nvim) func(*testing.T) {
 					},
 				}
 				wantMapsLen := 0
-				if nvimVersion.Minor >= 6 {
-					lastMap := wantMaps[0]
+				switch nvimVersion.Minor {
+				case 6:
 					wantMaps = []*Mapping{
 						{
 							LHS:     "<C-L>",
@@ -3159,13 +3233,86 @@ func testKey(v *Nvim) func(*testing.T) {
 							SID:     0,
 							NoWait:  0,
 						},
-						lastMap,
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
 					}
 					wantMapsLen = 2
-				}
-				if nvimVersion.Minor >= 7 {
-					wantMaps[0].RHS = "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>"
-					wantMaps[2].SID = -9
+				case 7:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 2
+				case 8:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 2
 				}
 				var got []*Mapping
 				b.KeyMap(mode, &got)
@@ -3451,10 +3598,10 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			const HLIDName = `Error`
-			var wantErrorHLID = 64
-			if nvimVersion.Minor >= 7 {
-				wantErrorHLID = 67
+			const HLIDName = `PreProc`
+			var wantErrorHLID = 85
+			if nvimVersion.Minor >= 8 {
+				wantErrorHLID += 3
 			}
 
 			goHLID, err := v.HLIDByName(HLIDName)
@@ -3590,10 +3737,10 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			const HLIDName = `Error`
-			var wantErrorHLID = 64
-			if nvimVersion.Minor >= 7 {
-				wantErrorHLID = 67
+			const HLIDName = `PreProc`
+			var wantErrorHLID = 85
+			if nvimVersion.Minor >= 8 {
+				wantErrorHLID += 3
 			}
 
 			var goHLID int
@@ -5569,6 +5716,11 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					Buffer:   0,
 				},
 			}
+			switch nvimVersion.Minor {
+			case 8:
+				want[0].Desc = ""
+				want[0].Command = ""
+			}
 
 			args := map[string]interface{}{
 				"group":   augID,
@@ -5662,6 +5814,11 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					BufLocal: false,
 					Buffer:   0,
 				},
+			}
+			switch nvimVersion.Minor {
+			case 8:
+				want[0].Desc = ""
+				want[0].Command = ""
 			}
 
 			args := map[string]interface{}{
