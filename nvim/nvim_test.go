@@ -95,7 +95,7 @@ func TestDial(t *testing.T) {
 
 	v1 := newChildProcess(t)
 	var addr string
-	if err := v1.Eval("$NVIM_LISTEN_ADDRESS", &addr); err != nil {
+	if err := v1.VVar("servername", &addr); err != nil {
 		t.Fatal(err)
 	}
 
