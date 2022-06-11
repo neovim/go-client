@@ -3,6 +3,7 @@ package nvim
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -17,6 +18,8 @@ import (
 	"sync/atomic"
 	"testing"
 )
+
+var flagNvimPath = flag.String("nvim-path", "", "nvim binary for testing")
 
 type version struct {
 	Major int64
@@ -75,7 +78,11 @@ var channelID int64
 func TestAPI(t *testing.T) {
 	t.Parallel()
 
-	v := newChildProcess(t)
+	var opts []ChildProcessOption
+	if nvimCmd := *flagNvimPath; nvimCmd != "" {
+		opts = []ChildProcessOption{ChildProcessCommand(nvimCmd)}
+	}
+	v := newChildProcess(t, opts...)
 
 	apiInfo, err := v.APIInfo()
 	if err != nil {

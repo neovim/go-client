@@ -14,7 +14,7 @@ import (
 )
 
 // newChildProcess returns the new *Nvim, and registers cleanup to tb.Cleanup.
-func newChildProcess(tb testing.TB) (v *Nvim) {
+func newChildProcess(tb testing.TB, opts ...ChildProcessOption) (v *Nvim) {
 	tb.Helper()
 
 	envs := os.Environ()
@@ -24,14 +24,15 @@ func newChildProcess(tb testing.TB) (v *Nvim) {
 	}...)
 
 	ctx := context.Background()
-	opts := []ChildProcessOption{
+	copts := []ChildProcessOption{
 		ChildProcessCommand(BinaryName),
 		ChildProcessArgs("-u", "NONE", "-n", "-i", "NONE", "--embed", "--headless"),
 		ChildProcessContext(ctx),
 		ChildProcessLogf(tb.Logf),
 		ChildProcessEnv(envs),
 	}
-	n, err := NewChildProcess(opts...)
+	copts = append(copts, opts...)
+	n, err := NewChildProcess(copts...)
 	if err != nil {
 		tb.Fatal(err)
 	}
