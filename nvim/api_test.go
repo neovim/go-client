@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-var flagNvimPath = flag.String("nvim-path", "", "nvim binary for testing")
+var flagNvimPath = flag.String("nvim", "nvim", "nvim binary for testing")
 
 type version struct {
 	Major int64
