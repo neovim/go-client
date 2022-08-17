@@ -76,7 +76,7 @@ func overwriteManifest(path, host string, manifest []byte) error {
 		return err
 	}
 	output := replaceManifest(host, input, manifest)
-	return ioutil.WriteFile(path, output, 0666)
+	return ioutil.WriteFile(path, output, 0o666)
 }
 
 func replaceManifest(host string, input, manifest []byte) []byte {

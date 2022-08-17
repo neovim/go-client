@@ -405,7 +405,7 @@ func printImplementation(functions []*Function, tmpl *template.Template, outFile
 	}
 
 	if outFile != "" {
-		return ioutil.WriteFile(outFile, out, 0666)
+		return ioutil.WriteFile(outFile, out, 0o666)
 	}
 	_, err = os.Stdout.Write(out)
 	return err

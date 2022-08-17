@@ -3377,7 +3377,7 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			const HLIDName = `Error`
-			var wantErrorHLID = 64
+			wantErrorHLID := 64
 			if nvimVersion.Minor >= 7 {
 				wantErrorHLID = 67
 			}
@@ -3516,7 +3516,7 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			const HLIDName = `Error`
-			var wantErrorHLID = 64
+			wantErrorHLID := 64
 			if nvimVersion.Minor >= 7 {
 				wantErrorHLID = 67
 			}
@@ -4316,7 +4316,7 @@ func testPutPaste(v *Nvim) func(*testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				var want = "!foobarbaz!"
+				want := "!foobarbaz!"
 				if nvimVersion.Minor >= 7 {
 					want = "!!foobarbaz"
 				}
@@ -4347,7 +4347,7 @@ func testPutPaste(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				var want = "!foobarbaz!"
+				want := "!foobarbaz!"
 				if nvimVersion.Minor >= 7 {
 					want = "!!foobarbaz"
 				}

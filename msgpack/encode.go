@@ -381,7 +381,8 @@ func (b *encodeBuilder) structEncoder(t reflect.Type) encodeFunc {
 			name:  f.name,
 			empty: empty,
 			index: f.index,
-			f:     encoderForType(f.typ, b)}
+			f:     encoderForType(f.typ, b),
+		}
 	}
 
 	if array {
