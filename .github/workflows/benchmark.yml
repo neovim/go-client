@@ -17,9 +17,10 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-20.04  # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
+          - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
         go-version:
-          - 1.18.x
+          - 1.19.x
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -35,26 +36,6 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Cache Go module and build cache
-      uses: actions/cache@v3
-      with:
-        key: ${{ env.OS }}-go-${{ hashFiles('**/go.sum') }}
-        path: |
-          ~/go/pkg/mod              # Module download cache
-          ~/.cache/go-build         # Build cache (Linux)
-        restore-keys: |
-          ${{ env.OS }}-go-
-
-    - name: Cache nvim binary for linux and darwin
-      uses: actions/cache@v3
-      id: cache-nvim
-      with:
-        key: ${{ env.OS }}-nvim-${{ hashFiles('~/nvim/bin/nvim') }}
-        path: |
-          ~/nvim
-        restore-keys: |
-          ${{ env.OS }}-nvim-
 
     - name: Install nvim binary
       uses: rhysd/action-setup-vim@v1
