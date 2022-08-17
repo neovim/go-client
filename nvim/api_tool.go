@@ -411,8 +411,7 @@ func printImplementation(functions []*Function, tmpl *template.Template, outFile
 	return err
 }
 
-func readAPIInfo() (*APIInfo, error) {
-	const cmdName = "nvim"
+func readAPIInfo(cmdName string) (*APIInfo, error) {
 	const cmdArgs = "--api-info"
 	output, err := exec.Command(cmdName, cmdArgs).Output()
 	if err != nil {
@@ -527,8 +526,8 @@ var specialAPIs = map[string]bool{
 	"nvim_notify":                  true, // implements underling nlua(vim.notify)
 }
 
-func compareFunctions(functions []*Function) error {
-	info, err := readAPIInfo()
+func compareFunctions(cmdName string, functions []*Function) error {
+	info, err := readAPIInfo(cmdName)
 	if err != nil {
 		return fmt.Errorf("failed to real APIInfo :%w", err)
 	}
@@ -599,8 +598,8 @@ func compareFunctions(functions []*Function) error {
 	return nil
 }
 
-func dumpAPI() error {
-	output, err := exec.Command("nvim", "--api-info").Output()
+func dumpAPI(cmdName string) error {
+	output, err := exec.Command(cmdName, "--api-info").Output()
 	if err != nil {
 		return fmt.Errorf("error getting API info: %w", err)
 	}
@@ -619,17 +618,26 @@ func dumpAPI() error {
 	return nil
 }
 
+var (
+	flagNvim       string
+	flagGenerate   string
+	flagDeprecated string
+	flagCompare    bool
+	flagDump       bool
+)
+
 func main() {
 	log.SetFlags(log.Lshortfile)
 
-	generateFlag := flag.String("generate", "", "Generate implementation from api_def.go and write to `file`")
-	deprecatedFlag := flag.String("deprecated", "", "Generate deprecated implementation from api_def.go and write to `file`")
-	compareFlag := flag.Bool("compare", false, "Compare api_def.go to the output of nvim --api-info")
-	dumpFlag := flag.Bool("dump", false, "Print nvim --api-info as JSON")
+	flag.StringVar(&flagNvim, "nvim", "nvim", "nvim binary path")
+	flag.StringVar(&flagGenerate, "generate", "", "Generate implementation from api_def.go and write to `file`")
+	flag.StringVar(&flagDeprecated, "deprecated", "", "Generate deprecated implementation from api_def.go and write to `file`")
+	flag.BoolVar(&flagCompare, "compare", false, "Compare api_def.go to the output of nvim --api-info")
+	flag.BoolVar(&flagDump, "dump", false, "Print nvim --api-info as JSON")
 	flag.Parse()
 
-	if *dumpFlag {
-		if err := dumpAPI(); err != nil {
+	if flagDump {
+		if err := dumpAPI(flagNvim); err != nil {
 			log.Fatal(err)
 		}
 		return
@@ -641,22 +649,22 @@ func main() {
 	}
 
 	switch {
-	case *compareFlag:
+	case flagCompare:
 		functions = append(functions, deprecated...)
-		if err := compareFunctions(functions); err != nil {
+		if err := compareFunctions(flagNvim, functions); err != nil {
 			log.Fatal(err)
 		}
 
-	case *generateFlag != "":
-		if *deprecatedFlag == "" {
+	case flagGenerate != "":
+		if flagDeprecated == "" {
 			functions = append(functions, deprecated...)
 		}
-		if err := printImplementation(functions, implementationTemplate, *generateFlag); err != nil {
+		if err := printImplementation(functions, implementationTemplate, flagGenerate); err != nil {
 			log.Fatal(err)
 		}
 
-		if *deprecatedFlag != "" {
-			if err := printImplementation(deprecated, deprecatedTemplate, *deprecatedFlag); err != nil {
+		if flagDeprecated != "" {
+			if err := printImplementation(deprecated, deprecatedTemplate, flagDeprecated); err != nil {
 				log.Fatal(err)
 			}
 		}
