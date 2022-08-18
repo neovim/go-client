@@ -13,17 +13,17 @@ import (
 
 // pack packs the values vs and returns the result.
 //
-//  Go Type     Encoder method
-//  nil         PackNil
-//  bool        PackBool
-//  int64       PackInt
-//  uint64      PackUint
-//  float64     PackFloat
-//  arrayLen    PackArrayLen
-//  mapLen      PackMapLen
-//  string      PackString(s, false)
-//  []byte      PackBytes(s, true)
-//  extension   PackExtension(k, d)
+//	Go Type     Encoder method
+//	nil         PackNil
+//	bool        PackBool
+//	int64       PackInt
+//	uint64      PackUint
+//	float64     PackFloat
+//	arrayLen    PackArrayLen
+//	mapLen      PackMapLen
+//	string      PackString(s, false)
+//	[]byte      PackBytes(s, true)
+//	extension   PackExtension(k, d)
 func pack(vs ...interface{}) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := NewEncoder(&buf)
@@ -65,17 +65,17 @@ func pack(vs ...interface{}) ([]byte, error) {
 
 // unpack unpacks a byte slice to the following types.
 //
-//   Type      Go
-//   Nil       nil
-//   Bool      bool
-//   Int       int
-//   Uint      int
-//   Float     float64
-//   ArrayLen  arrayLen
-//   MapLen    mapLen
-//   String    string
-//   Binary    []byte
-//   Extension extension
+//	Type      Go
+//	Nil       nil
+//	Bool      bool
+//	Int       int
+//	Uint      int
+//	Float     float64
+//	ArrayLen  arrayLen
+//	MapLen    mapLen
+//	String    string
+//	Binary    []byte
+//	Extension extension
 //
 // This function is not suitable for unpack tests because the integer and float
 // types are mapped to int and float64 respectively.

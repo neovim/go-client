@@ -71,7 +71,7 @@ type QuickfixError struct {
 // CommandCompletionArgs represents the arguments to a custom command line
 // completion function.
 //
-//  :help :command-completion-custom
+//	:help :command-completion-custom
 type CommandCompletionArgs struct {
 	// ArgLead is the leading portion of the argument currently being completed
 	// on.
@@ -466,24 +466,36 @@ type TextChunk struct {
 // Relative is the specifies the type of positioning method used for the floating window.
 // The positioning method string keys names:
 //
-//  editor
+//	editor
+//
 // The global editor grid.
-//  win
+//
+//	win
+//
 // Window given by the `win` field, or current window by default.
-//  cursor
+//
+//	cursor
+//
 // Cursor position in current window.
 //
 // Win is window ID for Relative="win".
 //
 // Anchor is the decides which corner of the float to place at row and col.
 //
-//  NW
+//	NW
+//
 // northwest (default)
-//  NE
+//
+//	NE
+//
 // northeast
-//  SW
+//
+//	SW
+//
 // southwest
-//  SE
+//
+//	SE
+//
 // southeast
 //
 // BufPos places float relative to buffer text only when Relative == "win".
@@ -506,7 +518,8 @@ type TextChunk struct {
 // Style is the Configure the appearance of the window.
 // Currently only takes one non-empty value:
 //
-//  minimal
+//	minimal
+//
 // Nvim will display the window with many UI options disabled.
 // This is useful when displaying a temporary float where the text should not be edited.
 //
@@ -514,43 +527,60 @@ type TextChunk struct {
 // And, "signcolumn" is changed to "auto" and "colorcolumn" is cleared.
 // The end-of-buffer region is hidden by setting "eob" flag of "fillchars" to a space char, and clearing the EndOfBuffer region in "winhighlight".
 //
-//  border
+//	border
+//
 // Style of (optional) window border. This can either be a string or an array.
 // The string values are:
 //
-//  none
+//	none
+//
 // No border. This is the default.
-//  single
+//
+//	single
+//
 // A single line box.
-//  double
+//
+//	double
+//
 // A double line box.
-//  rounded
+//
+//	rounded
+//
 // Like "single", but with rounded corners ("╭" etc.).
-//  solid
+//
+//	solid
+//
 // Adds padding by a single whitespace cell.
-//  shadow
+//
+//	shadow
+//
 // A drop shadow effect by blending with the background.
 //
 // If it is an array it should be an array of eight items or any divisor of
 // eight. The array will specifify the eight chars building up the border
 // in a clockwise fashion starting with the top-left corner.
 // As, an example, the double box style could be specified as:
-//  [ "╔", "═" ,"╗", "║", "╝", "═", "╚", "║" ]
+//
+//	[ "╔", "═" ,"╗", "║", "╝", "═", "╚", "║" ]
 //
 // If the number of chars are less than eight, they will be repeated.
 // Thus an ASCII border could be specified as:
-//  [ "/", "-", "\\", "|" ]
+//
+//	[ "/", "-", "\\", "|" ]
 //
 // Or all chars the same as:
-//  [ "x" ]
+//
+//	[ "x" ]
 //
 // An empty string can be used to turn off a specific border, for instance,
-//  [ "", "", "", ">", "", "", "", "<" ]
+//
+//	[ "", "", "", ">", "", "", "", "<" ]
 //
 // By default "FloatBorder" highlight is used which links to "VertSplit"
 // when not defined.
 // It could also be specified by character:
-//  [ {"+", "MyCorner"}, {"x", "MyBorder"} ]
+//
+//	[ {"+", "MyCorner"}, {"x", "MyBorder"} ]
 //
 // NoAutocmd is if true then no buffer-related autocommand events such as BufEnter, BufLeave or BufWinEnter may fire from calling this function.
 type WindowConfig struct {

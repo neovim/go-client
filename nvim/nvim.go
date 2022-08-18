@@ -112,7 +112,7 @@ func (v *Nvim) ExitCode() int {
 // New is a low-level function. Most applications should use NewChildProcess,
 // Dial or the ./plugin package.
 //
-//  :help rpc-connecting
+//	:help rpc-connecting
 func New(r io.Reader, w io.Writer, c io.Closer, logf func(string, ...interface{})) (*Nvim, error) {
 	ep, err := rpc.NewEndpoint(r, w, c, rpc.WithLogf(logf), withExtensions())
 	if err != nil {
@@ -283,8 +283,8 @@ func DialLogf(logf func(string, ...interface{})) DialOption {
 // Dial dials an Nvim instance given an address in the format used by
 // $NVIM_LISTEN_ADDRESS.
 //
-//  :help rpc-connecting
-//  :help $NVIM_LISTEN_ADDRESS
+//	:help rpc-connecting
+//	:help $NVIM_LISTEN_ADDRESS
 func Dial(address string, options ...DialOption) (*Nvim, error) {
 	var d net.Dialer
 	dos := &dialOptions{
@@ -323,16 +323,16 @@ func Dial(address string, options ...DialOption) (*Nvim, error) {
 // RegisterHandler registers fn as a MessagePack RPC handler for the named
 // method. The function signature for fn is one of
 //
-//  func([v *nvim.Nvim,] {args}) ({resultType}, error)
-//  func([v *nvim.Nvim,] {args}) error
-//  func([v *nvim.Nvim,] {args})
+//	func([v *nvim.Nvim,] {args}) ({resultType}, error)
+//	func([v *nvim.Nvim,] {args}) error
+//	func([v *nvim.Nvim,] {args})
 //
 // where {args} is zero or more arguments and {resultType} is the type of a
 // return value. Call the handler from Nvim using the rpcnotify and rpcrequest
 // functions:
 //
-//  :help rpcrequest()
-//  :help rpcnotify()
+//	:help rpcrequest()
+//	:help rpcnotify()
 //
 // Plugin applications should use the Handler* methods in the ./plugin package
 // to register handlers instead of this method.

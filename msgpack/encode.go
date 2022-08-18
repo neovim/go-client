@@ -31,13 +31,13 @@ func encodeUnsupportedType(e *Encoder, v reflect.Value) {
 //
 // Otherwise, Encode uses the following type-dependent default encodings:
 //
-//  Go Type             MessagePack Type
-//  bool                true or false
-//  float32, float64    float64
-//  string              string
-//  []byte              binary
-//  slices, arrays      array
-//  struct, map         map
+//	Go Type             MessagePack Type
+//	bool                true or false
+//	float32, float64    float64
+//	string              string
+//	[]byte              binary
+//	slices, arrays      array
+//	struct, map         map
 //
 // Struct values encode as maps or arrays. If any struct field tag specifies
 // the "array" option, then the struct is encoded as an array. Otherwise, the

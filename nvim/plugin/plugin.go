@@ -71,16 +71,16 @@ func (p *Plugin) handle(fn interface{}, spec *pluginSpec) {
 // Handle registers fn as a MessagePack RPC handler for the specified method
 // name. The function signature for fn is one of
 //
-//  func([v *nvim.Nvim,] {args}) ({resultType}, error)
-//  func([v *nvim.Nvim,] {args}) error
-//  func([v *nvim.Nvim,] {args})
+//	func([v *nvim.Nvim,] {args}) ({resultType}, error)
+//	func([v *nvim.Nvim,] {args}) error
+//	func([v *nvim.Nvim,] {args})
 //
 // where {args} is zero or more arguments and {resultType} is the type of of a
 // return value. Call the handler from Nvim using the rpcnotify and rpcrequest
 // functions:
 //
-//  :help rpcrequest()
-//  :help rpcnotify()
+//	:help rpcrequest()
+//	:help rpcnotify()
 func (p *Plugin) Handle(method string, fn interface{}) {
 	if p.Nvim == nil {
 		return
@@ -105,8 +105,8 @@ type FunctionOptions struct {
 // HandleFunction registers fn as a handler for a Nvim function. The function
 // signature for fn is one of
 //
-//  func([v *nvim.Nvim,] args {arrayType} [, eval {evalType}]) ({resultType}, error)
-//  func([v *nvim.Nvim,] args {arrayType} [, eval {evalType}]) error
+//	func([v *nvim.Nvim,] args {arrayType} [, eval {evalType}]) ({resultType}, error)
+//	func([v *nvim.Nvim,] args {arrayType} [, eval {evalType}]) error
 //
 // where {arrayType} is a type that can be unmarshaled from a MessagePack
 // array, {evalType} is a type compatible with the Eval option expression and
@@ -118,14 +118,14 @@ type FunctionOptions struct {
 // expression to evaluate for each field. Nested structs are supported. The
 // expression for the function
 //
-//  func example(eval *struct{
-//  	GOPATH string `eval:"$GOPATH"`
-//  	Cwd    string `eval:"getcwd()"`
-//  })
+//	func example(eval *struct{
+//		GOPATH string `eval:"$GOPATH"`
+//		Cwd    string `eval:"getcwd()"`
+//	})
 //
 // is
 //
-//  {'GOPATH': $GOPATH, Cwd: getcwd()}
+//	{'GOPATH': $GOPATH, Cwd: getcwd()}
 func (p *Plugin) HandleFunction(options *FunctionOptions, fn interface{}) {
 	m := make(map[string]string)
 
@@ -216,13 +216,13 @@ type CommandOptions struct {
 // HandleCommand registers fn as a handler for a Nvim command. The arguments
 // to the function fn are:
 //
-//  v *nvim.Nvim        optional
-//  args []string       when options.NArgs != ""
-//  range [2]int        when options.Range == "." or Range == "%"
-//  range int           when options.Range == N or Count != ""
-//  bang bool           when options.Bang == true
-//  register string     when options.Register == true
-//  eval interface{}    when options.Eval != ""
+//	v *nvim.Nvim        optional
+//	args []string       when options.NArgs != ""
+//	range [2]int        when options.Range == "." or Range == "%"
+//	range int           when options.Range == N or Count != ""
+//	bang bool           when options.Bang == true
+//	register string     when options.Register == true
+//	eval interface{}    when options.Eval != ""
 //
 // The function fn must return an error.
 //
