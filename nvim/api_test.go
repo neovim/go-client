@@ -5630,197 +5630,231 @@ func testStatusLine(v *Nvim) func(*testing.T) {
 func testAutocmd(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			augID, err := v.CreateAugroup("TestNvimAucmd", map[string]interface{}{
-				"clear": false,
-			})
-			if err != nil {
-				t.Fatal(err)
-			}
-			t.Cleanup(func() {
-				if err := v.DeleteAugroupByID(augID); err != nil {
+			t.Run("CreateAndClear", func(t *testing.T) {
+				augID, err := v.CreateAugroup("TestNvimAucmd", map[string]interface{}{
+					"clear": false,
+				})
+				if err != nil {
 					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					if err := v.DeleteAugroupByID(augID); err != nil {
+						t.Fatal(err)
+					}
+				})
+
+				auOpts := map[string]interface{}{
+					"group":    augID,
+					"pattern":  `AutocmdTest`,
+					"callback": `echomsg 'Hello Autocmd'`,
+				}
+				if _, err := v.CreateAutocmd(`User`, auOpts); err != nil {
+					t.Fatal(err)
+				}
+				auOpts2 := map[string]interface{}{
+					"group":    augID,
+					"pattern":  `AutocmdTest2`,
+					"callback": `echomsg 'Hello Autocmd'`,
+				}
+				auID2, err := v.CreateAutocmd(`User`, auOpts2)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.ExecAutocmds(`User Test`, map[string]interface{}{"group": augID}); err != nil {
+					t.Fatal(err)
+				}
+
+				want := []*AutocmdType{
+					{
+						ID:       0,
+						Group:    augID,
+						Desc:     `<vim function: echomsg 'Hello Autocmd'>`,
+						Event:    `User`,
+						Command:  `<vim function: echomsg 'Hello Autocmd'>`,
+						Once:     false,
+						Pattern:  `AutocmdTest`,
+						BufLocal: false,
+						Buffer:   0,
+					},
+				}
+				switch nvimVersion.Minor {
+				case 8:
+					want[0].Desc = ""
+					want[0].Command = ""
+				}
+
+				args := map[string]interface{}{
+					"group":   augID,
+					"event":   []string{`User`},
+					"pattern": `AutocmdTest`,
+				}
+				got, err := v.Autocmds(args)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(got, want) {
+					t.Fatalf("autocmd:\n got %#v\nwant %#v", got[0], want[0])
+				}
+
+				if err := v.ClearAutocmds(args); err != nil {
+					t.Fatal(err)
+				}
+				got2, err := v.Autocmds(args)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if got2 != nil {
+					t.Fatalf("except got2 is cleared but non-nil: %#v", got2)
+				}
+
+				if err := v.DeleteAutocmd(auID2); err != nil {
+					t.Fatal(err)
+				}
+				args["pattern"] = `AutocmdTest2`
+				got3, err := v.Autocmds(args)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if got3 != nil {
+					t.Fatalf("except got3 is deleted but non-nil: %#v", got2)
 				}
 			})
 
-			auOpts := map[string]interface{}{
-				"group":    augID,
-				"pattern":  `AutocmdTest`,
-				"callback": `echomsg 'Hello Autocmd'`,
-			}
-			if _, err := v.CreateAutocmd(`User`, auOpts); err != nil {
-				t.Fatal(err)
-			}
-			auOpts2 := map[string]interface{}{
-				"group":    augID,
-				"pattern":  `AutocmdTest2`,
-				"callback": `echomsg 'Hello Autocmd'`,
-			}
-			auID2, err := v.CreateAutocmd(`User`, auOpts2)
-			if err != nil {
-				t.Fatal(err)
-			}
+			t.Run("DeleteAugroupByName", func(t *testing.T) {
+				_, err := v.CreateAugroup("TestDeleteAucmd", map[string]interface{}{
+					"clear": false,
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
 
-			if err := v.Command(`doautocmd User Test`); err != nil {
-				t.Fatal(err)
-			}
-			want := []*AutocmdType{
-				{
-					ID:       0,
-					Group:    augID,
-					Desc:     `<vim function: echomsg 'Hello Autocmd'>`,
-					Event:    `User`,
-					Command:  `<vim function: echomsg 'Hello Autocmd'>`,
-					Once:     false,
-					Pattern:  `AutocmdTest`,
-					BufLocal: false,
-					Buffer:   0,
-				},
-			}
-			switch nvimVersion.Minor {
-			case 8:
-				want[0].Desc = ""
-				want[0].Command = ""
-			}
-
-			args := map[string]interface{}{
-				"group":   augID,
-				"event":   []string{`User`},
-				"pattern": `AutocmdTest`,
-			}
-			got, err := v.Autocmds(args)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !reflect.DeepEqual(got, want) {
-				t.Fatalf("autocmd:\n got %#v\nwant %#v", got[0], want[0])
-			}
-
-			if err := v.ClearAutocmds(args); err != nil {
-				t.Fatal(err)
-			}
-			got2, err := v.Autocmds(args)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if got2 != nil {
-				t.Fatalf("except got2 is cleared but non-nil: %#v", got2)
-			}
-
-			if err := v.DeleteAutocmd(auID2); err != nil {
-				t.Fatal(err)
-			}
-			args["pattern"] = `AutocmdTest2`
-			got3, err := v.Autocmds(args)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if got3 != nil {
-				t.Fatalf("except got3 is deleted but non-nil: %#v", got2)
-			}
+				if err := v.DeleteAugroupByName("TestDeleteAucmd"); err != nil {
+					t.Fatal(err)
+				}
+			})
 		})
 
 		t.Run("Batch", func(t *testing.T) {
-			b := v.NewBatch()
+			t.Run("CreateAndClear", func(t *testing.T) {
+				b := v.NewBatch()
 
-			var augID int
-			b.CreateAugroup(`TestNvimAugroup`, map[string]interface{}{
-				"clear": false,
-			}, &augID)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			t.Cleanup(func() {
-				b.DeleteAugroupByID(augID)
+				var augID int
+				b.CreateAugroup(`TestNvimAugroup`, map[string]interface{}{
+					"clear": false,
+				}, &augID)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					b.DeleteAugroupByID(augID)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				})
+
+				auOpts := map[string]interface{}{
+					"group":    augID,
+					"pattern":  `AutocmdTest`,
+					"callback": `echomsg 'Hello Autocmd'`,
+				}
+				b.CreateAutocmd(`User`, auOpts, new(int))
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				auOpts2 := map[string]interface{}{
+					"group":    augID,
+					"pattern":  `AutocmdTest2`,
+					"callback": `echomsg 'Hello Autocmd'`,
+				}
+				var auID2 int
+				b.CreateAutocmd(`User`, auOpts2, &auID2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.ExecAutocmds(`User Test`, map[string]interface{}{"group": augID})
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				want := []*AutocmdType{
+					{
+						ID:       0,
+						Group:    augID,
+						Desc:     `<vim function: echomsg 'Hello Autocmd'>`,
+						Event:    `User`,
+						Command:  `<vim function: echomsg 'Hello Autocmd'>`,
+						Once:     false,
+						Pattern:  `AutocmdTest`,
+						BufLocal: false,
+						Buffer:   0,
+					},
+				}
+				switch nvimVersion.Minor {
+				case 8:
+					want[0].Desc = ""
+					want[0].Command = ""
+				}
+
+				args := map[string]interface{}{
+					"group":   augID,
+					"event":   []string{`User`},
+					"pattern": `AutocmdTest`,
+				}
+				var got []*AutocmdType
+				b.Autocmds(args, &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(got, want) {
+					t.Fatalf("autocmd:\n got %#v\nwant %#v", got[0], want[0])
+				}
+
+				b.ClearAutocmds(args)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				var got2 []*AutocmdType
+				b.Autocmds(args, &got2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if got2 != nil {
+					t.Fatalf("except got2 is cleared but non-nil: %#v", got2)
+				}
+
+				b.DeleteAutocmd(auID2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				args["pattern"] = `AutocmdTest2`
+				var got3 []*AutocmdType
+				b.Autocmds(args, &got3)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if got3 != nil {
+					t.Fatalf("except got3 is deleted but non-nil: %#v", got2)
+				}
+			})
+
+			t.Run("DeleteAugroupByName", func(t *testing.T) {
+				b := v.NewBatch()
+
+				b.CreateAugroup("TestNvimAucmd", map[string]interface{}{
+					"clear": false,
+				}, new(int))
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.DeleteAugroupByName("TestNvimAucmd")
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
 			})
-
-			auOpts := map[string]interface{}{
-				"group":    augID,
-				"pattern":  `AutocmdTest`,
-				"callback": `echomsg 'Hello Autocmd'`,
-			}
-			b.CreateAutocmd(`User`, auOpts, new(int))
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-
-			auOpts2 := map[string]interface{}{
-				"group":    augID,
-				"pattern":  `AutocmdTest2`,
-				"callback": `echomsg 'Hello Autocmd'`,
-			}
-			var auID2 int
-			b.CreateAutocmd(`User`, auOpts2, &auID2)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-
-			b.Command(`doautocmd User Test`)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-
-			want := []*AutocmdType{
-				{
-					ID:       0,
-					Group:    augID,
-					Desc:     `<vim function: echomsg 'Hello Autocmd'>`,
-					Event:    `User`,
-					Command:  `<vim function: echomsg 'Hello Autocmd'>`,
-					Once:     false,
-					Pattern:  `AutocmdTest`,
-					BufLocal: false,
-					Buffer:   0,
-				},
-			}
-			switch nvimVersion.Minor {
-			case 8:
-				want[0].Desc = ""
-				want[0].Command = ""
-			}
-
-			args := map[string]interface{}{
-				"group":   augID,
-				"event":   []string{`User`},
-				"pattern": `AutocmdTest`,
-			}
-			var got []*AutocmdType
-			b.Autocmds(args, &got)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if !reflect.DeepEqual(got, want) {
-				t.Fatalf("autocmd:\n got %#v\nwant %#v", got[0], want[0])
-			}
-
-			b.ClearAutocmds(args)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			var got2 []*AutocmdType
-			b.Autocmds(args, &got2)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if got2 != nil {
-				t.Fatalf("except got2 is cleared but non-nil: %#v", got2)
-			}
-
-			b.DeleteAutocmd(auID2)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			args["pattern"] = `AutocmdTest2`
-			var got3 []*AutocmdType
-			b.Autocmds(args, &got3)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if got3 != nil {
-				t.Fatalf("except got3 is deleted but non-nil: %#v", got2)
-			}
 		})
 	}
 }
