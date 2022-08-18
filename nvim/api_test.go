@@ -3675,37 +3675,6 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatalf("SetHighlight:\nwant %#v\n got %#v", wantErrorMsgEHL, errorMsgHL)
 			}
 
-			const cmd2 = `hi NewHighlight2 guifg=yellow guibg=red gui=bold`
-			if err := v.Command(cmd2); err != nil {
-				t.Fatal(err)
-			}
-			var nsID2 int
-			if err := v.Eval(`hlID('NewHighlight2')`, &nsID2); err != nil {
-				t.Fatal(err)
-			}
-			if err := v.SetHighlightNameSpace(nsID2); err != nil {
-				t.Fatal(err)
-			}
-			want := &HLAttrs{
-				Bold:            true,
-				Underline:       false,
-				Undercurl:       false,
-				Italic:          false,
-				Reverse:         false,
-				Foreground:      16776960,
-				Background:      16711680,
-				Special:         -1,
-				CtermForeground: -1,
-				CtermBackground: -1,
-			}
-			got, err := v.HLByID(nsID2, true)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !reflect.DeepEqual(want, got) {
-				t.Fatalf("SetHighlight:\nwant %#v\n got %#v", want, got)
-			}
-
 			const wantRedColor = 16711680
 			gotColor, err := v.ColorByName("red")
 			if err != nil {
@@ -3818,40 +3787,6 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 			if !reflect.DeepEqual(&errorMsgHL, wantErrorMsgEHL) {
 				t.Fatalf("SetHighlight:\ngot %#v\nwant %#v", &errorMsgHL, wantErrorMsgEHL)
-			}
-
-			const cmd2 = `hi NewHighlight2 guifg=yellow guibg=red gui=bold`
-			b.Command(cmd2)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-
-			var nsID2 int
-			b.Eval("hlID('NewHighlight2')", &nsID2)
-			b.SetHighlightNameSpace(nsID2)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			want := &HLAttrs{
-				Bold:            true,
-				Underline:       false,
-				Undercurl:       false,
-				Italic:          false,
-				Reverse:         false,
-				Foreground:      16776960,
-				Background:      16711680,
-				Special:         -1,
-				CtermForeground: -1,
-				CtermBackground: -1,
-			}
-
-			var got HLAttrs
-			b.HLByID(nsID2, true, &got)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if !reflect.DeepEqual(&got, want) {
-				t.Fatalf("SetHighlight:\n got %#v\nwant %#v", &got, want)
 			}
 
 			const wantRedColor = 16711680

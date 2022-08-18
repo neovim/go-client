@@ -231,20 +231,6 @@ func (b *Batch) SetHighlight(nsID int, name string, val *HLAttrs) {
 	b.call("nvim_set_hl", nil, nsID, name, val)
 }
 
-// SetHighlightNameSpace set active namespace for highlights.
-//
-// nsID is the namespace to activate.
-func (v *Nvim) SetHighlightNameSpace(nsID int) error {
-	return v.call("nvim__set_hl_ns", nil, nsID)
-}
-
-// SetHighlightNameSpace set active namespace for highlights.
-//
-// nsID is the namespace to activate.
-func (b *Batch) SetHighlightNameSpace(nsID int) {
-	b.call("nvim__set_hl_ns", nil, nsID)
-}
-
 // FeedKeys input-keys to Nvim, subject to various quirks controlled by "mode"
 // flags. Unlike Input, this is a blocking call.
 //
