@@ -81,13 +81,6 @@ func SetHighlight(nsID int, name string, val *HLAttrs) {
 	name(nvim_set_hl)
 }
 
-// SetHighlightNameSpace set active namespace for highlights.
-//
-// nsID is the namespace to activate.
-func SetHighlightNameSpace(nsID int) {
-	name(nvim__set_hl_ns)
-}
-
 // FeedKeys input-keys to Nvim, subject to various quirks controlled by "mode"
 // flags. Unlike Input, this is a blocking call.
 //
@@ -990,6 +983,20 @@ func SetBufferText(buffer Buffer, startRow, startCol, endRow, endCol int, replac
 	name(nvim_buf_set_text)
 }
 
+// BufferText gets a range from the buffer.
+//
+// This differs from BufferLines in that it allows retrieving only
+// portions of a line.
+//
+// Indexing is zero-based. Column indices are end-exclusive.
+//
+// Prefer BufferLines when retrieving entire lines.
+//
+// opts is optional parameters. Currently unused.
+func BufferText(buffer Buffer, startRow, startCol, endRow, endCol int, opts map[string]interface{}) [][]byte {
+	name(nvim_buf_get_text)
+}
+
 // BufferOffset returns the byte offset of a line (0-indexed).
 //
 // Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
@@ -1500,6 +1507,58 @@ func TabpageNumber(tabpage Tabpage) (number int) {
 // IsTabpageValid checks if a tabpage is valid.
 func IsTabpageValid(tabpage Tabpage) (valid bool) {
 	name(nvim_tabpage_is_valid)
+}
+
+// autocmd.c
+
+// Autocmds get all autocommands that match the corresponding {opts}.
+//
+// Note that when multiple patterns or events are provided, it will find all the autocommands that
+// match any combination of them.
+func Autocmds(opts map[string]interface{}) (result []*AutocmdType) {
+	name(nvim_get_autocmds)
+}
+
+// CreateAutocmd create an autocommand.
+//
+// The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
+// triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
+func CreateAutocmd(event interface{}, opts map[string]interface{}) (id int) {
+	name(nvim_create_autocmd)
+}
+
+// DeleteAutocmd delete an autocommand by id.
+//
+// NOTE: Only autocommands created via the API have an id.
+func DeleteAutocmd(id int) {
+	name(nvim_del_autocmd)
+}
+
+// ClearAutocmds clear all autocommands that match the corresponding {opts}.
+//
+// To delete a particular autocmd, see DeleteAutocmd.
+func ClearAutocmds(opts map[string]interface{}) {
+	name(nvim_clear_autocmds)
+}
+
+// CreateAugroup create or get an autocommand group(autocmd-groups).
+func CreateAugroup(name string, opts map[string]interface{}) (id int) {
+	name(nvim_create_augroup)
+}
+
+// DeleteAugroupByID delete an autocommand group by id.
+func DeleteAugroupByID(id int) {
+	name(nvim_del_augroup_by_id)
+}
+
+// DeleteAugroupByID delete an autocommand group by name.
+func DeleteAugroupByName(name string) {
+	name(nvim_del_augroup_by_name)
+}
+
+// ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
+func ExecAutocmds(event interface{}, opts map[string]interface{}) {
+	name(nvim_exec_autocmds)
 }
 
 // ui.c

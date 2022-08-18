@@ -715,3 +715,40 @@ func (level LogLevel) String() string {
 		return "unknown Level"
 	}
 }
+
+// AutocmdArg is the type of autocmd API arguments.
+type AutocmdArg struct {
+	Group   int         `msgpack:"group,omitempty"`
+	Event   interface{} `msgpack:"event,omitempty"`
+	Pattern interface{} `msgpack:"pattern,omitempty"`
+}
+
+// AutocmdType is the type of autocmd API return type.
+type AutocmdType struct {
+	// ID is the autocommand id (only when defined with the API).
+	ID int `msgpack:"int"`
+
+	// Group is the autocommand group id.
+	Group int `msgpack:"group"`
+
+	// Desc is the autocommand description.
+	Desc string `msgpack:"desc"`
+
+	// Event is the autocommand event.
+	Event string `msgpack:"event"`
+
+	// Command is the autocommand command.
+	Command string `msgpack:"command"`
+
+	// Once whether the autocommand is only run once.
+	Once bool `msgpack:"once"`
+
+	// Pattern is the autocommand pattern.
+	Pattern string `msgpack:"pattern"`
+
+	// BufLocal is the true if the autocommand is buffer local.
+	BufLocal bool `msgpack:"buflocal,omitempty"`
+
+	// Buffer is the buffer number.
+	Buffer Buffer `msgpack:"buffer,omitempty"`
+}

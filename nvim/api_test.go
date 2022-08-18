@@ -3,6 +3,7 @@ package nvim
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -18,10 +19,16 @@ import (
 	"testing"
 )
 
+var flagNvimPath = flag.String("nvim", "nvim", "nvim binary for testing")
+
 type version struct {
 	Major int64
 	Minor int64
 	Patch int64
+}
+
+func (v version) String() string {
+	return fmt.Sprintf("v%d.%d.%d", v.Major, v.Minor, v.Patch)
 }
 
 var nvimVersion version
@@ -52,12 +59,26 @@ func parseVersion(tb testing.TB, version string) (major, minor, patch int64) {
 	return major, minor, patch
 }
 
-func skipVersion(tb testing.TB, version string) {
+func isSkipVersion(tb testing.TB, version string) bool {
 	major, minor, patch := parseVersion(tb, version)
-
-	const skipFmt = "SKIP: current neovim version v%d.%d.%d but expected version %s"
 	if nvimVersion.Major < major || nvimVersion.Minor < minor || nvimVersion.Patch < patch {
-		tb.Skipf(skipFmt, nvimVersion.Major, nvimVersion.Minor, nvimVersion.Patch, version)
+		return true
+	}
+
+	return false
+}
+
+func skipVersion(tb testing.TB, version string) {
+	if isSkipVersion(tb, version) {
+		const skipFmt = "run this test %s or higher neovim version: current neovim version %s"
+		tb.Skipf(skipFmt, version, nvimVersion)
+	}
+}
+
+func skipBetweenVersion(tb testing.TB, low, high string) {
+	if isSkipVersion(tb, low) || !isSkipVersion(tb, high) {
+		const skipFmt = "run this test between %s to %s neovim version: current version: %s"
+		tb.Skipf(skipFmt, low, high, nvimVersion)
 	}
 }
 
@@ -75,7 +96,11 @@ var channelID int64
 func TestAPI(t *testing.T) {
 	t.Parallel()
 
-	v := newChildProcess(t)
+	var opts []ChildProcessOption
+	if nvimCmd := *flagNvimPath; nvimCmd != "" {
+		opts = []ChildProcessOption{ChildProcessCommand(nvimCmd)}
+	}
+	v := newChildProcess(t, opts...)
 
 	apiInfo, err := v.APIInfo()
 	if err != nil {
@@ -133,6 +158,7 @@ func TestAPI(t *testing.T) {
 	t.Run("Proc", testProc(v))
 	t.Run("Mark", testMark(v))
 	t.Run("StatusLine", testStatusLine(v))
+	t.Run("Autocmd", testAutocmd(v))
 }
 
 func testBufAttach(v *Nvim) func(*testing.T) {
@@ -1855,6 +1881,37 @@ func testLines(v *Nvim) func(*testing.T) {
 				}
 			})
 
+			t.Run("BufferText", func(t *testing.T) {
+				buf, err := v.CurrentBuffer()
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					clearBuffer(t, v, buf)
+				})
+
+				// sets test buffer text.
+				lines := [][]byte{[]byte("Neovim is the"), []byte("Vim-fork focused on extensibility and usability")}
+				if err := v.SetBufferLines(buf, 0, -1, true, lines); err != nil {
+					t.Fatal(err)
+				}
+
+				got, err := v.BufferText(buf, 0, 0, 1, -1, make(map[string]interface{}))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// assert row 1 buffer text.
+				if !bytes.EqualFold(lines[0], got[0]) {
+					t.Fatalf("row 1 is not equal: got: %q, want: %q", string(got[0]), string(lines[0]))
+				}
+
+				// assert row 2 buffer text.
+				if !bytes.EqualFold(lines[1], got[1]) {
+					t.Fatalf("row 2 is not equal: got: %q, want: %q", string(got[1]), string(lines[1]))
+				}
+			})
+
 			t.Run("SetBufferText", func(t *testing.T) {
 				buf, err := v.CurrentBuffer()
 				if err != nil {
@@ -1988,6 +2045,42 @@ func testLines(v *Nvim) func(*testing.T) {
 				}
 				if offset != wantOffset {
 					t.Fatalf("got offset %d but want %d", offset, wantOffset)
+				}
+			})
+
+			t.Run("BufferText", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var buf Buffer
+				b.CurrentBuffer(&buf)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					clearBuffer(t, v, buf)
+				})
+
+				// sets test buffer text.
+				lines := [][]byte{[]byte("Neovim is the"), []byte("Vim-fork focused on extensibility and usability")}
+				b.SetBufferLines(buf, 0, -1, true, lines)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var got [][]byte
+				b.BufferText(buf, 0, 0, 1, -1, make(map[string]interface{}), &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				// assert row 1 buffer text.
+				if !bytes.EqualFold(lines[0], got[0]) {
+					t.Fatalf("row 1 is not equal: got: %q, want: %q", string(got[0]), string(lines[0]))
+				}
+
+				// assert row 2 buffer text.
+				if !bytes.EqualFold(lines[1], got[1]) {
+					t.Fatalf("row 2 is not equal: got: %q, want: %q", string(got[1]), string(lines[1]))
 				}
 			})
 
@@ -2774,6 +2867,8 @@ func testKey(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("KeyMap", func(t *testing.T) {
+				skipBetweenVersion(t, "v0.6.0", "v0.8.0")
+
 				mode := "n"
 				if err := v.SetKeyMap(mode, "y", "yy", make(map[string]bool)); err != nil {
 					t.Fatal(err)
@@ -2792,8 +2887,9 @@ func testKey(v *Nvim) func(*testing.T) {
 					},
 				}
 				wantMapsLen := 0
-				if nvimVersion.Minor >= 6 {
-					lastMap := wantMaps[0]
+
+				switch nvimVersion.Minor {
+				case 6:
 					wantMaps = []*Mapping{
 						{
 							LHS:     "<C-L>",
@@ -2815,13 +2911,86 @@ func testKey(v *Nvim) func(*testing.T) {
 							SID:     0,
 							NoWait:  0,
 						},
-						lastMap,
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
 					}
 					wantMapsLen = 2
-				}
-				if nvimVersion.Minor >= 7 {
-					wantMaps[0].RHS = "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>"
-					wantMaps[2].SID = -9
+				case 7:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 2
+				case 8:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 2
 				}
 
 				got, err := v.KeyMap(mode)
@@ -3040,6 +3209,8 @@ func testKey(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("KeyMap", func(t *testing.T) {
+				skipBetweenVersion(t, "v0.6.0", "v0.8.0")
+
 				b := v.NewBatch()
 
 				mode := "n"
@@ -3061,8 +3232,8 @@ func testKey(v *Nvim) func(*testing.T) {
 					},
 				}
 				wantMapsLen := 0
-				if nvimVersion.Minor >= 6 {
-					lastMap := wantMaps[0]
+				switch nvimVersion.Minor {
+				case 6:
 					wantMaps = []*Mapping{
 						{
 							LHS:     "<C-L>",
@@ -3084,13 +3255,86 @@ func testKey(v *Nvim) func(*testing.T) {
 							SID:     0,
 							NoWait:  0,
 						},
-						lastMap,
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
 					}
 					wantMapsLen = 2
-				}
-				if nvimVersion.Minor >= 7 {
-					wantMaps[0].RHS = "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>"
-					wantMaps[2].SID = -9
+				case 7:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 2
+				case 8:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     0,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 2
 				}
 				var got []*Mapping
 				b.KeyMap(mode, &got)
@@ -3376,10 +3620,10 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			const HLIDName = `Error`
-			var wantErrorHLID = 64
-			if nvimVersion.Minor >= 7 {
-				wantErrorHLID = 67
+			const HLIDName = `PreProc`
+			var wantErrorHLID = 85
+			if nvimVersion.Minor >= 8 {
+				wantErrorHLID += 3
 			}
 
 			goHLID, err := v.HLIDByName(HLIDName)
@@ -3429,37 +3673,6 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 			if !reflect.DeepEqual(wantErrorMsgEHL, errorMsgHL) {
 				t.Fatalf("SetHighlight:\nwant %#v\n got %#v", wantErrorMsgEHL, errorMsgHL)
-			}
-
-			const cmd2 = `hi NewHighlight2 guifg=yellow guibg=red gui=bold`
-			if err := v.Command(cmd2); err != nil {
-				t.Fatal(err)
-			}
-			var nsID2 int
-			if err := v.Eval(`hlID('NewHighlight2')`, &nsID2); err != nil {
-				t.Fatal(err)
-			}
-			if err := v.SetHighlightNameSpace(nsID2); err != nil {
-				t.Fatal(err)
-			}
-			want := &HLAttrs{
-				Bold:            true,
-				Underline:       false,
-				Undercurl:       false,
-				Italic:          false,
-				Reverse:         false,
-				Foreground:      16776960,
-				Background:      16711680,
-				Special:         -1,
-				CtermForeground: -1,
-				CtermBackground: -1,
-			}
-			got, err := v.HLByID(nsID2, true)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !reflect.DeepEqual(want, got) {
-				t.Fatalf("SetHighlight:\nwant %#v\n got %#v", want, got)
 			}
 
 			const wantRedColor = 16711680
@@ -3515,10 +3728,10 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			const HLIDName = `Error`
-			var wantErrorHLID = 64
-			if nvimVersion.Minor >= 7 {
-				wantErrorHLID = 67
+			const HLIDName = `PreProc`
+			var wantErrorHLID = 85
+			if nvimVersion.Minor >= 8 {
+				wantErrorHLID += 3
 			}
 
 			var goHLID int
@@ -3574,40 +3787,6 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 			if !reflect.DeepEqual(&errorMsgHL, wantErrorMsgEHL) {
 				t.Fatalf("SetHighlight:\ngot %#v\nwant %#v", &errorMsgHL, wantErrorMsgEHL)
-			}
-
-			const cmd2 = `hi NewHighlight2 guifg=yellow guibg=red gui=bold`
-			b.Command(cmd2)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-
-			var nsID2 int
-			b.Eval("hlID('NewHighlight2')", &nsID2)
-			b.SetHighlightNameSpace(nsID2)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			want := &HLAttrs{
-				Bold:            true,
-				Underline:       false,
-				Undercurl:       false,
-				Italic:          false,
-				Reverse:         false,
-				Foreground:      16776960,
-				Background:      16711680,
-				Special:         -1,
-				CtermForeground: -1,
-				CtermBackground: -1,
-			}
-
-			var got HLAttrs
-			b.HLByID(nsID2, true, &got)
-			if err := b.Execute(); err != nil {
-				t.Fatal(err)
-			}
-			if !reflect.DeepEqual(&got, want) {
-				t.Fatalf("SetHighlight:\n got %#v\nwant %#v", &got, want)
 			}
 
 			const wantRedColor = 16711680
@@ -5444,6 +5623,238 @@ func testStatusLine(v *Nvim) func(*testing.T) {
 			if gotWidth != wantWidth {
 				t.Fatalf("got %#v width but want %#v", gotWidth, wantWidth)
 			}
+		})
+	}
+}
+
+func testAutocmd(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Nvim", func(t *testing.T) {
+			t.Run("CreateAndClear", func(t *testing.T) {
+				augID, err := v.CreateAugroup("TestNvimAucmd", map[string]interface{}{
+					"clear": false,
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					if err := v.DeleteAugroupByID(augID); err != nil {
+						t.Fatal(err)
+					}
+				})
+
+				auOpts := map[string]interface{}{
+					"group":    augID,
+					"pattern":  `AutocmdTest`,
+					"callback": `echomsg 'Hello Autocmd'`,
+				}
+				if _, err := v.CreateAutocmd(`User`, auOpts); err != nil {
+					t.Fatal(err)
+				}
+				auOpts2 := map[string]interface{}{
+					"group":    augID,
+					"pattern":  `AutocmdTest2`,
+					"callback": `echomsg 'Hello Autocmd'`,
+				}
+				auID2, err := v.CreateAutocmd(`User`, auOpts2)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.ExecAutocmds(`User Test`, map[string]interface{}{"group": augID}); err != nil {
+					t.Fatal(err)
+				}
+
+				want := []*AutocmdType{
+					{
+						ID:       0,
+						Group:    augID,
+						Desc:     `<vim function: echomsg 'Hello Autocmd'>`,
+						Event:    `User`,
+						Command:  `<vim function: echomsg 'Hello Autocmd'>`,
+						Once:     false,
+						Pattern:  `AutocmdTest`,
+						BufLocal: false,
+						Buffer:   0,
+					},
+				}
+				switch nvimVersion.Minor {
+				case 8:
+					want[0].Desc = ""
+					want[0].Command = ""
+				}
+
+				args := map[string]interface{}{
+					"group":   augID,
+					"event":   []string{`User`},
+					"pattern": `AutocmdTest`,
+				}
+				got, err := v.Autocmds(args)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(got, want) {
+					t.Fatalf("autocmd:\n got %#v\nwant %#v", got[0], want[0])
+				}
+
+				if err := v.ClearAutocmds(args); err != nil {
+					t.Fatal(err)
+				}
+				got2, err := v.Autocmds(args)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if got2 != nil {
+					t.Fatalf("except got2 is cleared but non-nil: %#v", got2)
+				}
+
+				if err := v.DeleteAutocmd(auID2); err != nil {
+					t.Fatal(err)
+				}
+				args["pattern"] = `AutocmdTest2`
+				got3, err := v.Autocmds(args)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if got3 != nil {
+					t.Fatalf("except got3 is deleted but non-nil: %#v", got2)
+				}
+			})
+
+			t.Run("DeleteAugroupByName", func(t *testing.T) {
+				_, err := v.CreateAugroup("TestDeleteAucmd", map[string]interface{}{
+					"clear": false,
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.DeleteAugroupByName("TestDeleteAucmd"); err != nil {
+					t.Fatal(err)
+				}
+			})
+		})
+
+		t.Run("Batch", func(t *testing.T) {
+			t.Run("CreateAndClear", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var augID int
+				b.CreateAugroup(`TestNvimAugroup`, map[string]interface{}{
+					"clear": false,
+				}, &augID)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					b.DeleteAugroupByID(augID)
+					if err := b.Execute(); err != nil {
+						t.Fatal(err)
+					}
+				})
+
+				auOpts := map[string]interface{}{
+					"group":    augID,
+					"pattern":  `AutocmdTest`,
+					"callback": `echomsg 'Hello Autocmd'`,
+				}
+				b.CreateAutocmd(`User`, auOpts, new(int))
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				auOpts2 := map[string]interface{}{
+					"group":    augID,
+					"pattern":  `AutocmdTest2`,
+					"callback": `echomsg 'Hello Autocmd'`,
+				}
+				var auID2 int
+				b.CreateAutocmd(`User`, auOpts2, &auID2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.ExecAutocmds(`User Test`, map[string]interface{}{"group": augID})
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				want := []*AutocmdType{
+					{
+						ID:       0,
+						Group:    augID,
+						Desc:     `<vim function: echomsg 'Hello Autocmd'>`,
+						Event:    `User`,
+						Command:  `<vim function: echomsg 'Hello Autocmd'>`,
+						Once:     false,
+						Pattern:  `AutocmdTest`,
+						BufLocal: false,
+						Buffer:   0,
+					},
+				}
+				switch nvimVersion.Minor {
+				case 8:
+					want[0].Desc = ""
+					want[0].Command = ""
+				}
+
+				args := map[string]interface{}{
+					"group":   augID,
+					"event":   []string{`User`},
+					"pattern": `AutocmdTest`,
+				}
+				var got []*AutocmdType
+				b.Autocmds(args, &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(got, want) {
+					t.Fatalf("autocmd:\n got %#v\nwant %#v", got[0], want[0])
+				}
+
+				b.ClearAutocmds(args)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				var got2 []*AutocmdType
+				b.Autocmds(args, &got2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if got2 != nil {
+					t.Fatalf("except got2 is cleared but non-nil: %#v", got2)
+				}
+
+				b.DeleteAutocmd(auID2)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				args["pattern"] = `AutocmdTest2`
+				var got3 []*AutocmdType
+				b.Autocmds(args, &got3)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				if got3 != nil {
+					t.Fatalf("except got3 is deleted but non-nil: %#v", got2)
+				}
+			})
+
+			t.Run("DeleteAugroupByName", func(t *testing.T) {
+				b := v.NewBatch()
+
+				b.CreateAugroup("TestNvimAucmd", map[string]interface{}{
+					"clear": false,
+				}, new(int))
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.DeleteAugroupByName("TestNvimAucmd")
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+			})
 		})
 	}
 }
