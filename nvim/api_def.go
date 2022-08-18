@@ -1526,7 +1526,6 @@ func Autocmds(opts map[string]interface{}) (result []*AutocmdType) {
 	name(nvim_get_autocmds)
 }
 
-
 // CreateAutocmd create an autocommand.
 //
 // The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
