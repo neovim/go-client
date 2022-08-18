@@ -27,6 +27,10 @@ type version struct {
 	Patch int64
 }
 
+func (v version) String() string {
+	return fmt.Sprintf("v%d.%d.%d", v.Major, v.Minor, v.Patch)
+}
+
 var nvimVersion version
 
 func parseVersion(tb testing.TB, version string) (major, minor, patch int64) {
@@ -55,12 +59,26 @@ func parseVersion(tb testing.TB, version string) (major, minor, patch int64) {
 	return major, minor, patch
 }
 
-func skipVersion(tb testing.TB, version string) {
+func isSkipVersion(tb testing.TB, version string) bool {
 	major, minor, patch := parseVersion(tb, version)
-
-	const skipFmt = "SKIP: current neovim version v%d.%d.%d but expected version %s or higher"
 	if nvimVersion.Major < major || nvimVersion.Minor < minor || nvimVersion.Patch < patch {
-		tb.Skipf(skipFmt, nvimVersion.Major, nvimVersion.Minor, nvimVersion.Patch, version)
+		return true
+	}
+
+	return false
+}
+
+func skipVersion(tb testing.TB, version string) {
+	if isSkipVersion(tb, version) {
+		const skipFmt = "run this test %s or higher neovim version: current neovim version %s"
+		tb.Skipf(skipFmt, version, nvimVersion)
+	}
+}
+
+func skipBetweenVersion(tb testing.TB, low, high string) {
+	if isSkipVersion(tb, low) || !isSkipVersion(tb, high) {
+		const skipFmt = "run this test between %s to %s neovim version: current version: %s"
+		tb.Skipf(skipFmt, low, high, nvimVersion)
 	}
 }
 
@@ -2849,7 +2867,7 @@ func testKey(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("KeyMap", func(t *testing.T) {
-				skipVersion(t, "v0.9.0")
+				skipBetweenVersion(t, "v0.6.0", "v0.8.0")
 
 				mode := "n"
 				if err := v.SetKeyMap(mode, "y", "yy", make(map[string]bool)); err != nil {
@@ -3191,7 +3209,7 @@ func testKey(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("KeyMap", func(t *testing.T) {
-				skipVersion(t, "v0.9.0")
+				skipBetweenVersion(t, "v0.6.0", "v0.8.0")
 
 				b := v.NewBatch()
 
