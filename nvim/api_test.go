@@ -5633,6 +5633,9 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 			augID, err := v.CreateAugroup("TestNvimAucmd", map[string]interface{}{
 				"clear": false,
 			})
+			if err != nil {
+				t.Fatal(err)
+			}
 			t.Cleanup(func() {
 				if err := v.DeleteAugroupByID(augID); err != nil {
 					t.Fatal(err)
