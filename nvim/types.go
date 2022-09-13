@@ -361,6 +361,109 @@ type UI struct {
 	ChannelID int `msgpack:"chan,omitempty"`
 }
 
+// Cmd represents a Neovim Ex Cmd args.
+type Cmd struct {
+	// Cmd command name.
+	Cmd string `msgpack:"cmd"`
+
+	// Range command <range>.
+	//
+	// Can have 0-2 elements depending on how many items the range contains.
+	//
+	// Has no elements if command doesn't accept a range or if no range was specified,
+	// one element if only a single range item was specified and two elements if both range items were specified.
+	Range []int `msgpack:"range,omitempty"`
+
+	// Count any <count> that was supplied to the command. -1 if command cannot take a count.
+	Count int `msgpack:"count,omitempty"`
+
+	// Reg is the optional command |<register>|, if specified. Empty string if not specified or if command cannot take a register.
+	Reg string `msgpack:"reg,omitempty"`
+
+	// Bang Whether command contains a |<bang>| (!) modifier.
+	Bang bool `msgpack:"bang,omitempty"`
+
+	// Args Command arguments.
+	Args []string `msgpack:"args,omitempty"`
+
+	// Magic which characters have special meaning in the command arguments.
+	Magic *CmdMagic `msgpack:"magic,omitempty"`
+
+	Mods *CmdMods `msgpack:"mods,omitempty"`
+
+	// Nargs value of command-nargs.
+	Nargs string `msgpack:"nargs,omitempty" empty:"*"`
+
+	// Addr value of command-addr. Uses short name.
+	Addr string `msgpack:"addr,omitempty" empty:"none"`
+
+	// Nextcmd next command if there are multiple commands separated by a |:bar|. Empty if there isn't a next command.
+	Nextcmd string `msgpack:"nextcmd,omitempty"`
+}
+
+// CmdMagic which characters have special meaning in the command arguments.
+type CmdMagic struct {
+	// File is the command expands filenames. Which means characters such as "%", "#" and wildcards are expanded.
+	File bool `msgpack:"file,omitempty"`
+	// Bar is the "|" character is treated as a command separator and the double quote character (\") is treated as the start of a comment.
+	Bar bool `msgpack:"bar,omitempty"`
+}
+
+// CmdMods command-modifiers.
+type CmdMods struct {
+	// Silent is the |:help :silent|
+	Silent bool `msgpack:"silent,omitempty"`
+	// emsg_silent is the |:help :silent|
+	EmsgSilent bool `msgpack:"emsg_silent,omitempty"`
+	// Unsilent is the |:help :unsilent|
+	Unsilent bool `msgpack:"unsilent,omitempty"`
+	// Filter is filter.
+	Filter *CmdModsFilter `msgpack:"filter,omitempty"`
+	// Sandbox is the |:help :sandbox|
+	Sandbox bool `msgpack:"sandbox,omitempty"`
+	// Noautocmd is the |:help :noautocmd|
+	Noautocmd bool `msgpack:"noautocmd,omitempty"`
+	// Browse is the |:help :browse|
+	Browse bool `msgpack:"browse,omitempty"`
+	// Confirm is the |:help :confirm|
+	Confirm bool `msgpack:"confirm,omitempty"`
+	// Hide is the |:help :hide|
+	Hide bool `msgpack:"hide,omitempty"`
+	// Horizontal is the |:help :horizontal|
+	Horizontal bool `msgpack:"horizontal,omitempty"`
+	// Keepalt is the |:help :keepalt|
+	Keepalt bool `msgpack:"keepalt,omitempty"`
+	// Keepjumps is the |:help :keepjumps|
+	Keepjumps bool `msgpack:"keepjumps,omitempty"`
+	// Keepmarks is the |:help :keepmarks|
+	Keepmarks bool `msgpack:"keepmarks,omitempty"`
+	// Keeppatterns is the |:help :keeppatterns|
+	Keeppatterns bool `msgpack:"keeppatterns,omitempty"`
+	// Lockmarks is the |:help :lockmarks|
+	Lockmarks bool `msgpack:"lockmarks,omitempty"`
+	// Noswapfile is the |:help :noswapfile|
+	Noswapfile bool `msgpack:"noswapfile,omitempty"`
+	// Tab is number of Tab. -1 when omitted.
+	Tab int `msgpack:"tab,omitempty" empty:"-1"`
+	// Verbose is number of verbose. -1 when omitted.
+	Verbose int `msgpack:"verbose,omitempty" empty:"-1"`
+	// Vertical is the |:help :vertical|
+	Vertical bool `msgpack:"vertical,omitempty"`
+	// Split split modifier string, is an empty string when there's no split modifier. If there is a split modifier it can be one of:
+	//	aboveleft
+	//	belowright
+	//	topleft"
+	//	botright"
+	Split string `msgpack:"split,omitempty"`
+}
+
+type CmdModsFilter struct {
+	// Pattern filter pattern. Empty string if there is no filter.
+	Pattern string `msgpack:"pattern,omitempty"`
+	// Force whether filter is inverted or not.
+	Force bool `msgpack:"force,omitempty"`
+}
+
 // Command represents a Neovim Ex command.
 type Command struct {
 	// Name is the name of command.
