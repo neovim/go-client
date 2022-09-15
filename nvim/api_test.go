@@ -59,9 +59,9 @@ func parseVersion(tb testing.TB, version string) (major, minor, patch int64) {
 	return major, minor, patch
 }
 
-func isSkipVersion(tb testing.TB, version string) bool {
+func versionIs(tb testing.TB, version string) bool {
 	major, minor, patch := parseVersion(tb, version)
-	if nvimVersion.Major < major || nvimVersion.Minor < minor || nvimVersion.Patch < patch {
+	if nvimVersion.Major <= major && nvimVersion.Minor <= minor && nvimVersion.Patch <= patch {
 		return true
 	}
 
@@ -69,14 +69,14 @@ func isSkipVersion(tb testing.TB, version string) bool {
 }
 
 func skipVersion(tb testing.TB, version string) {
-	if isSkipVersion(tb, version) {
+	if versionIs(tb, version) {
 		const skipFmt = "run this test %s or higher neovim version: current neovim version %s"
 		tb.Skipf(skipFmt, version, nvimVersion)
 	}
 }
 
 func skipBetweenVersion(tb testing.TB, low, high string) {
-	if isSkipVersion(tb, low) || !isSkipVersion(tb, high) {
+	if versionIs(tb, low) || versionIs(tb, high) {
 		const skipFmt = "run this test between %s to %s neovim version: current version: %s"
 		tb.Skipf(skipFmt, low, high, nvimVersion)
 	}
@@ -1137,7 +1137,7 @@ func testWindow(v *Nvim) func(*testing.T) {
 			}
 
 			t.Run("WindowBuffer", func(t *testing.T) {
-				skipVersion(t, "v0.6.0")
+				skipVersion(t, "v0.7.0")
 
 				gotBuf, err := v.WindowBuffer(Window(0))
 				if err != nil {
@@ -1374,7 +1374,7 @@ func testWindow(v *Nvim) func(*testing.T) {
 			}
 
 			t.Run("WindowBuffer", func(t *testing.T) {
-				skipVersion(t, "v0.6.0")
+				skipVersion(t, "v0.7.0")
 
 				b := v.NewBatch()
 
@@ -2190,7 +2190,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 			}
 			for name, tt := range tests {
 				t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
-					skipVersion(t, "v0.7.0")
+					skipVersion(t, "v0.8.0")
 
 					if err := v.CreateUserCommand(tt.name, tt.command, tt.opts); err != nil {
 						t.Fatal(err)
@@ -2211,7 +2211,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 				})
 
 				t.Run(path.Join(name, "Batch"), func(t *testing.T) {
-					skipVersion(t, "v0.7.0")
+					skipVersion(t, "v0.8.0")
 
 					b := v.NewBatch()
 
@@ -2256,7 +2256,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 			}
 			for name, tt := range tests {
 				t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
-					skipVersion(t, "v0.7.0")
+					skipVersion(t, "v0.8.0")
 
 					if err := v.CreateBufferUserCommand(Buffer(0), tt.name, tt.command, tt.opts); err != nil {
 						t.Fatal(err)
@@ -2277,7 +2277,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 				})
 
 				t.Run(path.Join(name, "Batch"), func(t *testing.T) {
-					skipVersion(t, "v0.7.0")
+					skipVersion(t, "v0.8.0")
 
 					b := v.NewBatch()
 
@@ -2867,7 +2867,7 @@ func testKey(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("KeyMap", func(t *testing.T) {
-				skipBetweenVersion(t, "v0.6.0", "v0.8.0")
+				skipBetweenVersion(t, "v0.7.0", "v0.8.0")
 
 				mode := "n"
 				if err := v.SetKeyMap(mode, "y", "yy", make(map[string]bool)); err != nil {
@@ -3209,7 +3209,7 @@ func testKey(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("KeyMap", func(t *testing.T) {
-				skipBetweenVersion(t, "v0.6.0", "v0.8.0")
+				skipBetweenVersion(t, "v0.7.0", "v0.8.0")
 
 				b := v.NewBatch()
 
@@ -4742,7 +4742,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 			for name, tt := range tests {
 				t.Run("Nvim/"+name, func(t *testing.T) {
 					if name == "hidden" {
-						skipVersion(t, "v0.6.0")
+						skipVersion(t, "v0.7.0")
 					}
 
 					got, err := v.OptionInfo(tt.name)
@@ -4758,7 +4758,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 			for name, tt := range tests {
 				t.Run("Batch/"+name, func(t *testing.T) {
 					if name == "hidden" {
-						skipVersion(t, "v0.6.0")
+						skipVersion(t, "v0.7.0")
 					}
 
 					b := v.NewBatch()
@@ -4876,7 +4876,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 		for name, tt := range tests {
 			t.Run("Nvim/"+name, func(t *testing.T) {
 				if name == "hidden" {
-					skipVersion(t, "v0.6.0")
+					skipVersion(t, "v0.7.0")
 				}
 
 				got, err := v.OptionInfo(tt.name)
@@ -4892,7 +4892,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 		for name, tt := range tests {
 			t.Run("Batch/"+name, func(t *testing.T) {
 				if name == "hidden" {
-					skipVersion(t, "v0.6.0")
+					skipVersion(t, "v0.7.0")
 				}
 
 				b := v.NewBatch()
@@ -4937,7 +4937,7 @@ func testOptionsValue(v *Nvim) func(*testing.T) {
 		}
 		for name, tt := range tests {
 			t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
-				skipVersion(t, "v0.7.0")
+				skipVersion(t, "v0.8.0")
 
 				var result interface{}
 				if err := v.OptionValue(tt.name, tt.opts, &result); err != nil {
@@ -4967,7 +4967,7 @@ func testOptionsValue(v *Nvim) func(*testing.T) {
 
 		for name, tt := range tests {
 			t.Run(path.Join(name, "Batch"), func(t *testing.T) {
-				skipVersion(t, "v0.7.0")
+				skipVersion(t, "v0.8.0")
 
 				b := v.NewBatch()
 
@@ -5669,19 +5669,15 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					{
 						ID:       0,
 						Group:    augID,
-						Desc:     `<vim function: echomsg 'Hello Autocmd'>`,
 						Event:    `User`,
-						Command:  `<vim function: echomsg 'Hello Autocmd'>`,
 						Once:     false,
 						Pattern:  `AutocmdTest`,
 						BufLocal: false,
 						Buffer:   0,
 					},
 				}
-				switch nvimVersion.Minor {
-				case 8:
-					want[0].Desc = ""
-					want[0].Command = ""
+				if versionIs(t, "v0.7.2") {
+					want[0].Command = `<vim function: echomsg 'Hello Autocmd'>`
 				}
 
 				args := map[string]interface{}{
@@ -5783,19 +5779,15 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					{
 						ID:       0,
 						Group:    augID,
-						Desc:     `<vim function: echomsg 'Hello Autocmd'>`,
 						Event:    `User`,
-						Command:  `<vim function: echomsg 'Hello Autocmd'>`,
 						Once:     false,
 						Pattern:  `AutocmdTest`,
 						BufLocal: false,
 						Buffer:   0,
 					},
 				}
-				switch nvimVersion.Minor {
-				case 8:
-					want[0].Desc = ""
-					want[0].Command = ""
+				if versionIs(t, "v0.7.2") {
+					want[0].Command = `<vim function: echomsg 'Hello Autocmd'>`
 				}
 
 				args := map[string]interface{}{
