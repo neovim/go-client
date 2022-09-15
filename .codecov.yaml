@@ -36,7 +36,7 @@ coverage:
 
 comment:
   behavior: default
-  require_changes: true
+  require_changes: false
   show_carryforward_flags: true
 
 ignore:
