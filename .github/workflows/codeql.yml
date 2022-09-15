@@ -3,35 +3,38 @@ name: "CodeQL"
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
-    branches:
-      - master
   schedule:
     - cron: '0 20 * * *'
 
 jobs:
   analyze:
     name: Analyze
-    runs-on: 
-      - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
+    runs-on: ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
 
     permissions:
       actions: read
       contents: read
       security-events: write
 
-    strategy:
-      fail-fast: false
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.19.x'
+
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: 'go'
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
+      env:
+        # hack for fetch dependencies when failed to go-autobuilder 'make' command
+        # https://github.com/github/codeql-go/blob/b953fe39c2cb/extractor/cli/go-autobuilder/go-autobuilder.go#L409
+        CODEQL_EXTRACTOR_GO_BUILD_COMMAND: 'true'
