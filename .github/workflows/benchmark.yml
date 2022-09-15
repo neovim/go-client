@@ -14,14 +14,7 @@ defaults:
 
 jobs:
   benchmark:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
-        go-version:
-          - 1.19.x
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
 
     steps:
     - name: Set flag environment variable
@@ -29,20 +22,19 @@ jobs:
         echo "OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         echo "GO_VERSION=$(echo ${{ matrix.go-version }} | cut -d. -f-2)" >> $GITHUB_ENV
 
-    - name: Install Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: ${{ matrix.go-version }}
-
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Install Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.19.x'
+
     - name: Install nvim binary
       uses: rhysd/action-setup-vim@v1
-      if: steps.cache-nvim.outputs.cache-hit != 'true'
       with:
         neovim: true
-        version: v0.7.0
+        version: v0.7.2
 
     - name: Run Benchmark
       run: |
