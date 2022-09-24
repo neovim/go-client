@@ -132,6 +132,7 @@ func TestAPI(t *testing.T) {
 	t.Run("Window", testWindow(v))
 	t.Run("Tabpage", testTabpage(v))
 	t.Run("Lines", testLines(v))
+	t.Run("Cmd", testCmd(v))
 	t.Run("Command", testCommand(v))
 	t.Run("Var", testVar(v))
 	t.Run("Message", testMessage(v))
@@ -2133,6 +2134,118 @@ func testLines(v *Nvim) func(*testing.T) {
 				// assert row 1 buffer text.
 				if !bytes.EqualFold(want[1], got[1]) {
 					t.Fatalf("row 2 is not equal: want: %q, got: %q", string(want[1]), string(got[1]))
+				}
+			})
+		})
+	}
+}
+
+func testCmd(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		skipVersion(t, "v0.7.3")
+
+		t.Run("Cmd", func(t *testing.T) {
+			t.Run("Nvim", func(t *testing.T) {
+				defer func() {
+					// cleanup v:statusmsg
+					if err := v.SetVVar("statusmsg", ""); err != nil {
+						t.Fatalf("failed to SetVVar: %v", err)
+					}
+					// clear messages
+					if _, err := v.Exec(":messages clear", false); err != nil {
+						t.Fatalf("failed to SetVVar: %v", err)
+					}
+				}()
+				cmd := &Cmd{
+					Cmd:  `echomsg`,
+					Args: []string{`'hello'`},
+				}
+				got, err := v.Cmd(cmd, map[string]bool{"output": true})
+				if err != nil {
+					t.Fatal(err)
+				}
+				want := `hello`
+				if got != want {
+					t.Fatalf("got %s but want %s", got, want)
+				}
+			})
+
+			t.Run("Batch", func(t *testing.T) {
+				defer func() {
+					// cleanup v:statusmsg
+					if err := v.SetVVar("statusmsg", ""); err != nil {
+						t.Fatalf("failed to SetVVar: %v", err)
+					}
+					// clear messages
+					if _, err := v.Exec(":messages clear", false); err != nil {
+						t.Fatalf("failed to SetVVar: %v", err)
+					}
+				}()
+				b := v.NewBatch()
+
+				cmd := &Cmd{
+					Cmd:  `echomsg`,
+					Args: []string{`'hello'`},
+				}
+				var got string
+				b.Cmd(cmd, map[string]bool{"output": false}, &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				want := ``
+				if got != want {
+					t.Fatalf("got %s but want %s", got, want)
+				}
+			})
+		})
+
+		t.Run("ParseCmd", func(t *testing.T) {
+			t.Run("Nvim", func(t *testing.T) {
+				got, err := v.ParseCmd(`echomsg 'hello'`, make(map[string]interface{}))
+				if err != nil {
+					t.Fatal(err)
+				}
+				want := &Cmd{
+					Cmd:   `echomsg`,
+					Args:  []string{`'hello'`},
+					Count: -1,
+					Magic: new(CmdMagic),
+					Mods: &CmdMods{
+						Tab:     -1,
+						Verbose: -1,
+						Filter:  new(CmdModsFilter),
+					},
+					Nargs: `*`,
+					Addr:  `none`,
+				}
+				if !reflect.DeepEqual(got, want) {
+					t.Fatalf("\n got %#v\nwant %#v", got, want)
+				}
+			})
+
+			t.Run("Batch", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var got Cmd
+				b.ParseCmd(`echomsg 'hello'`, make(map[string]interface{}), &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				want := Cmd{
+					Cmd:   `echomsg`,
+					Args:  []string{`'hello'`},
+					Count: -1,
+					Magic: new(CmdMagic),
+					Mods: &CmdMods{
+						Tab:     -1,
+						Verbose: -1,
+						Filter:  new(CmdModsFilter),
+					},
+					Nargs: `*`,
+					Addr:  `none`,
+				}
+				if !reflect.DeepEqual(&got, &want) {
+					t.Fatalf("\n got %#v\nwant %#v", got, want)
 				}
 			})
 		})
