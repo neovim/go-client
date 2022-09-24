@@ -12,7 +12,1048 @@
 
 package main
 
-// vim.c
+// autocmd.c
+
+// Autocmds get all autocommands that match the corresponding {opts}.
+//
+// Note that when multiple patterns or events are provided, it will find all the autocommands that
+// match any combination of them.
+func Autocmds(opts map[string]interface{}) (result []*AutocmdType) {
+	name(nvim_get_autocmds)
+}
+
+// CreateAutocmd create an autocommand.
+//
+// The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
+// triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
+func CreateAutocmd(event interface{}, opts map[string]interface{}) (id int) {
+	name(nvim_create_autocmd)
+}
+
+// DeleteAutocmd delete an autocommand by id.
+//
+// NOTE: Only autocommands created via the API have an id.
+func DeleteAutocmd(id int) {
+	name(nvim_del_autocmd)
+}
+
+// ClearAutocmds clear all autocommands that match the corresponding {opts}.
+//
+// To delete a particular autocmd, see DeleteAutocmd.
+func ClearAutocmds(opts map[string]interface{}) {
+	name(nvim_clear_autocmds)
+}
+
+// CreateAugroup create or get an autocommand group(autocmd-groups).
+func CreateAugroup(name string, opts map[string]interface{}) (id int) {
+	name(nvim_create_augroup)
+}
+
+// DeleteAugroupByID delete an autocommand group by id.
+func DeleteAugroupByID(id int) {
+	name(nvim_del_augroup_by_id)
+}
+
+// DeleteAugroupByID delete an autocommand group by name.
+func DeleteAugroupByName(name string) {
+	name(nvim_del_augroup_by_name)
+}
+
+// ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
+func ExecAutocmds(event interface{}, opts map[string]interface{}) {
+	name(nvim_exec_autocmds)
+}
+
+// buffer.c
+
+// BufferLineCount gets the buffer line count.
+//
+// The buffer arg is specific Buffer, or 0 for current buffer.
+//
+// The returns line count, or 0 for unloaded buffer.
+func BufferLineCount(buffer Buffer) (count int) {
+	name(nvim_buf_line_count)
+}
+
+// AttachBuffer activates buffer-update events on a channel.
+//
+// The buffer is specific Buffer, or 0 for current buffer.
+//
+// If sendBuffer is true, initial notification should contain the whole buffer.
+// If false, the first notification will be a "nvim_buf_lines_event".
+// Otherwise, the first notification will be a "nvim_buf_changedtick_event".
+//
+// Returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
+func AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}) (attached bool) {
+	name(nvim_buf_attach)
+}
+
+// DetachBuffer deactivate updates from this buffer to the current channel.
+//
+// Returns whether the updates couldn't be disabled because the buffer isn't loaded.
+func DetachBuffer(buffer Buffer) (detached bool) {
+	name(nvim_buf_detach)
+}
+
+// BufferLines gets a line-range from the buffer.
+//
+// Indexing is zero-based, end-exclusive.
+// Negative indices are interpreted as length+1+index: -1 refers to the index past the end.
+// So to get the last element use start=-2 and end=-1.
+//
+// Out-of-bounds indices are clamped to the nearest valid value, unless strictIndexing is set.
+func BufferLines(buffer Buffer, start, end int, strictIndexing bool) (lines [][]byte) {
+	name(nvim_buf_get_lines)
+}
+
+// SetBufferLines sets or replaces a line-range in the buffer.
+//
+// Indexing is zero-based, end-exclusive.
+// Negative indices are interpreted as length+1+index: -1 refers to the index past the end.
+// So to change or delete the last element use start=-2 and end=-1.
+//
+// To insert lines at a given index, set start and end args to the same index.
+//
+// To delete a range of lines, set replacement arg to an empty array.
+//
+// Out-of-bounds indices are clamped to the nearest valid value, unless
+// strict_indexing arg is set to true.
+func SetBufferLines(buffer Buffer, start, end int, strictIndexing bool, replacement [][]byte) {
+	name(nvim_buf_set_lines)
+}
+
+// SetBufferText sets or replaces a range in the buffer.
+//
+// This is recommended over SetBufferLines when only modifying parts of a
+// line, as extmarks will be preserved on non-modified parts of the touched
+// lines.
+//
+// Indexing is zero-based and end-exclusive.
+//
+// To insert text at a given index, set startRow and endRow args ranges to the same index.
+//
+// To delete a range, set replacement arg to an array containing an empty string, or simply an empty array.
+//
+// Prefer SetBufferLines when adding or deleting entire lines only.
+func SetBufferText(buffer Buffer, startRow, startCol, endRow, endCol int, replacement [][]byte) {
+	name(nvim_buf_set_text)
+}
+
+// BufferText gets a range from the buffer.
+//
+// This differs from BufferLines in that it allows retrieving only
+// portions of a line.
+//
+// Indexing is zero-based. Column indices are end-exclusive.
+//
+// Prefer BufferLines when retrieving entire lines.
+//
+// opts is optional parameters. Currently unused.
+func BufferText(buffer Buffer, startRow, startCol, endRow, endCol int, opts map[string]interface{}) [][]byte {
+	name(nvim_buf_get_text)
+}
+
+// BufferOffset returns the byte offset of a line (0-indexed).
+//
+// Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
+// "fileformat" and "fileencoding" are ignored.
+//
+// The line index just after the last line gives the total byte-count of the buffer.
+// A final EOL byte is counted if it would be written, see ":help eol".
+//
+// Unlike "line2byte" vim function, throws error for out-of-bounds indexing.
+//
+// If Buffer is unloaded buffer, returns -1.
+func BufferOffset(buffer Buffer, index int) (offset int) {
+	name(nvim_buf_get_offset)
+}
+
+// BufferVar gets a buffer-scoped (b:) variable.
+func BufferVar(buffer Buffer, name string) (value interface{}) {
+	name(nvim_buf_get_var)
+}
+
+// BufferChangedTick gets a changed tick of a buffer.
+func BufferChangedTick(buffer Buffer) (changedtick int) {
+	name(nvim_buf_get_changedtick)
+}
+
+// BufferKeymap gets a list of buffer-local mapping definitions.
+//
+// The mode short-name ("n", "i", "v", ...).
+func BufferKeyMap(buffer Buffer, mode string) []*Mapping {
+	name(nvim_buf_get_keymap)
+}
+
+// SetBufferKeyMap sets a buffer-local mapping for the given mode.
+//
+// See:
+//
+//	:help nvim_set_keymap()
+func SetBufferKeyMap(buffer Buffer, mode, lhs, rhs string, opts map[string]bool) {
+	name(nvim_buf_set_keymap)
+}
+
+// DeleteBufferKeyMap unmaps a buffer-local mapping for the given mode.
+//
+// See:
+//
+//	:help nvim_del_keymap()
+func DeleteBufferKeyMap(buffer Buffer, mode, lhs string) {
+	name(nvim_buf_del_keymap)
+}
+
+// SetBufferVar sets a buffer-scoped (b:) variable.
+func SetBufferVar(buffer Buffer, name string, value interface{}) {
+	name(nvim_buf_set_var)
+}
+
+// DeleteBufferVar removes a buffer-scoped (b:) variable.
+func DeleteBufferVar(buffer Buffer, name string) {
+	name(nvim_buf_del_var)
+}
+
+// BufferNumber gets a buffer's number.
+//
+// Deprecated: Use int(buffer) to get the buffer's number as an integer.
+func BufferNumber(buffer Buffer) (number int) {
+	name(nvim_buf_get_number)
+	deprecatedSince(2)
+}
+
+// BufferName gets the full file name for the buffer.
+func BufferName(buffer Buffer) (name string) {
+	name(nvim_buf_get_name)
+}
+
+// SetBufferName sets the full file name for a buffer.
+func SetBufferName(buffer Buffer, name string) {
+	name(nvim_buf_set_name)
+}
+
+// IsBufferLoaded checks if a buffer is valid and loaded.
+//
+// See |help api-buffer| for more info about unloaded buffers.
+func IsBufferLoaded(buffer Buffer) (loaded bool) {
+	name(nvim_buf_is_loaded)
+}
+
+// DeleteBuffer deletes the buffer.
+// See
+//
+//	:help :bwipeout
+//
+// The opts args is optional parameters.
+//
+//	force
+//
+// Force deletion and ignore unsaved changes. bool type.
+//
+//	unload
+//
+// Unloaded only, do not delete. See |help :bunload|. bool type.
+func DeleteBuffer(buffer Buffer, opts map[string]bool) {
+	name(nvim_buf_delete)
+}
+
+// IsBufferValid returns whether the buffer is valid.
+//
+// Note: Even if a buffer is valid it may have been unloaded.
+// See |help api-buffer| for more info about unloaded buffers.
+func IsBufferValid(buffer Buffer) (valied bool) {
+	name(nvim_buf_is_valid)
+}
+
+// DeleteBufferMark deletes a named mark in the buffer.
+// See |help mark-motions|.
+func DeleteBufferMark(buffer Buffer, name string) (deleted bool) {
+	name(nvim_buf_del_mark)
+}
+
+// SetBufferMark sets a named mark in the given buffer, all marks are allowed
+// file/uppercase, visual, last change, etc.
+// See |help mark-motions|.
+//
+// line and col are (1,0)-indexed.
+//
+// opts is optional parameters. Reserved for future use.
+func SetBufferMark(buffer Buffer, name string, line, col int, opts map[string]interface{}) (set bool) {
+	name(nvim_buf_set_mark)
+}
+
+// BufferMark return a tuple (row,col) representing the position of the named mark.
+//
+// Marks are (1,0)-indexed.
+func BufferMark(buffer Buffer, name string) (pos [2]int) {
+	name(nvim_buf_get_mark)
+}
+
+// ClearBufferHighlight clears highlights from a given source group and a range
+// of lines.
+//
+// To clear a source group in the entire buffer, pass in 1 and -1 to startLine
+// and endLine respectively.
+//
+// The lineStart and lineEnd parameters specify the range of lines to clear.
+// The end of range is exclusive. Specify -1 to clear to the end of the file.
+//
+// Deprecated: Use ClearBufferNamespace instead.
+func ClearBufferHighlight(buffer Buffer, srcID, startLine, endLine int) {
+	name(nvim_buf_clear_highlight)
+	deprecatedSince(7)
+}
+
+// SetBufferVirtualText set the virtual text (annotation) for a buffer line.
+//
+// By default (and currently the only option), the text will be placed after
+// the buffer text.
+//
+// Virtual text will never cause reflow, rather virtual text will be truncated at the end of the screen line.
+// The virtual text will begin one cell (|lcs-eol| or space) after the ordinary text.
+//
+// Namespaces are used to support batch deletion/updating of virtual text.
+// To create a namespace, use CreateNamespace. Virtual text is cleared using ClearBufferNamespace.
+//
+// The same nsID can be used for both virtual text and highlights added by AddBufferHighlight,
+// both can then be cleared with a single call to ClearBufferNamespace.
+// If the virtual text never will be cleared by an API call, pass "nsID = -1".
+//
+// As a shorthand, "nsID = 0" can be used to create a new namespace for the
+// virtual text, the allocated id is then returned.
+//
+// The opts arg is reserved for future use.
+//
+// Deprecated: Use SetBufferExtmark instead.
+func SetBufferVirtualText(buffer Buffer, nsID, line int, chunks []TextChunk, opts map[string]interface{}) (id int) {
+	name(nvim_buf_set_virtual_text)
+	deprecatedSince(8)
+}
+
+// command.c
+
+// ParseCmd parse command line.
+//
+// Doesn't check the validity of command arguments.
+//
+// str is command line string to parse. Cannot contain "\n".
+//
+// opts is optional parameters. Reserved for future use.
+//
+// Return dictionary containing command information, with these keys:
+//
+//	cmd: (string)
+//
+// Command name
+//
+//	range: ([]int)
+//
+// Command <range>. Can have 0-2 elements depending on how many items the range contains.
+// Has no elements if command doesn't accept a range or if no range was specified,
+// one element if only a single range item was specified and two elements if both range items were specified.
+//
+//	count: (int)
+//
+// Any |<count>| that was supplied to the command. -1 if command cannot take a count.
+//
+//	reg: (int)
+//
+// The optional command |<register>|, if specified. Empty string if not specified or if command cannot take a register.
+//
+//	bang: (bool)
+//
+// Whether command contains a |<bang>| (!) modifier.
+//
+//	args: ([]string)
+//
+// Command arguments.
+//
+//	addr: (string)
+//
+// Value of |:command-addr|. Uses short name.
+//
+//	nargs: (string)
+//
+// Value of |:command-nargs|.
+//
+//	nextcmd: (string)
+//
+// Next command if there are multiple commands separated by a |:bar|. Empty if there isn't a next command.
+//
+//	magic: (struct)
+//
+// Which characters have special meaning in the command arguments.
+//
+//	magic.file: (bool)
+//
+// The command expands filenames. Which means characters such as "%", "#" and wildcards are expanded.
+//
+//	magic.bar: (bool)
+//
+// The "|" character is treated as a command separator and the double quote character (\") is treated as the start of a comment.
+//
+//	mods: (struct)
+//
+// mods
+//
+//	mods.filter: (struct)
+//
+// |:filter|.
+//
+//	mods.filter.pattern: (string)
+//
+// Filter pattern. Empty string if there is no filter.
+//
+//	mods.filter.force: (bool)
+//
+// Whether filter is inverted or not.
+//
+//	mods.silent: (bool)
+//
+// silent
+//
+//	mods.emsg_silent: (bool)
+//
+// emsg_silent
+//
+//	mods.unsilent: (bool)
+//
+// unsilent
+//
+//	mods.sandbox: (bool)
+//
+// sandbox
+//
+//	mods.noautocmd: (bool)
+//
+// noautocmd
+//
+//	mods.browse: (bool)
+//
+// browse
+//
+//	mods.confirm: (bool)
+//
+// confirm
+//
+//	mods.hide: (bool)
+//
+// hide
+//
+//	mods.horizontal: (bool)
+//
+// horizontal
+//
+//	mods.keepalt: (bool)
+//
+// keepalt
+//
+//	mods.keepjumps: (bool)
+//
+// keepjumps
+//
+//	mods.keepmarks: (bool)
+//
+// keepmarks
+//
+//	mods.keeppatterns: (bool)
+//
+// keeppatterns
+//
+//	mods.lockmarks: (bool)
+//
+// lockmarks
+//
+//	mods.noswapfile: (bool)
+//
+// noswapfile
+//
+//	mods.tab: (int)
+//
+// -1 when omitted.
+//
+//	verbose: (int)
+//
+// -1 when omitted.
+//
+//	vertical: (bool)
+//
+// vertical
+//
+//	split: (string)
+//
+// Split modifier string, is an empty string when there's no split modifier. If there is a split modifier it can be one of:
+//
+//	aboveleft
+//	belowright
+//	topleft
+//	botright
+func ParseCmd(str string, opts map[string]interface{}) (cmd Cmd) {
+	name(nvim_parse_cmd)
+	returnPtr()
+}
+
+// Cmd executes an Ex command.
+//
+// Unlike Command() this command takes a structured Dictionary instead of a String. This
+// allows for easier construction and manipulation of an Ex command. This also allows for things
+// such as having spaces inside a command argument, expanding filenames in a command that otherwise
+// doesn't expand filenames, etc.
+//
+// On execution error: fails with VimL error, updates v:errmsg.
+// See Exec() and Command().
+//
+// cmd is the command to execute. Must be a Dictionary that can contain the same values
+// as the return value of ParseCmd except "addr", "nargs" and "nextcmd" which are ignored if provided.
+// All values except for "cmd" are optional.
+//
+// opts is the optional parameters.
+//
+//	output: (boolean, default false)
+//
+// Whether to return command output.
+func Cmd(cmd *Cmd, opts map[string]bool) (output string) {
+	name(nvim_cmd)
+}
+
+// CreateUserCommand create a new user command.
+//
+// name is name of the new user command. Must begin with an uppercase letter.
+//
+// command is replacement command to execute when this user command is executed.
+// When called from Lua, the command can also be a Lua function.
+//
+// opts is optional command attributes. See |command-attributes| for more details.
+//
+// To use boolean attributes (such as |:command-bang| or |:command-bar|) set the value to "true".
+// In addition to the string options listed in |:command-complete|,
+// the "complete" key also accepts a Lua function which works like the "customlist" completion mode |:command-completion-customlist|.
+//
+//	desc (string)
+//
+// Used for listing the command when a Lua function is used for {command}.
+//
+//	force (bool, default true)
+//
+// Override any previous definition.
+func CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) {
+	name(nvim_create_user_command)
+}
+
+// DeleteUserCommand delete a user-defined command.
+func DeleteUserCommand(name string) {
+	name(nvim_del_user_command)
+}
+
+// CreateBufferUserCommand create a new user command |user-commands| in the given buffer.
+//
+// Only commands created with |:command-buffer| or this function can be deleted with this function.
+func CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
+	name(nvim_buf_create_user_command)
+}
+
+// DeleteBufferUserCommand create a new user command |user-commands| in the given buffer.
+//
+// Only commands created with |:command-buffer| or this function can be deleted with this function.
+func DeleteBufferUserCommand(buffer Buffer, name string) {
+	name(nvim_buf_del_user_command)
+}
+
+// Commands gets a map of global (non-buffer-local) Ex commands.
+// Currently only user-commands are supported, not builtin Ex commands.
+//
+// opts is optional parameters. Currently only supports:
+//
+//	{"builtin":false}
+func Commands(opts map[string]interface{}) (commands map[string]*Command) {
+	name(nvim_get_commands)
+}
+
+// BufferCommands gets a map of buffer-local user-commands.
+//
+// opts is optional parameters. Currently not used.
+func BufferCommands(buffer Buffer, opts map[string]interface{}) map[string]*Command {
+	name(nvim_buf_get_commands)
+}
+
+// tabpage.c
+
+// TabpageWindows gets the windows in a tabpage.
+func TabpageWindows(tabpage Tabpage) (windows []Window) {
+	name(nvim_tabpage_list_wins)
+}
+
+// TabpageVar gets a tab-scoped (t:) variable.
+func TabpageVar(tabpage Tabpage, name string) (value interface{}) {
+	name(nvim_tabpage_get_var)
+}
+
+// SetTabpageVar sets a tab-scoped (t:) variable.
+func SetTabpageVar(tabpage Tabpage, name string, value interface{}) {
+	name(nvim_tabpage_set_var)
+}
+
+// DeleteTabpageVar removes a tab-scoped (t:) variable.
+func DeleteTabpageVar(tabpage Tabpage, name string) {
+	name(nvim_tabpage_del_var)
+}
+
+// TabpageWindow gets the current window in a tabpage.
+func TabpageWindow(tabpage Tabpage) Window {
+	name(nvim_tabpage_get_win)
+}
+
+// TabpageNumber gets the tabpage number.
+func TabpageNumber(tabpage Tabpage) (number int) {
+	name(nvim_tabpage_get_number)
+}
+
+// IsTabpageValid checks if a tabpage is valid.
+func IsTabpageValid(tabpage Tabpage) (valid bool) {
+	name(nvim_tabpage_is_valid)
+}
+
+// extmark.c
+
+// CreateNamespace creates a new namespace, or gets an existing one.
+//
+// Namespaces are used for buffer highlights and virtual text, see
+// AddBufferHighlight and SetBufferVirtualText.
+//
+// Namespaces can be named or anonymous. If "name" matches an existing namespace,
+// the associated id is returned. If "name" is an empty string a new, anonymous
+// namespace is created.
+//
+// The returns the namespace ID.
+func CreateNamespace(name string) (nsID int) {
+	name(nvim_create_namespace)
+}
+
+// BufferExtmarkByID beturns position for a given extmark id.
+//
+// opts is optional parameters.
+//
+//	details
+//
+// Whether to include the details dict. bool type.
+func BufferExtmarkByID(buffer Buffer, nsID, id int, opt map[string]interface{}) (pos []int) {
+	name(nvim_buf_get_extmark_by_id)
+}
+
+// BufferExtmarks gets extmarks in "traversal order" from a |charwise| region defined by
+// buffer positions (inclusive, 0-indexed).
+//
+// Region can be given as (row,col) tuples, or valid extmark ids (whose
+// positions define the bounds).
+// 0 and -1 are understood as (0,0) and (-1,-1) respectively, thus the following are equivalent:
+//
+//	BufferExtmarks(0, myNS, 0, -1, {})
+//	BufferExtmarks(0, myNS, [0,0], [-1,-1], {})
+//
+// If end arg is less than start arg, traversal works backwards.
+// It useful with limit arg, to get the first marks prior to a given position.
+//
+// The start and end args is start or end of range, given as (row, col), or
+// valid extmark id whose position defines the bound.
+//
+// opts is optional parameters.
+//
+//	limit
+//
+// Maximum number of marks to return. int type.
+//
+//	details
+//
+// Whether to include the details dict. bool type.
+func BufferExtmarks(buffer Buffer, nsID int, start, end interface{}, opt map[string]interface{}) (marks []ExtMark) {
+	name(nvim_buf_get_extmarks)
+}
+
+// SetBufferExtmark creates or updates an extmark.
+//
+// To create a new extmark, pass id=0. The extmark id will be returned.
+// To move an existing mark, pass its id.
+//
+// It is also allowed to create a new mark by passing in a previously unused
+// id, but the caller must then keep track of existing and unused ids itself.
+// (Useful over RPC, to avoid waiting for the return value.)
+//
+// Using the optional arguments, it is possible to use this to highlight
+// a range of text, and also to associate virtual text to the mark.
+//
+// The opts arg is optional parameters.
+//
+//	id
+//
+// ID of the extmark to edit.
+//
+//	end_line
+//
+// Ending line of the mark, 0-based inclusive.
+//
+//	end_col
+//
+// Ending col of the mark, 0-based inclusive.
+//
+//	hl_group
+//
+// Name of the highlight group used to highlight this mark.
+//
+//	virt_text
+//
+// Virtual text to link to this mark.
+//
+//	virt_text_pos
+//
+// Positioning of virtual text.
+// Possible values:
+//
+//	eol
+//
+// right after eol character (default)
+//
+//	overlay
+//
+// display over the specified column, without shifting the underlying text.
+//
+//	virt_text_win_col
+//
+// position the virtual text at a fixed window column (starting from the first text column)
+//
+//	virt_text_hide
+//
+// Hide the virtual text when the background text is selected or hidden due to horizontal scroll "nowrap".
+//
+//	hl_mode
+//
+// Control how highlights are combined with the highlights of the text. Currently only affects
+// virt_text highlights, but might affect "hl_group" in later versions.
+// Possible values:
+//
+//	replace
+//
+// only show the virt_text color. This is the default.
+//
+//	combine
+//
+// combine with background text color
+//
+//	blend
+//
+// blend with background text color.
+//
+//	hl_eol
+//
+// when true, for a multiline highlight covering the EOL of a line, continue the highlight for the rest
+// of the screen line (just like for diff and cursorline highlight).
+//
+//	ephemeral
+//
+// For use with "nvim_set_decoration_provider" callbacks. The mark will only be used for the current redraw cycle,
+// and not be permantently stored in the buffer.
+//
+//	right_gravity
+//
+// Boolean that indicates the direction the extmark will be shifted in when new text is
+// inserted (true for right, false for left).  defaults to true.
+//
+//	end_right_gravity
+//
+// Boolean that indicates the direction the extmark end position (if it exists) will be
+// shifted in when new text is inserted (true for right, false for left). Defaults to false.
+//
+//	priority
+//
+// A priority value for the highlight group. For example treesitter highlighting uses a value of 100.
+func SetBufferExtmark(buffer Buffer, nsID, line, col int, opts map[string]interface{}) (id int) {
+	name(nvim_buf_set_extmark)
+}
+
+// DeleteBufferExtmark removes an extmark.
+//
+// THe returns whether the extmark was found.
+func DeleteBufferExtmark(buffer Buffer, nsID, extmarkID int) (deleted bool) {
+	name(nvim_buf_del_extmark)
+}
+
+// AddBufferHighlight adds a highlight to buffer.
+//
+// IT useful for plugins that dynamically generate highlights to a buffer like a semantic highlighter or linter.
+//
+// The function adds a single highlight to a buffer.
+// Unlike |matchaddpos()| vim function, highlights follow changes to line numbering as lines are
+// inserted/removed above the highlighted line, like signs and marks do.
+//
+// Namespaces are used for batch deletion/updating of a set of highlights.
+// To create a namespace, use CreateNamespace which returns a namespace id.
+// Pass it in to this function as nsID to add highlights to the namespace.
+// All highlights in the same namespace can then be cleared with single call to ClearBufferNamespace.
+// If the highlight never will be deleted by an API call, pass nsID = -1.
+//
+// As a shorthand, "srcID = 0" can be used to create a new namespace for the
+// highlight, the allocated id is then returned.
+//
+// If hlGroup arg is the empty string, no highlight is added, but a new `nsID` is still returned.
+// This is supported for backwards compatibility, new code should use CreateNamespaceto create a new empty namespace.
+func AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line, startCol, endCol int) (id int) {
+	name(nvim_buf_add_highlight)
+}
+
+// ClearBufferNamespace clears namespaced objects (highlights, extmarks, virtual text) from a region.
+// Lines are 0-indexed.
+//
+// To clear the namespace in the entire buffer, specify line_start=0 and line_end=-1.
+func ClearBufferNamespace(buffer Buffer, nsID, lineStart, lineEnd int) {
+	name(nvim_buf_clear_namespace)
+}
+
+// options.c
+
+// OptionValue gets the value of an option.
+//
+// The behavior of this function matches that of |:set|: the local value of an option is returned if it exists; otherwise,
+// the global value is returned.
+// Local values always correspond to the current buffer or window.
+//
+// To get a buffer-local or window-local option for a specific buffer or window, use BufferOption() or WindowOption().
+//
+// name is the option name.
+//
+// opts is the Optional parameters.
+//
+//	scope
+//
+// Analogous to |:setglobal| and |:setlocal|, respectively.
+func OptionValue(name string, opts map[string]OptionValueScope) (optionValue interface{}) {
+	name(nvim_get_option_value)
+}
+
+// SetOptionValue sets the value of an option. The behavior of this function matches that of
+// |:set|: for global-local options, both the global and local value are set
+// unless otherwise specified with {scope}.
+// name is the option name.
+//
+// opts is the Optional parameters.
+//
+//	scope
+//
+// Analogous to |:setglobal| and |:setlocal|, respectively.
+func SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) {
+	name(nvim_set_option_value)
+}
+
+// AllOptionsInfo gets the option information for all options.
+//
+// The dictionary has the full option names as keys and option metadata
+// dictionaries as detailed at OptionInfo.
+//
+// Resulting map has keys:
+//
+//	name
+//
+// Name of the option (like "filetype").
+//
+//	shortname
+//
+// Shortened name of the option (like "ft").
+//
+//	type
+//
+// type of option ("string", "number" or "boolean").
+//
+//	default
+//
+// The default value for the option.
+//
+//	was_set
+//
+// Whether the option was set.
+//
+//	last_set_sid
+//
+// Last set script id (if any).
+//
+//	last_set_linenr
+//
+// line number where option was set.
+//
+//	last_set_chan
+//
+// Channel where option was set (0 for local).
+//
+//	scope
+//
+// One of "global", "win", or "buf".
+//
+//	global_local
+//
+// Whether win or buf option has a global value.
+//
+//	commalist
+//
+// List of comma separated values.
+//
+//	flaglist
+//
+// List of single char flags.
+func AllOptionsInfo() (opinfo OptionInfo) {
+	name(nvim_get_all_options_info)
+	returnPtr()
+}
+
+// OptionInfo gets the option information for one option.
+//
+// Resulting map has keys:
+//
+//	name
+//
+// Name of the option (like "filetype").
+//
+//	shortname
+//
+// Shortened name of the option (like "ft").
+//
+//	type
+//
+// type of option ("string", "number" or "boolean").
+//
+//	default
+//
+// The default value for the option.
+//
+//	was_set
+//
+// Whether the option was set.
+//
+//	last_set_sid
+//
+// Last set script id (if any).
+//
+//	last_set_linenr
+//
+// line number where option was set.
+//
+//	last_set_chan
+//
+// Channel where option was set (0 for local).
+//
+//	scope
+//
+// One of "global", "win", or "buf".
+//
+//	global_local
+//
+// Whether win or buf option has a global value.
+//
+//	commalist
+//
+// List of comma separated values.
+//
+//	flaglist
+//
+// List of single char flags.
+func OptionInfo(name string) (opinfo OptionInfo) {
+	name(nvim_get_option_info)
+	returnPtr()
+}
+
+// SetOption sets an option value.
+func SetOption(name string, value interface{}) {
+	name(nvim_set_option)
+}
+
+// Option gets an option value string.
+func Option(name string) (option interface{}) {
+	name(nvim_get_option)
+}
+
+// BufferOption gets a buffer option value.
+func BufferOption(buffer Buffer, name string) (value interface{}) {
+	name(nvim_buf_get_option)
+}
+
+// SetBufferOption sets a buffer option value.
+//
+// Passing nil as value arg to deletes the option (only works if there's a global fallback).
+func SetBufferOption(buffer Buffer, name string, value interface{}) {
+	name(nvim_buf_set_option)
+}
+
+// WindowOption gets a window option value.
+func WindowOption(window Window, name string) (value interface{}) {
+	name(nvim_win_get_option)
+}
+
+// SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
+func SetWindowOption(window Window, name string, value interface{}) {
+	name(nvim_win_set_option)
+}
+
+// ui.c
+
+// AttachUI registers the client as a remote UI. After this method is called,
+// the client will receive redraw notifications.
+//
+//	:help rpc-remote-ui
+//
+// The redraw notification method has variadic arguments. Register a handler
+// for the method like this:
+//
+//	v.RegisterHandler("redraw", func(updates ...[]interface{}) {
+//	    for _, update := range updates {
+//	        // handle update
+//	    }
+//	})
+func AttachUI(width, height int, options map[string]interface{}) {
+	name(nvim_ui_attach)
+}
+
+// DetachUI unregisters the client as a remote UI.
+func DetachUI() {
+	name(nvim_ui_detach)
+}
+
+// TryResizeUI notifies Nvim that the client window has resized. If possible,
+// Nvim will send a redraw request to resize.
+func TryResizeUI(width, height int) {
+	name(nvim_ui_try_resize)
+}
+
+// SetUIOption sets a UI option.
+func SetUIOption(name string, value interface{}) {
+	name(nvim_ui_set_option)
+}
+
+// TryResizeUIGrid tell Nvim to resize a grid. Triggers a grid_resize event with the requested
+// grid size or the maximum size if it exceeds size limits.
+//
+// On invalid grid handle, fails with error.
+func TryResizeUIGrid(grid, width, height int) {
+	name(nvim_ui_try_resize_grid)
+}
+
+// SetPumHeight tells Nvim the number of elements displaying in the popumenu, to decide
+// <PageUp> and <PageDown> movement.
+//
+// height is popupmenu height, must be greater than zero.
+func SetPumHeight(height int) {
+	name(nvim_ui_pum_set_height)
+}
+
+// SetPumBounds tells Nvim the geometry of the popumenu, to align floating windows with an
+// external popup menu.
+//
+// Note that this method is not to be confused with SetPumHeight,
+// which sets the number of visible items in the popup menu, while this
+// function sets the bounding box of the popup menu, including visual
+// elements such as borders and sliders.
+//
+// Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
+// numbers to the popup menu geometry.
+func SetPumBounds(width, height, row, col float64) {
+	name(nvim_ui_pum_set_bounds)
+}
+
+// vimscript.c
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
 //
@@ -29,6 +1070,13 @@ func Exec(src string, output bool) (out string) {
 func Command(cmd string) {
 	name(nvim_command)
 }
+
+// ParseExpression parse a VimL expression.
+func ParseExpression(expr, flags string, highlight bool) (expression map[string]interface{}) {
+	name(nvim_parse_expression)
+}
+
+// vim.c
 
 // HLByID gets a highlight definition by name.
 //
@@ -80,6 +1128,22 @@ func HLByName(name string, rgb bool) (highlight HLAttrs) {
 // don't override existing definition, like "hi default".
 func SetHighlight(nsID int, name string, val *HLAttrs) {
 	name(nvim_set_hl)
+}
+
+// SetHighlightNamespace set active namespace for highlights. This can be set for a single window,
+//
+// See SetWindowHeightNamespace.
+func SetHighlightNamespace(nsID int) {
+	name(nvim_set_hl_ns)
+}
+
+// SetFastHighlightNamespace set active namespace for highlights while redrawing.
+//
+// This function meant to be called while redrawing, primarily from
+// nvim_set_decoration_provider on_win and on_line callbacks, which
+// are allowed to change the namespace during a redraw cycle.
+func SetFastHighlightNamespace(nsID int) {
+	name(nvim_set_hl_ns_fast)
 }
 
 // FeedKeys input-keys to Nvim, subject to various quirks controlled by "mode"
@@ -293,164 +1357,6 @@ func SetVVar(name string, value interface{}) {
 	name(nvim_set_vvar)
 }
 
-// Option gets an option value string.
-func Option(name string) (option interface{}) {
-	name(nvim_get_option)
-}
-
-// AllOptionsInfo gets the option information for all options.
-//
-// The dictionary has the full option names as keys and option metadata
-// dictionaries as detailed at OptionInfo.
-//
-// Resulting map has keys:
-//
-//	name
-//
-// Name of the option (like "filetype").
-//
-//	shortname
-//
-// Shortened name of the option (like "ft").
-//
-//	type
-//
-// type of option ("string", "number" or "boolean").
-//
-//	default
-//
-// The default value for the option.
-//
-//	was_set
-//
-// Whether the option was set.
-//
-//	last_set_sid
-//
-// Last set script id (if any).
-//
-//	last_set_linenr
-//
-// line number where option was set.
-//
-//	last_set_chan
-//
-// Channel where option was set (0 for local).
-//
-//	scope
-//
-// One of "global", "win", or "buf".
-//
-//	global_local
-//
-// Whether win or buf option has a global value.
-//
-//	commalist
-//
-// List of comma separated values.
-//
-//	flaglist
-//
-// List of single char flags.
-func AllOptionsInfo() (opinfo OptionInfo) {
-	name(nvim_get_all_options_info)
-	returnPtr()
-}
-
-// OptionInfo gets the option information for one option.
-//
-// Resulting map has keys:
-//
-//	name
-//
-// Name of the option (like "filetype").
-//
-//	shortname
-//
-// Shortened name of the option (like "ft").
-//
-//	type
-//
-// type of option ("string", "number" or "boolean").
-//
-//	default
-//
-// The default value for the option.
-//
-//	was_set
-//
-// Whether the option was set.
-//
-//	last_set_sid
-//
-// Last set script id (if any).
-//
-//	last_set_linenr
-//
-// line number where option was set.
-//
-//	last_set_chan
-//
-// Channel where option was set (0 for local).
-//
-//	scope
-//
-// One of "global", "win", or "buf".
-//
-//	global_local
-//
-// Whether win or buf option has a global value.
-//
-//	commalist
-//
-// List of comma separated values.
-//
-//	flaglist
-//
-// List of single char flags.
-func OptionInfo(name string) (opinfo OptionInfo) {
-	name(nvim_get_option_info)
-	returnPtr()
-}
-
-// OptionValue gets the value of an option.
-//
-// The behavior of this function matches that of |:set|: the local value of an option is returned if it exists; otherwise,
-// the global value is returned.
-// Local values always correspond to the current buffer or window.
-//
-// To get a buffer-local or window-local option for a specific buffer or window, use BufferOption() or WindowOption().
-//
-// name is the option name.
-//
-// opts is the Optional parameters.
-//
-//	scope
-//
-// Analogous to |:setglobal| and |:setlocal|, respectively.
-func OptionValue(name string, opts map[string]OptionValueScope) (optionValue interface{}) {
-	name(nvim_get_option_value)
-}
-
-// SetOptionValue sets the value of an option. The behavior of this function matches that of
-// |:set|: for global-local options, both the global and local value are set
-// unless otherwise specified with {scope}.
-// name is the option name.
-//
-// opts is the Optional parameters.
-//
-//	scope
-//
-// Analogous to |:setglobal| and |:setlocal|, respectively.
-func SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) {
-	name(nvim_set_option_value)
-}
-
-// SetOption sets an option value.
-func SetOption(name string, value interface{}) {
-	name(nvim_set_option)
-}
-
 // Echo echo a message.
 //
 // chunks is a list of [text, hl_group] arrays, each representing a
@@ -594,20 +1500,6 @@ func CurrentTabpage() (tabpage Tabpage) {
 // SetCurrentTabpage sets the current tabpage.
 func SetCurrentTabpage(tabpage Tabpage) {
 	name(nvim_set_current_tabpage)
-}
-
-// CreateNamespace creates a new namespace, or gets an existing one.
-//
-// Namespaces are used for buffer highlights and virtual text, see
-// AddBufferHighlight and SetBufferVirtualText.
-//
-// Namespaces can be named or anonymous. If "name" matches an existing namespace,
-// the associated id is returned. If "name" is an empty string a new, anonymous
-// namespace is created.
-//
-// The returns the namespace ID.
-func CreateNamespace(name string) (nsID int) {
-	name(nvim_create_namespace)
 }
 
 // Namespaces gets existing, non-anonymous namespaces.
@@ -797,16 +1689,6 @@ func DeleteKeyMap(mode, lhs string) {
 	name(nvim_del_keymap)
 }
 
-// Commands gets a map of global (non-buffer-local) Ex commands.
-// Currently only user-commands are supported, not builtin Ex commands.
-//
-// opts is optional parameters. Currently only supports:
-//
-//	{"builtin":false}
-func Commands(opts map[string]interface{}) (commands map[string]*Command) {
-	name(nvim_get_commands)
-}
-
 // APIInfo returns a 2-tuple (Array), where item 0 is the current channel id and item
 // 1 is the "api-metadata" map (Dictionary).
 //
@@ -891,11 +1773,6 @@ func Channels() (channels []*Channel) {
 	name(nvim_list_chans)
 }
 
-// ParseExpression parse a VimL expression.
-func ParseExpression(expr, flags string, highlight bool) (expression map[string]interface{}) {
-	name(nvim_parse_expression)
-}
-
 // UIs gets a list of dictionaries representing attached UIs.
 func UIs() (uis []*UI) {
 	name(nvim_list_uis)
@@ -966,511 +1843,6 @@ func EvalStatusLine(name string, opts map[string]interface{}) (statusline map[st
 	name(nvim_eval_statusline)
 }
 
-// CreateUserCommand create a new user command.
-//
-// name is name of the new user command. Must begin with an uppercase letter.
-//
-// command is replacement command to execute when this user command is executed.
-// When called from Lua, the command can also be a Lua function.
-//
-// opts is optional command attributes. See |command-attributes| for more details.
-//
-// To use boolean attributes (such as |:command-bang| or |:command-bar|) set the value to "true".
-// In addition to the string options listed in |:command-complete|,
-// the "complete" key also accepts a Lua function which works like the "customlist" completion mode |:command-completion-customlist|.
-//
-//	desc (string)
-//
-// Used for listing the command when a Lua function is used for {command}.
-//
-//	force (bool, default true)
-//
-// Override any previous definition.
-func CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) {
-	name(nvim_create_user_command)
-}
-
-// DeleteUserCommand delete a user-defined command.
-func DeleteUserCommand(name string) {
-	name(nvim_del_user_command)
-}
-
-// buffer.c
-
-// BufferLineCount gets the buffer line count.
-//
-// The buffer arg is specific Buffer, or 0 for current buffer.
-//
-// The returns line count, or 0 for unloaded buffer.
-func BufferLineCount(buffer Buffer) (count int) {
-	name(nvim_buf_line_count)
-}
-
-// AttachBuffer activates buffer-update events on a channel.
-//
-// The buffer is specific Buffer, or 0 for current buffer.
-//
-// If sendBuffer is true, initial notification should contain the whole buffer.
-// If false, the first notification will be a "nvim_buf_lines_event".
-// Otherwise, the first notification will be a "nvim_buf_changedtick_event".
-//
-// Returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
-func AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}) (attached bool) {
-	name(nvim_buf_attach)
-}
-
-// DetachBuffer deactivate updates from this buffer to the current channel.
-//
-// Returns whether the updates couldn't be disabled because the buffer isn't loaded.
-func DetachBuffer(buffer Buffer) (detached bool) {
-	name(nvim_buf_detach)
-}
-
-// BufferLines gets a line-range from the buffer.
-//
-// Indexing is zero-based, end-exclusive.
-// Negative indices are interpreted as length+1+index: -1 refers to the index past the end.
-// So to get the last element use start=-2 and end=-1.
-//
-// Out-of-bounds indices are clamped to the nearest valid value, unless strictIndexing is set.
-func BufferLines(buffer Buffer, start, end int, strictIndexing bool) (lines [][]byte) {
-	name(nvim_buf_get_lines)
-}
-
-// SetBufferLines sets or replaces a line-range in the buffer.
-//
-// Indexing is zero-based, end-exclusive.
-// Negative indices are interpreted as length+1+index: -1 refers to the index past the end.
-// So to change or delete the last element use start=-2 and end=-1.
-//
-// To insert lines at a given index, set start and end args to the same index.
-//
-// To delete a range of lines, set replacement arg to an empty array.
-//
-// Out-of-bounds indices are clamped to the nearest valid value, unless
-// strict_indexing arg is set to true.
-func SetBufferLines(buffer Buffer, start, end int, strictIndexing bool, replacement [][]byte) {
-	name(nvim_buf_set_lines)
-}
-
-// SetBufferText sets or replaces a range in the buffer.
-//
-// This is recommended over SetBufferLines when only modifying parts of a
-// line, as extmarks will be preserved on non-modified parts of the touched
-// lines.
-//
-// Indexing is zero-based and end-exclusive.
-//
-// To insert text at a given index, set startRow and endRow args ranges to the same index.
-//
-// To delete a range, set replacement arg to an array containing an empty string, or simply an empty array.
-//
-// Prefer SetBufferLines when adding or deleting entire lines only.
-func SetBufferText(buffer Buffer, startRow, startCol, endRow, endCol int, replacement [][]byte) {
-	name(nvim_buf_set_text)
-}
-
-// BufferText gets a range from the buffer.
-//
-// This differs from BufferLines in that it allows retrieving only
-// portions of a line.
-//
-// Indexing is zero-based. Column indices are end-exclusive.
-//
-// Prefer BufferLines when retrieving entire lines.
-//
-// opts is optional parameters. Currently unused.
-func BufferText(buffer Buffer, startRow, startCol, endRow, endCol int, opts map[string]interface{}) [][]byte {
-	name(nvim_buf_get_text)
-}
-
-// BufferOffset returns the byte offset of a line (0-indexed).
-//
-// Line 1 (index=0) has offset 0. UTF-8 bytes are counted. EOL is one byte.
-// "fileformat" and "fileencoding" are ignored.
-//
-// The line index just after the last line gives the total byte-count of the buffer.
-// A final EOL byte is counted if it would be written, see ":help eol".
-//
-// Unlike "line2byte" vim function, throws error for out-of-bounds indexing.
-//
-// If Buffer is unloaded buffer, returns -1.
-func BufferOffset(buffer Buffer, index int) (offset int) {
-	name(nvim_buf_get_offset)
-}
-
-// BufferVar gets a buffer-scoped (b:) variable.
-func BufferVar(buffer Buffer, name string) (value interface{}) {
-	name(nvim_buf_get_var)
-}
-
-// BufferChangedTick gets a changed tick of a buffer.
-func BufferChangedTick(buffer Buffer) (changedtick int) {
-	name(nvim_buf_get_changedtick)
-}
-
-// BufferKeymap gets a list of buffer-local mapping definitions.
-//
-// The mode short-name ("n", "i", "v", ...).
-func BufferKeyMap(buffer Buffer, mode string) []*Mapping {
-	name(nvim_buf_get_keymap)
-}
-
-// SetBufferKeyMap sets a buffer-local mapping for the given mode.
-//
-// See:
-//
-//	:help nvim_set_keymap()
-func SetBufferKeyMap(buffer Buffer, mode, lhs, rhs string, opts map[string]bool) {
-	name(nvim_buf_set_keymap)
-}
-
-// DeleteBufferKeyMap unmaps a buffer-local mapping for the given mode.
-//
-// See:
-//
-//	:help nvim_del_keymap()
-func DeleteBufferKeyMap(buffer Buffer, mode, lhs string) {
-	name(nvim_buf_del_keymap)
-}
-
-// BufferCommands gets a map of buffer-local user-commands.
-//
-// opts is optional parameters. Currently not used.
-func BufferCommands(buffer Buffer, opts map[string]interface{}) map[string]*Command {
-	name(nvim_buf_get_commands)
-}
-
-// SetBufferVar sets a buffer-scoped (b:) variable.
-func SetBufferVar(buffer Buffer, name string, value interface{}) {
-	name(nvim_buf_set_var)
-}
-
-// DeleteBufferVar removes a buffer-scoped (b:) variable.
-func DeleteBufferVar(buffer Buffer, name string) {
-	name(nvim_buf_del_var)
-}
-
-// BufferOption gets a buffer option value.
-func BufferOption(buffer Buffer, name string) (value interface{}) {
-	name(nvim_buf_get_option)
-}
-
-// SetBufferOption sets a buffer option value.
-//
-// Passing nil as value arg to deletes the option (only works if there's a global fallback).
-func SetBufferOption(buffer Buffer, name string, value interface{}) {
-	name(nvim_buf_set_option)
-}
-
-// BufferNumber gets a buffer's number.
-//
-// Deprecated: Use int(buffer) to get the buffer's number as an integer.
-func BufferNumber(buffer Buffer) (number int) {
-	name(nvim_buf_get_number)
-	deprecatedSince(2)
-}
-
-// BufferName gets the full file name for the buffer.
-func BufferName(buffer Buffer) (name string) {
-	name(nvim_buf_get_name)
-}
-
-// SetBufferName sets the full file name for a buffer.
-func SetBufferName(buffer Buffer, name string) {
-	name(nvim_buf_set_name)
-}
-
-// IsBufferLoaded checks if a buffer is valid and loaded.
-//
-// See |help api-buffer| for more info about unloaded buffers.
-func IsBufferLoaded(buffer Buffer) (loaded bool) {
-	name(nvim_buf_is_loaded)
-}
-
-// DeleteBuffer deletes the buffer.
-// See
-//
-//	:help :bwipeout
-//
-// The opts args is optional parameters.
-//
-//	force
-//
-// Force deletion and ignore unsaved changes. bool type.
-//
-//	unload
-//
-// Unloaded only, do not delete. See |help :bunload|. bool type.
-func DeleteBuffer(buffer Buffer, opts map[string]bool) {
-	name(nvim_buf_delete)
-}
-
-// IsBufferValid returns whether the buffer is valid.
-//
-// Note: Even if a buffer is valid it may have been unloaded.
-// See |help api-buffer| for more info about unloaded buffers.
-func IsBufferValid(buffer Buffer) (valied bool) {
-	name(nvim_buf_is_valid)
-}
-
-// DeleteBufferMark deletes a named mark in the buffer.
-// See |help mark-motions|.
-func DeleteBufferMark(buffer Buffer, name string) (deleted bool) {
-	name(nvim_buf_del_mark)
-}
-
-// SetBufferMark sets a named mark in the given buffer, all marks are allowed
-// file/uppercase, visual, last change, etc.
-// See |help mark-motions|.
-//
-// line and col are (1,0)-indexed.
-//
-// opts is optional parameters. Reserved for future use.
-func SetBufferMark(buffer Buffer, name string, line, col int, opts map[string]interface{}) (set bool) {
-	name(nvim_buf_set_mark)
-}
-
-// BufferMark return a tuple (row,col) representing the position of the named mark.
-//
-// Marks are (1,0)-indexed.
-func BufferMark(buffer Buffer, name string) (pos [2]int) {
-	name(nvim_buf_get_mark)
-}
-
-// CreateBufferUserCommand create a new user command |user-commands| in the given buffer.
-//
-// Only commands created with |:command-buffer| or this function can be deleted with this function.
-func CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
-	name(nvim_buf_create_user_command)
-}
-
-// DeleteBufferUserCommand create a new user command |user-commands| in the given buffer.
-//
-// Only commands created with |:command-buffer| or this function can be deleted with this function.
-func DeleteBufferUserCommand(buffer Buffer, name string) {
-	name(nvim_buf_del_user_command)
-}
-
-// BufferExtmarkByID beturns position for a given extmark id.
-//
-// opts is optional parameters.
-//
-//	details
-//
-// Whether to include the details dict. bool type.
-func BufferExtmarkByID(buffer Buffer, nsID, id int, opt map[string]interface{}) (pos []int) {
-	name(nvim_buf_get_extmark_by_id)
-}
-
-// BufferExtmarks gets extmarks in "traversal order" from a |charwise| region defined by
-// buffer positions (inclusive, 0-indexed).
-//
-// Region can be given as (row,col) tuples, or valid extmark ids (whose
-// positions define the bounds).
-// 0 and -1 are understood as (0,0) and (-1,-1) respectively, thus the following are equivalent:
-//
-//	BufferExtmarks(0, myNS, 0, -1, {})
-//	BufferExtmarks(0, myNS, [0,0], [-1,-1], {})
-//
-// If end arg is less than start arg, traversal works backwards.
-// It useful with limit arg, to get the first marks prior to a given position.
-//
-// The start and end args is start or end of range, given as (row, col), or
-// valid extmark id whose position defines the bound.
-//
-// opts is optional parameters.
-//
-//	limit
-//
-// Maximum number of marks to return. int type.
-//
-//	details
-//
-// Whether to include the details dict. bool type.
-func BufferExtmarks(buffer Buffer, nsID int, start, end interface{}, opt map[string]interface{}) (marks []ExtMark) {
-	name(nvim_buf_get_extmarks)
-}
-
-// SetBufferExtmark creates or updates an extmark.
-//
-// To create a new extmark, pass id=0. The extmark id will be returned.
-// To move an existing mark, pass its id.
-//
-// It is also allowed to create a new mark by passing in a previously unused
-// id, but the caller must then keep track of existing and unused ids itself.
-// (Useful over RPC, to avoid waiting for the return value.)
-//
-// Using the optional arguments, it is possible to use this to highlight
-// a range of text, and also to associate virtual text to the mark.
-//
-// The opts arg is optional parameters.
-//
-//	id
-//
-// ID of the extmark to edit.
-//
-//	end_line
-//
-// Ending line of the mark, 0-based inclusive.
-//
-//	end_col
-//
-// Ending col of the mark, 0-based inclusive.
-//
-//	hl_group
-//
-// Name of the highlight group used to highlight this mark.
-//
-//	virt_text
-//
-// Virtual text to link to this mark.
-//
-//	virt_text_pos
-//
-// Positioning of virtual text.
-// Possible values:
-//
-//	eol
-//
-// right after eol character (default)
-//
-//	overlay
-//
-// display over the specified column, without shifting the underlying text.
-//
-//	virt_text_win_col
-//
-// position the virtual text at a fixed window column (starting from the first text column)
-//
-//	virt_text_hide
-//
-// Hide the virtual text when the background text is selected or hidden due to horizontal scroll "nowrap".
-//
-//	hl_mode
-//
-// Control how highlights are combined with the highlights of the text. Currently only affects
-// virt_text highlights, but might affect "hl_group" in later versions.
-// Possible values:
-//
-//	replace
-//
-// only show the virt_text color. This is the default.
-//
-//	combine
-//
-// combine with background text color
-//
-//	blend
-//
-// blend with background text color.
-//
-//	hl_eol
-//
-// when true, for a multiline highlight covering the EOL of a line, continue the highlight for the rest
-// of the screen line (just like for diff and cursorline highlight).
-//
-//	ephemeral
-//
-// For use with "nvim_set_decoration_provider" callbacks. The mark will only be used for the current redraw cycle,
-// and not be permantently stored in the buffer.
-//
-//	right_gravity
-//
-// Boolean that indicates the direction the extmark will be shifted in when new text is
-// inserted (true for right, false for left).  defaults to true.
-//
-//	end_right_gravity
-//
-// Boolean that indicates the direction the extmark end position (if it exists) will be
-// shifted in when new text is inserted (true for right, false for left). Defaults to false.
-//
-//	priority
-//
-// A priority value for the highlight group. For example treesitter highlighting uses a value of 100.
-func SetBufferExtmark(buffer Buffer, nsID, line, col int, opts map[string]interface{}) (id int) {
-	name(nvim_buf_set_extmark)
-}
-
-// DeleteBufferExtmark removes an extmark.
-//
-// THe returns whether the extmark was found.
-func DeleteBufferExtmark(buffer Buffer, nsID, extmarkID int) (deleted bool) {
-	name(nvim_buf_del_extmark)
-}
-
-// AddBufferHighlight adds a highlight to buffer.
-//
-// IT useful for plugins that dynamically generate highlights to a buffer like a semantic highlighter or linter.
-//
-// The function adds a single highlight to a buffer.
-// Unlike |matchaddpos()| vim function, highlights follow changes to line numbering as lines are
-// inserted/removed above the highlighted line, like signs and marks do.
-//
-// Namespaces are used for batch deletion/updating of a set of highlights.
-// To create a namespace, use CreateNamespace which returns a namespace id.
-// Pass it in to this function as nsID to add highlights to the namespace.
-// All highlights in the same namespace can then be cleared with single call to ClearBufferNamespace.
-// If the highlight never will be deleted by an API call, pass nsID = -1.
-//
-// As a shorthand, "srcID = 0" can be used to create a new namespace for the
-// highlight, the allocated id is then returned.
-//
-// If hlGroup arg is the empty string, no highlight is added, but a new `nsID` is still returned.
-// This is supported for backwards compatibility, new code should use CreateNamespaceto create a new empty namespace.
-func AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line, startCol, endCol int) (id int) {
-	name(nvim_buf_add_highlight)
-}
-
-// ClearBufferNamespace clears namespaced objects (highlights, extmarks, virtual text) from a region.
-// Lines are 0-indexed.
-//
-// To clear the namespace in the entire buffer, specify line_start=0 and line_end=-1.
-func ClearBufferNamespace(buffer Buffer, nsID, lineStart, lineEnd int) {
-	name(nvim_buf_clear_namespace)
-}
-
-// ClearBufferHighlight clears highlights from a given source group and a range
-// of lines.
-//
-// To clear a source group in the entire buffer, pass in 1 and -1 to startLine
-// and endLine respectively.
-//
-// The lineStart and lineEnd parameters specify the range of lines to clear.
-// The end of range is exclusive. Specify -1 to clear to the end of the file.
-//
-// Deprecated: Use ClearBufferNamespace instead.
-func ClearBufferHighlight(buffer Buffer, srcID, startLine, endLine int) {
-	name(nvim_buf_clear_highlight)
-	deprecatedSince(7)
-}
-
-// SetBufferVirtualText set the virtual text (annotation) for a buffer line.
-//
-// By default (and currently the only option), the text will be placed after
-// the buffer text.
-//
-// Virtual text will never cause reflow, rather virtual text will be truncated at the end of the screen line.
-// The virtual text will begin one cell (|lcs-eol| or space) after the ordinary text.
-//
-// Namespaces are used to support batch deletion/updating of virtual text.
-// To create a namespace, use CreateNamespace. Virtual text is cleared using ClearBufferNamespace.
-//
-// The same nsID can be used for both virtual text and highlights added by AddBufferHighlight,
-// both can then be cleared with a single call to ClearBufferNamespace.
-// If the virtual text never will be cleared by an API call, pass "nsID = -1".
-//
-// As a shorthand, "nsID = 0" can be used to create a new namespace for the
-// virtual text, the allocated id is then returned.
-//
-// The opts arg is reserved for future use.
-//
-// Deprecated: Use SetBufferExtmark instead.
-func SetBufferVirtualText(buffer Buffer, nsID, line int, chunks []TextChunk, opts map[string]interface{}) (id int) {
-	name(nvim_buf_set_virtual_text)
-	deprecatedSince(8)
-}
-
 // window.c
 
 // WindowBuffer gets the current buffer in a window.
@@ -1526,16 +1898,6 @@ func SetWindowVar(window Window, name string, value interface{}) {
 // DeleteWindowVar removes a window-scoped (w:) variable.
 func DeleteWindowVar(window Window, name string) {
 	name(nvim_win_del_var)
-}
-
-// WindowOption gets a window option value.
-func WindowOption(window Window, name string) (value interface{}) {
-	name(nvim_win_get_option)
-}
-
-// SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
-func SetWindowOption(window Window, name string, value interface{}) {
-	name(nvim_win_set_option)
 }
 
 // WindowPosition gets the window position in display cells. First position is zero.
@@ -1594,156 +1956,10 @@ func CloseWindow(window Window, force bool) {
 	name(nvim_win_close)
 }
 
-// tabpage.c
-
-// TabpageWindows gets the windows in a tabpage.
-func TabpageWindows(tabpage Tabpage) (windows []Window) {
-	name(nvim_tabpage_list_wins)
-}
-
-// TabpageVar gets a tab-scoped (t:) variable.
-func TabpageVar(tabpage Tabpage, name string) (value interface{}) {
-	name(nvim_tabpage_get_var)
-}
-
-// SetTabpageVar sets a tab-scoped (t:) variable.
-func SetTabpageVar(tabpage Tabpage, name string, value interface{}) {
-	name(nvim_tabpage_set_var)
-}
-
-// DeleteTabpageVar removes a tab-scoped (t:) variable.
-func DeleteTabpageVar(tabpage Tabpage, name string) {
-	name(nvim_tabpage_del_var)
-}
-
-// TabpageWindow gets the current window in a tabpage.
-func TabpageWindow(tabpage Tabpage) Window {
-	name(nvim_tabpage_get_win)
-}
-
-// TabpageNumber gets the tabpage number.
-func TabpageNumber(tabpage Tabpage) (number int) {
-	name(nvim_tabpage_get_number)
-}
-
-// IsTabpageValid checks if a tabpage is valid.
-func IsTabpageValid(tabpage Tabpage) (valid bool) {
-	name(nvim_tabpage_is_valid)
-}
-
-// autocmd.c
-
-// Autocmds get all autocommands that match the corresponding {opts}.
+// SetWindowHeightNamespace set highlight namespace for a window. This will use highlights defined in
+// this namespace, but fall back to global highlights (ns=0) when missing.
 //
-// Note that when multiple patterns or events are provided, it will find all the autocommands that
-// match any combination of them.
-func Autocmds(opts map[string]interface{}) (result []*AutocmdType) {
-	name(nvim_get_autocmds)
-}
-
-// CreateAutocmd create an autocommand.
-//
-// The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
-// triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
-func CreateAutocmd(event interface{}, opts map[string]interface{}) (id int) {
-	name(nvim_create_autocmd)
-}
-
-// DeleteAutocmd delete an autocommand by id.
-//
-// NOTE: Only autocommands created via the API have an id.
-func DeleteAutocmd(id int) {
-	name(nvim_del_autocmd)
-}
-
-// ClearAutocmds clear all autocommands that match the corresponding {opts}.
-//
-// To delete a particular autocmd, see DeleteAutocmd.
-func ClearAutocmds(opts map[string]interface{}) {
-	name(nvim_clear_autocmds)
-}
-
-// CreateAugroup create or get an autocommand group(autocmd-groups).
-func CreateAugroup(name string, opts map[string]interface{}) (id int) {
-	name(nvim_create_augroup)
-}
-
-// DeleteAugroupByID delete an autocommand group by id.
-func DeleteAugroupByID(id int) {
-	name(nvim_del_augroup_by_id)
-}
-
-// DeleteAugroupByID delete an autocommand group by name.
-func DeleteAugroupByName(name string) {
-	name(nvim_del_augroup_by_name)
-}
-
-// ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
-func ExecAutocmds(event interface{}, opts map[string]interface{}) {
-	name(nvim_exec_autocmds)
-}
-
-// ui.c
-
-// AttachUI registers the client as a remote UI. After this method is called,
-// the client will receive redraw notifications.
-//
-//	:help rpc-remote-ui
-//
-// The redraw notification method has variadic arguments. Register a handler
-// for the method like this:
-//
-//	v.RegisterHandler("redraw", func(updates ...[]interface{}) {
-//	    for _, update := range updates {
-//	        // handle update
-//	    }
-//	})
-func AttachUI(width, height int, options map[string]interface{}) {
-	name(nvim_ui_attach)
-}
-
-// DetachUI unregisters the client as a remote UI.
-func DetachUI() {
-	name(nvim_ui_detach)
-}
-
-// TryResizeUI notifies Nvim that the client window has resized. If possible,
-// Nvim will send a redraw request to resize.
-func TryResizeUI(width, height int) {
-	name(nvim_ui_try_resize)
-}
-
-// SetUIOption sets a UI option.
-func SetUIOption(name string, value interface{}) {
-	name(nvim_ui_set_option)
-}
-
-// TryResizeUIGrid tell Nvim to resize a grid. Triggers a grid_resize event with the requested
-// grid size or the maximum size if it exceeds size limits.
-//
-// On invalid grid handle, fails with error.
-func TryResizeUIGrid(grid, width, height int) {
-	name(nvim_ui_try_resize_grid)
-}
-
-// SetPumHeight tells Nvim the number of elements displaying in the popumenu, to decide
-// <PageUp> and <PageDown> movement.
-//
-// height is popupmenu height, must be greater than zero.
-func SetPumHeight(height int) {
-	name(nvim_ui_pum_set_height)
-}
-
-// SetPumBounds tells Nvim the geometry of the popumenu, to align floating windows with an
-// external popup menu.
-//
-// Note that this method is not to be confused with SetPumHeight,
-// which sets the number of visible items in the popup menu, while this
-// function sets the bounding box of the popup menu, including visual
-// elements such as borders and sliders.
-//
-// Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
-// numbers to the popup menu geometry.
-func SetPumBounds(width, height, row, col float64) {
-	name(nvim_ui_pum_set_bounds)
+// This takes predecence over the 'winhighlight' option.
+func SetWindowHeightNamespace(window Window, nsID int) {
+	name(nvim_win_set_hl_ns)
 }

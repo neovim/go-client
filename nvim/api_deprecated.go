@@ -68,21 +68,6 @@ func (b *Batch) ExecuteLua(code string, result interface{}, args ...interface{})
 	b.call("nvim_execute_lua", result, code, args)
 }
 
-// CommandOutput executes a single ex command and returns the output.
-//
-// Deprecated: Use Exec instead.
-func (v *Nvim) CommandOutput(cmd string) (out string, err error) {
-	err = v.call("nvim_command_output", &out, cmd)
-	return out, err
-}
-
-// CommandOutput executes a single ex command and returns the output.
-//
-// Deprecated: Use Exec instead.
-func (b *Batch) CommandOutput(cmd string, out *string) {
-	b.call("nvim_command_output", out, cmd)
-}
-
 // BufferNumber gets a buffer's number.
 //
 // Deprecated: Use int(buffer) to get the buffer's number as an integer.
@@ -175,4 +160,19 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 // Deprecated: Use SetBufferExtmark instead.
 func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}, id *int) {
 	b.call("nvim_buf_set_virtual_text", id, buffer, nsID, line, chunks, opts)
+}
+
+// CommandOutput executes a single ex command and returns the output.
+//
+// Deprecated: Use Exec instead.
+func (v *Nvim) CommandOutput(cmd string) (out string, err error) {
+	err = v.call("nvim_command_output", &out, cmd)
+	return out, err
+}
+
+// CommandOutput executes a single ex command and returns the output.
+//
+// Deprecated: Use Exec instead.
+func (b *Batch) CommandOutput(cmd string, out *string) {
+	b.call("nvim_command_output", out, cmd)
 }

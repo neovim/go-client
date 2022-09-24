@@ -132,6 +132,7 @@ func TestAPI(t *testing.T) {
 	t.Run("Window", testWindow(v))
 	t.Run("Tabpage", testTabpage(v))
 	t.Run("Lines", testLines(v))
+	t.Run("Cmd", testCmd(v))
 	t.Run("Command", testCommand(v))
 	t.Run("Var", testVar(v))
 	t.Run("Message", testMessage(v))
@@ -2139,6 +2140,118 @@ func testLines(v *Nvim) func(*testing.T) {
 	}
 }
 
+func testCmd(v *Nvim) func(*testing.T) {
+	return func(t *testing.T) {
+		skipVersion(t, "v0.7.3")
+
+		t.Run("Cmd", func(t *testing.T) {
+			t.Run("Nvim", func(t *testing.T) {
+				defer func() {
+					// cleanup v:statusmsg
+					if err := v.SetVVar("statusmsg", ""); err != nil {
+						t.Fatalf("failed to SetVVar: %v", err)
+					}
+					// clear messages
+					if _, err := v.Exec(":messages clear", false); err != nil {
+						t.Fatalf("failed to SetVVar: %v", err)
+					}
+				}()
+				cmd := &Cmd{
+					Cmd:  `echomsg`,
+					Args: []string{`'hello'`},
+				}
+				got, err := v.Cmd(cmd, map[string]bool{"output": true})
+				if err != nil {
+					t.Fatal(err)
+				}
+				want := `hello`
+				if got != want {
+					t.Fatalf("got %s but want %s", got, want)
+				}
+			})
+
+			t.Run("Batch", func(t *testing.T) {
+				defer func() {
+					// cleanup v:statusmsg
+					if err := v.SetVVar("statusmsg", ""); err != nil {
+						t.Fatalf("failed to SetVVar: %v", err)
+					}
+					// clear messages
+					if _, err := v.Exec(":messages clear", false); err != nil {
+						t.Fatalf("failed to SetVVar: %v", err)
+					}
+				}()
+				b := v.NewBatch()
+
+				cmd := &Cmd{
+					Cmd:  `echomsg`,
+					Args: []string{`'hello'`},
+				}
+				var got string
+				b.Cmd(cmd, map[string]bool{"output": false}, &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				want := ``
+				if got != want {
+					t.Fatalf("got %s but want %s", got, want)
+				}
+			})
+		})
+
+		t.Run("ParseCmd", func(t *testing.T) {
+			t.Run("Nvim", func(t *testing.T) {
+				got, err := v.ParseCmd(`echomsg 'hello'`, make(map[string]interface{}))
+				if err != nil {
+					t.Fatal(err)
+				}
+				want := &Cmd{
+					Cmd:   `echomsg`,
+					Args:  []string{`'hello'`},
+					Count: -1,
+					Magic: new(CmdMagic),
+					Mods: &CmdMods{
+						Tab:     -1,
+						Verbose: -1,
+						Filter:  new(CmdModsFilter),
+					},
+					Nargs: `*`,
+					Addr:  `none`,
+				}
+				if !reflect.DeepEqual(got, want) {
+					t.Fatalf("\n got %#v\nwant %#v", got, want)
+				}
+			})
+
+			t.Run("Batch", func(t *testing.T) {
+				b := v.NewBatch()
+
+				var got Cmd
+				b.ParseCmd(`echomsg 'hello'`, make(map[string]interface{}), &got)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				want := Cmd{
+					Cmd:   `echomsg`,
+					Args:  []string{`'hello'`},
+					Count: -1,
+					Magic: new(CmdMagic),
+					Mods: &CmdMods{
+						Tab:     -1,
+						Verbose: -1,
+						Filter:  new(CmdModsFilter),
+					},
+					Nargs: `*`,
+					Addr:  `none`,
+				}
+				if !reflect.DeepEqual(&got, &want) {
+					t.Fatalf("\n got %#v\nwant %#v", got, want)
+				}
+			})
+		})
+	}
+}
+
 func testCommand(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Commands", func(t *testing.T) {
@@ -3691,6 +3804,22 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			if id < 0 {
 				t.Fatalf("want id is not negative but got %d", id)
 			}
+
+			{
+				skipVersion(t, "v0.7.3")
+
+				if err := v.SetHighlightNamespace(nsID); err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.SetFastHighlightNamespace(nsID); err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.SetWindowHeightNamespace(Window(0), nsID); err != nil {
+					t.Fatal(err)
+				}
+			}
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -3807,6 +3936,25 @@ func testHighlight(v *Nvim) func(*testing.T) {
 
 			if id < 0 {
 				t.Fatalf("want id is not negative but got %d", id)
+			}
+
+			{
+				skipVersion(t, "v0.7.3")
+
+				b.SetHighlightNamespace(nsID)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.SetFastHighlightNamespace(nsID)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.SetWindowHeightNamespace(Window(0), nsID)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
 			}
 		})
 	}
