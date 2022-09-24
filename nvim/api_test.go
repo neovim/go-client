@@ -3804,6 +3804,22 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			if id < 0 {
 				t.Fatalf("want id is not negative but got %d", id)
 			}
+
+			{
+				skipVersion(t, "v0.7.3")
+
+				if err := v.SetHighlightNamespace(nsID); err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.SetFastHighlightNamespace(nsID); err != nil {
+					t.Fatal(err)
+				}
+
+				if err := v.SetWindowHeightNamespace(Window(0), nsID); err != nil {
+					t.Fatal(err)
+				}
+			}
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -3920,6 +3936,25 @@ func testHighlight(v *Nvim) func(*testing.T) {
 
 			if id < 0 {
 				t.Fatalf("want id is not negative but got %d", id)
+			}
+
+			{
+				skipVersion(t, "v0.7.3")
+
+				b.SetHighlightNamespace(nsID)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.SetFastHighlightNamespace(nsID)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				b.SetWindowHeightNamespace(Window(0), nsID)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
 			}
 		})
 	}
