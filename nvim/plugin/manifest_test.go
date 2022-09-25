@@ -13,7 +13,7 @@ const (
 func TestReplaceManifest(t *testing.T) {
 	t.Parallel()
 
-	var replaceManifestTests = []struct {
+	replaceManifestTests := []struct {
 		name     string
 		original string
 		expected string

@@ -148,7 +148,6 @@ func NewEndpoint(r io.Reader, w io.Writer, c io.Closer, options ...Option) (*End
 		option.f(e)
 	}
 	return e, nil
-
 }
 
 func (e *Endpoint) decodeUint(what string) (uint64, error) {
