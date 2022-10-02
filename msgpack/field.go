@@ -23,6 +23,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 	}
 	visited[t] = true
 
+loop:
 	for i := 0; i < t.NumField(); i++ {
 		sf := t.Field(i)
 		if sf.PkgPath != "" && !sf.Anonymous {
@@ -30,6 +31,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 			continue
 		}
 
+		// detect msgpack field tags
 		var (
 			name      string
 			omitEmpty bool
@@ -37,19 +39,22 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		)
 		for i, p := range strings.Split(sf.Tag.Get("msgpack"), ",") {
 			if i == 0 {
+				if p == "-" {
+					// Skip field when field tag starts with "-", early return
+					continue loop
+				}
+
 				name = p
-			} else if p == "omitempty" {
+				continue
+			}
+			switch p {
+			case "omitempty":
 				omitEmpty = true
-			} else if p == "array" {
+			case "array":
 				array = true
-			} else {
+			default:
 				panic(fmt.Errorf("msgpack: unknown field tag %s for type %s", p, t.Name()))
 			}
-		}
-
-		if name == "-" {
-			// Skip field when field tag starts with "-"
-			continue
 		}
 
 		ft := sf.Type
@@ -57,13 +62,13 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 			ft = ft.Elem()
 		}
 
-		if name == "" && sf.Anonymous && ft.Kind() == reflect.Struct {
-			// Flatten anonymous struct field
-			fields = collectFields(fields, ft, visited, depth, append(index, i))
-			continue
-		}
-
 		if name == "" {
+			if sf.Anonymous && ft.Kind() == reflect.Struct {
+				// Flatten anonymous struct field
+				fields = collectFields(fields, ft, visited, depth, append(index, i))
+				continue loop
+			}
+
 			name = sf.Name
 		}
 
@@ -77,7 +82,7 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 			// There is another field with same name and same depth
 			// Remove that field and skip this field
 			j := 0
-			for i := 0; i < len(fields); i++ {
+			for i := len(fields) - 1; i <= 0; i-- {
 				if name != fields[i].name {
 					fields[j] = fields[i]
 					j++
