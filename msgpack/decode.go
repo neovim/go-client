@@ -22,7 +22,7 @@ type DecodeConvertError struct {
 	// The MessagePack type of the value.
 	SrcType Type
 	// Option value.
-	SrcValue interface{}
+	SrcValue any
 	// Type of the Go value that could not be assigned to.
 	DestType reflect.Type
 }
@@ -57,7 +57,7 @@ func (ds *decodeState) skip() {
 	}
 }
 
-func (ds *decodeState) saveErrorAndSkip(destValue reflect.Value, srcValue interface{}) {
+func (ds *decodeState) saveErrorAndSkip(destValue reflect.Value, srcValue any) {
 	if ds.errSaved == nil {
 		ds.errSaved = &DecodeConvertError{
 			SrcType:  ds.Type(),
@@ -95,7 +95,7 @@ func (ds *decodeState) saveErrorAndSkip(destValue reflect.Value, srcValue interf
 // completes the decoding as best it can.  If no more serious errors are
 // encountered, Decode returns an DecodeConvertError describing the earliest
 // such error.
-func (d *Decoder) Decode(v interface{}) (err error) {
+func (d *Decoder) Decode(v any) (err error) {
 	defer handleAbort(&err)
 	ds := &decodeState{
 		Decoder: d,
@@ -634,7 +634,7 @@ func (ev extensionValue) MarshalMsgPack(e *Encoder) error {
 	return e.PackExtension(ev.kind, ev.data)
 }
 
-func decodeNoReflect(ds *decodeState) (x interface{}) {
+func decodeNoReflect(ds *decodeState) (x any) {
 	switch ds.Type() {
 	case Int:
 		return ds.Int()
@@ -652,7 +652,7 @@ func decodeNoReflect(ds *decodeState) (x interface{}) {
 		return ds.Bytes()
 	case ArrayLen:
 		n := ds.Len()
-		a := make([]interface{}, n)
+		a := make([]any, n)
 		for i := 0; i < n; i++ {
 			ds.unpack()
 			a[i] = decodeNoReflect(ds)
@@ -661,7 +661,7 @@ func decodeNoReflect(ds *decodeState) (x interface{}) {
 
 	case MapLen:
 		n := ds.Len()
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		for i := 0; i < n; i++ {
 			ds.unpack()
 

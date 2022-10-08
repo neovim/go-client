@@ -16,17 +16,17 @@ const (
 
 func withExtensions() rpc.Option {
 	return rpc.WithExtensions(msgpack.ExtensionMap{
-		0: func(p []byte) (interface{}, error) {
+		0: func(p []byte) (any, error) {
 			x, err := decodeExt(p)
 			return Buffer(x), err
 		},
 
-		2: func(p []byte) (interface{}, error) {
+		2: func(p []byte) (any, error) {
 			x, err := decodeExt(p)
 			return Tabpage(x), err
 		},
 
-		1: func(p []byte) (interface{}, error) {
+		1: func(p []byte) (any, error) {
 			x, err := decodeExt(p)
 			return Window(x), err
 		},
@@ -97,7 +97,7 @@ func (x Window) String() string {
 //
 // Note that when multiple patterns or events are provided, it will find all the autocommands that
 // match any combination of them.
-func (v *Nvim) Autocmds(opts map[string]interface{}) (result []*AutocmdType, err error) {
+func (v *Nvim) Autocmds(opts map[string]any) (result []*AutocmdType, err error) {
 	err = v.call("nvim_get_autocmds", &result, opts)
 	return result, err
 }
@@ -106,7 +106,7 @@ func (v *Nvim) Autocmds(opts map[string]interface{}) (result []*AutocmdType, err
 //
 // Note that when multiple patterns or events are provided, it will find all the autocommands that
 // match any combination of them.
-func (b *Batch) Autocmds(opts map[string]interface{}, result *[]*AutocmdType) {
+func (b *Batch) Autocmds(opts map[string]any, result *[]*AutocmdType) {
 	b.call("nvim_get_autocmds", result, opts)
 }
 
@@ -114,7 +114,7 @@ func (b *Batch) Autocmds(opts map[string]interface{}, result *[]*AutocmdType) {
 //
 // The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
 // triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
-func (v *Nvim) CreateAutocmd(event interface{}, opts map[string]interface{}) (id int, err error) {
+func (v *Nvim) CreateAutocmd(event any, opts map[string]any) (id int, err error) {
 	err = v.call("nvim_create_autocmd", &id, event, opts)
 	return id, err
 }
@@ -123,7 +123,7 @@ func (v *Nvim) CreateAutocmd(event interface{}, opts map[string]interface{}) (id
 //
 // The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
 // triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
-func (b *Batch) CreateAutocmd(event interface{}, opts map[string]interface{}, id *int) {
+func (b *Batch) CreateAutocmd(event any, opts map[string]any, id *int) {
 	b.call("nvim_create_autocmd", id, event, opts)
 }
 
@@ -144,25 +144,25 @@ func (b *Batch) DeleteAutocmd(id int) {
 // ClearAutocmds clear all autocommands that match the corresponding {opts}.
 //
 // To delete a particular autocmd, see DeleteAutocmd.
-func (v *Nvim) ClearAutocmds(opts map[string]interface{}) error {
+func (v *Nvim) ClearAutocmds(opts map[string]any) error {
 	return v.call("nvim_clear_autocmds", nil, opts)
 }
 
 // ClearAutocmds clear all autocommands that match the corresponding {opts}.
 //
 // To delete a particular autocmd, see DeleteAutocmd.
-func (b *Batch) ClearAutocmds(opts map[string]interface{}) {
+func (b *Batch) ClearAutocmds(opts map[string]any) {
 	b.call("nvim_clear_autocmds", nil, opts)
 }
 
 // CreateAugroup create or get an autocommand group(autocmd-groups).
-func (v *Nvim) CreateAugroup(name string, opts map[string]interface{}) (id int, err error) {
+func (v *Nvim) CreateAugroup(name string, opts map[string]any) (id int, err error) {
 	err = v.call("nvim_create_augroup", &id, name, opts)
 	return id, err
 }
 
 // CreateAugroup create or get an autocommand group(autocmd-groups).
-func (b *Batch) CreateAugroup(name string, opts map[string]interface{}, id *int) {
+func (b *Batch) CreateAugroup(name string, opts map[string]any, id *int) {
 	b.call("nvim_create_augroup", id, name, opts)
 }
 
@@ -187,12 +187,12 @@ func (b *Batch) DeleteAugroupByName(name string) {
 }
 
 // ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
-func (v *Nvim) ExecAutocmds(event interface{}, opts map[string]interface{}) error {
+func (v *Nvim) ExecAutocmds(event any, opts map[string]any) error {
 	return v.call("nvim_exec_autocmds", nil, event, opts)
 }
 
 // ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
-func (b *Batch) ExecAutocmds(event interface{}, opts map[string]interface{}) {
+func (b *Batch) ExecAutocmds(event any, opts map[string]any) {
 	b.call("nvim_exec_autocmds", nil, event, opts)
 }
 
@@ -224,7 +224,7 @@ func (b *Batch) BufferLineCount(buffer Buffer, count *int) {
 // Otherwise, the first notification will be a "nvim_buf_changedtick_event".
 //
 // Returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
-func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}) (attached bool, err error) {
+func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]any) (attached bool, err error) {
 	err = v.call("nvim_buf_attach", &attached, buffer, sendBuffer, opts)
 	return attached, err
 }
@@ -238,7 +238,7 @@ func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]inte
 // Otherwise, the first notification will be a "nvim_buf_changedtick_event".
 //
 // Returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
-func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}, attached *bool) {
+func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]any, attached *bool) {
 	b.call("nvim_buf_attach", attached, buffer, sendBuffer, opts)
 }
 
@@ -356,7 +356,7 @@ func (b *Batch) SetBufferText(buffer Buffer, startRow int, startCol int, endRow 
 // Prefer BufferLines when retrieving entire lines.
 //
 // opts is optional parameters. Currently unused.
-func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}) ([][]byte, error) {
+func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]any) ([][]byte, error) {
 	var result [][]byte
 	err := v.call("nvim_buf_get_text", &result, buffer, startRow, startCol, endRow, endCol, opts)
 	return result, err
@@ -372,7 +372,7 @@ func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int,
 // Prefer BufferLines when retrieving entire lines.
 //
 // opts is optional parameters. Currently unused.
-func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}, result *[][]byte) {
+func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]any, result *[][]byte) {
 	b.call("nvim_buf_get_text", result, buffer, startRow, startCol, endRow, endCol, opts)
 }
 
@@ -408,12 +408,12 @@ func (b *Batch) BufferOffset(buffer Buffer, index int, offset *int) {
 }
 
 // BufferVar gets a buffer-scoped (b:) variable.
-func (v *Nvim) BufferVar(buffer Buffer, name string, result interface{}) error {
+func (v *Nvim) BufferVar(buffer Buffer, name string, result any) error {
 	return v.call("nvim_buf_get_var", result, buffer, name)
 }
 
 // BufferVar gets a buffer-scoped (b:) variable.
-func (b *Batch) BufferVar(buffer Buffer, name string, result interface{}) {
+func (b *Batch) BufferVar(buffer Buffer, name string, result any) {
 	b.call("nvim_buf_get_var", &result, buffer, name)
 }
 
@@ -481,12 +481,12 @@ func (b *Batch) DeleteBufferKeyMap(buffer Buffer, mode string, lhs string) {
 }
 
 // SetBufferVar sets a buffer-scoped (b:) variable.
-func (v *Nvim) SetBufferVar(buffer Buffer, name string, value interface{}) error {
+func (v *Nvim) SetBufferVar(buffer Buffer, name string, value any) error {
 	return v.call("nvim_buf_set_var", nil, buffer, name, value)
 }
 
 // SetBufferVar sets a buffer-scoped (b:) variable.
-func (b *Batch) SetBufferVar(buffer Buffer, name string, value interface{}) {
+func (b *Batch) SetBufferVar(buffer Buffer, name string, value any) {
 	b.call("nvim_buf_set_var", nil, buffer, name, value)
 }
 
@@ -609,7 +609,7 @@ func (b *Batch) DeleteBufferMark(buffer Buffer, name string, deleted *bool) {
 // line and col are (1,0)-indexed.
 //
 // opts is optional parameters. Reserved for future use.
-func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]interface{}) (set bool, err error) {
+func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]any) (set bool, err error) {
 	err = v.call("nvim_buf_set_mark", &set, buffer, name, line, col, opts)
 	return set, err
 }
@@ -621,7 +621,7 @@ func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts
 // line and col are (1,0)-indexed.
 //
 // opts is optional parameters. Reserved for future use.
-func (b *Batch) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]interface{}, set *bool) {
+func (b *Batch) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]any, set *bool) {
 	b.call("nvim_buf_set_mark", set, buffer, name, line, col, opts)
 }
 
@@ -796,7 +796,7 @@ func (b *Batch) BufferMark(buffer Buffer, name string, pos *[2]int) {
 //	belowright
 //	topleft
 //	botright
-func (v *Nvim) ParseCmd(str string, opts map[string]interface{}) (cmd *Cmd, err error) {
+func (v *Nvim) ParseCmd(str string, opts map[string]any) (cmd *Cmd, err error) {
 	var result Cmd
 	err = v.call("nvim_parse_cmd", &result, str, opts)
 	return &result, err
@@ -958,7 +958,7 @@ func (v *Nvim) ParseCmd(str string, opts map[string]interface{}) (cmd *Cmd, err 
 //	belowright
 //	topleft
 //	botright
-func (b *Batch) ParseCmd(str string, opts map[string]interface{}, cmd *Cmd) {
+func (b *Batch) ParseCmd(str string, opts map[string]any, cmd *Cmd) {
 	b.call("nvim_parse_cmd", cmd, str, opts)
 }
 
@@ -1029,7 +1029,7 @@ func (b *Batch) Cmd(cmd *Cmd, opts map[string]bool, output *string) {
 //	force (bool, default true)
 //
 // Override any previous definition.
-func (v *Nvim) CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) error {
+func (v *Nvim) CreateUserCommand(name string, command UserCommand, opts map[string]any) error {
 	return v.call("nvim_create_user_command", nil, name, command, opts)
 }
 
@@ -1053,7 +1053,7 @@ func (v *Nvim) CreateUserCommand(name string, command UserCommand, opts map[stri
 //	force (bool, default true)
 //
 // Override any previous definition.
-func (b *Batch) CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) {
+func (b *Batch) CreateUserCommand(name string, command UserCommand, opts map[string]any) {
 	b.call("nvim_create_user_command", nil, name, command, opts)
 }
 
@@ -1070,14 +1070,14 @@ func (b *Batch) DeleteUserCommand(name string) {
 // CreateBufferUserCommand create a new user command |user-commands| in the given buffer.
 //
 // Only commands created with |:command-buffer| or this function can be deleted with this function.
-func (v *Nvim) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) error {
+func (v *Nvim) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]any) error {
 	return v.call("nvim_buf_create_user_command", nil, buffer, name, command, opts)
 }
 
 // CreateBufferUserCommand create a new user command |user-commands| in the given buffer.
 //
 // Only commands created with |:command-buffer| or this function can be deleted with this function.
-func (b *Batch) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
+func (b *Batch) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]any) {
 	b.call("nvim_buf_create_user_command", nil, buffer, name, command, opts)
 }
 
@@ -1101,7 +1101,7 @@ func (b *Batch) DeleteBufferUserCommand(buffer Buffer, name string) {
 // opts is optional parameters. Currently only supports:
 //
 //	{"builtin":false}
-func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Command, err error) {
+func (v *Nvim) Commands(opts map[string]any) (commands map[string]*Command, err error) {
 	err = v.call("nvim_get_commands", &commands, opts)
 	return commands, err
 }
@@ -1112,14 +1112,14 @@ func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Comma
 // opts is optional parameters. Currently only supports:
 //
 //	{"builtin":false}
-func (b *Batch) Commands(opts map[string]interface{}, commands *map[string]*Command) {
+func (b *Batch) Commands(opts map[string]any, commands *map[string]*Command) {
 	b.call("nvim_get_commands", commands, opts)
 }
 
 // BufferCommands gets a map of buffer-local user-commands.
 //
 // opts is optional parameters. Currently not used.
-func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[string]*Command, error) {
+func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]any) (map[string]*Command, error) {
 	var result map[string]*Command
 	err := v.call("nvim_buf_get_commands", &result, buffer, opts)
 	return result, err
@@ -1128,7 +1128,7 @@ func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[s
 // BufferCommands gets a map of buffer-local user-commands.
 //
 // opts is optional parameters. Currently not used.
-func (b *Batch) BufferCommands(buffer Buffer, opts map[string]interface{}, result *map[string]*Command) {
+func (b *Batch) BufferCommands(buffer Buffer, opts map[string]any, result *map[string]*Command) {
 	b.call("nvim_buf_get_commands", result, buffer, opts)
 }
 
@@ -1144,22 +1144,22 @@ func (b *Batch) TabpageWindows(tabpage Tabpage, windows *[]Window) {
 }
 
 // TabpageVar gets a tab-scoped (t:) variable.
-func (v *Nvim) TabpageVar(tabpage Tabpage, name string, result interface{}) error {
+func (v *Nvim) TabpageVar(tabpage Tabpage, name string, result any) error {
 	return v.call("nvim_tabpage_get_var", result, tabpage, name)
 }
 
 // TabpageVar gets a tab-scoped (t:) variable.
-func (b *Batch) TabpageVar(tabpage Tabpage, name string, result interface{}) {
+func (b *Batch) TabpageVar(tabpage Tabpage, name string, result any) {
 	b.call("nvim_tabpage_get_var", &result, tabpage, name)
 }
 
 // SetTabpageVar sets a tab-scoped (t:) variable.
-func (v *Nvim) SetTabpageVar(tabpage Tabpage, name string, value interface{}) error {
+func (v *Nvim) SetTabpageVar(tabpage Tabpage, name string, value any) error {
 	return v.call("nvim_tabpage_set_var", nil, tabpage, name, value)
 }
 
 // SetTabpageVar sets a tab-scoped (t:) variable.
-func (b *Batch) SetTabpageVar(tabpage Tabpage, name string, value interface{}) {
+func (b *Batch) SetTabpageVar(tabpage Tabpage, name string, value any) {
 	b.call("nvim_tabpage_set_var", nil, tabpage, name, value)
 }
 
@@ -1243,7 +1243,7 @@ func (b *Batch) CreateNamespace(name string, nsID *int) {
 //	details
 //
 // Whether to include the details dict. bool type.
-func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}) (pos []int, err error) {
+func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]any) (pos []int, err error) {
 	err = v.call("nvim_buf_get_extmark_by_id", &pos, buffer, nsID, id, opt)
 	return pos, err
 }
@@ -1255,7 +1255,7 @@ func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string
 //	details
 //
 // Whether to include the details dict. bool type.
-func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}, pos *[]int) {
+func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]any, pos *[]int) {
 	b.call("nvim_buf_get_extmark_by_id", pos, buffer, nsID, id, opt)
 }
 
@@ -1284,7 +1284,7 @@ func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[strin
 //	details
 //
 // Whether to include the details dict. bool type.
-func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}) (marks []ExtMark, err error) {
+func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start any, end any, opt map[string]any) (marks []ExtMark, err error) {
 	err = v.call("nvim_buf_get_extmarks", &marks, buffer, nsID, start, end, opt)
 	return marks, err
 }
@@ -1314,7 +1314,7 @@ func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end in
 //	details
 //
 // Whether to include the details dict. bool type.
-func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, marks *[]ExtMark) {
+func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start any, end any, opt map[string]any, marks *[]ExtMark) {
 	b.call("nvim_buf_get_extmarks", marks, buffer, nsID, start, end, opt)
 }
 
@@ -1414,7 +1414,7 @@ func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end i
 //	priority
 //
 // A priority value for the highlight group. For example treesitter highlighting uses a value of 100.
-func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}) (id int, err error) {
+func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]any) (id int, err error) {
 	err = v.call("nvim_buf_set_extmark", &id, buffer, nsID, line, col, opts)
 	return id, err
 }
@@ -1515,7 +1515,7 @@ func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts
 //	priority
 //
 // A priority value for the highlight group. For example treesitter highlighting uses a value of 100.
-func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}, id *int) {
+func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]any, id *int) {
 	b.call("nvim_buf_set_extmark", id, buffer, nsID, line, col, opts)
 }
 
@@ -1612,7 +1612,7 @@ func (b *Batch) ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lin
 //	scope
 //
 // Analogous to |:setglobal| and |:setlocal|, respectively.
-func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result interface{}) error {
+func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result any) error {
 	return v.call("nvim_get_option_value", result, name, opts)
 }
 
@@ -1631,7 +1631,7 @@ func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result
 //	scope
 //
 // Analogous to |:setglobal| and |:setlocal|, respectively.
-func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, result interface{}) {
+func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, result any) {
 	b.call("nvim_get_option_value", &result, name, opts)
 }
 
@@ -1645,7 +1645,7 @@ func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, resul
 //	scope
 //
 // Analogous to |:setglobal| and |:setlocal|, respectively.
-func (v *Nvim) SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) error {
+func (v *Nvim) SetOptionValue(name string, value any, opts map[string]OptionValueScope) error {
 	return v.call("nvim_set_option_value", nil, name, value, opts)
 }
 
@@ -1659,7 +1659,7 @@ func (v *Nvim) SetOptionValue(name string, value interface{}, opts map[string]Op
 //	scope
 //
 // Analogous to |:setglobal| and |:setlocal|, respectively.
-func (b *Batch) SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) {
+func (b *Batch) SetOptionValue(name string, value any, opts map[string]OptionValueScope) {
 	b.call("nvim_set_option_value", nil, name, value, opts)
 }
 
@@ -1894,66 +1894,66 @@ func (b *Batch) OptionInfo(name string, opinfo *OptionInfo) {
 }
 
 // SetOption sets an option value.
-func (v *Nvim) SetOption(name string, value interface{}) error {
+func (v *Nvim) SetOption(name string, value any) error {
 	return v.call("nvim_set_option", nil, name, value)
 }
 
 // SetOption sets an option value.
-func (b *Batch) SetOption(name string, value interface{}) {
+func (b *Batch) SetOption(name string, value any) {
 	b.call("nvim_set_option", nil, name, value)
 }
 
 // Option gets an option value string.
-func (v *Nvim) Option(name string, result interface{}) error {
+func (v *Nvim) Option(name string, result any) error {
 	return v.call("nvim_get_option", result, name)
 }
 
 // Option gets an option value string.
-func (b *Batch) Option(name string, result interface{}) {
+func (b *Batch) Option(name string, result any) {
 	b.call("nvim_get_option", &result, name)
 }
 
 // BufferOption gets a buffer option value.
-func (v *Nvim) BufferOption(buffer Buffer, name string, result interface{}) error {
+func (v *Nvim) BufferOption(buffer Buffer, name string, result any) error {
 	return v.call("nvim_buf_get_option", result, buffer, name)
 }
 
 // BufferOption gets a buffer option value.
-func (b *Batch) BufferOption(buffer Buffer, name string, result interface{}) {
+func (b *Batch) BufferOption(buffer Buffer, name string, result any) {
 	b.call("nvim_buf_get_option", &result, buffer, name)
 }
 
 // SetBufferOption sets a buffer option value.
 //
 // Passing nil as value arg to deletes the option (only works if there's a global fallback).
-func (v *Nvim) SetBufferOption(buffer Buffer, name string, value interface{}) error {
+func (v *Nvim) SetBufferOption(buffer Buffer, name string, value any) error {
 	return v.call("nvim_buf_set_option", nil, buffer, name, value)
 }
 
 // SetBufferOption sets a buffer option value.
 //
 // Passing nil as value arg to deletes the option (only works if there's a global fallback).
-func (b *Batch) SetBufferOption(buffer Buffer, name string, value interface{}) {
+func (b *Batch) SetBufferOption(buffer Buffer, name string, value any) {
 	b.call("nvim_buf_set_option", nil, buffer, name, value)
 }
 
 // WindowOption gets a window option value.
-func (v *Nvim) WindowOption(window Window, name string, result interface{}) error {
+func (v *Nvim) WindowOption(window Window, name string, result any) error {
 	return v.call("nvim_win_get_option", result, window, name)
 }
 
 // WindowOption gets a window option value.
-func (b *Batch) WindowOption(window Window, name string, result interface{}) {
+func (b *Batch) WindowOption(window Window, name string, result any) {
 	b.call("nvim_win_get_option", &result, window, name)
 }
 
 // SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
-func (v *Nvim) SetWindowOption(window Window, name string, value interface{}) error {
+func (v *Nvim) SetWindowOption(window Window, name string, value any) error {
 	return v.call("nvim_win_set_option", nil, window, name, value)
 }
 
 // SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
-func (b *Batch) SetWindowOption(window Window, name string, value interface{}) {
+func (b *Batch) SetWindowOption(window Window, name string, value any) {
 	b.call("nvim_win_set_option", nil, window, name, value)
 }
 
@@ -1970,7 +1970,7 @@ func (b *Batch) SetWindowOption(window Window, name string, value interface{}) {
 //	        // handle update
 //	    }
 //	})
-func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) error {
+func (v *Nvim) AttachUI(width int, height int, options map[string]any) error {
 	return v.call("nvim_ui_attach", nil, width, height, options)
 }
 
@@ -1987,7 +1987,7 @@ func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) e
 //	        // handle update
 //	    }
 //	})
-func (b *Batch) AttachUI(width int, height int, options map[string]interface{}) {
+func (b *Batch) AttachUI(width int, height int, options map[string]any) {
 	b.call("nvim_ui_attach", nil, width, height, options)
 }
 
@@ -2014,12 +2014,12 @@ func (b *Batch) TryResizeUI(width int, height int) {
 }
 
 // SetUIOption sets a UI option.
-func (v *Nvim) SetUIOption(name string, value interface{}) error {
+func (v *Nvim) SetUIOption(name string, value any) error {
 	return v.call("nvim_ui_set_option", nil, name, value)
 }
 
 // SetUIOption sets a UI option.
-func (b *Batch) SetUIOption(name string, value interface{}) {
+func (b *Batch) SetUIOption(name string, value any) {
 	b.call("nvim_ui_set_option", nil, name, value)
 }
 
@@ -2117,13 +2117,13 @@ func (b *Batch) Command(cmd string) {
 }
 
 // ParseExpression parse a VimL expression.
-func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (expression map[string]interface{}, err error) {
+func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (expression map[string]any, err error) {
 	err = v.call("nvim_parse_expression", &expression, expr, flags, highlight)
 	return expression, err
 }
 
 // ParseExpression parse a VimL expression.
-func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expression *map[string]interface{}) {
+func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expression *map[string]any) {
 	b.call("nvim_parse_expression", expression, expr, flags, highlight)
 }
 
@@ -2495,7 +2495,7 @@ func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special b
 // expr is VimL expression string.
 //
 //	:help expression
-func (v *Nvim) Eval(expr string, result interface{}) error {
+func (v *Nvim) Eval(expr string, result any) error {
 	return v.call("nvim_eval", result, expr)
 }
 
@@ -2508,7 +2508,7 @@ func (v *Nvim) Eval(expr string, result interface{}) error {
 // expr is VimL expression string.
 //
 //	:help expression
-func (b *Batch) Eval(expr string, result interface{}) {
+func (b *Batch) Eval(expr string, result any) {
 	b.call("nvim_eval", &result, expr)
 }
 
@@ -2627,22 +2627,22 @@ func (b *Batch) DeleteCurrentLine() {
 }
 
 // Var gets a global (g:) variable.
-func (v *Nvim) Var(name string, result interface{}) error {
+func (v *Nvim) Var(name string, result any) error {
 	return v.call("nvim_get_var", result, name)
 }
 
 // Var gets a global (g:) variable.
-func (b *Batch) Var(name string, result interface{}) {
+func (b *Batch) Var(name string, result any) {
 	b.call("nvim_get_var", &result, name)
 }
 
 // SetVar sets a global (g:) variable.
-func (v *Nvim) SetVar(name string, value interface{}) error {
+func (v *Nvim) SetVar(name string, value any) error {
 	return v.call("nvim_set_var", nil, name, value)
 }
 
 // SetVar sets a global (g:) variable.
-func (b *Batch) SetVar(name string, value interface{}) {
+func (b *Batch) SetVar(name string, value any) {
 	b.call("nvim_set_var", nil, name, value)
 }
 
@@ -2657,22 +2657,22 @@ func (b *Batch) DeleteVar(name string) {
 }
 
 // VVar gets a v: variable.
-func (v *Nvim) VVar(name string, result interface{}) error {
+func (v *Nvim) VVar(name string, result any) error {
 	return v.call("nvim_get_vvar", result, name)
 }
 
 // VVar gets a v: variable.
-func (b *Batch) VVar(name string, result interface{}) {
+func (b *Batch) VVar(name string, result any) {
 	b.call("nvim_get_vvar", &result, name)
 }
 
 // SetVVar sets a v: variable, if it is not readonly.
-func (v *Nvim) SetVVar(name string, value interface{}) error {
+func (v *Nvim) SetVVar(name string, value any) error {
 	return v.call("nvim_set_vvar", nil, name, value)
 }
 
 // SetVVar sets a v: variable, if it is not readonly.
-func (b *Batch) SetVVar(name string, value interface{}) {
+func (b *Batch) SetVVar(name string, value any) {
 	b.call("nvim_set_vvar", nil, name, value)
 }
 
@@ -2684,7 +2684,7 @@ func (b *Batch) SetVVar(name string, value interface{}) {
 // If history is true, add to "message-history".
 //
 // opts is optional parameters. Reserved for future use.
-func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) error {
+func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]any) error {
 	return v.call("nvim_echo", nil, chunks, history, opts)
 }
 
@@ -2696,7 +2696,7 @@ func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{
 // If history is true, add to "message-history".
 //
 // opts is optional parameters. Reserved for future use.
-func (b *Batch) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) {
+func (b *Batch) Echo(chunks []TextChunk, history bool, opts map[string]any) {
 	b.call("nvim_echo", nil, chunks, history, opts)
 }
 
@@ -2856,7 +2856,7 @@ func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
 // buffer is the buffer to use (expected to be empty).
 //
 // opts is optional parameters. Reserved for future use.
-func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]interface{}) (channel int, err error) {
+func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]any) (channel int, err error) {
 	err = v.call("nvim_open_term", &channel, buffer, opts)
 	return channel, err
 }
@@ -2878,7 +2878,7 @@ func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]interface{}) (channel int
 // buffer is the buffer to use (expected to be empty).
 //
 // opts is optional parameters. Reserved for future use.
-func (b *Batch) OpenTerm(buffer Buffer, opts map[string]interface{}, channel *int) {
+func (b *Batch) OpenTerm(buffer Buffer, opts map[string]any, channel *int) {
 	b.call("nvim_open_term", channel, buffer, opts)
 }
 
@@ -3213,7 +3213,7 @@ func (b *Batch) ColorMap(colorMap *map[string]int) {
 //	gvars
 //	funcs
 //	sfuncs
-func (v *Nvim) Context(opts map[string][]string) (context map[string]interface{}, err error) {
+func (v *Nvim) Context(opts map[string][]string) (context map[string]any, err error) {
 	err = v.call("nvim_get_context", &context, opts)
 	return context, err
 }
@@ -3232,17 +3232,17 @@ func (v *Nvim) Context(opts map[string][]string) (context map[string]interface{}
 //	gvars
 //	funcs
 //	sfuncs
-func (b *Batch) Context(opts map[string][]string, context *map[string]interface{}) {
+func (b *Batch) Context(opts map[string][]string, context *map[string]any) {
 	b.call("nvim_get_context", context, opts)
 }
 
 // LoadContext Sets the current editor state from the given context map.
-func (v *Nvim) LoadContext(context map[string]interface{}, result interface{}) error {
+func (v *Nvim) LoadContext(context map[string]any, result any) error {
 	return v.call("nvim_load_context", result, context)
 }
 
 // LoadContext Sets the current editor state from the given context map.
-func (b *Batch) LoadContext(context map[string]interface{}, result interface{}) {
+func (b *Batch) LoadContext(context map[string]any, result any) {
 	b.call("nvim_load_context", &result, context)
 }
 
@@ -3359,7 +3359,7 @@ func (b *Batch) DeleteKeyMap(mode string, lhs string) {
 // 1 is the "api-metadata" map (Dictionary).
 //
 // Returns 2-tuple [{channel-id}, {api-metadata}].
-func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
+func (v *Nvim) APIInfo() (apiInfo []any, err error) {
 	err = v.call("nvim_get_api_info", &apiInfo)
 	return apiInfo, err
 }
@@ -3368,7 +3368,7 @@ func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
 // 1 is the "api-metadata" map (Dictionary).
 //
 // Returns 2-tuple [{channel-id}, {api-metadata}].
-func (b *Batch) APIInfo(apiInfo *[]interface{}) {
+func (b *Batch) APIInfo(apiInfo *[]any) {
 	b.call("nvim_get_api_info", apiInfo)
 }
 
@@ -3566,7 +3566,7 @@ func (b *Batch) Proc(pid int, process *Process) {
 // ensure the mapping doesn't end completion mode.
 //
 // opts optional parameters. Reserved for future use.
-func (v *Nvim) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]interface{}) error {
+func (v *Nvim) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]any) error {
 	return v.call("nvim_select_popupmenu_item", nil, item, insert, finish, opts)
 }
 
@@ -3578,7 +3578,7 @@ func (v *Nvim) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[
 // ensure the mapping doesn't end completion mode.
 //
 // opts optional parameters. Reserved for future use.
-func (b *Batch) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]interface{}) {
+func (b *Batch) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]any) {
 	b.call("nvim_select_popupmenu_item", nil, item, insert, finish, opts)
 }
 
@@ -3600,7 +3600,7 @@ func (b *Batch) DeleteMark(name string, deleted *bool) {
 // See |help mark-motions|.
 //
 // opts is optional parameters. Reserved for future use.
-func (v *Nvim) Mark(name string, opts map[string]interface{}) (mark *Mark, err error) {
+func (v *Nvim) Mark(name string, opts map[string]any) (mark *Mark, err error) {
 	var result Mark
 	err = v.call("nvim_get_mark", &result, name, opts)
 	return &result, err
@@ -3611,7 +3611,7 @@ func (v *Nvim) Mark(name string, opts map[string]interface{}) (mark *Mark, err e
 // See |help mark-motions|.
 //
 // opts is optional parameters. Reserved for future use.
-func (b *Batch) Mark(name string, opts map[string]interface{}, mark *Mark) {
+func (b *Batch) Mark(name string, opts map[string]any, mark *Mark) {
 	b.call("nvim_get_mark", mark, name, opts)
 }
 
@@ -3638,7 +3638,7 @@ func (b *Batch) Mark(name string, opts map[string]interface{}, mark *Mark) {
 //	use_tabline (bool)
 //
 // Evaluate tabline instead of statusline. When true, {winid} is ignored.
-func (v *Nvim) EvalStatusLine(name string, opts map[string]interface{}) (statusline map[string]interface{}, err error) {
+func (v *Nvim) EvalStatusLine(name string, opts map[string]any) (statusline map[string]any, err error) {
 	err = v.call("nvim_eval_statusline", &statusline, name, opts)
 	return statusline, err
 }
@@ -3666,7 +3666,7 @@ func (v *Nvim) EvalStatusLine(name string, opts map[string]interface{}) (statusl
 //	use_tabline (bool)
 //
 // Evaluate tabline instead of statusline. When true, {winid} is ignored.
-func (b *Batch) EvalStatusLine(name string, opts map[string]interface{}, statusline *map[string]interface{}) {
+func (b *Batch) EvalStatusLine(name string, opts map[string]any, statusline *map[string]any) {
 	b.call("nvim_eval_statusline", statusline, name, opts)
 }
 
@@ -3755,22 +3755,22 @@ func (b *Batch) SetWindowWidth(window Window, width int) {
 }
 
 // WindowVar gets a window-scoped (w:) variable.
-func (v *Nvim) WindowVar(window Window, name string, result interface{}) error {
+func (v *Nvim) WindowVar(window Window, name string, result any) error {
 	return v.call("nvim_win_get_var", result, window, name)
 }
 
 // WindowVar gets a window-scoped (w:) variable.
-func (b *Batch) WindowVar(window Window, name string, result interface{}) {
+func (b *Batch) WindowVar(window Window, name string, result any) {
 	b.call("nvim_win_get_var", &result, window, name)
 }
 
 // SetWindowVar sets a window-scoped (w:) variable.
-func (v *Nvim) SetWindowVar(window Window, name string, value interface{}) error {
+func (v *Nvim) SetWindowVar(window Window, name string, value any) error {
 	return v.call("nvim_win_set_var", nil, window, name, value)
 }
 
 // SetWindowVar sets a window-scoped (w:) variable.
-func (b *Batch) SetWindowVar(window Window, name string, value interface{}) {
+func (b *Batch) SetWindowVar(window Window, name string, value any) {
 	b.call("nvim_win_set_var", nil, window, name, value)
 }
 

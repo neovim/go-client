@@ -51,13 +51,13 @@ func (spec *pluginSpec) path() string {
 	return ""
 }
 
-func isSync(f interface{}) bool {
+func isSync(f any) bool {
 	t := reflect.TypeOf(f)
 
 	return t.Kind() == reflect.Func && t.NumOut() > 0
 }
 
-func (p *Plugin) handle(fn interface{}, spec *pluginSpec) {
+func (p *Plugin) handle(fn any, spec *pluginSpec) {
 	p.pluginSpecs = append(p.pluginSpecs, spec)
 	if p.Nvim == nil {
 		return
@@ -81,7 +81,7 @@ func (p *Plugin) handle(fn interface{}, spec *pluginSpec) {
 //
 //	:help rpcrequest()
 //	:help rpcnotify()
-func (p *Plugin) Handle(method string, fn interface{}) {
+func (p *Plugin) Handle(method string, fn any) {
 	if p.Nvim == nil {
 		return
 	}
@@ -126,7 +126,7 @@ type FunctionOptions struct {
 // is
 //
 //	{'GOPATH': $GOPATH, Cwd: getcwd()}
-func (p *Plugin) HandleFunction(options *FunctionOptions, fn interface{}) {
+func (p *Plugin) HandleFunction(options *FunctionOptions, fn any) {
 	m := make(map[string]string)
 
 	if options.Eval != "" {
@@ -230,7 +230,7 @@ type CommandOptions struct {
 // evaluate in Nvim from the type of fn's last argument. See the
 // HandleFunction documentation for information on how the expression is
 // generated.
-func (p *Plugin) HandleCommand(options *CommandOptions, fn interface{}) {
+func (p *Plugin) HandleCommand(options *CommandOptions, fn any) {
 	m := make(map[string]string)
 
 	if options.NArgs != "" {
@@ -313,7 +313,7 @@ type AutocmdOptions struct {
 // If options.Eval == "*", then HandleAutocmd constructs the expression to
 // evaluate in Nvim from the type of fn's last argument. See the HandleFunction
 // documentation for information on how the expression is generated.
-func (p *Plugin) HandleAutocmd(options *AutocmdOptions, fn interface{}) {
+func (p *Plugin) HandleAutocmd(options *AutocmdOptions, fn any) {
 	pattern := ""
 
 	m := make(map[string]string)
@@ -374,7 +374,7 @@ func (p *Plugin) RegisterForTests() error {
 	return err
 }
 
-func eval(eval string, f interface{}) string {
+func eval(eval string, f any) string {
 	if eval != `*` {
 		return eval
 	}

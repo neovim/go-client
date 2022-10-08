@@ -95,7 +95,7 @@ var extensionTypes = map[string]ExtensionType{
 	},
 }
 
-func formatNode(fset *token.FileSet, node interface{}) string {
+func formatNode(fset *token.FileSet, node any) string {
 	var buf strings.Builder
 	if err := format.Node(&buf, fset, node); err != nil {
 		panic(err)
@@ -604,7 +604,7 @@ func dumpAPI(cmdName string) error {
 		return fmt.Errorf("error getting API info: %w", err)
 	}
 
-	var v interface{}
+	var v any
 	if err := msgpack.NewDecoder(bytes.NewReader(output)).Decode(&v); err != nil {
 		return fmt.Errorf("error parsing msppack: %w", err)
 	}

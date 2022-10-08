@@ -42,94 +42,94 @@ func TestEncode(t *testing.T) {
 	t.Parallel()
 
 	encodeTests := map[string]struct {
-		v    interface{}
-		data []interface{}
+		v    any
+		data []any
 	}{
 		"Bool": {
 			v:    true,
-			data: []interface{}{true},
+			data: []any{true},
 		},
 		"Int": {
 			v:    int(1),
-			data: []interface{}{(1)},
+			data: []any{(1)},
 		},
 		"Int8": {
 			v:    int8(2),
-			data: []interface{}{2},
+			data: []any{2},
 		},
 		"Int16": {
 			v:    int16(3),
-			data: []interface{}{3},
+			data: []any{3},
 		},
 		"Int32": {
 			v:    int32(4),
-			data: []interface{}{4},
+			data: []any{4},
 		},
 		"Int64": {
 			v:    int64(5),
-			data: []interface{}{5},
+			data: []any{5},
 		},
 		"Uint": {
 			v:    uint(1),
-			data: []interface{}{1},
+			data: []any{1},
 		},
 		"Uint8": {
 			v:    uint8(2),
-			data: []interface{}{2},
+			data: []any{2},
 		},
 		"Uint16": {
 			v:    uint16(3),
-			data: []interface{}{3},
+			data: []any{3},
 		},
 		"Uint32": {
 			v:    uint32(4),
-			data: []interface{}{4},
+			data: []any{4},
 		},
 		"Uint64": {
 			v:    uint64(5),
-			data: []interface{}{5},
+			data: []any{5},
 		},
 		"Float32": {
 			v:    float32(5.0),
-			data: []interface{}{5.0},
+			data: []any{5.0},
 		},
 		"Float64": {
 			v:    float64(6.0),
-			data: []interface{}{6.0},
+			data: []any{6.0},
 		},
 		"String": {
 			v:    "hello",
-			data: []interface{}{"hello"},
+			data: []any{"hello"},
 		},
 		"Bytes": {
 			v:    []byte("world"),
-			data: []interface{}{[]byte("world")},
+			data: []any{[]byte("world")},
 		},
 		"typedString": {
 			v:    typedString("quux"),
-			data: []interface{}{"quux"},
+			data: []any{"quux"},
 		},
 		"typedByteSlice": {
 			v: typedByteSlice("foo"),
-			data: []interface{}{
+			data: []any{
 				[]byte("foo"),
 			},
 		},
 		"typedTypedByteSlice": {
 			v:    typedTypedByteSlice("bar"),
-			data: []interface{}{[]byte("bar")},
+			data: []any{[]byte("bar")},
 		},
 		"StringSlice/Nil": {
 			v:    []string(nil),
-			data: []interface{}{nil},
+			data: []any{nil},
 		},
 		"StringSlice/Empty": {
 			v:    []string{},
-			data: []interface{}{arrayLen(0)},
+			data: []any{arrayLen(0)},
 		},
 		"StringSlice/Value": {
 			v: []string{"hello", "world"},
-			data: []interface{}{
+			data: []any{
 				arrayLen(2),
 				"hello",
 				"world",
@@ -137,7 +137,7 @@ func TestEncode(t *testing.T) {
 		},
 		"StringArray/Value": {
 			v: [2]string{"hello", "world"},
-			data: []interface{}{
+			data: []any{
 				arrayLen(2),
 				"hello",
 				"world",
@@ -145,11 +145,11 @@ func TestEncode(t *testing.T) {
 		},
 		"MapStringString/Nil": {
 			v:    map[string]string(nil),
-			data: []interface{}{nil},
+			data: []any{nil},
 		},
 		"MapStringString/Value": {
 			v: map[string]string{"hello": "world"},
-			data: []interface{}{
+			data: []any{
 				mapLen(1),
 				"hello",
 				"world",
@@ -157,7 +157,7 @@ func TestEncode(t *testing.T) {
 		},
 		"IntPointer": {
 			v:    new(int),
-			data: []interface{}{0},
+			data: []any{0},
 		},
 		"TagNames": {
 			v: struct {
@@ -171,7 +171,7 @@ func TestEncode(t *testing.T) {
 				C: 3,
 				D: 4,
 			},
-			data: []interface{}{
+			data: []any{
 				mapLen(3),
 				"A", 1,
 				"BB", 2,
@@ -186,7 +186,7 @@ func TestEncode(t *testing.T) {
 				I: 22,
 				S: "skidoo",
 			},
-			data: []interface{}{arrayLen(2), 22, "skidoo"},
+			data: []any{arrayLen(2), 22, "skidoo"},
 		},
 		"OmitEmpty": {
 			v: struct {
@@ -233,7 +233,7 @@ func TestEncode(t *testing.T) {
 				M:  map[string]string{"foo": "bar"},
 				P:  new(int),
 			},
-			data: []interface{}{
+			data: []any{
 				mapLen(8),
 				"s", "1",
 				"i", 2,
@@ -247,7 +247,7 @@ func TestEncode(t *testing.T) {
 		},
 		"Struct": {
 			v: &ra{"foo", &rb{"bar", &ra{"quux", nil}}},
-			data: []interface{}{
+			data: []any{
 				mapLen(2),
 				"Sa", "foo",
 				"Ra", mapLen(2),
@@ -259,15 +259,15 @@ func TestEncode(t *testing.T) {
 		},
 		"MarshalMsgPack": {
 			v:    &me{"hello"},
-			data: []interface{}{"hello"},
+			data: []any{"hello"},
 		},
 		"Interface": {
-			v:    []interface{}{"foo", "bar"},
-			data: []interface{}{arrayLen(2), "foo", "bar"},
+			v:    []any{"foo", "bar"},
+			data: []any{arrayLen(2), "foo", "bar"},
 		},
 		"Nil": {
 			v:    nil,
-			data: []interface{}{nil},
+			data: []any{nil},
 		},
 	}
 	for name, tt := range encodeTests {

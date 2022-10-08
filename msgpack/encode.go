@@ -57,7 +57,7 @@ func encodeUnsupportedType(e *Encoder, v reflect.Value) {
 //
 // Interface values encode as the value contained in the interface. A nil
 // interface value encodes as the MessagePack nil value.
-func (e *Encoder) Encode(v interface{}) (err error) {
+func (e *Encoder) Encode(v any) (err error) {
 	if v == nil {
 		return e.PackNil()
 	}

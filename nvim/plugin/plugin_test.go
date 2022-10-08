@@ -62,7 +62,7 @@ func TestRegister(t *testing.T) {
 				chunks = append(chunks, nvim.TextChunk{Text: arg})
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -77,7 +77,7 @@ func TestRegister(t *testing.T) {
 				{Text: `Hello`},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -92,7 +92,7 @@ func TestRegister(t *testing.T) {
 				{Text: `Hello`},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -109,7 +109,7 @@ func TestRegister(t *testing.T) {
 				},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -132,7 +132,7 @@ func TestRegister(t *testing.T) {
 				},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -151,7 +151,7 @@ func TestRegister(t *testing.T) {
 				},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -177,7 +177,7 @@ func TestRegister(t *testing.T) {
 				},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -332,7 +332,7 @@ func TestSubscribe(t *testing.T) {
 
 	const event1 = "event1"
 	eventFn1 := func(t *testing.T, v *nvim.Nvim) error {
-		return v.RegisterHandler(event1, func(event ...interface{}) {
+		return v.RegisterHandler(event1, func(event ...any) {
 			if event[0] != int64(1) {
 				t.Fatalf("expected event[0] is 1 but got %d", event[0])
 			}
@@ -348,7 +348,7 @@ func TestSubscribe(t *testing.T) {
 
 	const event2 = "event2"
 	eventFn2 := func(t *testing.T, v *nvim.Nvim) error {
-		return v.RegisterHandler(event1, func(event ...interface{}) {
+		return v.RegisterHandler(event1, func(event ...any) {
 			if event[0] != int64(4) {
 				t.Fatalf("expected event[0] is 4 but got %d", event[0])
 			}
