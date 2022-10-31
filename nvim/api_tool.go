@@ -14,7 +14,6 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -405,7 +404,7 @@ func printImplementation(functions []*Function, tmpl *template.Template, outFile
 	}
 
 	if outFile != "" {
-		return ioutil.WriteFile(outFile, out, 0666)
+		return os.WriteFile(outFile, out, 0666)
 	}
 	_, err = os.Stdout.Write(out)
 	return err

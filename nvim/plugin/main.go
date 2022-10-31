@@ -4,7 +4,6 @@ package plugin
 import (
 	"bytes"
 	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -71,12 +70,12 @@ func Main(registerHandlers func(p *Plugin) error) {
 }
 
 func overwriteManifest(path, host string, manifest []byte) error {
-	input, err := ioutil.ReadFile(path)
+	input, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
 	output := replaceManifest(host, input, manifest)
-	return ioutil.WriteFile(path, output, 0666)
+	return os.WriteFile(path, output, 0666)
 }
 
 func replaceManifest(host string, input, manifest []byte) []byte {
