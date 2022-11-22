@@ -1,0 +1,11 @@
+# https://github.com/actions/labeler
+---
+
+area/ci:
+- .github/**
+
+area/msgpack:
+- msgpack/**/*.go
+
+area/nvim:
+- nvim/**/*.go
