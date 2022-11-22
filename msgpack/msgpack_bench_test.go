@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/binary"
-	"io/ioutil"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -72,7 +72,7 @@ func BenchmarkEncode(b *testing.B) {
 	for name, bb := range benchs {
 		bb := bb
 		b.Run(name, func(b *testing.B) {
-			enc := NewEncoder(ioutil.Discard)
+			enc := NewEncoder(io.Discard)
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				if err := enc.Encode(bb.value); err != nil {
@@ -86,7 +86,7 @@ func BenchmarkEncode(b *testing.B) {
 		b.Run("Parallel/"+name, func(b *testing.B) {
 			b.RunParallel(func(pb *testing.PB) {
 				for pb.Next() {
-					enc := NewEncoder(ioutil.Discard)
+					enc := NewEncoder(io.Discard)
 					if err := enc.Encode(bb.value); err != nil {
 						b.Fatal(err)
 					}
@@ -100,7 +100,7 @@ func BenchmarkPackBool(b *testing.B) {
 	b.ReportAllocs()
 
 	b.Run("False", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			v := false
@@ -111,7 +111,7 @@ func BenchmarkPackBool(b *testing.B) {
 	})
 
 	b.Run("True", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			v := true
@@ -125,7 +125,7 @@ func BenchmarkPackBool(b *testing.B) {
 func BenchmarkPackUint8(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := uint64(math.MaxUint8)
@@ -138,7 +138,7 @@ func BenchmarkPackUint8(b *testing.B) {
 func BenchmarkPackUint16(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := uint64(math.MaxUint16)
@@ -151,7 +151,7 @@ func BenchmarkPackUint16(b *testing.B) {
 func BenchmarkPackUint32(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := uint64(math.MaxUint32)
@@ -164,7 +164,7 @@ func BenchmarkPackUint32(b *testing.B) {
 func BenchmarkPackUint64(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := uint64(math.MaxUint64)
@@ -177,7 +177,7 @@ func BenchmarkPackUint64(b *testing.B) {
 func BenchmarkPackInt8(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := int64(math.MaxInt8)
@@ -190,7 +190,7 @@ func BenchmarkPackInt8(b *testing.B) {
 func BenchmarkPackInt16(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := int64(math.MaxInt16)
@@ -203,7 +203,7 @@ func BenchmarkPackInt16(b *testing.B) {
 func BenchmarkPackInt32(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := int64(math.MaxInt32)
@@ -216,7 +216,7 @@ func BenchmarkPackInt32(b *testing.B) {
 func BenchmarkPackInt64(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := int64(math.MaxInt64)
@@ -229,7 +229,7 @@ func BenchmarkPackInt64(b *testing.B) {
 func BenchmarkPackFloat32(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := float64(math.MaxFloat32)
@@ -242,7 +242,7 @@ func BenchmarkPackFloat32(b *testing.B) {
 func BenchmarkPackFloat64(b *testing.B) {
 	b.ReportAllocs()
 
-	enc := NewEncoder(ioutil.Discard)
+	enc := NewEncoder(io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v := float64(math.MaxFloat64)
@@ -256,7 +256,7 @@ func BenchmarkPackString(b *testing.B) {
 	b.ReportAllocs()
 
 	b.Run("MaxUint8", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		s := makeString(math.MaxUint8)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -267,7 +267,7 @@ func BenchmarkPackString(b *testing.B) {
 	})
 
 	b.Run("MaxUint8+1", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		s := makeString(math.MaxUint8 + 1)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -278,7 +278,7 @@ func BenchmarkPackString(b *testing.B) {
 	})
 
 	b.Run("MaxUint16", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		s := makeString(math.MaxUint16)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -293,7 +293,7 @@ func BenchmarkPackStringBytes(b *testing.B) {
 	b.ReportAllocs()
 
 	b.Run("MaxUint8", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		p := []byte(makeString(math.MaxUint8))
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -304,7 +304,7 @@ func BenchmarkPackStringBytes(b *testing.B) {
 	})
 
 	b.Run("MaxUint8+1", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		p := []byte(makeString(math.MaxUint8 + 1))
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -315,7 +315,7 @@ func BenchmarkPackStringBytes(b *testing.B) {
 	})
 
 	b.Run("MaxUint16", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		p := []byte(makeString(math.MaxUint16))
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -330,7 +330,7 @@ func BenchmarkPackBinary(b *testing.B) {
 	b.ReportAllocs()
 
 	b.Run("MaxUint8", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		p := []byte(makeString(math.MaxUint8))
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -341,7 +341,7 @@ func BenchmarkPackBinary(b *testing.B) {
 	})
 
 	b.Run("MaxUint8+1", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		p := []byte(makeString(math.MaxUint8 + 1))
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -352,7 +352,7 @@ func BenchmarkPackBinary(b *testing.B) {
 	})
 
 	b.Run("MaxUint16", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		p := []byte(makeString(math.MaxUint16))
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -367,7 +367,7 @@ func BenchmarkPackArrayLen(b *testing.B) {
 	b.ReportAllocs()
 
 	b.Run("MaxUint8", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		v := int64(math.MaxUint8)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -378,7 +378,7 @@ func BenchmarkPackArrayLen(b *testing.B) {
 	})
 
 	b.Run("MaxUint16", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		v := int64(math.MaxUint16)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -389,7 +389,7 @@ func BenchmarkPackArrayLen(b *testing.B) {
 	})
 
 	b.Run("MaxUint32", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		v := int64(math.MaxUint32)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -404,7 +404,7 @@ func BenchmarkPackMapLen(b *testing.B) {
 	b.ReportAllocs()
 
 	b.Run("MaxUint8", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		v := int64(math.MaxUint8)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -415,7 +415,7 @@ func BenchmarkPackMapLen(b *testing.B) {
 	})
 
 	b.Run("MaxUint16", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		v := int64(math.MaxUint16)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -426,7 +426,7 @@ func BenchmarkPackMapLen(b *testing.B) {
 	})
 
 	b.Run("MaxUint32", func(b *testing.B) {
-		enc := NewEncoder(ioutil.Discard)
+		enc := NewEncoder(io.Discard)
 		v := int64(math.MaxUint32)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -1468,7 +1468,7 @@ func extractMpack(tb testing.TB, path string) []byte {
 		tb.Fatal(err)
 	}
 
-	data, err := ioutil.ReadAll(gz)
+	data, err := io.ReadAll(gz)
 	if err != nil {
 		tb.Fatal(err)
 	}
@@ -1490,7 +1490,7 @@ func BenchmarkEncodeMpack(b *testing.B) {
 		b.ResetTimer()
 
 		b.RunParallel(func(pb *testing.PB) {
-			enc := NewEncoder(ioutil.Discard)
+			enc := NewEncoder(io.Discard)
 			for pb.Next() {
 				if err := enc.Encode(&structAPI); err != nil {
 					b.Fatalf("Decode: %v", err)
@@ -1512,7 +1512,7 @@ func BenchmarkEncodeMpack(b *testing.B) {
 		b.ResetTimer()
 
 		b.RunParallel(func(pb *testing.PB) {
-			enc := NewEncoder(ioutil.Discard)
+			enc := NewEncoder(io.Discard)
 			for pb.Next() {
 				if err := enc.Encode(&structAPIMetadata); err != nil {
 					b.Fatalf("Decode: %v", err)
@@ -1534,7 +1534,7 @@ func BenchmarkEncodeMpack(b *testing.B) {
 		b.ResetTimer()
 
 		b.RunParallel(func(pb *testing.PB) {
-			enc := NewEncoder(ioutil.Discard)
+			enc := NewEncoder(io.Discard)
 			for pb.Next() {
 				if err := enc.Encode(&structAPIMetadata); err != nil {
 					b.Fatalf("Decode: %v", err)
@@ -1556,7 +1556,7 @@ func BenchmarkEncodeMpack(b *testing.B) {
 		b.ResetTimer()
 
 		b.RunParallel(func(pb *testing.PB) {
-			enc := NewEncoder(ioutil.Discard)
+			enc := NewEncoder(io.Discard)
 			for pb.Next() {
 				if err := enc.Encode(&structFuncsData); err != nil {
 					b.Fatalf("Decode: %v", err)
