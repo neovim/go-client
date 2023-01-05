@@ -2208,7 +2208,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 				want := &Cmd{
 					Cmd:   `echomsg`,
 					Args:  []string{`'hello'`},
-					Count: -1,
+					Count: 0,
 					Magic: new(CmdMagic),
 					Mods: &CmdMods{
 						Tab:     -1,
@@ -2234,7 +2234,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 				want := Cmd{
 					Cmd:   `echomsg`,
 					Args:  []string{`'hello'`},
-					Count: -1,
+					Count: 0,
 					Magic: new(CmdMagic),
 					Mods: &CmdMods{
 						Tab:     -1,
@@ -3073,13 +3073,23 @@ func testKey(v *Nvim) func(*testing.T) {
 				case 8:
 					wantMaps = []*Mapping{
 						{
+							LHS:     "&",
+							RHS:     ":&&<CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+						{
 							LHS:     "Y",
 							RHS:     "y$",
 							Silent:  0,
 							NoRemap: 1,
 							Expr:    0,
 							Buffer:  0,
-							SID:     0,
+							SID:     -8,
 							NoWait:  0,
 						},
 						{
@@ -3099,11 +3109,11 @@ func testKey(v *Nvim) func(*testing.T) {
 							NoRemap: 1,
 							Expr:    0,
 							Buffer:  0,
-							SID:     0,
+							SID:     -8,
 							NoWait:  0,
 						},
 					}
-					wantMapsLen = 2
+					wantMapsLen = 3
 				}
 
 				got, err := v.KeyMap(mode)
@@ -3417,13 +3427,23 @@ func testKey(v *Nvim) func(*testing.T) {
 				case 8:
 					wantMaps = []*Mapping{
 						{
+							LHS:     "&",
+							RHS:     ":&&<CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+						{
 							LHS:     "Y",
 							RHS:     "y$",
 							Silent:  0,
 							NoRemap: 1,
 							Expr:    0,
 							Buffer:  0,
-							SID:     0,
+							SID:     -8,
 							NoWait:  0,
 						},
 						{
@@ -3443,11 +3463,11 @@ func testKey(v *Nvim) func(*testing.T) {
 							NoRemap: 1,
 							Expr:    0,
 							Buffer:  0,
-							SID:     0,
+							SID:     -8,
 							NoWait:  0,
 						},
 					}
-					wantMapsLen = 2
+					wantMapsLen = 3
 				}
 				var got []*Mapping
 				b.KeyMap(mode, &got)
