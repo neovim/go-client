@@ -96,10 +96,7 @@ func (v *Nvim) Close() error {
 
 // ExitCode returns the exit code of the exited nvim process.
 func (v *Nvim) ExitCode() int {
-	if v.cmd.ProcessState == nil {
-		return -1
-	}
-
+	v.cmd.Wait()
 	return v.cmd.ProcessState.ExitCode()
 }
 
