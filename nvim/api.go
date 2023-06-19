@@ -1832,9 +1832,9 @@ func (b *Batch) AllOptionsInfo(opinfo *OptionInfo) {
 //	flaglist
 //
 // List of single char flags.
-func (v *Nvim) OptionInfo(name string) (opinfo *OptionInfo, err error) {
+func (v *Nvim) OptionInfo(name string, opts map[string]interface{}) (opinfo *OptionInfo, err error) {
 	var result OptionInfo
-	err = v.call("nvim_get_option_info", &result, name)
+	err = v.call("nvim_get_option_info2", &result, name, opts)
 	return &result, err
 }
 
@@ -1889,8 +1889,8 @@ func (v *Nvim) OptionInfo(name string) (opinfo *OptionInfo, err error) {
 //	flaglist
 //
 // List of single char flags.
-func (b *Batch) OptionInfo(name string, opinfo *OptionInfo) {
-	b.call("nvim_get_option_info", opinfo, name)
+func (b *Batch) OptionInfo(name string, opts map[string]interface{}, opinfo *OptionInfo) {
+	b.call("nvim_get_option_info2", opinfo, name, opts)
 }
 
 // SetOption sets an option value.
@@ -1989,6 +1989,16 @@ func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) e
 //	})
 func (b *Batch) AttachUI(width int, height int, options map[string]interface{}) {
 	b.call("nvim_ui_attach", nil, width, height, options)
+}
+
+// SetFocusUI tells the nvim server if focus was gained or lost by the GUI.
+func (v *Nvim) SetFocusUI(gained bool) error {
+	return v.call("nvim_ui_set_focus", nil, gained)
+}
+
+// SetFocusUI tells the nvim server if focus was gained or lost by the GUI.
+func (b *Batch) SetFocusUI(gained bool) {
+	b.call("nvim_ui_set_focus", nil, gained)
 }
 
 // DetachUI unregisters the client as a remote UI.
@@ -2125,6 +2135,54 @@ func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (expre
 // ParseExpression parse a VimL expression.
 func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expression *map[string]interface{}) {
 	b.call("nvim_parse_expression", expression, expr, flags, highlight)
+}
+
+// HL gets a highlight definition by name.
+//
+// nsID get highlight groups for namespace ns_id [Namespaces]. Use 0 to get global highlight groups |:highlight|.
+//
+// opts dict:
+//
+//	name
+//
+// Get a highlight definition by name.
+//
+//	id
+//
+// Get a highlight definition by id.
+//
+//	link
+//
+// Show linked group name instead of effective definition.
+//
+// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+func (v *Nvim) HL(nsID int, opts map[string]interface{}) (highlight *HLAttrs, err error) {
+	var result HLAttrs
+	err = v.call("nvim_get_hl", &result, nsID, opts)
+	return &result, err
+}
+
+// HL gets a highlight definition by name.
+//
+// nsID get highlight groups for namespace ns_id [Namespaces]. Use 0 to get global highlight groups |:highlight|.
+//
+// opts dict:
+//
+//	name
+//
+// Get a highlight definition by name.
+//
+//	id
+//
+// Get a highlight definition by id.
+//
+//	link
+//
+// Show linked group name instead of effective definition.
+//
+// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+func (b *Batch) HL(nsID int, opts map[string]interface{}, highlight *HLAttrs) {
+	b.call("nvim_get_hl", highlight, nsID, opts)
 }
 
 // HLIDByName gets a highlight group by name.
