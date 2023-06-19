@@ -951,8 +951,8 @@ func AllOptionsInfo() (opinfo OptionInfo) {
 //	flaglist
 //
 // List of single char flags.
-func OptionInfo(name string) (opinfo OptionInfo) {
-	name(nvim_get_option_info)
+func OptionInfo(name string, opts map[string]interface{}) (opinfo OptionInfo) {
+	name(nvim_get_option_info2)
 	returnPtr()
 }
 
@@ -1005,6 +1005,11 @@ func SetWindowOption(window Window, name string, value interface{}) {
 //	})
 func AttachUI(width, height int, options map[string]interface{}) {
 	name(nvim_ui_attach)
+}
+
+// SetFocusUI tells the nvim server if focus was gained or lost by the GUI.
+func SetFocusUI(gained bool) {
+	name(nvim_ui_set_focus)
 }
 
 // DetachUI unregisters the client as a remote UI.
@@ -1060,8 +1065,8 @@ func SetPumBounds(width, height, row, col float64) {
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
-func Exec(src string, output bool) (out string) {
-	name(nvim_exec)
+func Exec(src string, opts map[string]interface{}) (out map[string]interface{}) {
+	name(nvim_exec2)
 }
 
 // Command executes an ex-command.
@@ -1078,6 +1083,30 @@ func ParseExpression(expr, flags string, highlight bool) (expression map[string]
 
 // vim.c
 
+// HL gets a highlight definition by name.
+//
+// nsID get highlight groups for namespace ns_id [Namespaces]. Use 0 to get global highlight groups |:highlight|.
+//
+// opts dict:
+//
+//	name
+//
+// Get a highlight definition by name.
+//
+//	id
+//
+// Get a highlight definition by id.
+//
+//	link
+//
+// Show linked group name instead of effective definition.
+//
+// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+func HL(nsID int, opts map[string]interface{}) (highlight HLAttrs) {
+	name(nvim_get_hl)
+	returnPtr()
+}
+
 // HLByID gets a highlight definition by name.
 //
 // hlID is the highlight id as returned by HLIDByName.
@@ -1088,6 +1117,7 @@ func ParseExpression(expr, flags string, highlight bool) (expression map[string]
 func HLByID(hlID int, rgb bool) (highlight HLAttrs) {
 	name(nvim_get_hl_by_id)
 	returnPtr()
+	deprecatedSince(9)
 }
 
 // HLIDByName gets a highlight group by name.
@@ -1111,6 +1141,7 @@ func HLIDByName(name string) (hlID int) {
 func HLByName(name string, rgb bool) (highlight HLAttrs) {
 	name(nvim_get_hl_by_name)
 	returnPtr()
+	deprecatedSince(9)
 }
 
 // SetHighlight sets a highlight group.

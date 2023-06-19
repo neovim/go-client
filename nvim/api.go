@@ -1832,9 +1832,9 @@ func (b *Batch) AllOptionsInfo(opinfo *OptionInfo) {
 //	flaglist
 //
 // List of single char flags.
-func (v *Nvim) OptionInfo(name string) (opinfo *OptionInfo, err error) {
+func (v *Nvim) OptionInfo(name string, opts map[string]interface{}) (opinfo *OptionInfo, err error) {
 	var result OptionInfo
-	err = v.call("nvim_get_option_info", &result, name)
+	err = v.call("nvim_get_option_info2", &result, name, opts)
 	return &result, err
 }
 
@@ -1889,8 +1889,8 @@ func (v *Nvim) OptionInfo(name string) (opinfo *OptionInfo, err error) {
 //	flaglist
 //
 // List of single char flags.
-func (b *Batch) OptionInfo(name string, opinfo *OptionInfo) {
-	b.call("nvim_get_option_info", opinfo, name)
+func (b *Batch) OptionInfo(name string, opts map[string]interface{}, opinfo *OptionInfo) {
+	b.call("nvim_get_option_info2", opinfo, name, opts)
 }
 
 // SetOption sets an option value.
@@ -1991,6 +1991,16 @@ func (b *Batch) AttachUI(width int, height int, options map[string]interface{}) 
 	b.call("nvim_ui_attach", nil, width, height, options)
 }
 
+// SetFocusUI tells the nvim server if focus was gained or lost by the GUI.
+func (v *Nvim) SetFocusUI(gained bool) error {
+	return v.call("nvim_ui_set_focus", nil, gained)
+}
+
+// SetFocusUI tells the nvim server if focus was gained or lost by the GUI.
+func (b *Batch) SetFocusUI(gained bool) {
+	b.call("nvim_ui_set_focus", nil, gained)
+}
+
 // DetachUI unregisters the client as a remote UI.
 func (v *Nvim) DetachUI() error {
 	return v.call("nvim_ui_detach", nil)
@@ -2088,8 +2098,8 @@ func (b *Batch) SetPumBounds(width float64, height float64, row float64, col flo
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
-func (v *Nvim) Exec(src string, output bool) (out string, err error) {
-	err = v.call("nvim_exec", &out, src, output)
+func (v *Nvim) Exec(src string, opts map[string]interface{}) (out map[string]interface{}, err error) {
+	err = v.call("nvim_exec2", &out, src, opts)
 	return out, err
 }
 
@@ -2098,8 +2108,8 @@ func (v *Nvim) Exec(src string, output bool) (out string, err error) {
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
-func (b *Batch) Exec(src string, output bool, out *string) {
-	b.call("nvim_exec", out, src, output)
+func (b *Batch) Exec(src string, opts map[string]interface{}, out *map[string]interface{}) {
+	b.call("nvim_exec2", out, src, opts)
 }
 
 // Command executes an ex-command.
@@ -2127,28 +2137,52 @@ func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expre
 	b.call("nvim_parse_expression", expression, expr, flags, highlight)
 }
 
-// HLByID gets a highlight definition by name.
+// HL gets a highlight definition by name.
 //
-// hlID is the highlight id as returned by HLIDByName.
+// nsID get highlight groups for namespace ns_id [Namespaces]. Use 0 to get global highlight groups |:highlight|.
 //
-// rgb is the whether the export RGB colors.
+// opts dict:
 //
-// The returned highlight is the highlight definition.
-func (v *Nvim) HLByID(hlID int, rgb bool) (highlight *HLAttrs, err error) {
+//	name
+//
+// Get a highlight definition by name.
+//
+//	id
+//
+// Get a highlight definition by id.
+//
+//	link
+//
+// Show linked group name instead of effective definition.
+//
+// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+func (v *Nvim) HL(nsID int, opts map[string]interface{}) (highlight *HLAttrs, err error) {
 	var result HLAttrs
-	err = v.call("nvim_get_hl_by_id", &result, hlID, rgb)
+	err = v.call("nvim_get_hl", &result, nsID, opts)
 	return &result, err
 }
 
-// HLByID gets a highlight definition by name.
+// HL gets a highlight definition by name.
 //
-// hlID is the highlight id as returned by HLIDByName.
+// nsID get highlight groups for namespace ns_id [Namespaces]. Use 0 to get global highlight groups |:highlight|.
 //
-// rgb is the whether the export RGB colors.
+// opts dict:
 //
-// The returned highlight is the highlight definition.
-func (b *Batch) HLByID(hlID int, rgb bool, highlight *HLAttrs) {
-	b.call("nvim_get_hl_by_id", highlight, hlID, rgb)
+//	name
+//
+// Get a highlight definition by name.
+//
+//	id
+//
+// Get a highlight definition by id.
+//
+//	link
+//
+// Show linked group name instead of effective definition.
+//
+// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+func (b *Batch) HL(nsID int, opts map[string]interface{}, highlight *HLAttrs) {
+	b.call("nvim_get_hl", highlight, nsID, opts)
 }
 
 // HLIDByName gets a highlight group by name.
@@ -2172,30 +2206,6 @@ func (v *Nvim) HLIDByName(name string) (hlID int, err error) {
 // This function similar to HLByID, but allocates a new ID if not present.
 func (b *Batch) HLIDByName(name string, hlID *int) {
 	b.call("nvim_get_hl_id_by_name", hlID, name)
-}
-
-// HLByName gets a highlight definition by id.
-//
-// name is Highlight group name.
-//
-// rgb is whether the export RGB colors.
-//
-// The returned highlight is the highlight definition.
-func (v *Nvim) HLByName(name string, rgb bool) (highlight *HLAttrs, err error) {
-	var result HLAttrs
-	err = v.call("nvim_get_hl_by_name", &result, name, rgb)
-	return &result, err
-}
-
-// HLByName gets a highlight definition by id.
-//
-// name is Highlight group name.
-//
-// rgb is whether the export RGB colors.
-//
-// The returned highlight is the highlight definition.
-func (b *Batch) HLByName(name string, rgb bool, highlight *HLAttrs) {
-	b.call("nvim_get_hl_by_name", highlight, name, rgb)
 }
 
 // SetHighlight sets a highlight group.

@@ -172,10 +172,8 @@ func parseAPIDef() ([]*Function, []*Function, error) {
 								}
 							}
 						case "deprecatedSince":
-							if len(call.Args) == 1 {
-								if lit, ok := call.Args[0].(*ast.BasicLit); ok && lit.Kind == token.INT {
-									m.DeprecatedSince, _ = strconv.Atoi(lit.Value)
-								}
+							if lit, ok := call.Args[0].(*ast.BasicLit); ok && lit.Kind == token.INT {
+								m.DeprecatedSince, _ = strconv.Atoi(lit.Value)
 							}
 						case "returnPtr":
 							m.ReturnPtr = true
@@ -440,11 +438,14 @@ var nvimTypes = map[string]string{
 	"Process":     "Object",
 	"UserCommand": "Object",
 
+	"Cmd":                         "Dictionary",
+	"*Cmd":                        "Dictionary",
 	"Channel":                     "Dictionary",
 	"*Channel":                    "Dictionary",
 	"ClientVersion":               "Dictionary",
 	"HLAttrs":                     "Dictionary",
 	"*HLAttrs":                    "Dictionary",
+	"[]*HLAttrs":                  "Dictionary",
 	"WindowConfig":                "Dictionary",
 	"*WindowConfig":               "Dictionary",
 	"ClientAttributes":            "Dictionary",
@@ -523,6 +524,7 @@ var specialAPIs = map[string]bool{
 	"nvim_chan_send":               true, // FUNC_API_LUA_ONLY
 	"nvim_win_call":                true, // FUNC_API_LUA_ONLY
 	"nvim_notify":                  true, // implements underling nlua(vim.notify)
+	"nvim_get_option_info":         true, // deprecated
 }
 
 func compareFunctions(cmdName string, functions []*Function) error {

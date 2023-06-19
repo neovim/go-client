@@ -162,6 +162,54 @@ func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks [
 	b.call("nvim_buf_set_virtual_text", id, buffer, nsID, line, chunks, opts)
 }
 
+// HLByID gets a highlight definition by name.
+//
+// hlID is the highlight id as returned by HLIDByName.
+//
+// rgb is the whether the export RGB colors.
+//
+// The returned highlight is the highlight definition.
+func (v *Nvim) HLByID(hlID int, rgb bool) (highlight *HLAttrs, err error) {
+	var result HLAttrs
+	err = v.call("nvim_get_hl_by_id", &result, hlID, rgb)
+	return &result, err
+}
+
+// HLByID gets a highlight definition by name.
+//
+// hlID is the highlight id as returned by HLIDByName.
+//
+// rgb is the whether the export RGB colors.
+//
+// The returned highlight is the highlight definition.
+func (b *Batch) HLByID(hlID int, rgb bool, highlight *HLAttrs) {
+	b.call("nvim_get_hl_by_id", highlight, hlID, rgb)
+}
+
+// HLByName gets a highlight definition by id.
+//
+// name is Highlight group name.
+//
+// rgb is whether the export RGB colors.
+//
+// The returned highlight is the highlight definition.
+func (v *Nvim) HLByName(name string, rgb bool) (highlight *HLAttrs, err error) {
+	var result HLAttrs
+	err = v.call("nvim_get_hl_by_name", &result, name, rgb)
+	return &result, err
+}
+
+// HLByName gets a highlight definition by id.
+//
+// name is Highlight group name.
+//
+// rgb is whether the export RGB colors.
+//
+// The returned highlight is the highlight definition.
+func (b *Batch) HLByName(name string, rgb bool, highlight *HLAttrs) {
+	b.call("nvim_get_hl_by_name", highlight, name, rgb)
+}
+
 // CommandOutput executes a single ex command and returns the output.
 //
 // Deprecated: Use Exec instead.
