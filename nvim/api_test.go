@@ -5371,6 +5371,10 @@ func testUI(v *Nvim) func(*testing.T) {
 			if err := v.TryResizeUIGrid(1, 50, 40); err != nil {
 				t.Fatal(err)
 			}
+
+			if err := v.SetFocusUI(true); err != nil {
+				t.Fatal(err)
+			}
 		})
 
 		t.Run("Batch", func(t *testing.T) {
@@ -5409,6 +5413,11 @@ func testUI(v *Nvim) func(*testing.T) {
 			}
 
 			b.TryResizeUIGrid(1, 50, 40)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+
+			b.SetFocusUI(true)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
