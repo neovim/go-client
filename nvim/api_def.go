@@ -1060,8 +1060,8 @@ func SetPumBounds(width, height, row, col float64) {
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
-func Exec(src string, output bool) (out string) {
-	name(nvim_exec)
+func Exec(src string, opts map[string]interface{}) (out map[string]interface{}) {
+	name(nvim_exec2)
 }
 
 // Command executes an ex-command.
@@ -1088,6 +1088,7 @@ func ParseExpression(expr, flags string, highlight bool) (expression map[string]
 func HLByID(hlID int, rgb bool) (highlight HLAttrs) {
 	name(nvim_get_hl_by_id)
 	returnPtr()
+	deprecatedSince(9)
 }
 
 // HLIDByName gets a highlight group by name.
@@ -1111,6 +1112,7 @@ func HLIDByName(name string) (hlID int) {
 func HLByName(name string, rgb bool) (highlight HLAttrs) {
 	name(nvim_get_hl_by_name)
 	returnPtr()
+	deprecatedSince(9)
 }
 
 // SetHighlight sets a highlight group.
