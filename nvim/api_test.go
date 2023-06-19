@@ -3825,6 +3825,14 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
+			color, err := v.ColorByName(`Red`)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if color != cm[`Red`] {
+				t.Fatalf("got red color is %v but want %v", color, cm[`Red`])
+			}
+
 			nsID, err := v.CreateNamespace(t.Name())
 			if err != nil {
 				t.Fatal(err)
@@ -3891,6 +3899,15 @@ func testHighlight(v *Nvim) func(*testing.T) {
 
 			var cm map[string]int
 			b.ColorMap(&cm)
+
+			var color int
+			b.ColorByName(`Red`, &color)
+			if err := b.Execute(); err != nil {
+				t.Fatal(err)
+			}
+			if color != cm[`Red`] {
+				t.Fatalf("got red color is %v but want %v", color, cm[`Red`])
+			}
 
 			var nsID int
 			b.CreateNamespace(t.Name(), &nsID)
