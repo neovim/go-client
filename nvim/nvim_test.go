@@ -26,7 +26,13 @@ func newChildProcess(tb testing.TB, opts ...ChildProcessOption) (v *Nvim) {
 	ctx := context.Background()
 	copts := []ChildProcessOption{
 		ChildProcessCommand(BinaryName),
-		ChildProcessArgs("-u", "NONE", "-n", "-i", "NONE", "--embed", "--headless"),
+		ChildProcessArgs(
+			"-u", "NONE",
+			"-n",
+			"-i", "NONE",
+			"--embed",
+			"--headless",
+		),
 		ChildProcessContext(ctx),
 		ChildProcessLogf(tb.Logf),
 		ChildProcessEnv(envs),
@@ -135,7 +141,6 @@ func TestEmbedded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer v.Close()
 
 	done := make(chan error, 1)
 	go func() {
