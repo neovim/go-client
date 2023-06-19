@@ -440,6 +440,8 @@ var nvimTypes = map[string]string{
 	"Process":     "Object",
 	"UserCommand": "Object",
 
+	"Cmd":                         "Dictionary",
+	"*Cmd":                        "Dictionary",
 	"Channel":                     "Dictionary",
 	"*Channel":                    "Dictionary",
 	"ClientVersion":               "Dictionary",
