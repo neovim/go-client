@@ -73,10 +73,7 @@ func (v *Nvim) Close() error {
 		v.readMu.Lock()
 		defer v.readMu.Unlock()
 
-		errWait := v.cmd.Wait()
-		if err == nil {
-			err = errWait
-		}
+		_ = v.cmd.Wait()
 	}
 
 	if v.serveCh != nil {
@@ -86,7 +83,7 @@ func (v *Nvim) Close() error {
 		case <-time.After(10 * time.Second):
 			errServe = errors.New("nvim: Serve did not exit")
 		}
-		if err == nil {
+		if err == nil && errServe != nil {
 			err = errServe
 		}
 	}

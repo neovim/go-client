@@ -2200,23 +2200,24 @@ func testCmd(v *Nvim) func(*testing.T) {
 		})
 
 		t.Run("ParseCmd", func(t *testing.T) {
+			want := &Cmd{
+				Cmd:   `echomsg`,
+				Args:  []string{`'hello'`},
+				Count: 0,
+				Magic: new(CmdMagic),
+				Mods: &CmdMods{
+					Tab:     -1,
+					Verbose: -1,
+					Filter:  new(CmdModsFilter),
+				},
+				Nargs: `*`,
+				Addr:  `none`,
+			}
+
 			t.Run("Nvim", func(t *testing.T) {
 				got, err := v.ParseCmd(`echomsg 'hello'`, make(map[string]interface{}))
 				if err != nil {
 					t.Fatal(err)
-				}
-				want := &Cmd{
-					Cmd:   `echomsg`,
-					Args:  []string{`'hello'`},
-					Count: -1,
-					Magic: new(CmdMagic),
-					Mods: &CmdMods{
-						Tab:     -1,
-						Verbose: -1,
-						Filter:  new(CmdModsFilter),
-					},
-					Nargs: `*`,
-					Addr:  `none`,
 				}
 				if !reflect.DeepEqual(got, want) {
 					t.Fatalf("\n got %#v\nwant %#v", got, want)
@@ -2231,20 +2232,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				want := Cmd{
-					Cmd:   `echomsg`,
-					Args:  []string{`'hello'`},
-					Count: -1,
-					Magic: new(CmdMagic),
-					Mods: &CmdMods{
-						Tab:     -1,
-						Verbose: -1,
-						Filter:  new(CmdModsFilter),
-					},
-					Nargs: `*`,
-					Addr:  `none`,
-				}
-				if !reflect.DeepEqual(&got, &want) {
+				if !reflect.DeepEqual(&got, want) {
 					t.Fatalf("\n got %#v\nwant %#v", got, want)
 				}
 			})
@@ -2987,20 +2975,8 @@ func testKey(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				wantMaps := []*Mapping{
-					{
-						LHS:     "y",
-						RHS:     "yy",
-						Silent:  0,
-						NoRemap: 0,
-						Expr:    0,
-						Buffer:  0,
-						SID:     0,
-						NoWait:  0,
-					},
-				}
+				var wantMaps []*Mapping
 				wantMapsLen := 0
-
 				switch nvimVersion.Minor {
 				case 6:
 					wantMaps = []*Mapping{
@@ -3073,13 +3049,23 @@ func testKey(v *Nvim) func(*testing.T) {
 				case 8:
 					wantMaps = []*Mapping{
 						{
+							LHS:     "&",
+							RHS:     ":&&<CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+						{
 							LHS:     "Y",
 							RHS:     "y$",
 							Silent:  0,
 							NoRemap: 1,
 							Expr:    0,
 							Buffer:  0,
-							SID:     0,
+							SID:     -8,
 							NoWait:  0,
 						},
 						{
@@ -3099,11 +3085,55 @@ func testKey(v *Nvim) func(*testing.T) {
 							NoRemap: 1,
 							Expr:    0,
 							Buffer:  0,
-							SID:     0,
+							SID:     -8,
 							NoWait:  0,
 						},
 					}
-					wantMapsLen = 2
+					wantMapsLen = 3
+				default:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "&",
+							RHS:     ":&&<CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 3
 				}
 
 				got, err := v.KeyMap(mode)
@@ -3332,18 +3362,7 @@ func testKey(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				wantMaps := []*Mapping{
-					{
-						LHS:     "y",
-						RHS:     "yy",
-						Silent:  0,
-						NoRemap: 0,
-						Expr:    0,
-						Buffer:  0,
-						SID:     0,
-						NoWait:  0,
-					},
-				}
+				var wantMaps []*Mapping
 				wantMapsLen := 0
 				switch nvimVersion.Minor {
 				case 6:
@@ -3417,13 +3436,23 @@ func testKey(v *Nvim) func(*testing.T) {
 				case 8:
 					wantMaps = []*Mapping{
 						{
+							LHS:     "&",
+							RHS:     ":&&<CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+						{
 							LHS:     "Y",
 							RHS:     "y$",
 							Silent:  0,
 							NoRemap: 1,
 							Expr:    0,
 							Buffer:  0,
-							SID:     0,
+							SID:     -8,
 							NoWait:  0,
 						},
 						{
@@ -3443,12 +3472,57 @@ func testKey(v *Nvim) func(*testing.T) {
 							NoRemap: 1,
 							Expr:    0,
 							Buffer:  0,
-							SID:     0,
+							SID:     -8,
 							NoWait:  0,
 						},
 					}
-					wantMapsLen = 2
+					wantMapsLen = 3
+				default:
+					wantMaps = []*Mapping{
+						{
+							LHS:     "&",
+							RHS:     ":&&<CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+						{
+							LHS:     "Y",
+							RHS:     "y$",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+						{
+							LHS:     "y",
+							RHS:     "yy",
+							Silent:  0,
+							NoRemap: 0,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -9,
+							NoWait:  0,
+						},
+						{
+							LHS:     "<C-L>",
+							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
+							Silent:  0,
+							NoRemap: 1,
+							Expr:    0,
+							Buffer:  0,
+							SID:     -8,
+							NoWait:  0,
+						},
+					}
+					wantMapsLen = 3
 				}
+
 				var got []*Mapping
 				b.KeyMap(mode, &got)
 				if err := b.Execute(); err != nil {
@@ -3706,7 +3780,8 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			const cmd = `highlight NewHighlight cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold`
+			const testHighlight = `TestHighlight`
+			const cmd = `highlight ` + testHighlight + ` cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold`
 			if err := v.Command(cmd); err != nil {
 				t.Fatal(err)
 			}
@@ -3721,30 +3796,24 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 			wantGUI := &HLAttrs{
 				Bold:            true,
-				Foreground:      cm["Red"],
-				Background:      cm["Yellow"],
-				Special:         cm["Blue"],
+				Foreground:      cm[`Red`],
+				Background:      cm[`Yellow`],
+				Special:         cm[`Blue`],
 				CtermForeground: -1,
 				CtermBackground: -1,
 			}
 
 			var nsID int
-			if err := v.Eval(`hlID('NewHighlight')`, &nsID); err != nil {
+			if err := v.Eval(`hlID('`+testHighlight+`')`, &nsID); err != nil {
 				t.Fatal(err)
 			}
 
-			const HLIDName = `PreProc`
-			var wantErrorHLID = 85
-			if nvimVersion.Minor >= 8 {
-				wantErrorHLID += 3
-			}
-
-			goHLID, err := v.HLIDByName(HLIDName)
+			goHLID, err := v.HLIDByName(testHighlight)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if goHLID != wantErrorHLID {
-				t.Fatalf("HLByID(%s)\n got %+v,\nwant %+v", HLIDName, goHLID, wantErrorHLID)
+			if goHLID != nsID {
+				t.Fatalf("HLByID(%s)\n got %+v,\nwant %+v", testHighlight, goHLID, nsID)
 			}
 
 			gotCTermHL, err := v.HLByID(nsID, false)
@@ -3828,7 +3897,8 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			var cm map[string]int
 			b.ColorMap(&cm)
 
-			const cmd = `highlight NewHighlight cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold`
+			const testHighlight = `TestHighlight`
+			const cmd = `highlight ` + testHighlight + ` cterm=underline ctermbg=green guifg=red guibg=yellow guisp=blue gui=bold`
 			b.Command(cmd)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
@@ -3852,24 +3922,18 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			}
 
 			var nsID int
-			b.Eval("hlID('NewHighlight')", &nsID)
+			b.Eval(`hlID('`+testHighlight+`')`, &nsID)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
-			}
-
-			const HLIDName = `PreProc`
-			var wantErrorHLID = 85
-			if nvimVersion.Minor >= 8 {
-				wantErrorHLID += 3
 			}
 
 			var goHLID int
-			b.HLIDByName(HLIDName, &goHLID)
+			b.HLIDByName(testHighlight, &goHLID)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
-			if goHLID != wantErrorHLID {
-				t.Fatalf("HLByID(%s)\n got %+v,\nwant %+v", HLIDName, goHLID, wantErrorHLID)
+			if goHLID != nsID {
+				t.Fatalf("HLByID(%s)\n got %+v,\nwant %+v", testHighlight, goHLID, nsID)
 			}
 
 			var gotCTermHL HLAttrs
@@ -4437,40 +4501,19 @@ func testRuntime(v *Nvim) func(*testing.T) {
 		vimDiff := filepath.Join(runtimePath, "doc", "vim_diff.txt")
 		want := fmt.Sprintf("%s,%s", viDiff, vimDiff)
 
-		binaryPath, err := exec.LookPath(BinaryName)
+		binName := BinaryName
+		if nvimCmd := *flagNvimPath; nvimCmd != "" {
+			binName = nvimCmd
+		}
+		binaryPath, err := exec.LookPath(binName)
 		if err != nil {
 			t.Fatal(err)
 		}
 		nvimPrefix := filepath.Dir(filepath.Dir(binaryPath))
 
 		wantPaths := []string{
-			filepath.Join(nvimPrefix, "share", "nvim", "runtime"),
 			filepath.Join(nvimPrefix, "lib", "nvim"),
-		}
-		switch runtime.GOOS {
-		case "linux", "darwin":
-			if nvimVersion.Minor <= 5 {
-				oldRuntimePaths := []string{
-					filepath.Join("/etc", "xdg", "nvim"),
-					filepath.Join("/etc", "xdg", "nvim", "after"),
-					filepath.Join("/usr", "local", "share", "nvim", "site"),
-					filepath.Join("/usr", "local", "share", "nvim", "site", "after"),
-					filepath.Join("/usr", "share", "nvim", "site"),
-					filepath.Join("/usr", "share", "nvim", "site", "after"),
-				}
-				wantPaths = append(wantPaths, oldRuntimePaths...)
-			}
-		case "windows":
-			if nvimVersion.Minor <= 5 {
-				localAppDataDir := os.Getenv("LocalAppData")
-				oldRuntimePaths := []string{
-					filepath.Join(localAppDataDir, "nvim"),
-					filepath.Join(localAppDataDir, "nvim", "after"),
-					filepath.Join(localAppDataDir, "nvim-data", "site"),
-					filepath.Join(localAppDataDir, "nvim-data", "site", "after"),
-				}
-				wantPaths = append(wantPaths, oldRuntimePaths...)
-			}
+			filepath.Join(nvimPrefix, "share", "nvim", "runtime"),
 		}
 		sort.Strings(wantPaths)
 
@@ -4500,8 +4543,11 @@ func testRuntime(v *Nvim) func(*testing.T) {
 				}
 				sort.Strings(paths)
 
-				if got, want := strings.Join(paths, ","), strings.Join(wantPaths, ","); !strings.EqualFold(got, want) {
-					t.Fatalf("RuntimePaths():\n got %v\nwant %v", paths, wantPaths)
+				got := strings.Join(paths, ",")
+				want := strings.Join(wantPaths, ",")
+				t.Logf("%s\n got: %v\nwant: %s", t.Name(), got, want)
+				if !reflect.DeepEqual(got, want) {
+					t.Fatalf("RuntimePaths():\n got %v\nwant %v", got, want)
 				}
 			})
 		})
@@ -4535,7 +4581,9 @@ func testRuntime(v *Nvim) func(*testing.T) {
 				}
 				sort.Strings(paths)
 
-				if got, want := strings.Join(paths, ","), strings.Join(wantPaths, ","); !strings.EqualFold(got, want) {
+				got := strings.Join(paths, ",")
+				want := strings.Join(wantPaths, ",")
+				if !reflect.DeepEqual(got, want) {
 					t.Fatalf("RuntimePaths():\n got %v\nwant %v", paths, wantPaths)
 				}
 			})
