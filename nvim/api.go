@@ -2088,8 +2088,8 @@ func (b *Batch) SetPumBounds(width float64, height float64, row float64, col flo
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
-func (v *Nvim) Exec(src string, output bool) (out string, err error) {
-	err = v.call("nvim_exec", &out, src, output)
+func (v *Nvim) Exec(src string, opts map[string]interface{}) (out map[string]interface{}, err error) {
+	err = v.call("nvim_exec2", &out, src, opts)
 	return out, err
 }
 
@@ -2098,8 +2098,8 @@ func (v *Nvim) Exec(src string, output bool) (out string, err error) {
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
-func (b *Batch) Exec(src string, output bool, out *string) {
-	b.call("nvim_exec", out, src, output)
+func (b *Batch) Exec(src string, opts map[string]interface{}, out *map[string]interface{}) {
+	b.call("nvim_exec2", out, src, opts)
 }
 
 // Command executes an ex-command.
@@ -2127,30 +2127,6 @@ func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expre
 	b.call("nvim_parse_expression", expression, expr, flags, highlight)
 }
 
-// HLByID gets a highlight definition by name.
-//
-// hlID is the highlight id as returned by HLIDByName.
-//
-// rgb is the whether the export RGB colors.
-//
-// The returned highlight is the highlight definition.
-func (v *Nvim) HLByID(hlID int, rgb bool) (highlight *HLAttrs, err error) {
-	var result HLAttrs
-	err = v.call("nvim_get_hl_by_id", &result, hlID, rgb)
-	return &result, err
-}
-
-// HLByID gets a highlight definition by name.
-//
-// hlID is the highlight id as returned by HLIDByName.
-//
-// rgb is the whether the export RGB colors.
-//
-// The returned highlight is the highlight definition.
-func (b *Batch) HLByID(hlID int, rgb bool, highlight *HLAttrs) {
-	b.call("nvim_get_hl_by_id", highlight, hlID, rgb)
-}
-
 // HLIDByName gets a highlight group by name.
 //
 // name is the Highlight group name.
@@ -2172,30 +2148,6 @@ func (v *Nvim) HLIDByName(name string) (hlID int, err error) {
 // This function similar to HLByID, but allocates a new ID if not present.
 func (b *Batch) HLIDByName(name string, hlID *int) {
 	b.call("nvim_get_hl_id_by_name", hlID, name)
-}
-
-// HLByName gets a highlight definition by id.
-//
-// name is Highlight group name.
-//
-// rgb is whether the export RGB colors.
-//
-// The returned highlight is the highlight definition.
-func (v *Nvim) HLByName(name string, rgb bool) (highlight *HLAttrs, err error) {
-	var result HLAttrs
-	err = v.call("nvim_get_hl_by_name", &result, name, rgb)
-	return &result, err
-}
-
-// HLByName gets a highlight definition by id.
-//
-// name is Highlight group name.
-//
-// rgb is whether the export RGB colors.
-//
-// The returned highlight is the highlight definition.
-func (b *Batch) HLByName(name string, rgb bool, highlight *HLAttrs) {
-	b.call("nvim_get_hl_by_name", highlight, name, rgb)
 }
 
 // SetHighlight sets a highlight group.
