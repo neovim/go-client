@@ -97,13 +97,13 @@ func (v *Nvim) ExitCode() int {
 	return v.cmd.ProcessState.ExitCode()
 }
 
-// New creates an Nvim client. When connecting to Nvim over stdio, use stdin as
+// New creates an [*Nvim] client. When connecting to Nvim over stdio, use stdin as
 // r and stdout as w and c, When connecting to Nvim over a network connection,
 // use the connection for r, w and c.
 //
-// The application must call Serve() to handle RPC requests and responses.
+// The application must call [*Nvim.Serve] to handle RPC requests and responses.
 //
-// New is a low-level function. Most applications should use NewChildProcess,
+// New is a low-level function. Most applications should use [NewChildProcess],
 // Dial or the ./plugin package.
 //
 //	:help rpc-connecting
@@ -231,7 +231,7 @@ func NewChildProcess(options ...ChildProcessOption) (*Nvim, error) {
 	return v, nil
 }
 
-// DialOption specifies an option for dialing to Nvim.
+// DialOption specifies an option for dialing to [*Nvim].
 type DialOption struct {
 	f func(*dialOptions)
 }
@@ -252,7 +252,7 @@ func DialContext(ctx context.Context) DialOption {
 }
 
 // DialNetDial specifies a function used to dial a network connection. A
-// default net.Dialer DialContext method is used by default.
+// default [net.Dialer.DialContext] method is used by default.
 func DialNetDial(f func(ctx context.Context, network, address string) (net.Conn, error)) DialOption {
 	return DialOption{func(dos *dialOptions) {
 		dos.netDial = f
@@ -260,7 +260,7 @@ func DialNetDial(f func(ctx context.Context, network, address string) (net.Conn,
 }
 
 // DialServe specifies whether Server should be run in a goroutine.
-// The default is to run Serve().
+// The default is to run [*Nvim.Serve].
 func DialServe(serve bool) DialOption {
 	return DialOption{func(dos *dialOptions) {
 		dos.serve = serve
