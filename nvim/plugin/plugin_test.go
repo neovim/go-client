@@ -2,6 +2,7 @@ package plugin_test
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -186,14 +187,20 @@ func TestRegister(t *testing.T) {
 	}
 
 	t.Run("SimpleHandler", func(t *testing.T) {
-		result, err := p.Nvim.Exec(`:echo Hello('John', 'Doe')`, true)
+		opts := map[string]interface{}{
+			"output": true,
+		}
+		result, err := p.Nvim.Exec(`:echo Hello('John', 'Doe')`, opts)
 		if err != nil {
 			t.Fatalf("exec 'echo Hello' function: %v", err)
 		}
 
 		expected := `Hello, John Doe`
-		if result != expected {
-			t.Fatalf("Hello returned %q, want %q", result, expected)
+		want := map[string]interface{}{
+			"output": expected,
+		}
+		if !reflect.DeepEqual(result, want) {
+			t.Fatalf("Hello returned %v, want %v", result, want)
 		}
 	})
 
@@ -223,104 +230,154 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("CommandHandler", func(t *testing.T) {
-		result, err := p.Nvim.Exec(`Hello World`, true)
+		opts := map[string]interface{}{
+			"output": true,
+		}
+		result, err := p.Nvim.Exec(`Hello World`, opts)
 		if err != nil {
 			t.Fatalf("exec 'Hello' command: %v", err)
 		}
 
 		expected := `Helloorld`
-		if result != expected {
-			t.Fatalf("Hello returned %q, want %q", result, expected)
+		want := map[string]interface{}{
+			"output": expected,
+		}
+		if !reflect.DeepEqual(result, want) {
+			t.Fatalf("Hello returned %v, want %v", result, want)
 		}
 	})
 
 	t.Run("CommandRangeDotHandler", func(t *testing.T) {
-		result, err := p.Nvim.Exec(`HelloRangeDot`, true)
+		opts := map[string]interface{}{
+			"output": true,
+		}
+		result, err := p.Nvim.Exec(`HelloRangeDot`, opts)
 		if err != nil {
 			t.Fatalf("exec 'Hello' command: %v", err)
 		}
 
 		expected := `Hello`
-		if result != expected {
-			t.Fatalf("Hello returned %q, want %q", result, expected)
+		want := map[string]interface{}{
+			"output": expected,
+		}
+		if !reflect.DeepEqual(result, want) {
+			t.Fatalf("Hello returned %v, want %v", result, want)
 		}
 	})
 
 	t.Run("CommandCountHandler", func(t *testing.T) {
-		result, err := p.Nvim.Exec(`HelloCount`, true)
+		opts := map[string]interface{}{
+			"output": true,
+		}
+		result, err := p.Nvim.Exec(`HelloCount`, opts)
 		if err != nil {
 			t.Fatalf("exec 'Hello' command: %v", err)
 		}
 
 		expected := `Hello`
-		if result != expected {
-			t.Fatalf("Hello returned %q, want %q", result, expected)
+		want := map[string]interface{}{
+			"output": expected,
+		}
+		if !reflect.DeepEqual(result, want) {
+			t.Fatalf("Hello returned %v, want %v", result, want)
 		}
 	})
 
 	t.Run("CommandEvalHandler", func(t *testing.T) {
-		result, err := p.Nvim.Exec(`HelloEval`, true)
+		opts := map[string]interface{}{
+			"output": true,
+		}
+		result, err := p.Nvim.Exec(`HelloEval`, opts)
 		if err != nil {
 			t.Fatalf("exec 'Hello' command: %v", err)
 		}
 
 		expected := `plugin`
-		if result != expected {
-			t.Fatalf("Hello returned %q, want %q", result, expected)
+		want := map[string]interface{}{
+			"output": expected,
+		}
+		if !reflect.DeepEqual(result, want) {
+			t.Fatalf("Hello returned %v, want %v", result, want)
 		}
 	})
 
 	t.Run("AutocmdHandler", func(t *testing.T) {
-		result, err := p.Nvim.Exec(`doautocmd User Test`, true)
+		opts := map[string]interface{}{
+			"output": true,
+		}
+		result, err := p.Nvim.Exec(`doautocmd User Test`, opts)
 		if err != nil {
 			t.Fatalf("exec 'doautocmd User Test' command: %v", err)
 		}
 
 		expected := `HelloAutocmd`
-		if result != expected {
-			t.Fatalf("'doautocmd User Test' returned %q, want %q", result, expected)
+		want := map[string]interface{}{
+			"output": expected,
+		}
+		if !reflect.DeepEqual(result, want) {
+			t.Fatalf("'doautocmd User Test' returned %v, want %v", result, want)
 		}
 
-		result2, err := p.Nvim.Exec(`doautocmd User Test`, true)
+		opts2 := map[string]interface{}{
+			"output": true,
+		}
+		result2, err := p.Nvim.Exec(`doautocmd User Test`, opts2)
 		if err != nil {
 			t.Fatalf("exec 'doautocmd User Test' command: %v", err)
 		}
-
-		if result2 != expected {
-			t.Fatalf("'doautocmd User Test' returned %q, want %q", result, expected)
+		if !reflect.DeepEqual(result2, want) {
+			t.Fatalf("'doautocmd User Test' returned %v, want %v", result, want)
 		}
 	})
 
 	t.Run("AutocmdEvalHandler", func(t *testing.T) {
-		result, err := p.Nvim.Exec(`doautocmd User Eval`, true)
+		opts := map[string]interface{}{
+			"output": true,
+		}
+		result, err := p.Nvim.Exec(`doautocmd User Eval`, opts)
 		if err != nil {
 			t.Fatalf("exec 'doautocmd User Eval' command: %v", err)
 		}
 
 		expected := `plugin`
-		if result != expected {
-			t.Fatalf("'doautocmd User Eval' returned %q, want %q", result, expected)
+		want := map[string]interface{}{
+			"output": expected,
+		}
+		if !reflect.DeepEqual(result, want) {
+			t.Fatalf("'doautocmd User Eval' returned %v, want %v", result, want)
 		}
 	})
 
 	t.Run("AutocmdOnceHandler", func(t *testing.T) {
-		result, err := p.Nvim.Exec(`doautocmd User Once`, true)
+		opts := map[string]interface{}{
+			"output": true,
+		}
+		result, err := p.Nvim.Exec(`doautocmd User Once`, opts)
 		if err != nil {
 			t.Fatalf("exec 'doautocmd User Once' command: %v", err)
 		}
 
 		expected := `HelloAutocmdOnce`
-		if result != expected {
-			t.Fatalf("'doautocmd User Once' returned %q, want %q", result, expected)
+		want := map[string]interface{}{
+			"output": expected,
+		}
+		if !reflect.DeepEqual(result, want) {
+			t.Fatalf("'doautocmd User Once' returned %v, want %v", result, want)
 		}
 
-		result2, err := p.Nvim.Exec(`doautocmd User Once`, true)
+		opts2 := map[string]interface{}{
+			"output": true,
+		}
+		result2, err := p.Nvim.Exec(`doautocmd User Once`, opts2)
 		if err != nil {
 			t.Fatalf("exec 'doautocmd User Once' command: %v", err)
 		}
 
-		if result2 == expected {
-			t.Fatalf("'doautocmd User Once' returned %q, want %q", result, "")
+		want2 := map[string]interface{}{
+			"output": "",
+		}
+		if !reflect.DeepEqual(result2, want2) {
+			t.Fatalf("'doautocmd User Once' returned %v, want %v", result2, want2)
 		}
 	})
 }

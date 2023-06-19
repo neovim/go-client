@@ -2152,7 +2152,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2177,7 +2177,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2278,7 +2278,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 				name    string
 				command UserCommand
 				opts    map[string]interface{}
-				want    string
+				want    map[string]interface{}
 			}{
 				"SayHello": {
 					name:    "SayHello",
@@ -2286,7 +2286,9 @@ func testCommand(v *Nvim) func(*testing.T) {
 					opts: map[string]interface{}{
 						"force": false,
 					},
-					want: "Hello world!",
+					want: map[string]interface{}{
+						"output": "Hello world!",
+					},
 				},
 			}
 			for name, tt := range tests {
@@ -2302,12 +2304,15 @@ func testCommand(v *Nvim) func(*testing.T) {
 						}
 					})
 
-					got, err := v.Exec(tt.name, true)
+					opts := map[string]interface{}{
+						"output": true,
+					}
+					got, err := v.Exec(tt.name, opts)
 					if err != nil {
 						t.Fatal(err)
 					}
-					if !strings.EqualFold(tt.want, got) {
-						t.Fatalf("expected %s but got %s", tt.want, got)
+					if !reflect.DeepEqual(got, tt.want) {
+						t.Fatalf("got %v but expected %v", got, tt.want)
 					}
 				})
 
@@ -2327,13 +2332,16 @@ func testCommand(v *Nvim) func(*testing.T) {
 						}
 					})
 
-					var got string
-					b.Exec(tt.name, true, &got)
+					opts := map[string]interface{}{
+						"output": true,
+					}
+					var got map[string]interface{}
+					b.Exec(tt.name, opts, &got)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
 					}
-					if !strings.EqualFold(tt.want, got) {
-						t.Fatalf("expected %s but got %s", tt.want, got)
+					if !reflect.DeepEqual(got, tt.want) {
+						t.Fatalf("got %v but expected %v", got, tt.want)
 					}
 				})
 			}
@@ -2344,7 +2352,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 				name    string
 				command UserCommand
 				opts    map[string]interface{}
-				want    string
+				want    map[string]interface{}
 			}{
 				"SayHello": {
 					name:    "SayHello",
@@ -2352,7 +2360,9 @@ func testCommand(v *Nvim) func(*testing.T) {
 					opts: map[string]interface{}{
 						"force": false,
 					},
-					want: "Hello world!",
+					want: map[string]interface{}{
+						"output": "Hello world!",
+					},
 				},
 			}
 			for name, tt := range tests {
@@ -2368,12 +2378,15 @@ func testCommand(v *Nvim) func(*testing.T) {
 						}
 					})
 
-					got, err := v.Exec(tt.name, true)
+					opts := map[string]interface{}{
+						"output": true,
+					}
+					got, err := v.Exec(tt.name, opts)
 					if err != nil {
 						t.Fatal(err)
 					}
-					if !strings.EqualFold(tt.want, got) {
-						t.Fatalf("expected %s but got %s", tt.want, got)
+					if !reflect.DeepEqual(got, tt.want) {
+						t.Fatalf("got %v but expected %v", got, tt.want)
 					}
 				})
 
@@ -2393,13 +2406,16 @@ func testCommand(v *Nvim) func(*testing.T) {
 						}
 					})
 
-					var got string
-					b.Exec(tt.name, true, &got)
+					opts := map[string]interface{}{
+						"output": true,
+					}
+					var got map[string]interface{}
+					b.Exec(tt.name, opts, &got)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
 					}
-					if !strings.EqualFold(tt.want, got) {
-						t.Fatalf("expected %s but got %s", tt.want, got)
+					if !reflect.DeepEqual(got, tt.want) {
+						t.Fatalf("got %v but expected %v", got, tt.want)
 					}
 				})
 			}
@@ -2532,12 +2548,19 @@ func testMessage(v *Nvim) func(*testing.T) {
 					t.Fatalf("failed to Echo: %v", err)
 				}
 
-				gotEcho, err := v.Exec("message", true)
+				opts := map[string]interface{}{
+					"output": true,
+				}
+				gotEcho, err := v.Exec("message", opts)
 				if err != nil {
 					t.Fatalf("could not get v:statusmsg nvim variable: %v", err)
 				}
-				if gotEcho != wantEcho {
-					t.Fatalf("Echo(%q) = %q, want: %q", wantEcho, gotEcho, wantEcho)
+
+				want := map[string]interface{}{
+					"output": wantEcho,
+				}
+				if !reflect.DeepEqual(gotEcho, want) {
+					t.Fatalf("Echo(%q) = %q, want: %q", want, gotEcho, wantEcho)
 				}
 			})
 
@@ -2548,7 +2571,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2574,7 +2597,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2600,7 +2623,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2626,20 +2649,27 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
 
 				const wantNotifyMsg = `hello Notify`
+				want := map[string]interface{}{
+					"output": wantNotifyMsg,
+				}
 				if err := v.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]interface{})); err != nil {
 					t.Fatalf("failed to Notify: %v", err)
 				}
-				gotNotifyMsg, err := v.Exec(":messages", true)
+
+				opts := map[string]interface{}{
+					"output": true,
+				}
+				gotNotifyMsg, err := v.Exec(":messages", opts)
 				if err != nil {
 					t.Fatalf("failed to messages command: %v", err)
 				}
-				if wantNotifyMsg != gotNotifyMsg {
+				if !reflect.DeepEqual(gotNotifyMsg, want) {
 					t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyMsg, LogInfoLevel, gotNotifyMsg)
 				}
 			})
@@ -2651,7 +2681,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2682,12 +2712,19 @@ func testMessage(v *Nvim) func(*testing.T) {
 				}
 				b.Echo(chunk, true, make(map[string]interface{}))
 
-				var gotEcho string
-				b.Exec("message", true, &gotEcho)
+				opts := map[string]interface{}{
+					"output": true,
+				}
+				var gotEcho map[string]interface{}
+				b.Exec("message", opts, &gotEcho)
 				if err := b.Execute(); err != nil {
 					t.Fatalf("failed to Execute: %v", err)
 				}
-				if gotEcho != wantEcho {
+
+				want := map[string]interface{}{
+					"output": wantEcho,
+				}
+				if !reflect.DeepEqual(gotEcho, want) {
 					t.Fatalf("Echo(%q) = %q, want: %q", wantEcho, gotEcho, wantEcho)
 				}
 			})
@@ -2698,7 +2735,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2728,7 +2765,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2757,7 +2794,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2786,7 +2823,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2798,12 +2835,20 @@ func testMessage(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err != nil {
 					t.Fatalf("failed to Notify: %v", err)
 				}
-				var gotNotifyMsg string
-				b.Exec(":messages", true, &gotNotifyMsg)
+
+				opts := map[string]interface{}{
+					"output": true,
+				}
+				var gotNotifyMsg map[string]interface{}
+				b.Exec(":messages", opts, &gotNotifyMsg)
 				if err := b.Execute(); err != nil {
 					t.Fatalf("failed to \":messages\" command: %v", err)
 				}
-				if wantNotifyMsg != gotNotifyMsg {
+
+				want := map[string]interface{}{
+					"output": wantNotifyMsg,
+				}
+				if !reflect.DeepEqual(gotNotifyMsg, want) {
 					t.Fatalf("Notify(%[1]q, %[2]q) = %[3]q, want: %[1]q", wantNotifyMsg, LogInfoLevel, gotNotifyMsg)
 				}
 			})
@@ -2815,7 +2860,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", false); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -4941,7 +4986,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 						skipVersion(t, "v0.7.0")
 					}
 
-					got, err := v.OptionInfo(tt.name)
+					got, err := v.OptionInfo(tt.name, make(map[string]interface{}))
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -4960,7 +5005,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 					b := v.NewBatch()
 
 					var got OptionInfo
-					b.OptionInfo(tt.name, &got)
+					b.OptionInfo(tt.name, make(map[string]interface{}), &got)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
 					}
@@ -5075,7 +5120,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 					skipVersion(t, "v0.7.0")
 				}
 
-				got, err := v.OptionInfo(tt.name)
+				got, err := v.OptionInfo(tt.name, make(map[string]interface{}))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -5094,7 +5139,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 				b := v.NewBatch()
 
 				var got OptionInfo
-				b.OptionInfo(tt.name, &got)
+				b.OptionInfo(tt.name, make(map[string]interface{}), &got)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
