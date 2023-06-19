@@ -21,7 +21,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
-          - macos-12      # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md
+          - macos-13      # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
           - windows-2022  # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
         go-version:
           - 1.18.x
