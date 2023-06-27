@@ -29,13 +29,14 @@ func main() {
 ```
 
 Build the program with the [go tool](https://golang.org/cmd/go/) to an
-executable named `hello`. Ensure that the executable is on your path.
+executable named `hello`. Ensure that the executable is in a directory in
+the `PATH` environment variable.
 
 ```go
-// Use the go build to generate an executable
-// Enusre this hello executable on your path
-// you can move hello to your $GOPATH/bin
-// or set the current dir into env variable `path`
+// Use the `go build` command to generate an executable.
+// Ensure that this "hello" executable is on your path.
+// You can move "hello" to your $GOPATH/bin directory
+// or add the current directory to the `PATH` environment variable.
 go build -o hello
 ```
 
