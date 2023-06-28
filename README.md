@@ -34,8 +34,8 @@ the `PATH` environment variable.
 
 ```go
 // Use the `go build` command to generate an executable.
-// Ensure that this "hello" executable is on your path.
-// You can move "hello" to your $GOPATH/bin directory
+// To ensure this "hello" executable is on your path,
+// you can move "hello" to your $GOPATH/bin directory
 // or add the current directory to the `PATH` environment variable.
 go build -o hello
 ```
