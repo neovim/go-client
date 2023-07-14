@@ -121,13 +121,14 @@ type ChildProcessOption struct {
 }
 
 type childProcessOptions struct {
-	ctx     context.Context
-	logf    func(string, ...interface{})
-	command string
-	dir     string
-	args    []string
-	env     []string
-	serve   bool
+	ctx          context.Context
+	logf         func(string, ...interface{})
+	command      string
+	dir          string
+	args         []string
+	env          []string
+	serve        bool
+	disableEmbed bool
 }
 
 // ChildProcessArgs specifies the command line arguments. The application must
@@ -187,6 +188,30 @@ func ChildProcessLogf(logf func(string, ...interface{})) ChildProcessOption {
 	}}
 }
 
+// ChildProcessDisableEmbed disables the --embed flag of nvim.
+// This is needed for applications to use the RPC API.
+// See: https://neovim.io/doc/user/starting.html#--embed for details.
+func ChildProcessDisableEmbed() ChildProcessOption {
+	return ChildProcessOption{func(cpos *childProcessOptions) {
+		cpos.disableEmbed = true
+	}}
+}
+
+// appendEmbedFlagIfNeeded appends the --embed flag, if it is not yet added.
+// This behavior can be overriden by setting the ChildProcessDisableEmbed() process option.
+func appendEmbedFlagIfNeeded(cpos *childProcessOptions) {
+	for _, arg := range cpos.args {
+		if arg == "--embed" {
+			return
+		}
+	}
+	if !cpos.disableEmbed {
+		cpos.logf("[go-client/nvim] Warning: '--embed' flag missing, appending by default. It enables RPC calls via stdin/stdout. To disable this behavior, add ChildProcessDisableEmbed(). More info: https://neovim.io/doc/user/starting.html#--embed")
+		cpos.args = append(cpos.args, "--embed")
+		return
+	}
+}
+
 // NewChildProcess returns a client connected to stdin and stdout of a new
 // child process.
 func NewChildProcess(options ...ChildProcessOption) (*Nvim, error) {
@@ -199,6 +224,8 @@ func NewChildProcess(options ...ChildProcessOption) (*Nvim, error) {
 	for _, cpo := range options {
 		cpo.f(cpos)
 	}
+
+	appendEmbedFlagIfNeeded(cpos)
 
 	cmd := exec.CommandContext(cpos.ctx, cpos.command, cpos.args...)
 	cmd.Env = cpos.env
