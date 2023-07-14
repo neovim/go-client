@@ -27,7 +27,7 @@ func New(v *nvim.Nvim) *Plugin {
 	}
 
 	// Disable support for "specs" method until path mechanism for supporting
-	// binary exectables with Nvim is worked out.
+	// binary executables with Nvim is worked out.
 	// err := v.RegisterHandler("specs", func(path string) ([]*pluginSpec, error) {
 	//  return p.pluginSpecs, nil
 	// })
@@ -75,7 +75,7 @@ func (p *Plugin) handle(fn interface{}, spec *pluginSpec) {
 //	func([v *nvim.Nvim,] {args}) error
 //	func([v *nvim.Nvim,] {args})
 //
-// where {args} is zero or more arguments and {resultType} is the type of of a
+// where {args} is zero or more arguments and {resultType} is the type of a
 // return value. Call the handler from Nvim using the rpcnotify and rpcrequest
 // functions:
 //
@@ -97,7 +97,7 @@ type FunctionOptions struct {
 	// alphanumeric characters and '_', and must start with a capital letter.
 	Name string
 
-	// Eval is an expression evaluated in Nvim. The result is passed the
+	// Eval is an expression evaluated in Nvim. The result is passed to the
 	// handler function.
 	Eval string
 }
@@ -171,7 +171,7 @@ type CommandOptions struct {
 	//  :help :command-range
 	Range string
 
-	// Count specfies that thecommand accepts a count.
+	// Count specifies that the command accepts a count.
 	//
 	//  N   A count (default N) which is specified either in the line
 	//	    number position, or as an initial argument (like |:Next|).
@@ -203,7 +203,7 @@ type CommandOptions struct {
 	// Bang specifies that the command can take a ! modifier (like :q or :w).
 	Bang bool
 
-	// Register specifes that the first argument to the command can be an
+	// Register specifies that the first argument to the command can be an
 	// optional register name (like :del, :put, :yank).
 	Register bool
 
@@ -303,7 +303,7 @@ type AutocmdOptions struct {
 	//  :help autocmd-once
 	Once bool
 
-	// Eval is evaluated in Nvim and the result is passed the the handler
+	// Eval is evaluated in Nvim and the result is passed to the handler
 	// function.
 	Eval string
 }
