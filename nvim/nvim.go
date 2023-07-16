@@ -189,7 +189,6 @@ func ChildProcessLogf(logf func(string, ...interface{})) ChildProcessOption {
 }
 
 // ChildProcessDisableEmbed disables the --embed flag of nvim.
-// This is needed for applications to use the RPC API.
 // See: https://neovim.io/doc/user/starting.html#--embed for details.
 func ChildProcessDisableEmbed() ChildProcessOption {
 	return ChildProcessOption{func(cpos *childProcessOptions) {
