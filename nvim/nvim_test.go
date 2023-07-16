@@ -30,7 +30,6 @@ func newChildProcess(tb testing.TB, opts ...ChildProcessOption) (v *Nvim) {
 			"-u", "NONE",
 			"-n",
 			"-i", "NONE",
-			"--embed",
 			"--headless",
 		),
 		ChildProcessContext(ctx),
@@ -174,6 +173,18 @@ func TestCallWithNoArgs(t *testing.T) {
 	t.Parallel()
 
 	v := newChildProcess(t)
+
+	var wd string
+	err := v.Call("getcwd", &wd)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCallWithNoArgsWithDisabledEmbed(t *testing.T) {
+	t.Parallel()
+
+	v := newChildProcess(t, ChildProcessArgs("--embed"), ChildProcessDisableEmbed())
 
 	var wd string
 	err := v.Call("getcwd", &wd)
