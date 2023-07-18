@@ -164,7 +164,7 @@ func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks [
 
 // HLByID gets a highlight definition by name.
 //
-// hlID is the highlight id as returned by HLIDByName.
+// hlID is the highlight id as returned by [*Nvim.HLIDByName].
 //
 // rgb is the whether the export RGB colors.
 //
@@ -177,7 +177,7 @@ func (v *Nvim) HLByID(hlID int, rgb bool) (highlight *HLAttrs, err error) {
 
 // HLByID gets a highlight definition by name.
 //
-// hlID is the highlight id as returned by HLIDByName.
+// hlID is the highlight id as returned by [*Nvim.HLIDByName].
 //
 // rgb is the whether the export RGB colors.
 //

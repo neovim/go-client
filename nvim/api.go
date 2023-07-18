@@ -198,7 +198,7 @@ func (b *Batch) ExecAutocmds(event interface{}, opts map[string]interface{}) {
 
 // BufferLineCount gets the buffer line count.
 //
-// The buffer arg is specific Buffer, or 0 for current buffer.
+// The buffer arg is specific [Buffer], or 0 for current buffer.
 //
 // The returns line count, or 0 for unloaded buffer.
 func (v *Nvim) BufferLineCount(buffer Buffer) (count int, err error) {
@@ -208,7 +208,7 @@ func (v *Nvim) BufferLineCount(buffer Buffer) (count int, err error) {
 
 // BufferLineCount gets the buffer line count.
 //
-// The buffer arg is specific Buffer, or 0 for current buffer.
+// The buffer arg is specific [Buffer], or 0 for current buffer.
 //
 // The returns line count, or 0 for unloaded buffer.
 func (b *Batch) BufferLineCount(buffer Buffer, count *int) {
@@ -217,7 +217,7 @@ func (b *Batch) BufferLineCount(buffer Buffer, count *int) {
 
 // AttachBuffer activates buffer-update events on a channel.
 //
-// The buffer is specific Buffer, or 0 for current buffer.
+// The buffer is specific [Buffer], or 0 for current buffer.
 //
 // If sendBuffer is true, initial notification should contain the whole buffer.
 // If false, the first notification will be a "nvim_buf_lines_event".
@@ -231,7 +231,7 @@ func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]inte
 
 // AttachBuffer activates buffer-update events on a channel.
 //
-// The buffer is specific Buffer, or 0 for current buffer.
+// The buffer is specific [Buffer], or 0 for current buffer.
 //
 // If sendBuffer is true, initial notification should contain the whole buffer.
 // If false, the first notification will be a "nvim_buf_lines_event".
@@ -314,7 +314,7 @@ func (b *Batch) SetBufferLines(buffer Buffer, start int, end int, strictIndexing
 
 // SetBufferText sets or replaces a range in the buffer.
 //
-// This is recommended over SetBufferLines when only modifying parts of a
+// This is recommended over [*Nvim.SetBufferLines] when only modifying parts of a
 // line, as extmarks will be preserved on non-modified parts of the touched
 // lines.
 //
@@ -324,14 +324,14 @@ func (b *Batch) SetBufferLines(buffer Buffer, start int, end int, strictIndexing
 //
 // To delete a range, set replacement arg to an array containing an empty string, or simply an empty array.
 //
-// Prefer SetBufferLines when adding or deleting entire lines only.
+// Prefer [*Nvim.SetBufferLines] when adding or deleting entire lines only.
 func (v *Nvim) SetBufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, replacement [][]byte) error {
 	return v.call("nvim_buf_set_text", nil, buffer, startRow, startCol, endRow, endCol, replacement)
 }
 
 // SetBufferText sets or replaces a range in the buffer.
 //
-// This is recommended over SetBufferLines when only modifying parts of a
+// This is recommended over [*Nvim.SetBufferLines] when only modifying parts of a
 // line, as extmarks will be preserved on non-modified parts of the touched
 // lines.
 //
@@ -341,19 +341,19 @@ func (v *Nvim) SetBufferText(buffer Buffer, startRow int, startCol int, endRow i
 //
 // To delete a range, set replacement arg to an array containing an empty string, or simply an empty array.
 //
-// Prefer SetBufferLines when adding or deleting entire lines only.
+// Prefer [*Nvim.SetBufferLines] when adding or deleting entire lines only.
 func (b *Batch) SetBufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, replacement [][]byte) {
 	b.call("nvim_buf_set_text", nil, buffer, startRow, startCol, endRow, endCol, replacement)
 }
 
 // BufferText gets a range from the buffer.
 //
-// This differs from BufferLines in that it allows retrieving only
+// This differs from [*Nvim.BufferLines] in that it allows retrieving only
 // portions of a line.
 //
 // Indexing is zero-based. Column indices are end-exclusive.
 //
-// Prefer BufferLines when retrieving entire lines.
+// Prefer [*Nvim.BufferLines] when retrieving entire lines.
 //
 // opts is optional parameters. Currently unused.
 func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}) ([][]byte, error) {
@@ -364,12 +364,12 @@ func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int,
 
 // BufferText gets a range from the buffer.
 //
-// This differs from BufferLines in that it allows retrieving only
+// This differs from [*Nvim.BufferLines] in that it allows retrieving only
 // portions of a line.
 //
 // Indexing is zero-based. Column indices are end-exclusive.
 //
-// Prefer BufferLines when retrieving entire lines.
+// Prefer [*Nvim.BufferLines] when retrieving entire lines.
 //
 // opts is optional parameters. Currently unused.
 func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}, result *[][]byte) {
@@ -386,7 +386,7 @@ func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int
 //
 // Unlike "line2byte" vim function, throws error for out-of-bounds indexing.
 //
-// If Buffer is unloaded buffer, returns -1.
+// If buffer is unloaded buffer, returns -1.
 func (v *Nvim) BufferOffset(buffer Buffer, index int) (offset int, err error) {
 	err = v.call("nvim_buf_get_offset", &offset, buffer, index)
 	return offset, err
@@ -402,7 +402,7 @@ func (v *Nvim) BufferOffset(buffer Buffer, index int) (offset int, err error) {
 //
 // Unlike "line2byte" vim function, throws error for out-of-bounds indexing.
 //
-// If Buffer is unloaded buffer, returns -1.
+// If buffer is unloaded buffer, returns -1.
 func (b *Batch) BufferOffset(buffer Buffer, index int, offset *int) {
 	b.call("nvim_buf_get_offset", offset, buffer, index)
 }
@@ -536,10 +536,7 @@ func (b *Batch) IsBufferLoaded(buffer Buffer, loaded *bool) {
 	b.call("nvim_buf_is_loaded", loaded, buffer)
 }
 
-// DeleteBuffer deletes the buffer.
-// See
-//
-//	:help :bwipeout
+// DeleteBuffer deletes the buffer.  See |help :bwipeout|
 //
 // The opts args is optional parameters.
 //
@@ -554,10 +551,7 @@ func (v *Nvim) DeleteBuffer(buffer Buffer, opts map[string]bool) error {
 	return v.call("nvim_buf_delete", nil, buffer, opts)
 }
 
-// DeleteBuffer deletes the buffer.
-// See
-//
-//	:help :bwipeout
+// DeleteBuffer deletes the buffer.  See |help :bwipeout|
 //
 // The opts args is optional parameters.
 //
@@ -964,16 +958,16 @@ func (b *Batch) ParseCmd(str string, opts map[string]interface{}, cmd *Cmd) {
 
 // Cmd executes an Ex command.
 //
-// Unlike Command() this command takes a structured Dictionary instead of a String. This
+// Unlike [*Nvim.Command] this command takes a structured Dictionary instead of a String. This
 // allows for easier construction and manipulation of an Ex command. This also allows for things
 // such as having spaces inside a command argument, expanding filenames in a command that otherwise
 // doesn't expand filenames, etc.
 //
 // On execution error: fails with VimL error, updates v:errmsg.
-// See Exec() and Command().
+// See [*Nvim.Exec] and [*Nvim.Command].
 //
 // cmd is the command to execute. Must be a Dictionary that can contain the same values
-// as the return value of ParseCmd except "addr", "nargs" and "nextcmd" which are ignored if provided.
+// as the return value of [*Nvim.ParseCmd] except "addr", "nargs" and "nextcmd" which are ignored if provided.
 // All values except for "cmd" are optional.
 //
 // opts is the optional parameters.
@@ -988,16 +982,16 @@ func (v *Nvim) Cmd(cmd *Cmd, opts map[string]bool) (output string, err error) {
 
 // Cmd executes an Ex command.
 //
-// Unlike Command() this command takes a structured Dictionary instead of a String. This
+// Unlike [*Nvim.Command] this command takes a structured Dictionary instead of a String. This
 // allows for easier construction and manipulation of an Ex command. This also allows for things
 // such as having spaces inside a command argument, expanding filenames in a command that otherwise
 // doesn't expand filenames, etc.
 //
 // On execution error: fails with VimL error, updates v:errmsg.
-// See Exec() and Command().
+// See [*Nvim.Exec] and [*Nvim.Command].
 //
 // cmd is the command to execute. Must be a Dictionary that can contain the same values
-// as the return value of ParseCmd except "addr", "nargs" and "nextcmd" which are ignored if provided.
+// as the return value of [*Nvim.ParseCmd] except "addr", "nargs" and "nextcmd" which are ignored if provided.
 // All values except for "cmd" are optional.
 //
 // opts is the optional parameters.
@@ -1545,14 +1539,14 @@ func (b *Batch) DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int, dele
 // Namespaces are used for batch deletion/updating of a set of highlights.
 // To create a namespace, use CreateNamespace which returns a namespace id.
 // Pass it in to this function as nsID to add highlights to the namespace.
-// All highlights in the same namespace can then be cleared with single call to ClearBufferNamespace.
+// All highlights in the same namespace can then be cleared with single call to [*Nvim.ClearBufferNamespace].
 // If the highlight never will be deleted by an API call, pass nsID = -1.
 //
 // As a shorthand, "srcID = 0" can be used to create a new namespace for the
 // highlight, the allocated id is then returned.
 //
 // If hlGroup arg is the empty string, no highlight is added, but a new `nsID` is still returned.
-// This is supported for backwards compatibility, new code should use CreateNamespaceto create a new empty namespace.
+// This is supported for backwards compatibility, new code should use [*Nvim.CreateNamespace] to create a new empty namespace.
 func (v *Nvim) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, startCol int, endCol int) (id int, err error) {
 	err = v.call("nvim_buf_add_highlight", &id, buffer, srcID, hlGroup, line, startCol, endCol)
 	return id, err
@@ -1569,14 +1563,14 @@ func (v *Nvim) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line
 // Namespaces are used for batch deletion/updating of a set of highlights.
 // To create a namespace, use CreateNamespace which returns a namespace id.
 // Pass it in to this function as nsID to add highlights to the namespace.
-// All highlights in the same namespace can then be cleared with single call to ClearBufferNamespace.
+// All highlights in the same namespace can then be cleared with single call to [*Nvim.ClearBufferNamespace].
 // If the highlight never will be deleted by an API call, pass nsID = -1.
 //
 // As a shorthand, "srcID = 0" can be used to create a new namespace for the
 // highlight, the allocated id is then returned.
 //
 // If hlGroup arg is the empty string, no highlight is added, but a new `nsID` is still returned.
-// This is supported for backwards compatibility, new code should use CreateNamespaceto create a new empty namespace.
+// This is supported for backwards compatibility, new code should use [*Nvim.CreateNamespace] to create a new empty namespace.
 func (b *Batch) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, startCol int, endCol int, id *int) {
 	b.call("nvim_buf_add_highlight", id, buffer, srcID, hlGroup, line, startCol, endCol)
 }
@@ -1603,7 +1597,7 @@ func (b *Batch) ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lin
 // the global value is returned.
 // Local values always correspond to the current buffer or window.
 //
-// To get a buffer-local or window-local option for a specific buffer or window, use BufferOption() or WindowOption().
+// To get a buffer-local or window-local option for a specific buffer or window, use [*Nvim.BufferOption] or [*Nvim.WindowOption].
 //
 // name is the option name.
 //
@@ -1622,7 +1616,7 @@ func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result
 // the global value is returned.
 // Local values always correspond to the current buffer or window.
 //
-// To get a buffer-local or window-local option for a specific buffer or window, use BufferOption() or WindowOption().
+// To get a buffer-local or window-local option for a specific buffer or window, use [*Nvim.BufferOption] or [*Nvim.WindowOption].
 //
 // name is the option name.
 //
@@ -2095,7 +2089,7 @@ func (b *Batch) SetPumBounds(width float64, height float64, row float64, col flo
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
 //
-// Unlike Command, this function supports heredocs, script-scope (s:), etc.
+// Unlike [*Nvim.Command], this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
 func (v *Nvim) Exec(src string, opts map[string]interface{}) (out map[string]interface{}, err error) {
@@ -2105,7 +2099,7 @@ func (v *Nvim) Exec(src string, opts map[string]interface{}) (out map[string]int
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
 //
-// Unlike Command, this function supports heredocs, script-scope (s:), etc.
+// Unlike [*Nvim.Command], this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
 func (b *Batch) Exec(src string, opts map[string]interface{}, out *map[string]interface{}) {
@@ -2155,7 +2149,7 @@ func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expre
 //
 // Show linked group name instead of effective definition.
 //
-// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in [*Nvim.SetHighlight], or only a single highlight definition map if requested by name or id.
 func (v *Nvim) HL(nsID int, opts map[string]interface{}) (highlight *HLAttrs, err error) {
 	var result HLAttrs
 	err = v.call("nvim_get_hl", &result, nsID, opts)
@@ -2180,7 +2174,7 @@ func (v *Nvim) HL(nsID int, opts map[string]interface{}) (highlight *HLAttrs, er
 //
 // Show linked group name instead of effective definition.
 //
-// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in [*Nvim.SetHighlight], or only a single highlight definition map if requested by name or id.
 func (b *Batch) HL(nsID int, opts map[string]interface{}, highlight *HLAttrs) {
 	b.call("nvim_get_hl", highlight, nsID, opts)
 }
@@ -2214,7 +2208,7 @@ func (b *Batch) HLIDByName(name string, hlID *int) {
 //
 // name is highlight group name, like "ErrorMsg".
 //
-// val is highlight definiton map, like HLByName.
+// val is highlight definiton map, like [*Nvim.HLByName].
 //
 // in addition the following keys are also recognized:
 //
@@ -2231,7 +2225,7 @@ func (v *Nvim) SetHighlight(nsID int, name string, val *HLAttrs) error {
 //
 // name is highlight group name, like "ErrorMsg".
 //
-// val is highlight definiton map, like HLByName.
+// val is highlight definiton map, like [*Nvim.HLByName].
 //
 // in addition the following keys are also recognized:
 //
@@ -2244,14 +2238,14 @@ func (b *Batch) SetHighlight(nsID int, name string, val *HLAttrs) {
 
 // SetHighlightNamespace set active namespace for highlights. This can be set for a single window,
 //
-// See SetWindowHeightNamespace.
+// See [*Nvim.SetWindowHeightNamespace].
 func (v *Nvim) SetHighlightNamespace(nsID int) error {
 	return v.call("nvim_set_hl_ns", nil, nsID)
 }
 
 // SetHighlightNamespace set active namespace for highlights. This can be set for a single window,
 //
-// See SetWindowHeightNamespace.
+// See [*Nvim.SetWindowHeightNamespace].
 func (b *Batch) SetHighlightNamespace(nsID int) {
 	b.call("nvim_set_hl_ns", nil, nsID)
 }
@@ -2275,11 +2269,11 @@ func (b *Batch) SetFastHighlightNamespace(nsID int) {
 }
 
 // FeedKeys input-keys to Nvim, subject to various quirks controlled by "mode"
-// flags. Unlike Input, this is a blocking call.
+// flags. Unlike [*Nvim.Input], this is a blocking call.
 //
 // This function does not fail, but updates "v:errmsg".
 //
-// If need to input sequences like <C-o> use ReplaceTermcodes to
+// If need to input sequences like <C-o> use [*Nvim.ReplaceTermcodes] to
 // replace the termcodes and then pass the resulting string to nvim_feedkeys.
 // You'll also want to enable escape_csi.
 //
@@ -2304,11 +2298,11 @@ func (v *Nvim) FeedKeys(keys string, mode string, escapeCSI bool) error {
 }
 
 // FeedKeys input-keys to Nvim, subject to various quirks controlled by "mode"
-// flags. Unlike Input, this is a blocking call.
+// flags. Unlike [*Nvim.Input], this is a blocking call.
 //
 // This function does not fail, but updates "v:errmsg".
 //
-// If need to input sequences like <C-o> use ReplaceTermcodes to
+// If need to input sequences like <C-o> use [*Nvim.ReplaceTermcodes] to
 // replace the termcodes and then pass the resulting string to nvim_feedkeys.
 // You'll also want to enable escape_csi.
 //
@@ -2334,7 +2328,7 @@ func (b *Batch) FeedKeys(keys string, mode string, escapeCSI bool) {
 
 // Input queues raw user-input.
 //
-// Unlike FeedKeys, this uses a low-level input buffer and the call
+// Unlike [*Nvim.FeedKeys], this uses a low-level input buffer and the call
 // is non-blocking (input is processed asynchronously by the eventloop).
 //
 // This function does not fail but updates "v:errmsg".
@@ -2354,7 +2348,7 @@ func (v *Nvim) Input(keys string) (written int, err error) {
 
 // Input queues raw user-input.
 //
-// Unlike FeedKeys, this uses a low-level input buffer and the call
+// Unlike [*Nvim.FeedKeys], this uses a low-level input buffer and the call
 // is non-blocking (input is processed asynchronously by the eventloop).
 //
 // This function does not fail but updates "v:errmsg".
@@ -2754,7 +2748,7 @@ func (b *Batch) WritelnErr(str string) {
 
 // Buffers gets the current list of buffer handles.
 //
-// Includes unlisted (unloaded/deleted) buffers, like ":ls!". Use IsBufferLoaded to check if a buffer is loaded.
+// Includes unlisted (unloaded/deleted) buffers, like ":ls!". Use [*Nvim.IsBufferLoaded] to check if a buffer is loaded.
 func (v *Nvim) Buffers() (buffers []Buffer, err error) {
 	err = v.call("nvim_list_bufs", &buffers)
 	return buffers, err
@@ -2762,7 +2756,7 @@ func (v *Nvim) Buffers() (buffers []Buffer, err error) {
 
 // Buffers gets the current list of buffer handles.
 //
-// Includes unlisted (unloaded/deleted) buffers, like ":ls!". Use IsBufferLoaded to check if a buffer is loaded.
+// Includes unlisted (unloaded/deleted) buffers, like ":ls!". Use [*Nvim.IsBufferLoaded] to check if a buffer is loaded.
 func (b *Batch) Buffers(buffers *[]Buffer) {
 	b.call("nvim_list_bufs", buffers)
 }
@@ -3289,7 +3283,7 @@ func (b *Batch) KeyMap(mode string, maps *[]*Mapping) {
 
 // SetKeyMap sets a global mapping for the given mode.
 //
-// To set a buffer-local mapping, use SetBufferKeyMap().
+// To set a buffer-local mapping, use [*Nvim.SetBufferKeyMap].
 //
 // Unlike :map, leading/trailing whitespace is accepted as part of the {lhs}
 // or {rhs}.
@@ -3317,7 +3311,7 @@ func (v *Nvim) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bo
 
 // SetKeyMap sets a global mapping for the given mode.
 //
-// To set a buffer-local mapping, use SetBufferKeyMap().
+// To set a buffer-local mapping, use [*Nvim.SetBufferKeyMap].
 //
 // Unlike :map, leading/trailing whitespace is accepted as part of the {lhs}
 // or {rhs}.
@@ -3345,7 +3339,7 @@ func (b *Batch) SetKeyMap(mode string, lhs string, rhs string, opts map[string]b
 
 // DeleteKeyMap unmaps a global mapping for the given mode.
 //
-// To unmap a buffer-local mapping, use DeleteBufferKeyMap().
+// To unmap a buffer-local mapping, use [*Nvim.DeleteBufferKeyMap].
 //
 // See:
 //
@@ -3356,7 +3350,7 @@ func (v *Nvim) DeleteKeyMap(mode string, lhs string) error {
 
 // DeleteKeyMap unmaps a global mapping for the given mode.
 //
-// To unmap a buffer-local mapping, use DeleteBufferKeyMap().
+// To unmap a buffer-local mapping, use [*Nvim.DeleteBufferKeyMap].
 //
 // See:
 //
@@ -3459,7 +3453,7 @@ func (b *Batch) SetClientInfo(name string, version ClientVersion, typ ClientType
 //
 //	client
 //
-// Information about the client on the other end of the RPC channel, if it has added it using SetClientInfo() (optional).
+// Information about the client on the other end of the RPC channel, if it has added it using [*Nvim.SetClientInfo] (optional).
 func (v *Nvim) ChannelInfo(channelID int) (channel *Channel, err error) {
 	var result Channel
 	err = v.call("nvim_get_chan_info", &result, channelID)
@@ -3519,7 +3513,7 @@ func (v *Nvim) ChannelInfo(channelID int) (channel *Channel, err error) {
 //
 //	client
 //
-// Information about the client on the other end of the RPC channel, if it has added it using SetClientInfo() (optional).
+// Information about the client on the other end of the RPC channel, if it has added it using [*Nvim.SetClientInfo] (optional).
 func (b *Batch) ChannelInfo(channelID int, channel *Channel) {
 	b.call("nvim_get_chan_info", channel, channelID)
 }
@@ -3862,7 +3856,7 @@ func (b *Batch) SetWindowConfig(window Window, config *WindowConfig) {
 
 // WindowConfig return window configuration.
 //
-// The returned value may be given to OpenWindow.
+// The returned value may be given to [*Nvim.OpenWindow].
 //
 // Relative will be an empty string for normal windows.
 func (v *Nvim) WindowConfig(window Window) (config *WindowConfig, err error) {
@@ -3873,7 +3867,7 @@ func (v *Nvim) WindowConfig(window Window) (config *WindowConfig, err error) {
 
 // WindowConfig return window configuration.
 //
-// The returned value may be given to OpenWindow.
+// The returned value may be given to [*Nvim.OpenWindow].
 //
 // Relative will be an empty string for normal windows.
 func (b *Batch) WindowConfig(window Window, config *WindowConfig) {
@@ -3885,7 +3879,7 @@ func (b *Batch) WindowConfig(window Window, config *WindowConfig) {
 //
 // Like ":hide" the buffer becomes hidden unless another window is editing it,
 // or "bufhidden" is "unload", "delete" or "wipe" as opposed to ":close" or
-// CloseWindow, which will close the buffer.
+// [*Nvim.CloseWindow], which will close the buffer.
 func (v *Nvim) HideWindow(window Window) error {
 	return v.call("nvim_win_hide", nil, window)
 }
@@ -3895,7 +3889,7 @@ func (v *Nvim) HideWindow(window Window) error {
 //
 // Like ":hide" the buffer becomes hidden unless another window is editing it,
 // or "bufhidden" is "unload", "delete" or "wipe" as opposed to ":close" or
-// CloseWindow, which will close the buffer.
+// [*Nvim.CloseWindow], which will close the buffer.
 func (b *Batch) HideWindow(window Window) {
 	b.call("nvim_win_hide", nil, window)
 }
