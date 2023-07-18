@@ -74,6 +74,8 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		}
 
 		if len(index) == d {
+			_ = fields[len(fields)-1] // bounds check hint to compiler
+
 			// There is another field with same name and same depth
 			// Remove that field and skip this field
 			j := 0
@@ -101,12 +103,16 @@ func collectFields(fields []*field, t reflect.Type, visited map[reflect.Type]boo
 		// Parse empty field tag
 		if e := sf.Tag.Get("empty"); e != "" {
 			switch sf.Type.Kind() {
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				bits := 0
-				if sf.Type.Kind() != reflect.Int {
-					bits = sf.Type.Bits()
+			case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				v, err := strconv.ParseInt(e, 10, sf.Type.Bits())
+				if err != nil {
+					panic(fmt.Errorf("msgpack: error parsing field empty field %s.%s: %w", t.Name(), sf.Name, err))
 				}
-				v, err := strconv.ParseInt(e, 10, bits)
+				f.empty = reflect.New(sf.Type).Elem()
+				f.empty.SetInt(v)
+
+			case reflect.Int:
+				v, err := strconv.ParseInt(e, 10, 0)
 				if err != nil {
 					panic(fmt.Errorf("msgpack: error parsing field empty field %s.%s: %w", t.Name(), sf.Name, err))
 				}
