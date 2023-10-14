@@ -1,11 +1,16 @@
 # https://github.com/actions/labeler
 ---
-
 area/ci:
-- .github/**
+  - .github/**
 
 area/msgpack:
-- msgpack/**/*.go
+  - msgpack/**/*.go
 
 area/nvim:
-- nvim/**/*.go
+  - nvim/**/*.go
+
+area/gomod:
+  - any['go.mod', 'go.sum']
+
+documentation:
+  - "**/*.md"
