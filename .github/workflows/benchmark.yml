@@ -14,34 +14,34 @@ defaults:
 
 jobs:
   benchmark:
-    runs-on: ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
+    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
 
     steps:
-    - name: Set flag environment variable
-      run: |
-        echo "OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-        echo "GO_VERSION=$(echo ${{ matrix.go-version }} | cut -d. -f-2)" >> $GITHUB_ENV
+      - name: Set flag environment variable
+        run: |
+          echo "OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "GO_VERSION=$(echo ${{ matrix.go-version }} | cut -d. -f-2)" >> $GITHUB_ENV
 
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: '1.20.x'
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20.x"
 
-    - name: Install nvim binary
-      uses: rhysd/action-setup-vim@v1
-      with:
-        neovim: true
-        version: v0.9.1
+      - name: Install nvim binary
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: v0.9.4
 
-    - name: Run Benchmark
-      run: |
-        go test -v -count=3 -run=none -bench=. -benchmem -timeout=15m ./... | tee bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt
+      - name: Run Benchmark
+        run: |
+          go test -v -count=3 -run=none -bench=. -benchmem -timeout=15m ./... | tee bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt
 
-    - name: 'Upload benchmark Artifact'
-      uses: actions/upload-artifact@v3
-      with:
-        name: bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt
-        path: bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt
+      - name: "Upload benchmark Artifact"
+        uses: actions/upload-artifact@v3
+        with:
+          name: bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt
+          path: bench-${{ env.OS }}-${{ env.GO_VERSION }}.txt

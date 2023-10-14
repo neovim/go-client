@@ -20,51 +20,51 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
-          - macos-13      # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
-          - windows-2022  # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
+          - ubuntu-22.04 # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
+          - macos-13 # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
+          - windows-2022 # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
         go-version:
           - 1.18.x
           - 1.19.x
           - 1.20.x
         neovim-version:
-          - v0.9.1
+          - v0.9.4
           - nightly
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Set flag environment variable
-      run: |
-        echo "OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-        echo "GO_VERSION=$(echo ${{ matrix.go-version }} | cut -d. -f-2)" >> $GITHUB_ENV
-        echo "NVIM_VERSION=$(if [ ${{ matrix.neovim-version }} != 'nightly' ]; then echo 'stable'; else echo 'nightly'; fi)" >> $GITHUB_ENV
+      - name: Set flag environment variable
+        run: |
+          echo "OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "GO_VERSION=$(echo ${{ matrix.go-version }} | cut -d. -f-2)" >> $GITHUB_ENV
+          echo "NVIM_VERSION=$(if [ ${{ matrix.neovim-version }} != 'nightly' ]; then echo 'stable'; else echo 'nightly'; fi)" >> $GITHUB_ENV
 
-    - name: Install Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: ${{ matrix.go-version }}
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
 
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Install neovim binary
-      uses: rhysd/action-setup-vim@v1
-      with:
-        neovim: true
-        version: ${{ matrix.neovim-version }}
+      - name: Install neovim binary
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim-version }}
 
-    - name: go vet
-      run: |
-        go vet ./...
+      - name: go vet
+        run: |
+          go vet ./...
 
-    - name: Test and take a coverage
-      run: |
-        go test -v -race -count=1 -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
+      - name: Test and take a coverage
+        run: |
+          go test -v -race -count=1 -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
-    - uses: codecov/codecov-action@v3
-      with:
-        file: coverage.out
-        flags: ${{ env.OS }}-${{ env.GO_VERSION }}-${{ env.NVIM_VERSION }}
-        env_vars: OS,GO_VERSION,NVIM_VERSION
+      - uses: codecov/codecov-action@v3
+        with:
+          file: coverage.out
+          flags: ${{ env.OS }}-${{ env.GO_VERSION }}-${{ env.NVIM_VERSION }}
+          env_vars: OS,GO_VERSION,NVIM_VERSION
