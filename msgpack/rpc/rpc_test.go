@@ -86,7 +86,7 @@ func TestEndpoint(t *testing.T) {
 	}
 
 	const n = 10
-	for i := 0; i < i; i++ {
+	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			if err := client.Notify("n1", fmt.Sprintf("notif %d,%d", i, j)); err != nil {
 				t.Fatal(err)
@@ -109,7 +109,7 @@ func TestArgs(t *testing.T) {
 	defer cleanup()
 
 	if err := server.Register("n", func(a, b string) ([]string, error) {
-		return append([]string{a, b}), nil
+		return []string{a, b}, nil
 	}); err != nil {
 		t.Fatal(err)
 	}
