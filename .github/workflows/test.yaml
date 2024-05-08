@@ -20,13 +20,14 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
+          - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
           - macos-13      # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
-          - windows-2022  # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
+          - macos-14      # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
+          - windows-2022  # https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md
         go-version:
-          - 1.18.x
-          - 1.19.x
           - 1.20.x
+          - 1.21.x
+          - 1.22.x
         neovim-version:
           - v0.9.1
           - nightly
@@ -42,12 +43,14 @@ jobs:
         echo "NVIM_VERSION=$(if [ ${{ matrix.neovim-version }} != 'nightly' ]; then echo 'stable'; else echo 'nightly'; fi)" >> $GITHUB_ENV
 
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
+        check-latest: true
+        cache-dependency-path: go.mod
 
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install neovim binary
       uses: rhysd/action-setup-vim@v1
@@ -63,7 +66,7 @@ jobs:
       run: |
         go test -v -race -count=1 -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v4
       with:
         file: coverage.out
         flags: ${{ env.OS }}-${{ env.GO_VERSION }}-${{ env.NVIM_VERSION }}
