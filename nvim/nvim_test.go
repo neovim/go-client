@@ -31,6 +31,7 @@ func newChildProcess(tb testing.TB, opts ...ChildProcessOption) (v *Nvim) {
 			"-n",
 			"-i", "NONE",
 			"--headless",
+			"--embed",
 		),
 		ChildProcessContext(ctx),
 		ChildProcessLogf(tb.Logf),
