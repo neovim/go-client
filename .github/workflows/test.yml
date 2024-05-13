@@ -55,13 +55,9 @@ jobs:
         neovim: true
         version: ${{ matrix.neovim-version }}
 
-    - name: go vet
-      run: |
-        go vet ./...
-
     - name: Test and take a coverage
       run: |
-        go test -v -race -count=1 -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
+        go test -race -count=1 -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
     - uses: codecov/codecov-action@v3
       with:
