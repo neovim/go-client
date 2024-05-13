@@ -68,7 +68,7 @@ func ExecAutocmds(event interface{}, opts map[string]interface{}) {
 
 // BufferLineCount gets the buffer line count.
 //
-// The buffer arg is specific Buffer, or 0 for current buffer.
+// The buffer arg is specific [Buffer], or 0 for current buffer.
 //
 // The returns line count, or 0 for unloaded buffer.
 func BufferLineCount(buffer Buffer) (count int) {
@@ -77,7 +77,7 @@ func BufferLineCount(buffer Buffer) (count int) {
 
 // AttachBuffer activates buffer-update events on a channel.
 //
-// The buffer is specific Buffer, or 0 for current buffer.
+// The buffer is specific [Buffer], or 0 for current buffer.
 //
 // If sendBuffer is true, initial notification should contain the whole buffer.
 // If false, the first notification will be a "nvim_buf_lines_event".
@@ -124,7 +124,7 @@ func SetBufferLines(buffer Buffer, start, end int, strictIndexing bool, replacem
 
 // SetBufferText sets or replaces a range in the buffer.
 //
-// This is recommended over SetBufferLines when only modifying parts of a
+// This is recommended over [*Nvim.SetBufferLines] when only modifying parts of a
 // line, as extmarks will be preserved on non-modified parts of the touched
 // lines.
 //
@@ -134,19 +134,19 @@ func SetBufferLines(buffer Buffer, start, end int, strictIndexing bool, replacem
 //
 // To delete a range, set replacement arg to an array containing an empty string, or simply an empty array.
 //
-// Prefer SetBufferLines when adding or deleting entire lines only.
+// Prefer [*Nvim.SetBufferLines] when adding or deleting entire lines only.
 func SetBufferText(buffer Buffer, startRow, startCol, endRow, endCol int, replacement [][]byte) {
 	name(nvim_buf_set_text)
 }
 
 // BufferText gets a range from the buffer.
 //
-// This differs from BufferLines in that it allows retrieving only
+// This differs from [*Nvim.BufferLines] in that it allows retrieving only
 // portions of a line.
 //
 // Indexing is zero-based. Column indices are end-exclusive.
 //
-// Prefer BufferLines when retrieving entire lines.
+// Prefer [*Nvim.BufferLines] when retrieving entire lines.
 //
 // opts is optional parameters. Currently unused.
 func BufferText(buffer Buffer, startRow, startCol, endRow, endCol int, opts map[string]interface{}) [][]byte {
@@ -163,7 +163,7 @@ func BufferText(buffer Buffer, startRow, startCol, endRow, endCol int, opts map[
 //
 // Unlike "line2byte" vim function, throws error for out-of-bounds indexing.
 //
-// If Buffer is unloaded buffer, returns -1.
+// If buffer is unloaded buffer, returns -1.
 func BufferOffset(buffer Buffer, index int) (offset int) {
 	name(nvim_buf_get_offset)
 }
@@ -238,10 +238,7 @@ func IsBufferLoaded(buffer Buffer) (loaded bool) {
 	name(nvim_buf_is_loaded)
 }
 
-// DeleteBuffer deletes the buffer.
-// See
-//
-//	:help :bwipeout
+// DeleteBuffer deletes the buffer.  See |help :bwipeout|
 //
 // The opts args is optional parameters.
 //
@@ -494,16 +491,16 @@ func ParseCmd(str string, opts map[string]interface{}) (cmd Cmd) {
 
 // Cmd executes an Ex command.
 //
-// Unlike Command() this command takes a structured Dictionary instead of a String. This
+// Unlike [*Nvim.Command] this command takes a structured Dictionary instead of a String. This
 // allows for easier construction and manipulation of an Ex command. This also allows for things
 // such as having spaces inside a command argument, expanding filenames in a command that otherwise
 // doesn't expand filenames, etc.
 //
 // On execution error: fails with VimL error, updates v:errmsg.
-// See Exec() and Command().
+// See [*Nvim.Exec] and [*Nvim.Command].
 //
 // cmd is the command to execute. Must be a Dictionary that can contain the same values
-// as the return value of ParseCmd except "addr", "nargs" and "nextcmd" which are ignored if provided.
+// as the return value of [*Nvim.ParseCmd] except "addr", "nargs" and "nextcmd" which are ignored if provided.
 // All values except for "cmd" are optional.
 //
 // opts is the optional parameters.
@@ -786,14 +783,14 @@ func DeleteBufferExtmark(buffer Buffer, nsID, extmarkID int) (deleted bool) {
 // Namespaces are used for batch deletion/updating of a set of highlights.
 // To create a namespace, use CreateNamespace which returns a namespace id.
 // Pass it in to this function as nsID to add highlights to the namespace.
-// All highlights in the same namespace can then be cleared with single call to ClearBufferNamespace.
+// All highlights in the same namespace can then be cleared with single call to [*Nvim.ClearBufferNamespace].
 // If the highlight never will be deleted by an API call, pass nsID = -1.
 //
 // As a shorthand, "srcID = 0" can be used to create a new namespace for the
 // highlight, the allocated id is then returned.
 //
 // If hlGroup arg is the empty string, no highlight is added, but a new `nsID` is still returned.
-// This is supported for backwards compatibility, new code should use CreateNamespaceto create a new empty namespace.
+// This is supported for backwards compatibility, new code should use [*Nvim.CreateNamespace] to create a new empty namespace.
 func AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line, startCol, endCol int) (id int) {
 	name(nvim_buf_add_highlight)
 }
@@ -814,7 +811,7 @@ func ClearBufferNamespace(buffer Buffer, nsID, lineStart, lineEnd int) {
 // the global value is returned.
 // Local values always correspond to the current buffer or window.
 //
-// To get a buffer-local or window-local option for a specific buffer or window, use BufferOption() or WindowOption().
+// To get a buffer-local or window-local option for a specific buffer or window, use [*Nvim.BufferOption] or [*Nvim.WindowOption].
 //
 // name is the option name.
 //
@@ -1062,7 +1059,7 @@ func SetPumBounds(width, height, row, col float64) {
 
 // Exec executes Vimscript (multiline block of Ex-commands), like anonymous source.
 //
-// Unlike Command, this function supports heredocs, script-scope (s:), etc.
+// Unlike [*Nvim.Command], this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
 func Exec(src string, opts map[string]interface{}) (out map[string]interface{}) {
@@ -1101,7 +1098,7 @@ func ParseExpression(expr, flags string, highlight bool) (expression map[string]
 //
 // Show linked group name instead of effective definition.
 //
-// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+// The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in [*Nvim.SetHighlight], or only a single highlight definition map if requested by name or id.
 func HL(nsID int, opts map[string]interface{}) (highlight HLAttrs) {
 	name(nvim_get_hl)
 	returnPtr()
@@ -1109,7 +1106,7 @@ func HL(nsID int, opts map[string]interface{}) (highlight HLAttrs) {
 
 // HLByID gets a highlight definition by name.
 //
-// hlID is the highlight id as returned by HLIDByName.
+// hlID is the highlight id as returned by [*Nvim.HLIDByName].
 //
 // rgb is the whether the export RGB colors.
 //
@@ -1150,7 +1147,7 @@ func HLByName(name string, rgb bool) (highlight HLAttrs) {
 //
 // name is highlight group name, like "ErrorMsg".
 //
-// val is highlight definiton map, like HLByName.
+// val is highlight definiton map, like [*Nvim.HLByName].
 //
 // in addition the following keys are also recognized:
 //
@@ -1163,7 +1160,7 @@ func SetHighlight(nsID int, name string, val *HLAttrs) {
 
 // SetHighlightNamespace set active namespace for highlights. This can be set for a single window,
 //
-// See SetWindowHeightNamespace.
+// See [*Nvim.SetWindowHeightNamespace].
 func SetHighlightNamespace(nsID int) {
 	name(nvim_set_hl_ns)
 }
@@ -1178,11 +1175,11 @@ func SetFastHighlightNamespace(nsID int) {
 }
 
 // FeedKeys input-keys to Nvim, subject to various quirks controlled by "mode"
-// flags. Unlike Input, this is a blocking call.
+// flags. Unlike [*Nvim.Input], this is a blocking call.
 //
 // This function does not fail, but updates "v:errmsg".
 //
-// If need to input sequences like <C-o> use ReplaceTermcodes to
+// If need to input sequences like <C-o> use [*Nvim.ReplaceTermcodes] to
 // replace the termcodes and then pass the resulting string to nvim_feedkeys.
 // You'll also want to enable escape_csi.
 //
@@ -1208,7 +1205,7 @@ func FeedKeys(keys, mode string, escapeCSI bool) {
 
 // Input queues raw user-input.
 //
-// Unlike FeedKeys, this uses a low-level input buffer and the call
+// Unlike [*Nvim.FeedKeys], this uses a low-level input buffer and the call
 // is non-blocking (input is processed asynchronously by the eventloop).
 //
 // This function does not fail but updates "v:errmsg".
@@ -1423,7 +1420,7 @@ func WritelnErr(str string) {
 
 // Buffers gets the current list of buffer handles.
 //
-// Includes unlisted (unloaded/deleted) buffers, like ":ls!". Use IsBufferLoaded to check if a buffer is loaded.
+// Includes unlisted (unloaded/deleted) buffers, like ":ls!". Use [*Nvim.IsBufferLoaded] to check if a buffer is loaded.
 func Buffers() (buffers []Buffer) {
 	name(nvim_list_bufs)
 }
@@ -1683,7 +1680,7 @@ func KeyMap(mode string) (maps []*Mapping) {
 
 // SetKeyMap sets a global mapping for the given mode.
 //
-// To set a buffer-local mapping, use SetBufferKeyMap().
+// To set a buffer-local mapping, use [*Nvim.SetBufferKeyMap].
 //
 // Unlike :map, leading/trailing whitespace is accepted as part of the {lhs}
 // or {rhs}.
@@ -1711,7 +1708,7 @@ func SetKeyMap(mode, lhs, rhs string, opts map[string]bool) {
 
 // DeleteKeyMap unmaps a global mapping for the given mode.
 //
-// To unmap a buffer-local mapping, use DeleteBufferKeyMap().
+// To unmap a buffer-local mapping, use [*Nvim.DeleteBufferKeyMap].
 //
 // See:
 //
@@ -1793,7 +1790,7 @@ func SetClientInfo(name string, version ClientVersion, typ ClientType, methods m
 //
 //	client
 //
-// Information about the client on the other end of the RPC channel, if it has added it using SetClientInfo() (optional).
+// Information about the client on the other end of the RPC channel, if it has added it using [*Nvim.SetClientInfo] (optional).
 func ChannelInfo(channelID int) (channel Channel) {
 	name(nvim_get_chan_info)
 	returnPtr()
@@ -1964,7 +1961,7 @@ func SetWindowConfig(window Window, config *WindowConfig) {
 
 // WindowConfig return window configuration.
 //
-// The returned value may be given to OpenWindow.
+// The returned value may be given to [*Nvim.OpenWindow].
 //
 // Relative will be an empty string for normal windows.
 func WindowConfig(window Window) (config WindowConfig) {
@@ -1977,7 +1974,7 @@ func WindowConfig(window Window) (config WindowConfig) {
 //
 // Like ":hide" the buffer becomes hidden unless another window is editing it,
 // or "bufhidden" is "unload", "delete" or "wipe" as opposed to ":close" or
-// CloseWindow, which will close the buffer.
+// [*Nvim.CloseWindow], which will close the buffer.
 func HideWindow(window Window) {
 	name(nvim_win_hide)
 }
