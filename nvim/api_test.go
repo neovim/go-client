@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -4459,19 +4458,9 @@ func testRuntime(v *Nvim) func(*testing.T) {
 		vimDiff := filepath.Join(runtimePath, "doc", "vim_diff.txt")
 		want := fmt.Sprintf("%s,%s", viDiff, vimDiff)
 
-		binName := BinaryName
-		if nvimCmd := *flagNvimPath; nvimCmd != "" {
-			binName = nvimCmd
-		}
-		binaryPath, err := exec.LookPath(binName)
-		if err != nil {
+		var wantPaths []string
+		if err := v.Eval("nvim_list_runtime_paths()", &wantPaths); err != nil {
 			t.Fatal(err)
-		}
-		nvimPrefix := filepath.Dir(filepath.Dir(binaryPath))
-
-		wantPaths := []string{
-			filepath.Join(nvimPrefix, "lib", "nvim"),
-			filepath.Join(nvimPrefix, "share", "nvim", "runtime"),
 		}
 		sort.Strings(wantPaths)
 
@@ -4504,7 +4493,7 @@ func testRuntime(v *Nvim) func(*testing.T) {
 				got := strings.Join(paths, ",")
 				want := strings.Join(wantPaths, ",")
 				t.Logf("%s\n got: %v\nwant: %s", t.Name(), got, want)
-				if !reflect.DeepEqual(got, want) {
+				if got != want {
 					t.Fatalf("RuntimePaths():\n got %v\nwant %v", got, want)
 				}
 			})
@@ -4541,7 +4530,7 @@ func testRuntime(v *Nvim) func(*testing.T) {
 
 				got := strings.Join(paths, ",")
 				want := strings.Join(wantPaths, ",")
-				if !reflect.DeepEqual(got, want) {
+				if got != want {
 					t.Fatalf("RuntimePaths():\n got %v\nwant %v", paths, wantPaths)
 				}
 			})
@@ -5824,7 +5813,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				if err := v.ExecAutocmds(`User Test`, map[string]interface{}{"group": augID}); err != nil {
+				if err := v.ExecAutocmds(`User`, map[string]interface{}{"group": augID}); err != nil {
 					t.Fatal(err)
 				}
 
@@ -5933,7 +5922,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				b.ExecAutocmds(`User Test`, map[string]interface{}{"group": augID})
+				b.ExecAutocmds(`User`, map[string]interface{}{"group": augID})
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
