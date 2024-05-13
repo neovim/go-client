@@ -69,6 +69,15 @@ Start Nvim and run the following command:
 :echo Hello('world')
 ```
 
+Release
+-------
+
+Follow the standard Go process for [publishing a module](https://go.dev/doc/modules/publishing). 
+
+License
+-------
+
+[Apache License 2.0](https://github.com/neovim/go-client/blob/master/LICENSE)
 
 <!-- badge links -->
 [pkg.go.dev]: https://pkg.go.dev/github.com/neovim/go-client
