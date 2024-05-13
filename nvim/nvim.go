@@ -103,9 +103,6 @@ func (v *Nvim) ExitCode() int {
 //
 // The application must call Serve() to handle RPC requests and responses.
 //
-// New is a low-level function. Most applications should use NewChildProcess,
-// Dial or the ./plugin package.
-//
 //	:help rpc-connecting
 func New(r io.Reader, w io.Writer, c io.Closer, logf func(string, ...interface{})) (*Nvim, error) {
 	ep, err := rpc.NewEndpoint(r, w, c, rpc.WithLogf(logf), withExtensions())
@@ -354,8 +351,6 @@ func Dial(address string, options ...DialOption) (*Nvim, error) {
 //	:help rpcrequest()
 //	:help rpcnotify()
 //
-// Plugin applications should use the Handler* methods in the ./plugin package
-// to register handlers instead of this method.
 func (v *Nvim) RegisterHandler(method string, fn interface{}) error {
 	var args []interface{}
 	t := reflect.TypeOf(fn)
