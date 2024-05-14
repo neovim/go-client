@@ -724,7 +724,7 @@ type WindowConfig struct {
 	Style string `msgpack:"style,omitempty"`
 
 	// Border is the style of window border.
-	Border interface{} `msgpack:"border,omitempty"`
+	Border any `msgpack:"border,omitempty"`
 
 	// NoAutocmd whether the fire buffer-related autocommand events
 	NoAutocmd bool `msgpack:"noautocmd,omitempty"`
@@ -781,7 +781,7 @@ type OptionInfo struct {
 	Type string `msgpack:"type"`
 
 	// Default is the default value for the option.
-	Default interface{} `msgpack:"default"`
+	Default any `msgpack:"default"`
 
 	// Scope one of "global", "win", or "buf".
 	Scope string `msgpack:"scope"`
@@ -851,9 +851,9 @@ func (level LogLevel) String() string {
 
 // AutocmdArg is the type of autocmd API arguments.
 type AutocmdArg struct {
-	Group   int         `msgpack:"group,omitempty"`
-	Event   interface{} `msgpack:"event,omitempty"`
-	Pattern interface{} `msgpack:"pattern,omitempty"`
+	Group   int `msgpack:"group,omitempty"`
+	Event   any `msgpack:"event,omitempty"`
+	Pattern any `msgpack:"pattern,omitempty"`
 }
 
 // AutocmdType is the type of autocmd API return type.

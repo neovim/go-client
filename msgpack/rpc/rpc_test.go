@@ -128,67 +128,67 @@ func TestArgs(t *testing.T) {
 
 	argsTests := []struct {
 		sm     string
-		args   []interface{}
+		args   []any
 		result []string
 	}{
 		{
 			sm:     "n",
-			args:   []interface{}{},
+			args:   []any{},
 			result: []string{"", ""},
 		},
 		{
 			sm:     "n",
-			args:   []interface{}{"a"},
+			args:   []any{"a"},
 			result: []string{"a", ""},
 		},
 		{
 			sm:     "n",
-			args:   []interface{}{"a", "b"},
+			args:   []any{"a", "b"},
 			result: []string{"a", "b"},
 		},
 		{
 			sm:     "n",
-			args:   []interface{}{"a", "b", "c"},
+			args:   []any{"a", "b", "c"},
 			result: []string{"a", "b"},
 		},
 		{
 			sm:     "v",
-			args:   []interface{}{},
+			args:   []any{},
 			result: []string{"", ""},
 		},
 		{
 			sm:     "v",
-			args:   []interface{}{"a"},
+			args:   []any{"a"},
 			result: []string{"a", ""},
 		},
 		{
 			sm:     "v",
-			args:   []interface{}{"a", "b"},
+			args:   []any{"a", "b"},
 			result: []string{"a", "b"},
 		},
 		{
 			sm:     "v",
-			args:   []interface{}{"a", "b", "x1"},
+			args:   []any{"a", "b", "x1"},
 			result: []string{"a", "b", "x1"},
 		},
 		{
 			sm:     "v",
-			args:   []interface{}{"a", "b", "x1", "x2"},
+			args:   []any{"a", "b", "x1", "x2"},
 			result: []string{"a", "b", "x1", "x2"},
 		},
 		{
 			sm:     "v",
-			args:   []interface{}{"a", "b", "x1", "x2", "x3"},
+			args:   []any{"a", "b", "x1", "x2", "x3"},
 			result: []string{"a", "b", "x1", "x2", "x3"},
 		},
 		{
 			sm:     "a",
-			args:   []interface{}{},
+			args:   []any{},
 			result: []string(nil),
 		},
 		{
 			sm:     "a",
-			args:   []interface{}{"x1", "x2", "x3"},
+			args:   []any{"x1", "x2", "x3"},
 			result: []string{"x1", "x2", "x3"},
 		},
 	}

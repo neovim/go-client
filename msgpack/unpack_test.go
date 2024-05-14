@@ -79,7 +79,7 @@ var unpackTests = map[string]struct {
 	// typ is Expected type
 	typ Type
 	// v is Expected value
-	v interface{}
+	v any
 	// hs is Hex encodings of typ, v
 	hs []string
 }{

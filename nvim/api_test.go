@@ -115,11 +115,11 @@ func TestAPI(t *testing.T) {
 		t.Fatalf("apiInfo[0] is not int64 type: %T", apiInfo[0])
 	}
 
-	info, ok := apiInfo[1].(map[string]interface{})
+	info, ok := apiInfo[1].(map[string]any)
 	if !ok {
-		t.Fatalf("apiInfo[1] is not map[string]interface{} type: %T", apiInfo[1])
+		t.Fatalf("apiInfo[1] is not map[string]any type: %T", apiInfo[1])
 	}
-	infoV := info["version"].(map[string]interface{})
+	infoV := info["version"].(map[string]any)
 	nvimVersion.Major = infoV["major"].(int64)
 	nvimVersion.Minor = infoV["minor"].(int64)
 	nvimVersion.Patch = infoV["patch"].(int64)
@@ -167,7 +167,7 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 			clearBuffer(t, v, 0) // clear curret buffer text
 
 			changedtickChan := make(chan *ChangedtickEvent)
-			v.RegisterHandler(EventBufChangedtick, func(changedtickEvent ...interface{}) {
+			v.RegisterHandler(EventBufChangedtick, func(changedtickEvent ...any) {
 				ev := &ChangedtickEvent{
 					Buffer:     changedtickEvent[0].(Buffer),
 					Changetick: changedtickEvent[1].(int64),
@@ -176,7 +176,7 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 			})
 
 			bufLinesChan := make(chan *BufLinesEvent)
-			v.RegisterHandler(EventBufLines, func(bufLinesEvent ...interface{}) {
+			v.RegisterHandler(EventBufLines, func(bufLinesEvent ...any) {
 				ev := &BufLinesEvent{
 					Buffer:      bufLinesEvent[0].(Buffer),
 					Changetick:  bufLinesEvent[1].(int64),
@@ -184,21 +184,21 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 					LastLine:    bufLinesEvent[3].(int64),
 					IsMultipart: bufLinesEvent[5].(bool),
 				}
-				for _, line := range bufLinesEvent[4].([]interface{}) {
+				for _, line := range bufLinesEvent[4].([]any) {
 					ev.LineData = append(ev.LineData, line.(string))
 				}
 				bufLinesChan <- ev
 			})
 
 			bufDetachChan := make(chan *BufDetachEvent)
-			v.RegisterHandler(EventBufDetach, func(bufDetachEvent ...interface{}) {
+			v.RegisterHandler(EventBufDetach, func(bufDetachEvent ...any) {
 				ev := &BufDetachEvent{
 					Buffer: bufDetachEvent[0].(Buffer),
 				}
 				bufDetachChan <- ev
 			})
 
-			ok, err := v.AttachBuffer(0, false, make(map[string]interface{})) // first 0 arg refers to the current buffer
+			ok, err := v.AttachBuffer(0, false, make(map[string]any)) // first 0 arg refers to the current buffer
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -277,7 +277,7 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 			clearBuffer(t, v, 0) // clear curret buffer text
 
 			changedtickChan := make(chan *ChangedtickEvent)
-			v.RegisterHandler(EventBufChangedtick, func(changedtickEvent ...interface{}) {
+			v.RegisterHandler(EventBufChangedtick, func(changedtickEvent ...any) {
 				ev := &ChangedtickEvent{
 					Buffer:     changedtickEvent[0].(Buffer),
 					Changetick: changedtickEvent[1].(int64),
@@ -286,7 +286,7 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 			})
 
 			bufLinesChan := make(chan *BufLinesEvent)
-			v.RegisterHandler(EventBufLines, func(bufLinesEvent ...interface{}) {
+			v.RegisterHandler(EventBufLines, func(bufLinesEvent ...any) {
 				ev := &BufLinesEvent{
 					Buffer:      bufLinesEvent[0].(Buffer),
 					Changetick:  bufLinesEvent[1].(int64),
@@ -294,14 +294,14 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 					LastLine:    bufLinesEvent[3].(int64),
 					IsMultipart: bufLinesEvent[5].(bool),
 				}
-				for _, line := range bufLinesEvent[4].([]interface{}) {
+				for _, line := range bufLinesEvent[4].([]any) {
 					ev.LineData = append(ev.LineData, line.(string))
 				}
 				bufLinesChan <- ev
 			})
 
 			bufDetachChan := make(chan *BufDetachEvent)
-			v.RegisterHandler(EventBufDetach, func(bufDetachEvent ...interface{}) {
+			v.RegisterHandler(EventBufDetach, func(bufDetachEvent ...any) {
 				ev := &BufDetachEvent{
 					Buffer: bufDetachEvent[0].(Buffer),
 				}
@@ -311,7 +311,7 @@ func testBufAttach(v *Nvim) func(*testing.T) {
 			b := v.NewBatch()
 
 			var attached bool
-			b.AttachBuffer(0, false, make(map[string]interface{}), &attached) // first 0 arg refers to the current buffer
+			b.AttachBuffer(0, false, make(map[string]any), &attached) // first 0 arg refers to the current buffer
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
@@ -405,7 +405,7 @@ func testAPIInfo(v *Nvim) func(*testing.T) {
 		t.Run("Batch", func(t *testing.T) {
 			b := v.NewBatch()
 
-			var apiinfo []interface{}
+			var apiinfo []any
 			b.APIInfo(&apiinfo)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
@@ -615,7 +615,7 @@ func testBuffer(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("BufferCommands", func(t *testing.T) {
-				commands, err := v.BufferCommands(Buffer(0), make(map[string]interface{}))
+				commands, err := v.BufferCommands(Buffer(0), make(map[string]any))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -699,7 +699,7 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					wantLine = 3
 					wantCol  = 0
 				)
-				set, err := v.SetBufferMark(Buffer(0), mark, wantLine, wantCol, make(map[string]interface{}))
+				set, err := v.SetBufferMark(Buffer(0), mark, wantLine, wantCol, make(map[string]any))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -922,7 +922,7 @@ func testBuffer(v *Nvim) func(*testing.T) {
 				b := v.NewBatch()
 
 				var commands map[string]*Command
-				b.BufferCommands(Buffer(0), make(map[string]interface{}), &commands)
+				b.BufferCommands(Buffer(0), make(map[string]any), &commands)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
@@ -1020,7 +1020,7 @@ func testBuffer(v *Nvim) func(*testing.T) {
 					wantCol  = 0
 				)
 				var set bool
-				b.SetBufferMark(Buffer(0), mark, wantLine, wantCol, make(map[string]interface{}), &set)
+				b.SetBufferMark(Buffer(0), mark, wantLine, wantCol, make(map[string]any), &set)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
@@ -1896,7 +1896,7 @@ func testLines(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				got, err := v.BufferText(buf, 0, 0, 1, -1, make(map[string]interface{}))
+				got, err := v.BufferText(buf, 0, 0, 1, -1, make(map[string]any))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -2068,7 +2068,7 @@ func testLines(v *Nvim) func(*testing.T) {
 				}
 
 				var got [][]byte
-				b.BufferText(buf, 0, 0, 1, -1, make(map[string]interface{}), &got)
+				b.BufferText(buf, 0, 0, 1, -1, make(map[string]any), &got)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
@@ -2151,7 +2151,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2176,7 +2176,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2214,7 +2214,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 			}
 
 			t.Run("Nvim", func(t *testing.T) {
-				got, err := v.ParseCmd(`echomsg 'hello'`, make(map[string]interface{}))
+				got, err := v.ParseCmd(`echomsg 'hello'`, make(map[string]any))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -2227,7 +2227,7 @@ func testCmd(v *Nvim) func(*testing.T) {
 				b := v.NewBatch()
 
 				var got Cmd
-				b.ParseCmd(`echomsg 'hello'`, make(map[string]interface{}), &got)
+				b.ParseCmd(`echomsg 'hello'`, make(map[string]any), &got)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
@@ -2243,7 +2243,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Commands", func(t *testing.T) {
 			t.Run("Nvim", func(t *testing.T) {
-				opts := map[string]interface{}{
+				opts := map[string]any{
 					"builtin": false,
 				}
 				cmds, err := v.Commands(opts)
@@ -2258,7 +2258,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 			t.Run("Batch", func(t *testing.T) {
 				b := v.NewBatch()
 
-				opts := map[string]interface{}{
+				opts := map[string]any{
 					"builtin": false,
 				}
 				var cmds map[string]*Command
@@ -2276,16 +2276,16 @@ func testCommand(v *Nvim) func(*testing.T) {
 			tests := map[string]struct {
 				name    string
 				command UserCommand
-				opts    map[string]interface{}
-				want    map[string]interface{}
+				opts    map[string]any
+				want    map[string]any
 			}{
 				"SayHello": {
 					name:    "SayHello",
 					command: UserVimCommand(`echo "Hello world!"`),
-					opts: map[string]interface{}{
+					opts: map[string]any{
 						"force": false,
 					},
-					want: map[string]interface{}{
+					want: map[string]any{
 						"output": "Hello world!",
 					},
 				},
@@ -2303,7 +2303,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 						}
 					})
 
-					opts := map[string]interface{}{
+					opts := map[string]any{
 						"output": true,
 					}
 					got, err := v.Exec(tt.name, opts)
@@ -2331,10 +2331,10 @@ func testCommand(v *Nvim) func(*testing.T) {
 						}
 					})
 
-					opts := map[string]interface{}{
+					opts := map[string]any{
 						"output": true,
 					}
-					var got map[string]interface{}
+					var got map[string]any
 					b.Exec(tt.name, opts, &got)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
@@ -2350,16 +2350,16 @@ func testCommand(v *Nvim) func(*testing.T) {
 			tests := map[string]struct {
 				name    string
 				command UserCommand
-				opts    map[string]interface{}
-				want    map[string]interface{}
+				opts    map[string]any
+				want    map[string]any
 			}{
 				"SayHello": {
 					name:    "SayHello",
 					command: UserVimCommand(`echo "Hello world!"`),
-					opts: map[string]interface{}{
+					opts: map[string]any{
 						"force": false,
 					},
-					want: map[string]interface{}{
+					want: map[string]any{
 						"output": "Hello world!",
 					},
 				},
@@ -2377,7 +2377,7 @@ func testCommand(v *Nvim) func(*testing.T) {
 						}
 					})
 
-					opts := map[string]interface{}{
+					opts := map[string]any{
 						"output": true,
 					}
 					got, err := v.Exec(tt.name, opts)
@@ -2405,10 +2405,10 @@ func testCommand(v *Nvim) func(*testing.T) {
 						}
 					})
 
-					opts := map[string]interface{}{
+					opts := map[string]any{
 						"output": true,
 					}
-					var got map[string]interface{}
+					var got map[string]any
 					b.Exec(tt.name, opts, &got)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
@@ -2440,7 +2440,7 @@ func testVar(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				var value interface{}
+				var value any
 				if err := v.Var(varKey, &value); err != nil {
 					t.Fatal(err)
 				}
@@ -2486,7 +2486,7 @@ func testVar(v *Nvim) func(*testing.T) {
 
 				b.SetVar(varKey, varVal)
 
-				var value interface{}
+				var value any
 				b.Var(varKey, &value)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
@@ -2543,11 +2543,11 @@ func testMessage(v *Nvim) func(*testing.T) {
 						Text: wantEcho,
 					},
 				}
-				if err := v.Echo(chunk, true, make(map[string]interface{})); err != nil {
+				if err := v.Echo(chunk, true, make(map[string]any)); err != nil {
 					t.Fatalf("failed to Echo: %v", err)
 				}
 
-				opts := map[string]interface{}{
+				opts := map[string]any{
 					"output": true,
 				}
 				gotEcho, err := v.Exec("message", opts)
@@ -2555,7 +2555,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 					t.Fatalf("could not get v:statusmsg nvim variable: %v", err)
 				}
 
-				want := map[string]interface{}{
+				want := map[string]any{
 					"output": wantEcho,
 				}
 				if !reflect.DeepEqual(gotEcho, want) {
@@ -2570,7 +2570,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2596,7 +2596,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2622,7 +2622,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2648,20 +2648,20 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
 
 				const wantNotifyMsg = `hello Notify`
-				want := map[string]interface{}{
+				want := map[string]any{
 					"output": wantNotifyMsg,
 				}
-				if err := v.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]interface{})); err != nil {
+				if err := v.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]any)); err != nil {
 					t.Fatalf("failed to Notify: %v", err)
 				}
 
-				opts := map[string]interface{}{
+				opts := map[string]any{
 					"output": true,
 				}
 				gotNotifyMsg, err := v.Exec(":messages", opts)
@@ -2680,13 +2680,13 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
 
 				const wantNotifyErr = `hello Notify Error`
-				if err := v.Notify(wantNotifyErr, LogErrorLevel, make(map[string]interface{})); err != nil {
+				if err := v.Notify(wantNotifyErr, LogErrorLevel, make(map[string]any)); err != nil {
 					t.Fatalf("failed to Notify: %v", err)
 				}
 				var gotNotifyErr string
@@ -2709,18 +2709,18 @@ func testMessage(v *Nvim) func(*testing.T) {
 						Text: wantEcho,
 					},
 				}
-				b.Echo(chunk, true, make(map[string]interface{}))
+				b.Echo(chunk, true, make(map[string]any))
 
-				opts := map[string]interface{}{
+				opts := map[string]any{
 					"output": true,
 				}
-				var gotEcho map[string]interface{}
+				var gotEcho map[string]any
 				b.Exec("message", opts, &gotEcho)
 				if err := b.Execute(); err != nil {
 					t.Fatalf("failed to Execute: %v", err)
 				}
 
-				want := map[string]interface{}{
+				want := map[string]any{
 					"output": wantEcho,
 				}
 				if !reflect.DeepEqual(gotEcho, want) {
@@ -2734,7 +2734,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2764,7 +2764,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2793,7 +2793,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2822,7 +2822,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2830,21 +2830,21 @@ func testMessage(v *Nvim) func(*testing.T) {
 				b := v.NewBatch()
 
 				const wantNotifyMsg = `hello Notify`
-				b.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]interface{}))
+				b.Notify(wantNotifyMsg, LogInfoLevel, make(map[string]any))
 				if err := b.Execute(); err != nil {
 					t.Fatalf("failed to Notify: %v", err)
 				}
 
-				opts := map[string]interface{}{
+				opts := map[string]any{
 					"output": true,
 				}
-				var gotNotifyMsg map[string]interface{}
+				var gotNotifyMsg map[string]any
 				b.Exec(":messages", opts, &gotNotifyMsg)
 				if err := b.Execute(); err != nil {
 					t.Fatalf("failed to \":messages\" command: %v", err)
 				}
 
-				want := map[string]interface{}{
+				want := map[string]any{
 					"output": wantNotifyMsg,
 				}
 				if !reflect.DeepEqual(gotNotifyMsg, want) {
@@ -2859,7 +2859,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 					// clear messages
-					if _, err := v.Exec(":messages clear", make(map[string]interface{})); err != nil {
+					if _, err := v.Exec(":messages clear", make(map[string]any)); err != nil {
 						t.Fatalf("failed to SetVVar: %v", err)
 					}
 				}()
@@ -2867,7 +2867,7 @@ func testMessage(v *Nvim) func(*testing.T) {
 				b := v.NewBatch()
 
 				const wantNotifyErr = `hello Notify Error`
-				b.Notify(wantNotifyErr, LogErrorLevel, make(map[string]interface{}))
+				b.Notify(wantNotifyErr, LogErrorLevel, make(map[string]any))
 				if err := b.Execute(); err != nil {
 					t.Fatalf("failed to Notify: %v", err)
 				}
@@ -3851,7 +3851,7 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			opts := map[string]interface{}{
+			opts := map[string]any{
 				"id": testHLID,
 			}
 			got, err := v.HL(nsID, opts)
@@ -3931,7 +3931,7 @@ func testHighlight(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			opts := map[string]interface{}{
+			opts := map[string]any{
 				"id": testHLID,
 			}
 			var got HLAttrs
@@ -4001,7 +4001,7 @@ func testVirtualText(v *Nvim) func(*testing.T) {
 				HLGroup: "String",
 			},
 		}
-		nsID2, err := v.SetBufferVirtualText(Buffer(0), nsID, 0, chunks, make(map[string]interface{}))
+		nsID2, err := v.SetBufferVirtualText(Buffer(0), nsID, 0, chunks, make(map[string]any))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -4253,7 +4253,7 @@ func testContext(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			var result interface{}
+			var result any
 			if err := v.LoadContext(ctxt, &result); err != nil {
 				t.Fatal(err)
 			}
@@ -4265,13 +4265,13 @@ func testContext(v *Nvim) func(*testing.T) {
 		t.Run("Batch", func(t *testing.T) {
 			b := v.NewBatch()
 
-			var ctxt map[string]interface{}
+			var ctxt map[string]any
 			b.Context(make(map[string][]string), &ctxt)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
 
-			var result interface{}
+			var result any
 			b.LoadContext(ctxt, &result)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
@@ -4306,12 +4306,12 @@ func testExtmarks(v *Nvim) func(*testing.T) {
 				wantLine = 1
 				wantCol  = 3
 			)
-			gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}))
+			gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]any))
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			extmarks, err := v.BufferExtmarks(Buffer(0), nsID, 0, -1, make(map[string]interface{}))
+			extmarks, err := v.BufferExtmarks(Buffer(0), nsID, 0, -1, make(map[string]any))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -4328,7 +4328,7 @@ func testExtmarks(v *Nvim) func(*testing.T) {
 				t.Fatalf("got %d extmarks Col but want %d", extmarks[0].Col, wantCol)
 			}
 
-			pos, err := v.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]interface{}))
+			pos, err := v.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]any))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -4382,13 +4382,13 @@ func testExtmarks(v *Nvim) func(*testing.T) {
 				wantCol  = 3
 			)
 			var gotExtMarkID int
-			b.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}), &gotExtMarkID)
+			b.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]any), &gotExtMarkID)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
 
 			var extmarks []ExtMark
-			b.BufferExtmarks(Buffer(0), nsID, 0, -1, make(map[string]interface{}), &extmarks)
+			b.BufferExtmarks(Buffer(0), nsID, 0, -1, make(map[string]any), &extmarks)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
@@ -4407,7 +4407,7 @@ func testExtmarks(v *Nvim) func(*testing.T) {
 			}
 
 			var pos []int
-			b.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]interface{}), &pos)
+			b.BufferExtmarkByID(Buffer(0), nsID, gotExtMarkID, make(map[string]any), &pos)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
@@ -4732,7 +4732,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 		t.Run("Option", func(t *testing.T) {
 			tests := map[string]struct {
 				name string
-				want interface{}
+				want any
 			}{
 				"background": {
 					name: "background",
@@ -4742,7 +4742,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 
 			for name, tt := range tests {
 				t.Run("Nvim/"+name, func(t *testing.T) {
-					var got interface{}
+					var got any
 					if err := v.Option(tt.name, &got); err != nil {
 						t.Fatal(err)
 					}
@@ -4756,7 +4756,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 				t.Run("Batch/"+name, func(t *testing.T) {
 					b := v.NewBatch()
 
-					var got interface{}
+					var got any
 					b.Option(tt.name, &got)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
@@ -4771,8 +4771,8 @@ func testOptions(v *Nvim) func(*testing.T) {
 		t.Run("SetOption", func(t *testing.T) {
 			tests := map[string]struct {
 				name  string
-				value interface{}
-				want  interface{}
+				value any
+				want  any
 			}{
 				"background": {
 					name: "background",
@@ -4786,7 +4786,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 						t.Fatal(err)
 					}
 
-					var got interface{}
+					var got any
 					if err := v.Option(tt.name, &got); err != nil {
 						t.Fatal(err)
 					}
@@ -4804,7 +4804,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 						t.Fatal(err)
 					}
 
-					var got interface{}
+					var got any
 					b.Option(tt.name, &got)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
@@ -4880,7 +4880,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 						skipVersion(t, "v0.7.0")
 					}
 
-					got, err := v.OptionInfo(tt.name, make(map[string]interface{}))
+					got, err := v.OptionInfo(tt.name, make(map[string]any))
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -4899,7 +4899,7 @@ func testOptions(v *Nvim) func(*testing.T) {
 					b := v.NewBatch()
 
 					var got OptionInfo
-					b.OptionInfo(tt.name, make(map[string]interface{}), &got)
+					b.OptionInfo(tt.name, make(map[string]any), &got)
 					if err := b.Execute(); err != nil {
 						t.Fatal(err)
 					}
@@ -5014,7 +5014,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 					skipVersion(t, "v0.7.0")
 				}
 
-				got, err := v.OptionInfo(tt.name, make(map[string]interface{}))
+				got, err := v.OptionInfo(tt.name, make(map[string]any))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -5033,7 +5033,7 @@ func testOptionsInfo(v *Nvim) func(*testing.T) {
 				b := v.NewBatch()
 
 				var got OptionInfo
-				b.OptionInfo(tt.name, make(map[string]interface{}), &got)
+				b.OptionInfo(tt.name, make(map[string]any), &got)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
@@ -5050,8 +5050,8 @@ func testOptionsValue(v *Nvim) func(*testing.T) {
 		tests := map[string]struct {
 			name  string
 			opts  map[string]OptionValueScope
-			want  interface{}
-			value interface{}
+			want  any
+			value any
 		}{
 			"equalalways": {
 				name: "equalalways",
@@ -5074,7 +5074,7 @@ func testOptionsValue(v *Nvim) func(*testing.T) {
 			t.Run(path.Join(name, "Nvim"), func(t *testing.T) {
 				skipVersion(t, "v0.8.0")
 
-				var result interface{}
+				var result any
 				if err := v.OptionValue(tt.name, tt.opts, &result); err != nil {
 					t.Fatal(err)
 				}
@@ -5086,7 +5086,7 @@ func testOptionsValue(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				var result2 interface{}
+				var result2 any
 				if err := v.OptionValue(tt.name, tt.opts, &result2); err != nil {
 					t.Fatal(err)
 				}
@@ -5106,7 +5106,7 @@ func testOptionsValue(v *Nvim) func(*testing.T) {
 
 				b := v.NewBatch()
 
-				var result interface{}
+				var result any
 				b.OptionValue(tt.name, tt.opts, &result)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
@@ -5120,7 +5120,7 @@ func testOptionsValue(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				var result2 interface{}
+				var result2 any
 				b.OptionValue(tt.name, tt.opts, &result2)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
@@ -5159,7 +5159,7 @@ func testTerm(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			termID, err := v.OpenTerm(buf, make(map[string]interface{}))
+			termID, err := v.OpenTerm(buf, make(map[string]any))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -5191,7 +5191,7 @@ func testTerm(v *Nvim) func(*testing.T) {
 			b.OpenWindow(buf, false, cfg, &win)
 
 			var termID int
-			b.OpenTerm(buf, make(map[string]interface{}), &termID)
+			b.OpenTerm(buf, make(map[string]any), &termID)
 
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
@@ -5348,8 +5348,8 @@ func testUI(v *Nvim) func(*testing.T) {
 				t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
 			}
 
-			v.RegisterHandler("redraw", func(updates ...[]interface{}) {})
-			if err := v.AttachUI(500, 400, make(map[string]interface{})); err != nil {
+			v.RegisterHandler("redraw", func(updates ...[]any) {})
+			if err := v.AttachUI(500, 400, make(map[string]any)); err != nil {
 				t.Fatal(err)
 			}
 			t.Cleanup(func() {
@@ -5388,8 +5388,8 @@ func testUI(v *Nvim) func(*testing.T) {
 				t.Fatalf("expected ui empty but non-zero: %#v", gotUIs)
 			}
 
-			v.RegisterHandler("redraw", func(updates ...[]interface{}) {})
-			b.AttachUI(500, 400, make(map[string]interface{}))
+			v.RegisterHandler("redraw", func(updates ...[]any) {})
+			b.AttachUI(500, 400, make(map[string]any))
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
@@ -5554,7 +5554,7 @@ func testMark(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			gotMark, err := v.Mark(mark, make(map[string]interface{}))
+			gotMark, err := v.Mark(mark, make(map[string]any))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -5577,7 +5577,7 @@ func testMark(v *Nvim) func(*testing.T) {
 				t.Fatalf("could not delete %s mark", mark)
 			}
 
-			gotMark2, err := v.Mark(mark, make(map[string]interface{}))
+			gotMark2, err := v.Mark(mark, make(map[string]any))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -5637,7 +5637,7 @@ func testMark(v *Nvim) func(*testing.T) {
 			}
 
 			gotMark := new(Mark)
-			b.Mark(mark, make(map[string]interface{}), gotMark)
+			b.Mark(mark, make(map[string]any), gotMark)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
@@ -5662,7 +5662,7 @@ func testMark(v *Nvim) func(*testing.T) {
 			}
 
 			gotMark2 := new(Mark)
-			b.Mark(mark, make(map[string]interface{}), gotMark2)
+			b.Mark(mark, make(map[string]any), gotMark2)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
@@ -5683,7 +5683,7 @@ func testMark(v *Nvim) func(*testing.T) {
 func testStatusLine(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
-			opts := map[string]interface{}{
+			opts := map[string]any{
 				"highlights": true,
 			}
 			gotStatusLine, err := v.EvalStatusLine("TextWithNoHighlight", opts)
@@ -5691,9 +5691,9 @@ func testStatusLine(v *Nvim) func(*testing.T) {
 				t.Fatal(err)
 			}
 
-			wantStatusLine := map[string]interface{}{
-				"highlights": []interface{}{
-					map[string]interface{}{
+			wantStatusLine := map[string]any{
+				"highlights": []any{
+					map[string]any{
 						"group": "StatusLine",
 						"start": int64(0),
 					},
@@ -5702,8 +5702,8 @@ func testStatusLine(v *Nvim) func(*testing.T) {
 				"width": 19,
 			}
 
-			gotHighlight := gotStatusLine["highlights"].([]interface{})[0].(map[string]interface{})
-			wantHighlight := wantStatusLine["highlights"].([]interface{})[0].(map[string]interface{})
+			gotHighlight := gotStatusLine["highlights"].([]any)[0].(map[string]any)
+			wantHighlight := wantStatusLine["highlights"].([]any)[0].(map[string]any)
 			if !reflect.DeepEqual(gotHighlight["group"], wantHighlight["group"]) {
 				t.Fatalf("got %#v highlight group but want %#v", gotHighlight["group"], wantHighlight["group"])
 			}
@@ -5727,18 +5727,18 @@ func testStatusLine(v *Nvim) func(*testing.T) {
 		t.Run("Batch", func(t *testing.T) {
 			b := v.NewBatch()
 
-			opts := map[string]interface{}{
+			opts := map[string]any{
 				"highlights": true,
 			}
-			var gotStatusLine map[string]interface{}
+			var gotStatusLine map[string]any
 			b.EvalStatusLine("TextWithNoHighlight", opts, &gotStatusLine)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
 			}
 
-			wantStatusLine := map[string]interface{}{
-				"highlights": []interface{}{
-					map[string]interface{}{
+			wantStatusLine := map[string]any{
+				"highlights": []any{
+					map[string]any{
 						"group": "StatusLine",
 						"start": int64(0),
 					},
@@ -5747,8 +5747,8 @@ func testStatusLine(v *Nvim) func(*testing.T) {
 				"width": 19,
 			}
 
-			gotHighlight := gotStatusLine["highlights"].([]interface{})[0].(map[string]interface{})
-			wantHighlight := wantStatusLine["highlights"].([]interface{})[0].(map[string]interface{})
+			gotHighlight := gotStatusLine["highlights"].([]any)[0].(map[string]any)
+			wantHighlight := wantStatusLine["highlights"].([]any)[0].(map[string]any)
 			if !reflect.DeepEqual(gotHighlight["group"], wantHighlight["group"]) {
 				t.Fatalf("got %#v highlight group but want %#v", gotHighlight["group"], wantHighlight["group"])
 			}
@@ -5775,7 +5775,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Nvim", func(t *testing.T) {
 			t.Run("CreateAndClear", func(t *testing.T) {
-				augID, err := v.CreateAugroup("TestNvimAucmd", map[string]interface{}{
+				augID, err := v.CreateAugroup("TestNvimAucmd", map[string]any{
 					"clear": false,
 				})
 				if err != nil {
@@ -5787,7 +5787,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					}
 				})
 
-				auOpts := map[string]interface{}{
+				auOpts := map[string]any{
 					"group":    augID,
 					"pattern":  `AutocmdTest`,
 					"callback": `echomsg 'Hello Autocmd'`,
@@ -5795,7 +5795,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 				if _, err := v.CreateAutocmd(`User`, auOpts); err != nil {
 					t.Fatal(err)
 				}
-				auOpts2 := map[string]interface{}{
+				auOpts2 := map[string]any{
 					"group":    augID,
 					"pattern":  `AutocmdTest2`,
 					"callback": `echomsg 'Hello Autocmd'`,
@@ -5805,7 +5805,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				if err := v.ExecAutocmds(`User`, map[string]interface{}{"group": augID}); err != nil {
+				if err := v.ExecAutocmds(`User`, map[string]any{"group": augID}); err != nil {
 					t.Fatal(err)
 				}
 
@@ -5824,7 +5824,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					want[0].Command = `<vim function: echomsg 'Hello Autocmd'>`
 				}
 
-				args := map[string]interface{}{
+				args := map[string]any{
 					"group":   augID,
 					"event":   []string{`User`},
 					"pattern": `AutocmdTest`,
@@ -5862,7 +5862,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 			})
 
 			t.Run("DeleteAugroupByName", func(t *testing.T) {
-				_, err := v.CreateAugroup("TestDeleteAucmd", map[string]interface{}{
+				_, err := v.CreateAugroup("TestDeleteAucmd", map[string]any{
 					"clear": false,
 				})
 				if err != nil {
@@ -5880,7 +5880,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 				b := v.NewBatch()
 
 				var augID int
-				b.CreateAugroup(`TestNvimAugroup`, map[string]interface{}{
+				b.CreateAugroup(`TestNvimAugroup`, map[string]any{
 					"clear": false,
 				}, &augID)
 				if err := b.Execute(); err != nil {
@@ -5893,7 +5893,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					}
 				})
 
-				auOpts := map[string]interface{}{
+				auOpts := map[string]any{
 					"group":    augID,
 					"pattern":  `AutocmdTest`,
 					"callback": `echomsg 'Hello Autocmd'`,
@@ -5903,7 +5903,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				auOpts2 := map[string]interface{}{
+				auOpts2 := map[string]any{
 					"group":    augID,
 					"pattern":  `AutocmdTest2`,
 					"callback": `echomsg 'Hello Autocmd'`,
@@ -5914,7 +5914,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					t.Fatal(err)
 				}
 
-				b.ExecAutocmds(`User`, map[string]interface{}{"group": augID})
+				b.ExecAutocmds(`User`, map[string]any{"group": augID})
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
@@ -5934,7 +5934,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 					want[0].Command = `<vim function: echomsg 'Hello Autocmd'>`
 				}
 
-				args := map[string]interface{}{
+				args := map[string]any{
 					"group":   augID,
 					"event":   []string{`User`},
 					"pattern": `AutocmdTest`,
@@ -5979,7 +5979,7 @@ func testAutocmd(v *Nvim) func(*testing.T) {
 			t.Run("DeleteAugroupByName", func(t *testing.T) {
 				b := v.NewBatch()
 
-				b.CreateAugroup("TestNvimAucmd", map[string]interface{}{
+				b.CreateAugroup("TestNvimAucmd", map[string]any{
 					"clear": false,
 				}, new(int))
 				if err := b.Execute(); err != nil {

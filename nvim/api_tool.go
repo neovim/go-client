@@ -94,7 +94,7 @@ var extensionTypes = map[string]ExtensionType{
 	},
 }
 
-func formatNode(fset *token.FileSet, node interface{}) string {
+func formatNode(fset *token.FileSet, node any) string {
 	var buf strings.Builder
 	if err := format.Node(&buf, fset, node); err != nil {
 		panic(err)
@@ -208,14 +208,14 @@ const genTemplate = `
 {{- end}}
 
 {{range .Functions}}
-{{if eq "interface{}" .ReturnType}}
+{{if eq "any" .ReturnType}}
 {{template "doc" .}}
-func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result interface{}) error {
+func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result any) error {
     return v.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
 }
 
 {{template "doc" .}}
-func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result interface{}) {
+func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result any) {
     b.call("{{.Name}}", &result, {{range .Parameters}}{{.Name}},{{end}})
 }
 
@@ -287,7 +287,7 @@ const (
 func withExtensions() rpc.Option {
 	return rpc.WithExtensions(msgpack.ExtensionMap{
 {{- range $name, $type := .Types}}
-		{{$type.ID}}: func(p []byte) (interface{}, error) {
+		{{$type.ID}}: func(p []byte) (any, error) {
 			x, err := decodeExt(p)
 			return {{$name}}(x), err
 		},
@@ -329,7 +329,7 @@ package nvim
 // Deprecated: Use ChildProcessOption instead.
 type EmbedOptions struct {
 	// Logf log function for rpc.WithLogf.
-	Logf func(string, ...interface{})
+	Logf func(string, ...any)
 
 	// Dir specifies the working directory of the command. The working
 	// directory in the current process is used if Dir is "".
@@ -373,7 +373,7 @@ func NewEmbedded(options *EmbedOptions) (*Nvim, error) {
 // ExecuteLua executes a Lua block.
 //
 // Deprecated: Use ExecLua instead.
-func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) error {
+func (v *Nvim) ExecuteLua(code string, result any, args ...any) error {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -383,7 +383,7 @@ func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) 
 // ExecuteLua executes a Lua block.
 //
 // Deprecated: Use ExecLua instead.
-func (b *Batch) ExecuteLua(code string, result interface{}, args ...interface{}) {
+func (b *Batch) ExecuteLua(code string, result any, args ...any) {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -435,10 +435,10 @@ var nvimTypes = map[string]string{
 	"":              "void",
 	"[]byte":        "String",
 	"[]uint":        "Array",
-	"[]interface{}": "Array",
+	"[]any": "Array",
 	"bool":          "Boolean",
 	"int":           "Integer",
-	"interface{}":   "Object",
+	"any":   "Object",
 	"string":        "String",
 	"float64":       "Float",
 
@@ -463,7 +463,7 @@ var nvimTypes = map[string]string{
 	"map[string][]string":         "Dictionary",
 	"map[string]bool":             "Dictionary",
 	"map[string]int":              "Dictionary",
-	"map[string]interface{}":      "Dictionary",
+	"map[string]any":      "Dictionary",
 	"map[string]OptionValueScope": "Dictionary",
 	"Mode":                        "Dictionary",
 	"OptionInfo":                  "Dictionary",
@@ -613,7 +613,7 @@ func dumpAPI(cmdName string) error {
 		return fmt.Errorf("error getting API info: %w", err)
 	}
 
-	var v interface{}
+	var v any
 	if err := msgpack.NewDecoder(bytes.NewReader(output)).Decode(&v); err != nil {
 		return fmt.Errorf("error parsing msppack: %w", err)
 	}

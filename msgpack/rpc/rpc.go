@@ -50,7 +50,7 @@ var (
 
 // Error represents a MessagePack RPC error.
 type Error struct {
-	Value interface{}
+	Value any
 }
 
 // Error implements the error interface.
@@ -60,8 +60,8 @@ func (e Error) Error() string {
 
 // Call represents a MessagePack RPC call.
 type Call struct {
-	Args   interface{}
-	Reply  interface{}
+	Args   any
+	Reply  any
 	Err    error
 	Done   chan *Call
 	Method string
@@ -92,7 +92,7 @@ type notification struct {
 // Endpoint represents a MessagePack RPC peer.
 type Endpoint struct {
 	err  error
-	logf func(fmt string, args ...interface{})
+	logf func(fmt string, args ...any)
 
 	done   chan struct{}
 	closer io.Closer
@@ -126,7 +126,7 @@ func WithExtensions(extensions msgpack.ExtensionMap) Option {
 }
 
 // WithLogf sets the log function to Endpoint.
-func WithLogf(f func(fmt string, args ...interface{})) Option {
+func WithLogf(f func(fmt string, args ...any)) Option {
 	return Option{func(e *Endpoint) {
 		e.logf = f
 	}}
@@ -255,7 +255,7 @@ var errorType = reflect.ValueOf(new(error)).Elem().Type()
 //
 // When servicing a call, the arguments to fn are the values in args followed
 // by the values passed from the peer.
-func (e *Endpoint) Register(method string, fn interface{}, args ...interface{}) error {
+func (e *Endpoint) Register(method string, fn any, args ...any) error {
 	v := reflect.ValueOf(fn)
 	t := v.Type()
 	if t.Kind() != reflect.Func {
@@ -295,15 +295,15 @@ func (e *Endpoint) Register(method string, fn interface{}, args ...interface{}) 
 }
 
 // Call invokes the target method and waits for a response.
-func (e *Endpoint) Call(method string, reply interface{}, args ...interface{}) error {
+func (e *Endpoint) Call(method string, reply any, args ...any) error {
 	c := <-e.Go(method, make(chan *Call, 1), reply, args...).Done
 	return c.Err
 }
 
 // Go append method call to queue and returns the new Call.
-func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ...interface{}) *Call {
+func (e *Endpoint) Go(method string, done chan *Call, reply any, args ...any) *Call {
 	if args == nil {
-		args = []interface{}{}
+		args = []any{}
 	}
 
 	if done == nil {
@@ -334,7 +334,7 @@ func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ..
 		Kind   kind `msgpack:",array"`
 		ID     uint64
 		Method string
-		Args   []interface{}
+		Args   []any
 	}{
 		requestMessage,
 		id,
@@ -363,15 +363,15 @@ func (e *Endpoint) Go(method string, done chan *Call, reply interface{}, args ..
 }
 
 // Notify invokes the target method with non-blocking.
-func (e *Endpoint) Notify(method string, args ...interface{}) error {
+func (e *Endpoint) Notify(method string, args ...any) error {
 	if args == nil {
-		args = []interface{}{}
+		args = []any{}
 	}
 
 	message := &struct {
 		Kind   kind `msgpack:",array"`
 		Method string
-		Args   []interface{}
+		Args   []any
 	}{
 		notificationMessage,
 		method,
@@ -471,7 +471,7 @@ func (e *Endpoint) createCall(h *handler) (func([]reflect.Value) []reflect.Value
 	return h.fn.CallSlice, args, nil
 }
 
-func (e *Endpoint) reply(id uint64, replyErr error, reply interface{}) error {
+func (e *Endpoint) reply(id uint64, replyErr error, reply any) error {
 	e.encMu.Lock()
 	defer e.encMu.Unlock()
 
@@ -549,7 +549,7 @@ func (e *Endpoint) handleRequest(messageLen int) error {
 	go func() {
 		out := call(args)
 		var replyErr error
-		var replyVal interface{}
+		var replyVal any
 		switch h.fn.Type().NumOut() {
 		case 1:
 			replyErr, _ = out[0].Interface().(error)
@@ -586,7 +586,7 @@ func (e *Endpoint) handleReply(messageLen int) error {
 		return e.skip(2)
 	}
 
-	var errorValue interface{}
+	var errorValue any
 	if err := e.dec.Decode(&errorValue); err != nil {
 		call.done(e, ErrInternal)
 		return fmt.Errorf("msgpack/rpc: error decoding error value: %w", err)

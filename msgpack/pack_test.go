@@ -12,7 +12,7 @@ func TestPack(t *testing.T) {
 
 	packTests := map[string]struct {
 		// Expected value
-		v interface{}
+		v any
 		// Hex encodings of typ, v
 		hs string
 	}{

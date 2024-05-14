@@ -8,7 +8,7 @@ type env struct {
 }
 
 var evalTests = []struct {
-	fn   interface{}
+	fn   any
 	eval string
 }{
 	{func(x *struct {
