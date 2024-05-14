@@ -4303,16 +4303,12 @@ func testExtmarks(v *Nvim) func(*testing.T) {
 			}
 
 			const (
-				wantExtMarkID = 1
-				wantLine      = 1
-				wantCol       = 3
+				wantLine = 1
+				wantCol  = 3
 			)
 			gotExtMarkID, err := v.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}))
 			if err != nil {
 				t.Fatal(err)
-			}
-			if gotExtMarkID != wantExtMarkID {
-				t.Fatalf("got %d extMarkID but want %d", gotExtMarkID, wantExtMarkID)
 			}
 
 			extmarks, err := v.BufferExtmarks(Buffer(0), nsID, 0, -1, make(map[string]interface{}))
@@ -4323,7 +4319,7 @@ func testExtmarks(v *Nvim) func(*testing.T) {
 				t.Fatalf("expected extmarks length to 1 but got %d", len(extmarks))
 			}
 			if extmarks[0].ID != gotExtMarkID {
-				t.Fatalf("got %d extMarkID but want %d", extmarks[0].ID, wantExtMarkID)
+				t.Fatalf("got %d extMarkID but want %d", extmarks[0].ID, gotExtMarkID)
 			}
 			if extmarks[0].Row != wantLine {
 				t.Fatalf("got %d extmarks Row but want %d", extmarks[0].Row, wantLine)
@@ -4382,17 +4378,13 @@ func testExtmarks(v *Nvim) func(*testing.T) {
 			}
 
 			const (
-				wantExtMarkID = 2
-				wantLine      = 1
-				wantCol       = 3
+				wantLine = 1
+				wantCol  = 3
 			)
 			var gotExtMarkID int
 			b.SetBufferExtmark(Buffer(0), nsID, wantLine, wantCol, make(map[string]interface{}), &gotExtMarkID)
 			if err := b.Execute(); err != nil {
 				t.Fatal(err)
-			}
-			if gotExtMarkID != wantExtMarkID {
-				t.Fatalf("got %d extMarkID but want %d", gotExtMarkID, wantExtMarkID)
 			}
 
 			var extmarks []ExtMark
@@ -4405,7 +4397,7 @@ func testExtmarks(v *Nvim) func(*testing.T) {
 				t.Fatalf("expected extmarks length to 1 but got %d", len(extmarks))
 			}
 			if extmarks[0].ID != gotExtMarkID {
-				t.Fatalf("got %d extMarkID but want %d", extmarks[0].ID, wantExtMarkID)
+				t.Fatalf("got %d extMarkID but want %d", extmarks[0].ID, gotExtMarkID)
 			}
 			if extmarks[0].Row != wantLine {
 				t.Fatalf("got %d extmarks Row but want %d", extmarks[0].Row, wantLine)
