@@ -24,7 +24,7 @@ import (
 //	string      PackString(s, false)
 //	[]byte      PackBytes(s, true)
 //	extension   PackExtension(k, d)
-func pack(vs ...interface{}) ([]byte, error) {
+func pack(vs ...any) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := NewEncoder(&buf)
 
@@ -79,8 +79,8 @@ func pack(vs ...interface{}) ([]byte, error) {
 //
 // This function is not suitable for unpack tests because the integer and float
 // types are mapped to int and float64 respectively.
-func unpack(p []byte) ([]interface{}, error) {
-	var data []interface{}
+func unpack(p []byte) ([]any, error) {
+	var data []any
 	u := NewDecoder(bytes.NewReader(p))
 
 	for {
@@ -91,7 +91,7 @@ func unpack(p []byte) ([]interface{}, error) {
 			return nil, err
 		}
 
-		var v interface{}
+		var v any
 		switch u.Type() {
 		case Nil:
 			v = nil
@@ -162,7 +162,7 @@ func (x *testExtension1) UnmarshalMsgPack(dec *Decoder) error {
 }
 
 var testExtensionMap = ExtensionMap{
-	1: func(data []byte) (interface{}, error) { return testExtension1{data}, nil },
+	1: func(data []byte) (any, error) { return testExtension1{data}, nil },
 }
 
 func ptrInt(i int) *int {
@@ -213,7 +213,7 @@ type WriteByteWriter interface {
 }
 
 type testArrayBuilder struct {
-	buffer []interface{}
+	buffer []any
 	tb     testing.TB
 }
 
@@ -223,7 +223,7 @@ func NewTestArrayBuilder(tb testing.TB) *testArrayBuilder {
 	}
 }
 
-func (e *testArrayBuilder) Add(v interface{}) {
+func (e *testArrayBuilder) Add(v any) {
 	e.buffer = append(e.buffer, v)
 }
 
@@ -277,7 +277,7 @@ func (e testArrayBuilder) Bytes() []byte {
 }
 
 type testMapBuilder struct {
-	valuas []interface{}
+	valuas []any
 	tb     testing.TB
 }
 
@@ -287,7 +287,7 @@ func NewTestMapBuilder(tb testing.TB) *testMapBuilder {
 	}
 }
 
-func (m *testMapBuilder) Add(key string, value interface{}) {
+func (m *testMapBuilder) Add(key string, value any) {
 	m.valuas = append(m.valuas, key, value)
 }
 

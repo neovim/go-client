@@ -63,7 +63,7 @@ func TestRegister(t *testing.T) {
 				chunks = append(chunks, nvim.TextChunk{Text: arg})
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -78,7 +78,7 @@ func TestRegister(t *testing.T) {
 				{Text: `Hello`},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -93,7 +93,7 @@ func TestRegister(t *testing.T) {
 				{Text: `Hello`},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -110,7 +110,7 @@ func TestRegister(t *testing.T) {
 				},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -133,7 +133,7 @@ func TestRegister(t *testing.T) {
 				},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -152,7 +152,7 @@ func TestRegister(t *testing.T) {
 				},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -178,7 +178,7 @@ func TestRegister(t *testing.T) {
 				},
 			}
 
-			return n.Echo(chunks, true, make(map[string]interface{}))
+			return n.Echo(chunks, true, make(map[string]any))
 		},
 	)
 
@@ -187,7 +187,7 @@ func TestRegister(t *testing.T) {
 	}
 
 	t.Run("SimpleHandler", func(t *testing.T) {
-		opts := map[string]interface{}{
+		opts := map[string]any{
 			"output": true,
 		}
 		result, err := p.Nvim.Exec(`:echo Hello('John', 'Doe')`, opts)
@@ -196,7 +196,7 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `Hello, John Doe`
-		want := map[string]interface{}{
+		want := map[string]any{
 			"output": expected,
 		}
 		if !reflect.DeepEqual(result, want) {
@@ -230,7 +230,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("CommandHandler", func(t *testing.T) {
-		opts := map[string]interface{}{
+		opts := map[string]any{
 			"output": true,
 		}
 		result, err := p.Nvim.Exec(`Hello World`, opts)
@@ -239,7 +239,7 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `Helloorld`
-		want := map[string]interface{}{
+		want := map[string]any{
 			"output": expected,
 		}
 		if !reflect.DeepEqual(result, want) {
@@ -248,7 +248,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("CommandRangeDotHandler", func(t *testing.T) {
-		opts := map[string]interface{}{
+		opts := map[string]any{
 			"output": true,
 		}
 		result, err := p.Nvim.Exec(`HelloRangeDot`, opts)
@@ -257,7 +257,7 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `Hello`
-		want := map[string]interface{}{
+		want := map[string]any{
 			"output": expected,
 		}
 		if !reflect.DeepEqual(result, want) {
@@ -266,7 +266,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("CommandCountHandler", func(t *testing.T) {
-		opts := map[string]interface{}{
+		opts := map[string]any{
 			"output": true,
 		}
 		result, err := p.Nvim.Exec(`HelloCount`, opts)
@@ -275,7 +275,7 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `Hello`
-		want := map[string]interface{}{
+		want := map[string]any{
 			"output": expected,
 		}
 		if !reflect.DeepEqual(result, want) {
@@ -284,7 +284,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("CommandEvalHandler", func(t *testing.T) {
-		opts := map[string]interface{}{
+		opts := map[string]any{
 			"output": true,
 		}
 		result, err := p.Nvim.Exec(`HelloEval`, opts)
@@ -293,7 +293,7 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `plugin`
-		want := map[string]interface{}{
+		want := map[string]any{
 			"output": expected,
 		}
 		if !reflect.DeepEqual(result, want) {
@@ -302,7 +302,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("AutocmdHandler", func(t *testing.T) {
-		opts := map[string]interface{}{
+		opts := map[string]any{
 			"output": true,
 		}
 		result, err := p.Nvim.Exec(`doautocmd User Test`, opts)
@@ -311,14 +311,14 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `HelloAutocmd`
-		want := map[string]interface{}{
+		want := map[string]any{
 			"output": expected,
 		}
 		if !reflect.DeepEqual(result, want) {
 			t.Fatalf("'doautocmd User Test' returned %v, want %v", result, want)
 		}
 
-		opts2 := map[string]interface{}{
+		opts2 := map[string]any{
 			"output": true,
 		}
 		result2, err := p.Nvim.Exec(`doautocmd User Test`, opts2)
@@ -331,7 +331,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("AutocmdEvalHandler", func(t *testing.T) {
-		opts := map[string]interface{}{
+		opts := map[string]any{
 			"output": true,
 		}
 		result, err := p.Nvim.Exec(`doautocmd User Eval`, opts)
@@ -340,7 +340,7 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `plugin`
-		want := map[string]interface{}{
+		want := map[string]any{
 			"output": expected,
 		}
 		if !reflect.DeepEqual(result, want) {
@@ -349,7 +349,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("AutocmdOnceHandler", func(t *testing.T) {
-		opts := map[string]interface{}{
+		opts := map[string]any{
 			"output": true,
 		}
 		result, err := p.Nvim.Exec(`doautocmd User Once`, opts)
@@ -358,14 +358,14 @@ func TestRegister(t *testing.T) {
 		}
 
 		expected := `HelloAutocmdOnce`
-		want := map[string]interface{}{
+		want := map[string]any{
 			"output": expected,
 		}
 		if !reflect.DeepEqual(result, want) {
 			t.Fatalf("'doautocmd User Once' returned %v, want %v", result, want)
 		}
 
-		opts2 := map[string]interface{}{
+		opts2 := map[string]any{
 			"output": true,
 		}
 		result2, err := p.Nvim.Exec(`doautocmd User Once`, opts2)
@@ -373,7 +373,7 @@ func TestRegister(t *testing.T) {
 			t.Fatalf("exec 'doautocmd User Once' command: %v", err)
 		}
 
-		want2 := map[string]interface{}{
+		want2 := map[string]any{
 			"output": "",
 		}
 		if !reflect.DeepEqual(result2, want2) {
@@ -389,7 +389,7 @@ func TestSubscribe(t *testing.T) {
 
 	const event1 = "event1"
 	eventFn1 := func(t *testing.T, v *nvim.Nvim) error {
-		return v.RegisterHandler(event1, func(event ...interface{}) {
+		return v.RegisterHandler(event1, func(event ...any) {
 			if event[0] != int64(1) {
 				t.Fatalf("expected event[0] is 1 but got %d", event[0])
 			}
@@ -405,7 +405,7 @@ func TestSubscribe(t *testing.T) {
 
 	const event2 = "event2"
 	eventFn2 := func(t *testing.T, v *nvim.Nvim) error {
-		return v.RegisterHandler(event1, func(event ...interface{}) {
+		return v.RegisterHandler(event1, func(event ...any) {
 			if event[0] != int64(4) {
 				t.Fatalf("expected event[0] is 4 but got %d", event[0])
 			}

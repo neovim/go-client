@@ -16,7 +16,7 @@ func BenchmarkEncode(b *testing.B) {
 	b.ReportAllocs()
 
 	benchs := map[string]struct {
-		value interface{}
+		value any
 	}{
 		"Bool/False": {
 			value: false,
@@ -817,7 +817,7 @@ func BenchmarkDecode(b *testing.B) {
 	})
 
 	b.Run("Map/Interface", func(b *testing.B) {
-		m := map[string]interface{}{
+		m := map[string]any{
 			"uint8":  uint64(math.MaxUint8),
 			"uint16": uint64(math.MaxUint16),
 			"uint32": uint64(math.MaxUint32),
@@ -832,7 +832,7 @@ func BenchmarkDecode(b *testing.B) {
 		b.SetBytes(builder.Count())
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			v := make(map[string]interface{})
+			v := make(map[string]any)
 			if err := dec.Decode(&v); err != nil {
 				b.Fatal(err)
 			}
@@ -950,7 +950,7 @@ func BenchmarkDecoderByteSlice(b *testing.B) {
 
 func benchmarkDecoderInterface(ds *decodeState) func(*testing.B) {
 	return func(b *testing.B) {
-		v := reflect.ValueOf(new(interface{})).Elem()
+		v := reflect.ValueOf(new(any)).Elem()
 		for i := 0; i < b.N; i++ {
 			interfaceDecoder(ds, v)
 		}

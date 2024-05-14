@@ -16,17 +16,17 @@ const (
 
 func withExtensions() rpc.Option {
 	return rpc.WithExtensions(msgpack.ExtensionMap{
-		0: func(p []byte) (interface{}, error) {
+		0: func(p []byte) (any, error) {
 			x, err := decodeExt(p)
 			return Buffer(x), err
 		},
 
-		2: func(p []byte) (interface{}, error) {
+		2: func(p []byte) (any, error) {
 			x, err := decodeExt(p)
 			return Tabpage(x), err
 		},
 
-		1: func(p []byte) (interface{}, error) {
+		1: func(p []byte) (any, error) {
 			x, err := decodeExt(p)
 			return Window(x), err
 		},
@@ -101,7 +101,7 @@ func (x Window) String() string {
 // See: [nvim_get_autocmds()]
 //
 // [nvim_get_autocmds()]: https://neovim.io/doc/user/api.html#nvim_get_autocmds()
-func (v *Nvim) Autocmds(opts map[string]interface{}) (result []*AutocmdType, err error) {
+func (v *Nvim) Autocmds(opts map[string]any) (result []*AutocmdType, err error) {
 	err = v.call("nvim_get_autocmds", &result, opts)
 	return result, err
 }
@@ -114,7 +114,7 @@ func (v *Nvim) Autocmds(opts map[string]interface{}) (result []*AutocmdType, err
 // See: [nvim_get_autocmds()]
 //
 // [nvim_get_autocmds()]: https://neovim.io/doc/user/api.html#nvim_get_autocmds()
-func (b *Batch) Autocmds(opts map[string]interface{}, result *[]*AutocmdType) {
+func (b *Batch) Autocmds(opts map[string]any, result *[]*AutocmdType) {
 	b.call("nvim_get_autocmds", result, opts)
 }
 
@@ -126,7 +126,7 @@ func (b *Batch) Autocmds(opts map[string]interface{}, result *[]*AutocmdType) {
 // See: [nvim_create_autocmd()]
 //
 // [nvim_create_autocmd()]: https://neovim.io/doc/user/api.html#nvim_create_autocmd()
-func (v *Nvim) CreateAutocmd(event interface{}, opts map[string]interface{}) (id int, err error) {
+func (v *Nvim) CreateAutocmd(event any, opts map[string]any) (id int, err error) {
 	err = v.call("nvim_create_autocmd", &id, event, opts)
 	return id, err
 }
@@ -139,7 +139,7 @@ func (v *Nvim) CreateAutocmd(event interface{}, opts map[string]interface{}) (id
 // See: [nvim_create_autocmd()]
 //
 // [nvim_create_autocmd()]: https://neovim.io/doc/user/api.html#nvim_create_autocmd()
-func (b *Batch) CreateAutocmd(event interface{}, opts map[string]interface{}, id *int) {
+func (b *Batch) CreateAutocmd(event any, opts map[string]any, id *int) {
 	b.call("nvim_create_autocmd", id, event, opts)
 }
 
@@ -172,7 +172,7 @@ func (b *Batch) DeleteAutocmd(id int) {
 // See: [nvim_clear_autocmds()]
 //
 // [nvim_clear_autocmds()]: https://neovim.io/doc/user/api.html#nvim_clear_autocmds()
-func (v *Nvim) ClearAutocmds(opts map[string]interface{}) error {
+func (v *Nvim) ClearAutocmds(opts map[string]any) error {
 	return v.call("nvim_clear_autocmds", nil, opts)
 }
 
@@ -183,7 +183,7 @@ func (v *Nvim) ClearAutocmds(opts map[string]interface{}) error {
 // See: [nvim_clear_autocmds()]
 //
 // [nvim_clear_autocmds()]: https://neovim.io/doc/user/api.html#nvim_clear_autocmds()
-func (b *Batch) ClearAutocmds(opts map[string]interface{}) {
+func (b *Batch) ClearAutocmds(opts map[string]any) {
 	b.call("nvim_clear_autocmds", nil, opts)
 }
 
@@ -192,7 +192,7 @@ func (b *Batch) ClearAutocmds(opts map[string]interface{}) {
 // See: [nvim_create_augroup()]
 //
 // [nvim_create_augroup()]: https://neovim.io/doc/user/api.html#nvim_create_augroup()
-func (v *Nvim) CreateAugroup(name string, opts map[string]interface{}) (id int, err error) {
+func (v *Nvim) CreateAugroup(name string, opts map[string]any) (id int, err error) {
 	err = v.call("nvim_create_augroup", &id, name, opts)
 	return id, err
 }
@@ -202,7 +202,7 @@ func (v *Nvim) CreateAugroup(name string, opts map[string]interface{}) (id int, 
 // See: [nvim_create_augroup()]
 //
 // [nvim_create_augroup()]: https://neovim.io/doc/user/api.html#nvim_create_augroup()
-func (b *Batch) CreateAugroup(name string, opts map[string]interface{}, id *int) {
+func (b *Batch) CreateAugroup(name string, opts map[string]any, id *int) {
 	b.call("nvim_create_augroup", id, name, opts)
 }
 
@@ -247,7 +247,7 @@ func (b *Batch) DeleteAugroupByName(name string) {
 // See: [nvim_exec_autocmds()]
 //
 // [nvim_exec_autocmds()]: https://neovim.io/doc/user/api.html#nvim_exec_autocmds()
-func (v *Nvim) ExecAutocmds(event interface{}, opts map[string]interface{}) error {
+func (v *Nvim) ExecAutocmds(event any, opts map[string]any) error {
 	return v.call("nvim_exec_autocmds", nil, event, opts)
 }
 
@@ -256,7 +256,7 @@ func (v *Nvim) ExecAutocmds(event interface{}, opts map[string]interface{}) erro
 // See: [nvim_exec_autocmds()]
 //
 // [nvim_exec_autocmds()]: https://neovim.io/doc/user/api.html#nvim_exec_autocmds()
-func (b *Batch) ExecAutocmds(event interface{}, opts map[string]interface{}) {
+func (b *Batch) ExecAutocmds(event any, opts map[string]any) {
 	b.call("nvim_exec_autocmds", nil, event, opts)
 }
 
@@ -300,7 +300,7 @@ func (b *Batch) BufferLineCount(buffer Buffer, count *int) {
 // See: [nvim_buf_attach()]
 //
 // [nvim_buf_attach()]: https://neovim.io/doc/user/api.html#nvim_buf_attach()
-func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}) (attached bool, err error) {
+func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]any) (attached bool, err error) {
 	err = v.call("nvim_buf_attach", &attached, buffer, sendBuffer, opts)
 	return attached, err
 }
@@ -318,7 +318,7 @@ func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]inte
 // See: [nvim_buf_attach()]
 //
 // [nvim_buf_attach()]: https://neovim.io/doc/user/api.html#nvim_buf_attach()
-func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}, attached *bool) {
+func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]any, attached *bool) {
 	b.call("nvim_buf_attach", attached, buffer, sendBuffer, opts)
 }
 
@@ -472,7 +472,7 @@ func (b *Batch) SetBufferText(buffer Buffer, startRow int, startCol int, endRow 
 // See: [nvim_buf_get_text()]
 //
 // [nvim_buf_get_text()]: https://neovim.io/doc/user/api.html#nvim_buf_get_text()
-func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}) ([][]byte, error) {
+func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]any) ([][]byte, error) {
 	var result [][]byte
 	err := v.call("nvim_buf_get_text", &result, buffer, startRow, startCol, endRow, endCol, opts)
 	return result, err
@@ -492,7 +492,7 @@ func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int,
 // See: [nvim_buf_get_text()]
 //
 // [nvim_buf_get_text()]: https://neovim.io/doc/user/api.html#nvim_buf_get_text()
-func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}, result *[][]byte) {
+func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]any, result *[][]byte) {
 	b.call("nvim_buf_get_text", result, buffer, startRow, startCol, endRow, endCol, opts)
 }
 
@@ -540,7 +540,7 @@ func (b *Batch) BufferOffset(buffer Buffer, index int, offset *int) {
 // See: [nvim_buf_get_var()]
 //
 // [nvim_buf_get_var()]: https://neovim.io/doc/user/api.html#nvim_buf_get_var()
-func (v *Nvim) BufferVar(buffer Buffer, name string, result interface{}) error {
+func (v *Nvim) BufferVar(buffer Buffer, name string, result any) error {
 	return v.call("nvim_buf_get_var", result, buffer, name)
 }
 
@@ -549,7 +549,7 @@ func (v *Nvim) BufferVar(buffer Buffer, name string, result interface{}) error {
 // See: [nvim_buf_get_var()]
 //
 // [nvim_buf_get_var()]: https://neovim.io/doc/user/api.html#nvim_buf_get_var()
-func (b *Batch) BufferVar(buffer Buffer, name string, result interface{}) {
+func (b *Batch) BufferVar(buffer Buffer, name string, result any) {
 	b.call("nvim_buf_get_var", &result, buffer, name)
 }
 
@@ -637,7 +637,7 @@ func (b *Batch) DeleteBufferKeyMap(buffer Buffer, mode string, lhs string) {
 // See: [nvim_buf_set_var()]
 //
 // [nvim_buf_set_var()]: https://neovim.io/doc/user/api.html#nvim_buf_set_var()
-func (v *Nvim) SetBufferVar(buffer Buffer, name string, value interface{}) error {
+func (v *Nvim) SetBufferVar(buffer Buffer, name string, value any) error {
 	return v.call("nvim_buf_set_var", nil, buffer, name, value)
 }
 
@@ -646,7 +646,7 @@ func (v *Nvim) SetBufferVar(buffer Buffer, name string, value interface{}) error
 // See: [nvim_buf_set_var()]
 //
 // [nvim_buf_set_var()]: https://neovim.io/doc/user/api.html#nvim_buf_set_var()
-func (b *Batch) SetBufferVar(buffer Buffer, name string, value interface{}) {
+func (b *Batch) SetBufferVar(buffer Buffer, name string, value any) {
 	b.call("nvim_buf_set_var", nil, buffer, name, value)
 }
 
@@ -829,7 +829,7 @@ func (b *Batch) DeleteBufferMark(buffer Buffer, name string, deleted *bool) {
 // See: [nvim_buf_set_mark()]
 //
 // [nvim_buf_set_mark()]: https://neovim.io/doc/user/api.html#nvim_buf_set_mark()
-func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]interface{}) (set bool, err error) {
+func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]any) (set bool, err error) {
 	err = v.call("nvim_buf_set_mark", &set, buffer, name, line, col, opts)
 	return set, err
 }
@@ -845,7 +845,7 @@ func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts
 // See: [nvim_buf_set_mark()]
 //
 // [nvim_buf_set_mark()]: https://neovim.io/doc/user/api.html#nvim_buf_set_mark()
-func (b *Batch) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]interface{}, set *bool) {
+func (b *Batch) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]any, set *bool) {
 	b.call("nvim_buf_set_mark", set, buffer, name, line, col, opts)
 }
 
@@ -1032,7 +1032,7 @@ func (b *Batch) BufferMark(buffer Buffer, name string, pos *[2]int) {
 // See: [nvim_parse_cmd()]
 //
 // [nvim_parse_cmd()]: https://neovim.io/doc/user/api.html#nvim_parse_cmd()
-func (v *Nvim) ParseCmd(str string, opts map[string]interface{}) (cmd *Cmd, err error) {
+func (v *Nvim) ParseCmd(str string, opts map[string]any) (cmd *Cmd, err error) {
 	var result Cmd
 	err = v.call("nvim_parse_cmd", &result, str, opts)
 	return &result, err
@@ -1198,7 +1198,7 @@ func (v *Nvim) ParseCmd(str string, opts map[string]interface{}) (cmd *Cmd, err 
 // See: [nvim_parse_cmd()]
 //
 // [nvim_parse_cmd()]: https://neovim.io/doc/user/api.html#nvim_parse_cmd()
-func (b *Batch) ParseCmd(str string, opts map[string]interface{}, cmd *Cmd) {
+func (b *Batch) ParseCmd(str string, opts map[string]any, cmd *Cmd) {
 	b.call("nvim_parse_cmd", cmd, str, opts)
 }
 
@@ -1281,7 +1281,7 @@ func (b *Batch) Cmd(cmd *Cmd, opts map[string]bool, output *string) {
 // See: [nvim_create_user_command()]
 //
 // [nvim_create_user_command()]: https://neovim.io/doc/user/api.html#nvim_create_user_command()
-func (v *Nvim) CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) error {
+func (v *Nvim) CreateUserCommand(name string, command UserCommand, opts map[string]any) error {
 	return v.call("nvim_create_user_command", nil, name, command, opts)
 }
 
@@ -1309,7 +1309,7 @@ func (v *Nvim) CreateUserCommand(name string, command UserCommand, opts map[stri
 // See: [nvim_create_user_command()]
 //
 // [nvim_create_user_command()]: https://neovim.io/doc/user/api.html#nvim_create_user_command()
-func (b *Batch) CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) {
+func (b *Batch) CreateUserCommand(name string, command UserCommand, opts map[string]any) {
 	b.call("nvim_create_user_command", nil, name, command, opts)
 }
 
@@ -1338,7 +1338,7 @@ func (b *Batch) DeleteUserCommand(name string) {
 // See: [nvim_buf_create_user_command()]
 //
 // [nvim_buf_create_user_command()]: https://neovim.io/doc/user/api.html#nvim_buf_create_user_command()
-func (v *Nvim) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) error {
+func (v *Nvim) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]any) error {
 	return v.call("nvim_buf_create_user_command", nil, buffer, name, command, opts)
 }
 
@@ -1349,7 +1349,7 @@ func (v *Nvim) CreateBufferUserCommand(buffer Buffer, name string, command UserC
 // See: [nvim_buf_create_user_command()]
 //
 // [nvim_buf_create_user_command()]: https://neovim.io/doc/user/api.html#nvim_buf_create_user_command()
-func (b *Batch) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
+func (b *Batch) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]any) {
 	b.call("nvim_buf_create_user_command", nil, buffer, name, command, opts)
 }
 
@@ -1385,7 +1385,7 @@ func (b *Batch) DeleteBufferUserCommand(buffer Buffer, name string) {
 // See: [nvim_get_commands()]
 //
 // [nvim_get_commands()]: https://neovim.io/doc/user/api.html#nvim_get_commands()
-func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Command, err error) {
+func (v *Nvim) Commands(opts map[string]any) (commands map[string]*Command, err error) {
 	err = v.call("nvim_get_commands", &commands, opts)
 	return commands, err
 }
@@ -1400,7 +1400,7 @@ func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Comma
 // See: [nvim_get_commands()]
 //
 // [nvim_get_commands()]: https://neovim.io/doc/user/api.html#nvim_get_commands()
-func (b *Batch) Commands(opts map[string]interface{}, commands *map[string]*Command) {
+func (b *Batch) Commands(opts map[string]any, commands *map[string]*Command) {
 	b.call("nvim_get_commands", commands, opts)
 }
 
@@ -1411,7 +1411,7 @@ func (b *Batch) Commands(opts map[string]interface{}, commands *map[string]*Comm
 // See: [nvim_buf_get_commands()]
 //
 // [nvim_buf_get_commands()]: https://neovim.io/doc/user/api.html#nvim_buf_get_commands()
-func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[string]*Command, error) {
+func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]any) (map[string]*Command, error) {
 	var result map[string]*Command
 	err := v.call("nvim_buf_get_commands", &result, buffer, opts)
 	return result, err
@@ -1424,7 +1424,7 @@ func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[s
 // See: [nvim_buf_get_commands()]
 //
 // [nvim_buf_get_commands()]: https://neovim.io/doc/user/api.html#nvim_buf_get_commands()
-func (b *Batch) BufferCommands(buffer Buffer, opts map[string]interface{}, result *map[string]*Command) {
+func (b *Batch) BufferCommands(buffer Buffer, opts map[string]any, result *map[string]*Command) {
 	b.call("nvim_buf_get_commands", result, buffer, opts)
 }
 
@@ -1452,7 +1452,7 @@ func (b *Batch) TabpageWindows(tabpage Tabpage, windows *[]Window) {
 // See: [nvim_tabpage_get_var()]
 //
 // [nvim_tabpage_get_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_get_var()
-func (v *Nvim) TabpageVar(tabpage Tabpage, name string, result interface{}) error {
+func (v *Nvim) TabpageVar(tabpage Tabpage, name string, result any) error {
 	return v.call("nvim_tabpage_get_var", result, tabpage, name)
 }
 
@@ -1461,7 +1461,7 @@ func (v *Nvim) TabpageVar(tabpage Tabpage, name string, result interface{}) erro
 // See: [nvim_tabpage_get_var()]
 //
 // [nvim_tabpage_get_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_get_var()
-func (b *Batch) TabpageVar(tabpage Tabpage, name string, result interface{}) {
+func (b *Batch) TabpageVar(tabpage Tabpage, name string, result any) {
 	b.call("nvim_tabpage_get_var", &result, tabpage, name)
 }
 
@@ -1470,7 +1470,7 @@ func (b *Batch) TabpageVar(tabpage Tabpage, name string, result interface{}) {
 // See: [nvim_tabpage_set_var()]
 //
 // [nvim_tabpage_set_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_set_var()
-func (v *Nvim) SetTabpageVar(tabpage Tabpage, name string, value interface{}) error {
+func (v *Nvim) SetTabpageVar(tabpage Tabpage, name string, value any) error {
 	return v.call("nvim_tabpage_set_var", nil, tabpage, name, value)
 }
 
@@ -1479,7 +1479,7 @@ func (v *Nvim) SetTabpageVar(tabpage Tabpage, name string, value interface{}) er
 // See: [nvim_tabpage_set_var()]
 //
 // [nvim_tabpage_set_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_set_var()
-func (b *Batch) SetTabpageVar(tabpage Tabpage, name string, value interface{}) {
+func (b *Batch) SetTabpageVar(tabpage Tabpage, name string, value any) {
 	b.call("nvim_tabpage_set_var", nil, tabpage, name, value)
 }
 
@@ -1607,7 +1607,7 @@ func (b *Batch) CreateNamespace(name string, nsID *int) {
 // See: [nvim_buf_get_extmark_by_id()]
 //
 // [nvim_buf_get_extmark_by_id()]: https://neovim.io/doc/user/api.html#nvim_buf_get_extmark_by_id()
-func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}) (pos []int, err error) {
+func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]any) (pos []int, err error) {
 	err = v.call("nvim_buf_get_extmark_by_id", &pos, buffer, nsID, id, opt)
 	return pos, err
 }
@@ -1623,7 +1623,7 @@ func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string
 // See: [nvim_buf_get_extmark_by_id()]
 //
 // [nvim_buf_get_extmark_by_id()]: https://neovim.io/doc/user/api.html#nvim_buf_get_extmark_by_id()
-func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}, pos *[]int) {
+func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]any, pos *[]int) {
 	b.call("nvim_buf_get_extmark_by_id", pos, buffer, nsID, id, opt)
 }
 
@@ -1656,7 +1656,7 @@ func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[strin
 // See: [nvim_buf_get_extmarks()]
 //
 // [nvim_buf_get_extmarks()]: https://neovim.io/doc/user/api.html#nvim_buf_get_extmarks()
-func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}) (marks []ExtMark, err error) {
+func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start any, end any, opt map[string]any) (marks []ExtMark, err error) {
 	err = v.call("nvim_buf_get_extmarks", &marks, buffer, nsID, start, end, opt)
 	return marks, err
 }
@@ -1690,7 +1690,7 @@ func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end in
 // See: [nvim_buf_get_extmarks()]
 //
 // [nvim_buf_get_extmarks()]: https://neovim.io/doc/user/api.html#nvim_buf_get_extmarks()
-func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, marks *[]ExtMark) {
+func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start any, end any, opt map[string]any, marks *[]ExtMark) {
 	b.call("nvim_buf_get_extmarks", marks, buffer, nsID, start, end, opt)
 }
 
@@ -1794,7 +1794,7 @@ func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end i
 // See: [nvim_buf_set_extmark()]
 //
 // [nvim_buf_set_extmark()]: https://neovim.io/doc/user/api.html#nvim_buf_set_extmark()
-func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}) (id int, err error) {
+func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]any) (id int, err error) {
 	err = v.call("nvim_buf_set_extmark", &id, buffer, nsID, line, col, opts)
 	return id, err
 }
@@ -1899,7 +1899,7 @@ func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts
 // See: [nvim_buf_set_extmark()]
 //
 // [nvim_buf_set_extmark()]: https://neovim.io/doc/user/api.html#nvim_buf_set_extmark()
-func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}, id *int) {
+func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]any, id *int) {
 	b.call("nvim_buf_set_extmark", id, buffer, nsID, line, col, opts)
 }
 
@@ -2024,7 +2024,7 @@ func (b *Batch) ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lin
 // See: [nvim_get_option_value()]
 //
 // [nvim_get_option_value()]: https://neovim.io/doc/user/api.html#nvim_get_option_value()
-func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result interface{}) error {
+func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result any) error {
 	return v.call("nvim_get_option_value", result, name, opts)
 }
 
@@ -2047,7 +2047,7 @@ func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result
 // See: [nvim_get_option_value()]
 //
 // [nvim_get_option_value()]: https://neovim.io/doc/user/api.html#nvim_get_option_value()
-func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, result interface{}) {
+func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, result any) {
 	b.call("nvim_get_option_value", &result, name, opts)
 }
 
@@ -2065,7 +2065,7 @@ func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, resul
 // See: [nvim_set_option_value()]
 //
 // [nvim_set_option_value()]: https://neovim.io/doc/user/api.html#nvim_set_option_value()
-func (v *Nvim) SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) error {
+func (v *Nvim) SetOptionValue(name string, value any, opts map[string]OptionValueScope) error {
 	return v.call("nvim_set_option_value", nil, name, value, opts)
 }
 
@@ -2083,7 +2083,7 @@ func (v *Nvim) SetOptionValue(name string, value interface{}, opts map[string]Op
 // See: [nvim_set_option_value()]
 //
 // [nvim_set_option_value()]: https://neovim.io/doc/user/api.html#nvim_set_option_value()
-func (b *Batch) SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) {
+func (b *Batch) SetOptionValue(name string, value any, opts map[string]OptionValueScope) {
 	b.call("nvim_set_option_value", nil, name, value, opts)
 }
 
@@ -2268,7 +2268,7 @@ func (b *Batch) AllOptionsInfo(opinfo *OptionInfo) {
 // See: [nvim_get_option_info2()]
 //
 // [nvim_get_option_info2()]: https://neovim.io/doc/user/api.html#nvim_get_option_info2()
-func (v *Nvim) OptionInfo(name string, opts map[string]interface{}) (opinfo *OptionInfo, err error) {
+func (v *Nvim) OptionInfo(name string, opts map[string]any) (opinfo *OptionInfo, err error) {
 	var result OptionInfo
 	err = v.call("nvim_get_option_info2", &result, name, opts)
 	return &result, err
@@ -2329,7 +2329,7 @@ func (v *Nvim) OptionInfo(name string, opts map[string]interface{}) (opinfo *Opt
 // See: [nvim_get_option_info2()]
 //
 // [nvim_get_option_info2()]: https://neovim.io/doc/user/api.html#nvim_get_option_info2()
-func (b *Batch) OptionInfo(name string, opts map[string]interface{}, opinfo *OptionInfo) {
+func (b *Batch) OptionInfo(name string, opts map[string]any, opinfo *OptionInfo) {
 	b.call("nvim_get_option_info2", opinfo, name, opts)
 }
 
@@ -2338,7 +2338,7 @@ func (b *Batch) OptionInfo(name string, opts map[string]interface{}, opinfo *Opt
 // See: [nvim_set_option()]
 //
 // [nvim_set_option()]: https://neovim.io/doc/user/api.html#nvim_set_option()
-func (v *Nvim) SetOption(name string, value interface{}) error {
+func (v *Nvim) SetOption(name string, value any) error {
 	return v.call("nvim_set_option", nil, name, value)
 }
 
@@ -2347,7 +2347,7 @@ func (v *Nvim) SetOption(name string, value interface{}) error {
 // See: [nvim_set_option()]
 //
 // [nvim_set_option()]: https://neovim.io/doc/user/api.html#nvim_set_option()
-func (b *Batch) SetOption(name string, value interface{}) {
+func (b *Batch) SetOption(name string, value any) {
 	b.call("nvim_set_option", nil, name, value)
 }
 
@@ -2356,7 +2356,7 @@ func (b *Batch) SetOption(name string, value interface{}) {
 // See: [nvim_get_option()]
 //
 // [nvim_get_option()]: https://neovim.io/doc/user/api.html#nvim_get_option()
-func (v *Nvim) Option(name string, result interface{}) error {
+func (v *Nvim) Option(name string, result any) error {
 	return v.call("nvim_get_option", result, name)
 }
 
@@ -2365,7 +2365,7 @@ func (v *Nvim) Option(name string, result interface{}) error {
 // See: [nvim_get_option()]
 //
 // [nvim_get_option()]: https://neovim.io/doc/user/api.html#nvim_get_option()
-func (b *Batch) Option(name string, result interface{}) {
+func (b *Batch) Option(name string, result any) {
 	b.call("nvim_get_option", &result, name)
 }
 
@@ -2374,7 +2374,7 @@ func (b *Batch) Option(name string, result interface{}) {
 // See: [nvim_buf_get_option()]
 //
 // [nvim_buf_get_option()]: https://neovim.io/doc/user/api.html#nvim_buf_get_option()
-func (v *Nvim) BufferOption(buffer Buffer, name string, result interface{}) error {
+func (v *Nvim) BufferOption(buffer Buffer, name string, result any) error {
 	return v.call("nvim_buf_get_option", result, buffer, name)
 }
 
@@ -2383,7 +2383,7 @@ func (v *Nvim) BufferOption(buffer Buffer, name string, result interface{}) erro
 // See: [nvim_buf_get_option()]
 //
 // [nvim_buf_get_option()]: https://neovim.io/doc/user/api.html#nvim_buf_get_option()
-func (b *Batch) BufferOption(buffer Buffer, name string, result interface{}) {
+func (b *Batch) BufferOption(buffer Buffer, name string, result any) {
 	b.call("nvim_buf_get_option", &result, buffer, name)
 }
 
@@ -2394,7 +2394,7 @@ func (b *Batch) BufferOption(buffer Buffer, name string, result interface{}) {
 // See: [nvim_buf_set_option()]
 //
 // [nvim_buf_set_option()]: https://neovim.io/doc/user/api.html#nvim_buf_set_option()
-func (v *Nvim) SetBufferOption(buffer Buffer, name string, value interface{}) error {
+func (v *Nvim) SetBufferOption(buffer Buffer, name string, value any) error {
 	return v.call("nvim_buf_set_option", nil, buffer, name, value)
 }
 
@@ -2405,7 +2405,7 @@ func (v *Nvim) SetBufferOption(buffer Buffer, name string, value interface{}) er
 // See: [nvim_buf_set_option()]
 //
 // [nvim_buf_set_option()]: https://neovim.io/doc/user/api.html#nvim_buf_set_option()
-func (b *Batch) SetBufferOption(buffer Buffer, name string, value interface{}) {
+func (b *Batch) SetBufferOption(buffer Buffer, name string, value any) {
 	b.call("nvim_buf_set_option", nil, buffer, name, value)
 }
 
@@ -2414,7 +2414,7 @@ func (b *Batch) SetBufferOption(buffer Buffer, name string, value interface{}) {
 // See: [nvim_win_get_option()]
 //
 // [nvim_win_get_option()]: https://neovim.io/doc/user/api.html#nvim_win_get_option()
-func (v *Nvim) WindowOption(window Window, name string, result interface{}) error {
+func (v *Nvim) WindowOption(window Window, name string, result any) error {
 	return v.call("nvim_win_get_option", result, window, name)
 }
 
@@ -2423,7 +2423,7 @@ func (v *Nvim) WindowOption(window Window, name string, result interface{}) erro
 // See: [nvim_win_get_option()]
 //
 // [nvim_win_get_option()]: https://neovim.io/doc/user/api.html#nvim_win_get_option()
-func (b *Batch) WindowOption(window Window, name string, result interface{}) {
+func (b *Batch) WindowOption(window Window, name string, result any) {
 	b.call("nvim_win_get_option", &result, window, name)
 }
 
@@ -2432,7 +2432,7 @@ func (b *Batch) WindowOption(window Window, name string, result interface{}) {
 // See: [nvim_win_set_option()]
 //
 // [nvim_win_set_option()]: https://neovim.io/doc/user/api.html#nvim_win_set_option()
-func (v *Nvim) SetWindowOption(window Window, name string, value interface{}) error {
+func (v *Nvim) SetWindowOption(window Window, name string, value any) error {
 	return v.call("nvim_win_set_option", nil, window, name, value)
 }
 
@@ -2441,7 +2441,7 @@ func (v *Nvim) SetWindowOption(window Window, name string, value interface{}) er
 // See: [nvim_win_set_option()]
 //
 // [nvim_win_set_option()]: https://neovim.io/doc/user/api.html#nvim_win_set_option()
-func (b *Batch) SetWindowOption(window Window, name string, value interface{}) {
+func (b *Batch) SetWindowOption(window Window, name string, value any) {
 	b.call("nvim_win_set_option", nil, window, name, value)
 }
 
@@ -2453,7 +2453,7 @@ func (b *Batch) SetWindowOption(window Window, name string, value interface{}) {
 // The redraw notification method has variadic arguments. Register a handler
 // for the method like this:
 //
-//	v.RegisterHandler("redraw", func(updates ...[]interface{}) {
+//	v.RegisterHandler("redraw", func(updates ...[]any) {
 //	    for _, update := range updates {
 //	        // handle update
 //	    }
@@ -2462,7 +2462,7 @@ func (b *Batch) SetWindowOption(window Window, name string, value interface{}) {
 // See: [nvim_ui_attach()]
 //
 // [nvim_ui_attach()]: https://neovim.io/doc/user/api.html#nvim_ui_attach()
-func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) error {
+func (v *Nvim) AttachUI(width int, height int, options map[string]any) error {
 	return v.call("nvim_ui_attach", nil, width, height, options)
 }
 
@@ -2474,7 +2474,7 @@ func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) e
 // The redraw notification method has variadic arguments. Register a handler
 // for the method like this:
 //
-//	v.RegisterHandler("redraw", func(updates ...[]interface{}) {
+//	v.RegisterHandler("redraw", func(updates ...[]any) {
 //	    for _, update := range updates {
 //	        // handle update
 //	    }
@@ -2483,7 +2483,7 @@ func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) e
 // See: [nvim_ui_attach()]
 //
 // [nvim_ui_attach()]: https://neovim.io/doc/user/api.html#nvim_ui_attach()
-func (b *Batch) AttachUI(width int, height int, options map[string]interface{}) {
+func (b *Batch) AttachUI(width int, height int, options map[string]any) {
 	b.call("nvim_ui_attach", nil, width, height, options)
 }
 
@@ -2548,7 +2548,7 @@ func (b *Batch) TryResizeUI(width int, height int) {
 // See: [nvim_ui_set_option()]
 //
 // [nvim_ui_set_option()]: https://neovim.io/doc/user/api.html#nvim_ui_set_option()
-func (v *Nvim) SetUIOption(name string, value interface{}) error {
+func (v *Nvim) SetUIOption(name string, value any) error {
 	return v.call("nvim_ui_set_option", nil, name, value)
 }
 
@@ -2557,7 +2557,7 @@ func (v *Nvim) SetUIOption(name string, value interface{}) error {
 // See: [nvim_ui_set_option()]
 //
 // [nvim_ui_set_option()]: https://neovim.io/doc/user/api.html#nvim_ui_set_option()
-func (b *Batch) SetUIOption(name string, value interface{}) {
+func (b *Batch) SetUIOption(name string, value any) {
 	b.call("nvim_ui_set_option", nil, name, value)
 }
 
@@ -2654,7 +2654,7 @@ func (b *Batch) SetPumBounds(width float64, height float64, row float64, col flo
 // See: [nvim_exec2()]
 //
 // [nvim_exec2()]: https://neovim.io/doc/user/api.html#nvim_exec2()
-func (v *Nvim) Exec(src string, opts map[string]interface{}) (out map[string]interface{}, err error) {
+func (v *Nvim) Exec(src string, opts map[string]any) (out map[string]any, err error) {
 	err = v.call("nvim_exec2", &out, src, opts)
 	return out, err
 }
@@ -2668,7 +2668,7 @@ func (v *Nvim) Exec(src string, opts map[string]interface{}) (out map[string]int
 // See: [nvim_exec2()]
 //
 // [nvim_exec2()]: https://neovim.io/doc/user/api.html#nvim_exec2()
-func (b *Batch) Exec(src string, opts map[string]interface{}, out *map[string]interface{}) {
+func (b *Batch) Exec(src string, opts map[string]any, out *map[string]any) {
 	b.call("nvim_exec2", out, src, opts)
 }
 
@@ -2699,7 +2699,7 @@ func (b *Batch) Command(cmd string) {
 // See: [nvim_parse_expression()]
 //
 // [nvim_parse_expression()]: https://neovim.io/doc/user/api.html#nvim_parse_expression()
-func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (expression map[string]interface{}, err error) {
+func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (expression map[string]any, err error) {
 	err = v.call("nvim_parse_expression", &expression, expr, flags, highlight)
 	return expression, err
 }
@@ -2709,7 +2709,7 @@ func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (expre
 // See: [nvim_parse_expression()]
 //
 // [nvim_parse_expression()]: https://neovim.io/doc/user/api.html#nvim_parse_expression()
-func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expression *map[string]interface{}) {
+func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expression *map[string]any) {
 	b.call("nvim_parse_expression", expression, expr, flags, highlight)
 }
 
@@ -2736,7 +2736,7 @@ func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expre
 // See: [nvim_get_hl()]
 //
 // [nvim_get_hl()]: https://neovim.io/doc/user/api.html#nvim_get_hl()
-func (v *Nvim) HL(nsID int, opts map[string]interface{}) (highlight *HLAttrs, err error) {
+func (v *Nvim) HL(nsID int, opts map[string]any) (highlight *HLAttrs, err error) {
 	var result HLAttrs
 	err = v.call("nvim_get_hl", &result, nsID, opts)
 	return &result, err
@@ -2765,7 +2765,7 @@ func (v *Nvim) HL(nsID int, opts map[string]interface{}) (highlight *HLAttrs, er
 // See: [nvim_get_hl()]
 //
 // [nvim_get_hl()]: https://neovim.io/doc/user/api.html#nvim_get_hl()
-func (b *Batch) HL(nsID int, opts map[string]interface{}, highlight *HLAttrs) {
+func (b *Batch) HL(nsID int, opts map[string]any, highlight *HLAttrs) {
 	b.call("nvim_get_hl", highlight, nsID, opts)
 }
 
@@ -3157,7 +3157,7 @@ func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special b
 // See: [nvim_eval()]
 //
 // [nvim_eval()]: https://neovim.io/doc/user/api.html#nvim_eval()
-func (v *Nvim) Eval(expr string, result interface{}) error {
+func (v *Nvim) Eval(expr string, result any) error {
 	return v.call("nvim_eval", result, expr)
 }
 
@@ -3174,7 +3174,7 @@ func (v *Nvim) Eval(expr string, result interface{}) error {
 // See: [nvim_eval()]
 //
 // [nvim_eval()]: https://neovim.io/doc/user/api.html#nvim_eval()
-func (b *Batch) Eval(expr string, result interface{}) {
+func (b *Batch) Eval(expr string, result any) {
 	b.call("nvim_eval", &result, expr)
 }
 
@@ -3353,7 +3353,7 @@ func (b *Batch) DeleteCurrentLine() {
 // See: [nvim_get_var()]
 //
 // [nvim_get_var()]: https://neovim.io/doc/user/api.html#nvim_get_var()
-func (v *Nvim) Var(name string, result interface{}) error {
+func (v *Nvim) Var(name string, result any) error {
 	return v.call("nvim_get_var", result, name)
 }
 
@@ -3362,7 +3362,7 @@ func (v *Nvim) Var(name string, result interface{}) error {
 // See: [nvim_get_var()]
 //
 // [nvim_get_var()]: https://neovim.io/doc/user/api.html#nvim_get_var()
-func (b *Batch) Var(name string, result interface{}) {
+func (b *Batch) Var(name string, result any) {
 	b.call("nvim_get_var", &result, name)
 }
 
@@ -3371,7 +3371,7 @@ func (b *Batch) Var(name string, result interface{}) {
 // See: [nvim_set_var()]
 //
 // [nvim_set_var()]: https://neovim.io/doc/user/api.html#nvim_set_var()
-func (v *Nvim) SetVar(name string, value interface{}) error {
+func (v *Nvim) SetVar(name string, value any) error {
 	return v.call("nvim_set_var", nil, name, value)
 }
 
@@ -3380,7 +3380,7 @@ func (v *Nvim) SetVar(name string, value interface{}) error {
 // See: [nvim_set_var()]
 //
 // [nvim_set_var()]: https://neovim.io/doc/user/api.html#nvim_set_var()
-func (b *Batch) SetVar(name string, value interface{}) {
+func (b *Batch) SetVar(name string, value any) {
 	b.call("nvim_set_var", nil, name, value)
 }
 
@@ -3407,7 +3407,7 @@ func (b *Batch) DeleteVar(name string) {
 // See: [nvim_get_vvar()]
 //
 // [nvim_get_vvar()]: https://neovim.io/doc/user/api.html#nvim_get_vvar()
-func (v *Nvim) VVar(name string, result interface{}) error {
+func (v *Nvim) VVar(name string, result any) error {
 	return v.call("nvim_get_vvar", result, name)
 }
 
@@ -3416,7 +3416,7 @@ func (v *Nvim) VVar(name string, result interface{}) error {
 // See: [nvim_get_vvar()]
 //
 // [nvim_get_vvar()]: https://neovim.io/doc/user/api.html#nvim_get_vvar()
-func (b *Batch) VVar(name string, result interface{}) {
+func (b *Batch) VVar(name string, result any) {
 	b.call("nvim_get_vvar", &result, name)
 }
 
@@ -3425,7 +3425,7 @@ func (b *Batch) VVar(name string, result interface{}) {
 // See: [nvim_set_vvar()]
 //
 // [nvim_set_vvar()]: https://neovim.io/doc/user/api.html#nvim_set_vvar()
-func (v *Nvim) SetVVar(name string, value interface{}) error {
+func (v *Nvim) SetVVar(name string, value any) error {
 	return v.call("nvim_set_vvar", nil, name, value)
 }
 
@@ -3434,7 +3434,7 @@ func (v *Nvim) SetVVar(name string, value interface{}) error {
 // See: [nvim_set_vvar()]
 //
 // [nvim_set_vvar()]: https://neovim.io/doc/user/api.html#nvim_set_vvar()
-func (b *Batch) SetVVar(name string, value interface{}) {
+func (b *Batch) SetVVar(name string, value any) {
 	b.call("nvim_set_vvar", nil, name, value)
 }
 
@@ -3450,7 +3450,7 @@ func (b *Batch) SetVVar(name string, value interface{}) {
 // See: [nvim_echo()]
 //
 // [nvim_echo()]: https://neovim.io/doc/user/api.html#nvim_echo()
-func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) error {
+func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]any) error {
 	return v.call("nvim_echo", nil, chunks, history, opts)
 }
 
@@ -3466,7 +3466,7 @@ func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{
 // See: [nvim_echo()]
 //
 // [nvim_echo()]: https://neovim.io/doc/user/api.html#nvim_echo()
-func (b *Batch) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) {
+func (b *Batch) Echo(chunks []TextChunk, history bool, opts map[string]any) {
 	b.call("nvim_echo", nil, chunks, history, opts)
 }
 
@@ -3710,7 +3710,7 @@ func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
 // See: [nvim_open_term()]
 //
 // [nvim_open_term()]: https://neovim.io/doc/user/api.html#nvim_open_term()
-func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]interface{}) (channel int, err error) {
+func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]any) (channel int, err error) {
 	err = v.call("nvim_open_term", &channel, buffer, opts)
 	return channel, err
 }
@@ -3736,7 +3736,7 @@ func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]interface{}) (channel int
 // See: [nvim_open_term()]
 //
 // [nvim_open_term()]: https://neovim.io/doc/user/api.html#nvim_open_term()
-func (b *Batch) OpenTerm(buffer Buffer, opts map[string]interface{}, channel *int) {
+func (b *Batch) OpenTerm(buffer Buffer, opts map[string]any, channel *int) {
 	b.call("nvim_open_term", channel, buffer, opts)
 }
 
@@ -4163,7 +4163,7 @@ func (b *Batch) ColorMap(colorMap *map[string]int) {
 // See: [nvim_get_context()]
 //
 // [nvim_get_context()]: https://neovim.io/doc/user/api.html#nvim_get_context()
-func (v *Nvim) Context(opts map[string][]string) (context map[string]interface{}, err error) {
+func (v *Nvim) Context(opts map[string][]string) (context map[string]any, err error) {
 	err = v.call("nvim_get_context", &context, opts)
 	return context, err
 }
@@ -4186,7 +4186,7 @@ func (v *Nvim) Context(opts map[string][]string) (context map[string]interface{}
 // See: [nvim_get_context()]
 //
 // [nvim_get_context()]: https://neovim.io/doc/user/api.html#nvim_get_context()
-func (b *Batch) Context(opts map[string][]string, context *map[string]interface{}) {
+func (b *Batch) Context(opts map[string][]string, context *map[string]any) {
 	b.call("nvim_get_context", context, opts)
 }
 
@@ -4195,7 +4195,7 @@ func (b *Batch) Context(opts map[string][]string, context *map[string]interface{
 // See: [nvim_load_context()]
 //
 // [nvim_load_context()]: https://neovim.io/doc/user/api.html#nvim_load_context()
-func (v *Nvim) LoadContext(context map[string]interface{}, result interface{}) error {
+func (v *Nvim) LoadContext(context map[string]any, result any) error {
 	return v.call("nvim_load_context", result, context)
 }
 
@@ -4204,7 +4204,7 @@ func (v *Nvim) LoadContext(context map[string]interface{}, result interface{}) e
 // See: [nvim_load_context()]
 //
 // [nvim_load_context()]: https://neovim.io/doc/user/api.html#nvim_load_context()
-func (b *Batch) LoadContext(context map[string]interface{}, result interface{}) {
+func (b *Batch) LoadContext(context map[string]any, result any) {
 	b.call("nvim_load_context", &result, context)
 }
 
@@ -4349,7 +4349,7 @@ func (b *Batch) DeleteKeyMap(mode string, lhs string) {
 // See: [nvim_get_api_info()]
 //
 // [nvim_get_api_info()]: https://neovim.io/doc/user/api.html#nvim_get_api_info()
-func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
+func (v *Nvim) APIInfo() (apiInfo []any, err error) {
 	err = v.call("nvim_get_api_info", &apiInfo)
 	return apiInfo, err
 }
@@ -4362,7 +4362,7 @@ func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
 // See: [nvim_get_api_info()]
 //
 // [nvim_get_api_info()]: https://neovim.io/doc/user/api.html#nvim_get_api_info()
-func (b *Batch) APIInfo(apiInfo *[]interface{}) {
+func (b *Batch) APIInfo(apiInfo *[]any) {
 	b.call("nvim_get_api_info", apiInfo)
 }
 
@@ -4612,7 +4612,7 @@ func (b *Batch) Proc(pid int, process *Process) {
 // See: [nvim_select_popupmenu_item()]
 //
 // [nvim_select_popupmenu_item()]: https://neovim.io/doc/user/api.html#nvim_select_popupmenu_item()
-func (v *Nvim) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]interface{}) error {
+func (v *Nvim) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]any) error {
 	return v.call("nvim_select_popupmenu_item", nil, item, insert, finish, opts)
 }
 
@@ -4628,7 +4628,7 @@ func (v *Nvim) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[
 // See: [nvim_select_popupmenu_item()]
 //
 // [nvim_select_popupmenu_item()]: https://neovim.io/doc/user/api.html#nvim_select_popupmenu_item()
-func (b *Batch) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]interface{}) {
+func (b *Batch) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]any) {
 	b.call("nvim_select_popupmenu_item", nil, item, insert, finish, opts)
 }
 
@@ -4662,7 +4662,7 @@ func (b *Batch) DeleteMark(name string, deleted *bool) {
 // See: [nvim_get_mark()]
 //
 // [nvim_get_mark()]: https://neovim.io/doc/user/api.html#nvim_get_mark()
-func (v *Nvim) Mark(name string, opts map[string]interface{}) (mark *Mark, err error) {
+func (v *Nvim) Mark(name string, opts map[string]any) (mark *Mark, err error) {
 	var result Mark
 	err = v.call("nvim_get_mark", &result, name, opts)
 	return &result, err
@@ -4677,7 +4677,7 @@ func (v *Nvim) Mark(name string, opts map[string]interface{}) (mark *Mark, err e
 // See: [nvim_get_mark()]
 //
 // [nvim_get_mark()]: https://neovim.io/doc/user/api.html#nvim_get_mark()
-func (b *Batch) Mark(name string, opts map[string]interface{}, mark *Mark) {
+func (b *Batch) Mark(name string, opts map[string]any, mark *Mark) {
 	b.call("nvim_get_mark", mark, name, opts)
 }
 
@@ -4708,7 +4708,7 @@ func (b *Batch) Mark(name string, opts map[string]interface{}, mark *Mark) {
 // See: [nvim_eval_statusline()]
 //
 // [nvim_eval_statusline()]: https://neovim.io/doc/user/api.html#nvim_eval_statusline()
-func (v *Nvim) EvalStatusLine(name string, opts map[string]interface{}) (statusline map[string]interface{}, err error) {
+func (v *Nvim) EvalStatusLine(name string, opts map[string]any) (statusline map[string]any, err error) {
 	err = v.call("nvim_eval_statusline", &statusline, name, opts)
 	return statusline, err
 }
@@ -4740,7 +4740,7 @@ func (v *Nvim) EvalStatusLine(name string, opts map[string]interface{}) (statusl
 // See: [nvim_eval_statusline()]
 //
 // [nvim_eval_statusline()]: https://neovim.io/doc/user/api.html#nvim_eval_statusline()
-func (b *Batch) EvalStatusLine(name string, opts map[string]interface{}, statusline *map[string]interface{}) {
+func (b *Batch) EvalStatusLine(name string, opts map[string]any, statusline *map[string]any) {
 	b.call("nvim_eval_statusline", statusline, name, opts)
 }
 
@@ -4897,7 +4897,7 @@ func (b *Batch) SetWindowWidth(window Window, width int) {
 // See: [nvim_win_get_var()]
 //
 // [nvim_win_get_var()]: https://neovim.io/doc/user/api.html#nvim_win_get_var()
-func (v *Nvim) WindowVar(window Window, name string, result interface{}) error {
+func (v *Nvim) WindowVar(window Window, name string, result any) error {
 	return v.call("nvim_win_get_var", result, window, name)
 }
 
@@ -4906,7 +4906,7 @@ func (v *Nvim) WindowVar(window Window, name string, result interface{}) error {
 // See: [nvim_win_get_var()]
 //
 // [nvim_win_get_var()]: https://neovim.io/doc/user/api.html#nvim_win_get_var()
-func (b *Batch) WindowVar(window Window, name string, result interface{}) {
+func (b *Batch) WindowVar(window Window, name string, result any) {
 	b.call("nvim_win_get_var", &result, window, name)
 }
 
@@ -4915,7 +4915,7 @@ func (b *Batch) WindowVar(window Window, name string, result interface{}) {
 // See: [nvim_win_set_var()]
 //
 // [nvim_win_set_var()]: https://neovim.io/doc/user/api.html#nvim_win_set_var()
-func (v *Nvim) SetWindowVar(window Window, name string, value interface{}) error {
+func (v *Nvim) SetWindowVar(window Window, name string, value any) error {
 	return v.call("nvim_win_set_var", nil, window, name, value)
 }
 
@@ -4924,7 +4924,7 @@ func (v *Nvim) SetWindowVar(window Window, name string, value interface{}) error
 // See: [nvim_win_set_var()]
 //
 // [nvim_win_set_var()]: https://neovim.io/doc/user/api.html#nvim_win_set_var()
-func (b *Batch) SetWindowVar(window Window, name string, value interface{}) {
+func (b *Batch) SetWindowVar(window Window, name string, value any) {
 	b.call("nvim_win_set_var", nil, window, name, value)
 }
 

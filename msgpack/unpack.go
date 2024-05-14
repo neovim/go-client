@@ -82,7 +82,7 @@ func NewDecoder(r io.Reader) *Decoder {
 //
 // The key is the MessagePack extension type.
 // The value is a function that converts the extension data to a Go value.
-type ExtensionMap map[int]func([]byte) (interface{}, error)
+type ExtensionMap map[int]func([]byte) (any, error)
 
 // SetExtensions specifies functions for converting MessagePack extensions to Go
 // values.

@@ -104,7 +104,7 @@ func (v *Nvim) ExitCode() int {
 // The application must call Serve() to handle RPC requests and responses.
 //
 //	:help rpc-connecting
-func New(r io.Reader, w io.Writer, c io.Closer, logf func(string, ...interface{})) (*Nvim, error) {
+func New(r io.Reader, w io.Writer, c io.Closer, logf func(string, ...any)) (*Nvim, error) {
 	ep, err := rpc.NewEndpoint(r, w, c, rpc.WithLogf(logf), withExtensions())
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ type ChildProcessOption struct {
 
 type childProcessOptions struct {
 	ctx          context.Context
-	logf         func(string, ...interface{})
+	logf         func(string, ...any)
 	command      string
 	dir          string
 	args         []string
@@ -179,7 +179,7 @@ func ChildProcessServe(serve bool) ChildProcessOption {
 
 // ChildProcessLogf specifies function for logging output. The log.Printf
 // function is used by default.
-func ChildProcessLogf(logf func(string, ...interface{})) ChildProcessOption {
+func ChildProcessLogf(logf func(string, ...any)) ChildProcessOption {
 	return ChildProcessOption{func(cpos *childProcessOptions) {
 		cpos.logf = logf
 	}}
@@ -261,7 +261,7 @@ type DialOption struct {
 
 type dialOptions struct {
 	ctx     context.Context
-	logf    func(string, ...interface{})
+	logf    func(string, ...any)
 	netDial func(ctx context.Context, network, address string) (net.Conn, error)
 	serve   bool
 }
@@ -291,7 +291,7 @@ func DialServe(serve bool) DialOption {
 }
 
 // DialLogf specifies function for logging output. The log.Printf function is used by default.
-func DialLogf(logf func(string, ...interface{})) DialOption {
+func DialLogf(logf func(string, ...any)) DialOption {
 	return DialOption{func(dos *dialOptions) {
 		dos.logf = logf
 	}}
@@ -350,9 +350,8 @@ func Dial(address string, options ...DialOption) (*Nvim, error) {
 //
 //	:help rpcrequest()
 //	:help rpcnotify()
-//
-func (v *Nvim) RegisterHandler(method string, fn interface{}) error {
-	var args []interface{}
+func (v *Nvim) RegisterHandler(method string, fn any) error {
+	var args []any
 	t := reflect.TypeOf(fn)
 	if t.Kind() == reflect.Func && t.NumIn() > 0 && t.In(0) == reflect.TypeOf(v) {
 		args = append(args, v)
@@ -368,8 +367,8 @@ func (v *Nvim) ChannelID() int {
 		return v.channelID
 	}
 	var info struct {
-		ChannelID int         `msgpack:",array"`
-		Info      interface{} `msgpack:"-"`
+		ChannelID int `msgpack:",array"`
+		Info      any `msgpack:"-"`
 	}
 	if err := v.ep.Call("nvim_get_api_info", &info); err != nil {
 		// TODO: log error and exit process?
@@ -378,7 +377,7 @@ func (v *Nvim) ChannelID() int {
 	return v.channelID
 }
 
-func (v *Nvim) call(sm string, result interface{}, args ...interface{}) error {
+func (v *Nvim) call(sm string, result any, args ...any) error {
 	return fixError(sm, v.ep.Call(sm, result, args...))
 }
 
@@ -407,7 +406,7 @@ type Batch struct {
 	ep      *rpc.Endpoint
 	enc     *msgpack.Encoder
 	sms     []string
-	results []interface{}
+	results []any
 	buf     bytes.Buffer
 }
 
@@ -425,7 +424,7 @@ func (b *Batch) Execute() error {
 	}
 
 	result := struct {
-		Results []interface{} `msgpack:",array"`
+		Results []any `msgpack:",array"`
 		Error   *struct {
 			Index   int `msgpack:",array"`
 			Type    int
@@ -461,9 +460,9 @@ func (b *Batch) Execute() error {
 }
 
 // emptyArgs represents a empty interface slice which use to empty args.
-var emptyArgs = []interface{}{}
+var emptyArgs = []any{}
 
-func (b *Batch) call(sm string, result interface{}, args ...interface{}) {
+func (b *Batch) call(sm string, result any, args ...any) {
 	if b.err != nil {
 		return
 	}
@@ -509,7 +508,7 @@ func (e *BatchError) Error() string {
 
 func fixError(sm string, err error) error {
 	if e, ok := err.(rpc.Error); ok {
-		if a, ok := e.Value.([]interface{}); ok && len(a) == 2 {
+		if a, ok := e.Value.([]any); ok && len(a) == 2 {
 			switch a[0] {
 			case int64(exceptionError), uint64(exceptionError):
 				return fmt.Errorf("nvim:%s exception: %v", sm, a[1])
@@ -530,12 +529,12 @@ func (el ErrorList) Error() string {
 }
 
 // Request makes a any RPC request.
-func (v *Nvim) Request(procedure string, result interface{}, args ...interface{}) error {
+func (v *Nvim) Request(procedure string, result any, args ...any) error {
 	return v.call(procedure, result, args...)
 }
 
 // Request makes a any RPC request atomically as a part of batch request.
-func (b *Batch) Request(procedure string, result interface{}, args ...interface{}) {
+func (b *Batch) Request(procedure string, result any, args ...any) {
 	b.call(procedure, result, args...)
 }
 
@@ -548,7 +547,7 @@ func (b *Batch) Request(procedure string, result interface{}, args ...interface{
 // args is Function arguments packed in an Array.
 //
 // result is the result of the function call.
-func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error {
+func (v *Nvim) Call(fname string, result any, args ...any) error {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -564,7 +563,7 @@ func (v *Nvim) Call(fname string, result interface{}, args ...interface{}) error
 // args is function arguments packed in an array.
 //
 // result is the result of the function call.
-func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
+func (b *Batch) Call(fname string, result any, args ...any) {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -582,7 +581,7 @@ func (b *Batch) Call(fname string, result interface{}, args ...interface{}) {
 // args is function arguments packed in an array.
 //
 // result is the result of the function call.
-func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) error {
+func (v *Nvim) CallDict(dict []any, fname string, result any, args ...any) error {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -600,7 +599,7 @@ func (v *Nvim) CallDict(dict []interface{}, fname string, result interface{}, ar
 // args is Function arguments packed in an Array.
 //
 // result is the result of the function call.
-func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, args ...interface{}) {
+func (b *Batch) CallDict(dict []any, fname string, result any, args ...any) {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -619,7 +618,7 @@ func (b *Batch) CallDict(dict []interface{}, fname string, result interface{}, a
 // args is arguments to the code.
 //
 // The returned result value of Lua code if present or nil.
-func (v *Nvim) ExecLua(code string, result interface{}, args ...interface{}) error {
+func (v *Nvim) ExecLua(code string, result any, args ...any) error {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -638,7 +637,7 @@ func (v *Nvim) ExecLua(code string, result interface{}, args ...interface{}) err
 // args is arguments to the code.
 //
 // The returned result value of Lua code if present or nil.
-func (b *Batch) ExecLua(code string, result interface{}, args ...interface{}) {
+func (b *Batch) ExecLua(code string, result any, args ...any) {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -655,7 +654,7 @@ func (b *Batch) ExecLua(code string, result interface{}, args ...interface{}) {
 // logLevel is the LogLevel.
 //
 // opts is reserved for future use.
-func (v *Nvim) Notify(msg string, logLevel LogLevel, opts map[string]interface{}) error {
+func (v *Nvim) Notify(msg string, logLevel LogLevel, opts map[string]any) error {
 	if logLevel == LogErrorLevel {
 		return v.WritelnErr(msg)
 	}
@@ -678,7 +677,7 @@ func (v *Nvim) Notify(msg string, logLevel LogLevel, opts map[string]interface{}
 // logLevel is the LogLevel.
 //
 // opts is reserved for future use.
-func (b *Batch) Notify(msg string, logLevel LogLevel, opts map[string]interface{}) {
+func (b *Batch) Notify(msg string, logLevel LogLevel, opts map[string]any) {
 	if logLevel == LogErrorLevel {
 		b.WritelnErr(msg)
 		return
@@ -721,7 +720,7 @@ func encodeExt(n int) []byte {
 	return []byte{0xd2, byte(n >> 24), byte(n >> 16), byte(n >> 8), byte(n)}
 }
 
-func unmarshalExt(dec *msgpack.Decoder, id int, v interface{}) (int, error) {
+func unmarshalExt(dec *msgpack.Decoder, id int, v any) (int, error) {
 	if dec.Type() != msgpack.Extension || dec.Extension() != id {
 		err := &msgpack.DecodeConvertError{
 			SrcType:  dec.Type(),

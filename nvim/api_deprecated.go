@@ -7,7 +7,7 @@ package nvim
 // Deprecated: Use ChildProcessOption instead.
 type EmbedOptions struct {
 	// Logf log function for rpc.WithLogf.
-	Logf func(string, ...interface{})
+	Logf func(string, ...any)
 
 	// Dir specifies the working directory of the command. The working
 	// directory in the current process is used if Dir is "".
@@ -51,7 +51,7 @@ func NewEmbedded(options *EmbedOptions) (*Nvim, error) {
 // ExecuteLua executes a Lua block.
 //
 // Deprecated: Use ExecLua instead.
-func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) error {
+func (v *Nvim) ExecuteLua(code string, result any, args ...any) error {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -61,7 +61,7 @@ func (v *Nvim) ExecuteLua(code string, result interface{}, args ...interface{}) 
 // ExecuteLua executes a Lua block.
 //
 // Deprecated: Use ExecLua instead.
-func (b *Batch) ExecuteLua(code string, result interface{}, args ...interface{}) {
+func (b *Batch) ExecuteLua(code string, result any, args ...any) {
 	if args == nil {
 		args = emptyArgs
 	}
@@ -152,7 +152,7 @@ func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, en
 // See: [nvim_buf_set_virtual_text()]
 //
 // [nvim_buf_set_virtual_text()]: https://neovim.io/doc/user/api.html#nvim_buf_set_virtual_text()
-func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}) (id int, err error) {
+func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]any) (id int, err error) {
 	err = v.call("nvim_buf_set_virtual_text", &id, buffer, nsID, line, chunks, opts)
 	return id, err
 }
@@ -182,7 +182,7 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 // See: [nvim_buf_set_virtual_text()]
 //
 // [nvim_buf_set_virtual_text()]: https://neovim.io/doc/user/api.html#nvim_buf_set_virtual_text()
-func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}, id *int) {
+func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]any, id *int) {
 	b.call("nvim_buf_set_virtual_text", id, buffer, nsID, line, chunks, opts)
 }
 
