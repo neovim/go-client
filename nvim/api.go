@@ -97,6 +97,10 @@ func (x Window) String() string {
 //
 // Note that when multiple patterns or events are provided, it will find all the autocommands that
 // match any combination of them.
+//
+// See: [nvim_get_autocmds()]
+//
+// [nvim_get_autocmds()]: https://neovim.io/doc/user/api.html#nvim_get_autocmds()
 func (v *Nvim) Autocmds(opts map[string]interface{}) (result []*AutocmdType, err error) {
 	err = v.call("nvim_get_autocmds", &result, opts)
 	return result, err
@@ -106,6 +110,10 @@ func (v *Nvim) Autocmds(opts map[string]interface{}) (result []*AutocmdType, err
 //
 // Note that when multiple patterns or events are provided, it will find all the autocommands that
 // match any combination of them.
+//
+// See: [nvim_get_autocmds()]
+//
+// [nvim_get_autocmds()]: https://neovim.io/doc/user/api.html#nvim_get_autocmds()
 func (b *Batch) Autocmds(opts map[string]interface{}, result *[]*AutocmdType) {
 	b.call("nvim_get_autocmds", result, opts)
 }
@@ -114,6 +122,10 @@ func (b *Batch) Autocmds(opts map[string]interface{}, result *[]*AutocmdType) {
 //
 // The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
 // triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
+//
+// See: [nvim_create_autocmd()]
+//
+// [nvim_create_autocmd()]: https://neovim.io/doc/user/api.html#nvim_create_autocmd()
 func (v *Nvim) CreateAutocmd(event interface{}, opts map[string]interface{}) (id int, err error) {
 	err = v.call("nvim_create_autocmd", &id, event, opts)
 	return id, err
@@ -123,6 +135,10 @@ func (v *Nvim) CreateAutocmd(event interface{}, opts map[string]interface{}) (id
 //
 // The API allows for two (mutually exclusive) types of actions to be executed when the autocommand
 // triggers: a callback function (Lua or Vimscript), or a command (like regular autocommands).
+//
+// See: [nvim_create_autocmd()]
+//
+// [nvim_create_autocmd()]: https://neovim.io/doc/user/api.html#nvim_create_autocmd()
 func (b *Batch) CreateAutocmd(event interface{}, opts map[string]interface{}, id *int) {
 	b.call("nvim_create_autocmd", id, event, opts)
 }
@@ -130,6 +146,10 @@ func (b *Batch) CreateAutocmd(event interface{}, opts map[string]interface{}, id
 // DeleteAutocmd delete an autocommand by id.
 //
 // NOTE: Only autocommands created via the API have an id.
+//
+// See: [nvim_del_autocmd()]
+//
+// [nvim_del_autocmd()]: https://neovim.io/doc/user/api.html#nvim_del_autocmd()
 func (v *Nvim) DeleteAutocmd(id int) error {
 	return v.call("nvim_del_autocmd", nil, id)
 }
@@ -137,6 +157,10 @@ func (v *Nvim) DeleteAutocmd(id int) error {
 // DeleteAutocmd delete an autocommand by id.
 //
 // NOTE: Only autocommands created via the API have an id.
+//
+// See: [nvim_del_autocmd()]
+//
+// [nvim_del_autocmd()]: https://neovim.io/doc/user/api.html#nvim_del_autocmd()
 func (b *Batch) DeleteAutocmd(id int) {
 	b.call("nvim_del_autocmd", nil, id)
 }
@@ -144,6 +168,10 @@ func (b *Batch) DeleteAutocmd(id int) {
 // ClearAutocmds clear all autocommands that match the corresponding {opts}.
 //
 // To delete a particular autocmd, see DeleteAutocmd.
+//
+// See: [nvim_clear_autocmds()]
+//
+// [nvim_clear_autocmds()]: https://neovim.io/doc/user/api.html#nvim_clear_autocmds()
 func (v *Nvim) ClearAutocmds(opts map[string]interface{}) error {
 	return v.call("nvim_clear_autocmds", nil, opts)
 }
@@ -151,47 +179,83 @@ func (v *Nvim) ClearAutocmds(opts map[string]interface{}) error {
 // ClearAutocmds clear all autocommands that match the corresponding {opts}.
 //
 // To delete a particular autocmd, see DeleteAutocmd.
+//
+// See: [nvim_clear_autocmds()]
+//
+// [nvim_clear_autocmds()]: https://neovim.io/doc/user/api.html#nvim_clear_autocmds()
 func (b *Batch) ClearAutocmds(opts map[string]interface{}) {
 	b.call("nvim_clear_autocmds", nil, opts)
 }
 
 // CreateAugroup create or get an autocommand group(autocmd-groups).
+//
+// See: [nvim_create_augroup()]
+//
+// [nvim_create_augroup()]: https://neovim.io/doc/user/api.html#nvim_create_augroup()
 func (v *Nvim) CreateAugroup(name string, opts map[string]interface{}) (id int, err error) {
 	err = v.call("nvim_create_augroup", &id, name, opts)
 	return id, err
 }
 
 // CreateAugroup create or get an autocommand group(autocmd-groups).
+//
+// See: [nvim_create_augroup()]
+//
+// [nvim_create_augroup()]: https://neovim.io/doc/user/api.html#nvim_create_augroup()
 func (b *Batch) CreateAugroup(name string, opts map[string]interface{}, id *int) {
 	b.call("nvim_create_augroup", id, name, opts)
 }
 
 // DeleteAugroupByID delete an autocommand group by id.
+//
+// See: [nvim_del_augroup_by_id()]
+//
+// [nvim_del_augroup_by_id()]: https://neovim.io/doc/user/api.html#nvim_del_augroup_by_id()
 func (v *Nvim) DeleteAugroupByID(id int) error {
 	return v.call("nvim_del_augroup_by_id", nil, id)
 }
 
 // DeleteAugroupByID delete an autocommand group by id.
+//
+// See: [nvim_del_augroup_by_id()]
+//
+// [nvim_del_augroup_by_id()]: https://neovim.io/doc/user/api.html#nvim_del_augroup_by_id()
 func (b *Batch) DeleteAugroupByID(id int) {
 	b.call("nvim_del_augroup_by_id", nil, id)
 }
 
 // DeleteAugroupByID delete an autocommand group by name.
+//
+// See: [nvim_del_augroup_by_name()]
+//
+// [nvim_del_augroup_by_name()]: https://neovim.io/doc/user/api.html#nvim_del_augroup_by_name()
 func (v *Nvim) DeleteAugroupByName(name string) error {
 	return v.call("nvim_del_augroup_by_name", nil, name)
 }
 
 // DeleteAugroupByID delete an autocommand group by name.
+//
+// See: [nvim_del_augroup_by_name()]
+//
+// [nvim_del_augroup_by_name()]: https://neovim.io/doc/user/api.html#nvim_del_augroup_by_name()
 func (b *Batch) DeleteAugroupByName(name string) {
 	b.call("nvim_del_augroup_by_name", nil, name)
 }
 
 // ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
+//
+// See: [nvim_exec_autocmds()]
+//
+// [nvim_exec_autocmds()]: https://neovim.io/doc/user/api.html#nvim_exec_autocmds()
 func (v *Nvim) ExecAutocmds(event interface{}, opts map[string]interface{}) error {
 	return v.call("nvim_exec_autocmds", nil, event, opts)
 }
 
 // ExecAutocmds execute all autocommands for {event} that match the corresponding {opts} autocmd-execute.
+//
+// See: [nvim_exec_autocmds()]
+//
+// [nvim_exec_autocmds()]: https://neovim.io/doc/user/api.html#nvim_exec_autocmds()
 func (b *Batch) ExecAutocmds(event interface{}, opts map[string]interface{}) {
 	b.call("nvim_exec_autocmds", nil, event, opts)
 }
@@ -201,6 +265,10 @@ func (b *Batch) ExecAutocmds(event interface{}, opts map[string]interface{}) {
 // The buffer arg is specific Buffer, or 0 for current buffer.
 //
 // The returns line count, or 0 for unloaded buffer.
+//
+// See: [nvim_buf_line_count()]
+//
+// [nvim_buf_line_count()]: https://neovim.io/doc/user/api.html#nvim_buf_line_count()
 func (v *Nvim) BufferLineCount(buffer Buffer) (count int, err error) {
 	err = v.call("nvim_buf_line_count", &count, buffer)
 	return count, err
@@ -211,6 +279,10 @@ func (v *Nvim) BufferLineCount(buffer Buffer) (count int, err error) {
 // The buffer arg is specific Buffer, or 0 for current buffer.
 //
 // The returns line count, or 0 for unloaded buffer.
+//
+// See: [nvim_buf_line_count()]
+//
+// [nvim_buf_line_count()]: https://neovim.io/doc/user/api.html#nvim_buf_line_count()
 func (b *Batch) BufferLineCount(buffer Buffer, count *int) {
 	b.call("nvim_buf_line_count", count, buffer)
 }
@@ -224,6 +296,10 @@ func (b *Batch) BufferLineCount(buffer Buffer, count *int) {
 // Otherwise, the first notification will be a "nvim_buf_changedtick_event".
 //
 // Returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
+//
+// See: [nvim_buf_attach()]
+//
+// [nvim_buf_attach()]: https://neovim.io/doc/user/api.html#nvim_buf_attach()
 func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}) (attached bool, err error) {
 	err = v.call("nvim_buf_attach", &attached, buffer, sendBuffer, opts)
 	return attached, err
@@ -238,6 +314,10 @@ func (v *Nvim) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]inte
 // Otherwise, the first notification will be a "nvim_buf_changedtick_event".
 //
 // Returns whether the updates couldn't be enabled because the buffer isn't loaded or opts contained an invalid key.
+//
+// See: [nvim_buf_attach()]
+//
+// [nvim_buf_attach()]: https://neovim.io/doc/user/api.html#nvim_buf_attach()
 func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]interface{}, attached *bool) {
 	b.call("nvim_buf_attach", attached, buffer, sendBuffer, opts)
 }
@@ -245,6 +325,10 @@ func (b *Batch) AttachBuffer(buffer Buffer, sendBuffer bool, opts map[string]int
 // DetachBuffer deactivate updates from this buffer to the current channel.
 //
 // Returns whether the updates couldn't be disabled because the buffer isn't loaded.
+//
+// See: [nvim_buf_detach()]
+//
+// [nvim_buf_detach()]: https://neovim.io/doc/user/api.html#nvim_buf_detach()
 func (v *Nvim) DetachBuffer(buffer Buffer) (detached bool, err error) {
 	err = v.call("nvim_buf_detach", &detached, buffer)
 	return detached, err
@@ -253,6 +337,10 @@ func (v *Nvim) DetachBuffer(buffer Buffer) (detached bool, err error) {
 // DetachBuffer deactivate updates from this buffer to the current channel.
 //
 // Returns whether the updates couldn't be disabled because the buffer isn't loaded.
+//
+// See: [nvim_buf_detach()]
+//
+// [nvim_buf_detach()]: https://neovim.io/doc/user/api.html#nvim_buf_detach()
 func (b *Batch) DetachBuffer(buffer Buffer, detached *bool) {
 	b.call("nvim_buf_detach", detached, buffer)
 }
@@ -264,6 +352,10 @@ func (b *Batch) DetachBuffer(buffer Buffer, detached *bool) {
 // So to get the last element use start=-2 and end=-1.
 //
 // Out-of-bounds indices are clamped to the nearest valid value, unless strictIndexing is set.
+//
+// See: [nvim_buf_get_lines()]
+//
+// [nvim_buf_get_lines()]: https://neovim.io/doc/user/api.html#nvim_buf_get_lines()
 func (v *Nvim) BufferLines(buffer Buffer, start int, end int, strictIndexing bool) (lines [][]byte, err error) {
 	err = v.call("nvim_buf_get_lines", &lines, buffer, start, end, strictIndexing)
 	return lines, err
@@ -276,6 +368,10 @@ func (v *Nvim) BufferLines(buffer Buffer, start int, end int, strictIndexing boo
 // So to get the last element use start=-2 and end=-1.
 //
 // Out-of-bounds indices are clamped to the nearest valid value, unless strictIndexing is set.
+//
+// See: [nvim_buf_get_lines()]
+//
+// [nvim_buf_get_lines()]: https://neovim.io/doc/user/api.html#nvim_buf_get_lines()
 func (b *Batch) BufferLines(buffer Buffer, start int, end int, strictIndexing bool, lines *[][]byte) {
 	b.call("nvim_buf_get_lines", lines, buffer, start, end, strictIndexing)
 }
@@ -292,6 +388,10 @@ func (b *Batch) BufferLines(buffer Buffer, start int, end int, strictIndexing bo
 //
 // Out-of-bounds indices are clamped to the nearest valid value, unless
 // strict_indexing arg is set to true.
+//
+// See: [nvim_buf_set_lines()]
+//
+// [nvim_buf_set_lines()]: https://neovim.io/doc/user/api.html#nvim_buf_set_lines()
 func (v *Nvim) SetBufferLines(buffer Buffer, start int, end int, strictIndexing bool, replacement [][]byte) error {
 	return v.call("nvim_buf_set_lines", nil, buffer, start, end, strictIndexing, replacement)
 }
@@ -308,6 +408,10 @@ func (v *Nvim) SetBufferLines(buffer Buffer, start int, end int, strictIndexing 
 //
 // Out-of-bounds indices are clamped to the nearest valid value, unless
 // strict_indexing arg is set to true.
+//
+// See: [nvim_buf_set_lines()]
+//
+// [nvim_buf_set_lines()]: https://neovim.io/doc/user/api.html#nvim_buf_set_lines()
 func (b *Batch) SetBufferLines(buffer Buffer, start int, end int, strictIndexing bool, replacement [][]byte) {
 	b.call("nvim_buf_set_lines", nil, buffer, start, end, strictIndexing, replacement)
 }
@@ -325,6 +429,10 @@ func (b *Batch) SetBufferLines(buffer Buffer, start int, end int, strictIndexing
 // To delete a range, set replacement arg to an array containing an empty string, or simply an empty array.
 //
 // Prefer SetBufferLines when adding or deleting entire lines only.
+//
+// See: [nvim_buf_set_text()]
+//
+// [nvim_buf_set_text()]: https://neovim.io/doc/user/api.html#nvim_buf_set_text()
 func (v *Nvim) SetBufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, replacement [][]byte) error {
 	return v.call("nvim_buf_set_text", nil, buffer, startRow, startCol, endRow, endCol, replacement)
 }
@@ -342,6 +450,10 @@ func (v *Nvim) SetBufferText(buffer Buffer, startRow int, startCol int, endRow i
 // To delete a range, set replacement arg to an array containing an empty string, or simply an empty array.
 //
 // Prefer SetBufferLines when adding or deleting entire lines only.
+//
+// See: [nvim_buf_set_text()]
+//
+// [nvim_buf_set_text()]: https://neovim.io/doc/user/api.html#nvim_buf_set_text()
 func (b *Batch) SetBufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, replacement [][]byte) {
 	b.call("nvim_buf_set_text", nil, buffer, startRow, startCol, endRow, endCol, replacement)
 }
@@ -356,6 +468,10 @@ func (b *Batch) SetBufferText(buffer Buffer, startRow int, startCol int, endRow 
 // Prefer BufferLines when retrieving entire lines.
 //
 // opts is optional parameters. Currently unused.
+//
+// See: [nvim_buf_get_text()]
+//
+// [nvim_buf_get_text()]: https://neovim.io/doc/user/api.html#nvim_buf_get_text()
 func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}) ([][]byte, error) {
 	var result [][]byte
 	err := v.call("nvim_buf_get_text", &result, buffer, startRow, startCol, endRow, endCol, opts)
@@ -372,6 +488,10 @@ func (v *Nvim) BufferText(buffer Buffer, startRow int, startCol int, endRow int,
 // Prefer BufferLines when retrieving entire lines.
 //
 // opts is optional parameters. Currently unused.
+//
+// See: [nvim_buf_get_text()]
+//
+// [nvim_buf_get_text()]: https://neovim.io/doc/user/api.html#nvim_buf_get_text()
 func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int, endCol int, opts map[string]interface{}, result *[][]byte) {
 	b.call("nvim_buf_get_text", result, buffer, startRow, startCol, endRow, endCol, opts)
 }
@@ -387,6 +507,10 @@ func (b *Batch) BufferText(buffer Buffer, startRow int, startCol int, endRow int
 // Unlike "line2byte" vim function, throws error for out-of-bounds indexing.
 //
 // If Buffer is unloaded buffer, returns -1.
+//
+// See: [nvim_buf_get_offset()]
+//
+// [nvim_buf_get_offset()]: https://neovim.io/doc/user/api.html#nvim_buf_get_offset()
 func (v *Nvim) BufferOffset(buffer Buffer, index int) (offset int, err error) {
 	err = v.call("nvim_buf_get_offset", &offset, buffer, index)
 	return offset, err
@@ -403,27 +527,47 @@ func (v *Nvim) BufferOffset(buffer Buffer, index int) (offset int, err error) {
 // Unlike "line2byte" vim function, throws error for out-of-bounds indexing.
 //
 // If Buffer is unloaded buffer, returns -1.
+//
+// See: [nvim_buf_get_offset()]
+//
+// [nvim_buf_get_offset()]: https://neovim.io/doc/user/api.html#nvim_buf_get_offset()
 func (b *Batch) BufferOffset(buffer Buffer, index int, offset *int) {
 	b.call("nvim_buf_get_offset", offset, buffer, index)
 }
 
 // BufferVar gets a buffer-scoped (b:) variable.
+//
+// See: [nvim_buf_get_var()]
+//
+// [nvim_buf_get_var()]: https://neovim.io/doc/user/api.html#nvim_buf_get_var()
 func (v *Nvim) BufferVar(buffer Buffer, name string, result interface{}) error {
 	return v.call("nvim_buf_get_var", result, buffer, name)
 }
 
 // BufferVar gets a buffer-scoped (b:) variable.
+//
+// See: [nvim_buf_get_var()]
+//
+// [nvim_buf_get_var()]: https://neovim.io/doc/user/api.html#nvim_buf_get_var()
 func (b *Batch) BufferVar(buffer Buffer, name string, result interface{}) {
 	b.call("nvim_buf_get_var", &result, buffer, name)
 }
 
 // BufferChangedTick gets a changed tick of a buffer.
+//
+// See: [nvim_buf_get_changedtick()]
+//
+// [nvim_buf_get_changedtick()]: https://neovim.io/doc/user/api.html#nvim_buf_get_changedtick()
 func (v *Nvim) BufferChangedTick(buffer Buffer) (changedtick int, err error) {
 	err = v.call("nvim_buf_get_changedtick", &changedtick, buffer)
 	return changedtick, err
 }
 
 // BufferChangedTick gets a changed tick of a buffer.
+//
+// See: [nvim_buf_get_changedtick()]
+//
+// [nvim_buf_get_changedtick()]: https://neovim.io/doc/user/api.html#nvim_buf_get_changedtick()
 func (b *Batch) BufferChangedTick(buffer Buffer, changedtick *int) {
 	b.call("nvim_buf_get_changedtick", changedtick, buffer)
 }
@@ -431,6 +575,10 @@ func (b *Batch) BufferChangedTick(buffer Buffer, changedtick *int) {
 // BufferKeymap gets a list of buffer-local mapping definitions.
 //
 // The mode short-name ("n", "i", "v", ...).
+//
+// See: [nvim_buf_get_keymap()]
+//
+// [nvim_buf_get_keymap()]: https://neovim.io/doc/user/api.html#nvim_buf_get_keymap()
 func (v *Nvim) BufferKeyMap(buffer Buffer, mode string) ([]*Mapping, error) {
 	var result []*Mapping
 	err := v.call("nvim_buf_get_keymap", &result, buffer, mode)
@@ -440,83 +588,119 @@ func (v *Nvim) BufferKeyMap(buffer Buffer, mode string) ([]*Mapping, error) {
 // BufferKeymap gets a list of buffer-local mapping definitions.
 //
 // The mode short-name ("n", "i", "v", ...).
+//
+// See: [nvim_buf_get_keymap()]
+//
+// [nvim_buf_get_keymap()]: https://neovim.io/doc/user/api.html#nvim_buf_get_keymap()
 func (b *Batch) BufferKeyMap(buffer Buffer, mode string, result *[]*Mapping) {
 	b.call("nvim_buf_get_keymap", result, buffer, mode)
 }
 
 // SetBufferKeyMap sets a buffer-local mapping for the given mode.
 //
-// See:
+// See: [nvim_buf_set_keymap()]
 //
-//	:help nvim_set_keymap()
+// [nvim_buf_set_keymap()]: https://neovim.io/doc/user/api.html#nvim_buf_set_keymap()
 func (v *Nvim) SetBufferKeyMap(buffer Buffer, mode string, lhs string, rhs string, opts map[string]bool) error {
 	return v.call("nvim_buf_set_keymap", nil, buffer, mode, lhs, rhs, opts)
 }
 
 // SetBufferKeyMap sets a buffer-local mapping for the given mode.
 //
-// See:
+// See: [nvim_buf_set_keymap()]
 //
-//	:help nvim_set_keymap()
+// [nvim_buf_set_keymap()]: https://neovim.io/doc/user/api.html#nvim_buf_set_keymap()
 func (b *Batch) SetBufferKeyMap(buffer Buffer, mode string, lhs string, rhs string, opts map[string]bool) {
 	b.call("nvim_buf_set_keymap", nil, buffer, mode, lhs, rhs, opts)
 }
 
 // DeleteBufferKeyMap unmaps a buffer-local mapping for the given mode.
 //
-// See:
+// See: [nvim_buf_del_keymap()]
 //
-//	:help nvim_del_keymap()
+// [nvim_buf_del_keymap()]: https://neovim.io/doc/user/api.html#nvim_buf_del_keymap()
 func (v *Nvim) DeleteBufferKeyMap(buffer Buffer, mode string, lhs string) error {
 	return v.call("nvim_buf_del_keymap", nil, buffer, mode, lhs)
 }
 
 // DeleteBufferKeyMap unmaps a buffer-local mapping for the given mode.
 //
-// See:
+// See: [nvim_buf_del_keymap()]
 //
-//	:help nvim_del_keymap()
+// [nvim_buf_del_keymap()]: https://neovim.io/doc/user/api.html#nvim_buf_del_keymap()
 func (b *Batch) DeleteBufferKeyMap(buffer Buffer, mode string, lhs string) {
 	b.call("nvim_buf_del_keymap", nil, buffer, mode, lhs)
 }
 
 // SetBufferVar sets a buffer-scoped (b:) variable.
+//
+// See: [nvim_buf_set_var()]
+//
+// [nvim_buf_set_var()]: https://neovim.io/doc/user/api.html#nvim_buf_set_var()
 func (v *Nvim) SetBufferVar(buffer Buffer, name string, value interface{}) error {
 	return v.call("nvim_buf_set_var", nil, buffer, name, value)
 }
 
 // SetBufferVar sets a buffer-scoped (b:) variable.
+//
+// See: [nvim_buf_set_var()]
+//
+// [nvim_buf_set_var()]: https://neovim.io/doc/user/api.html#nvim_buf_set_var()
 func (b *Batch) SetBufferVar(buffer Buffer, name string, value interface{}) {
 	b.call("nvim_buf_set_var", nil, buffer, name, value)
 }
 
 // DeleteBufferVar removes a buffer-scoped (b:) variable.
+//
+// See: [nvim_buf_del_var()]
+//
+// [nvim_buf_del_var()]: https://neovim.io/doc/user/api.html#nvim_buf_del_var()
 func (v *Nvim) DeleteBufferVar(buffer Buffer, name string) error {
 	return v.call("nvim_buf_del_var", nil, buffer, name)
 }
 
 // DeleteBufferVar removes a buffer-scoped (b:) variable.
+//
+// See: [nvim_buf_del_var()]
+//
+// [nvim_buf_del_var()]: https://neovim.io/doc/user/api.html#nvim_buf_del_var()
 func (b *Batch) DeleteBufferVar(buffer Buffer, name string) {
 	b.call("nvim_buf_del_var", nil, buffer, name)
 }
 
 // BufferName gets the full file name for the buffer.
+//
+// See: [nvim_buf_get_name()]
+//
+// [nvim_buf_get_name()]: https://neovim.io/doc/user/api.html#nvim_buf_get_name()
 func (v *Nvim) BufferName(buffer Buffer) (name string, err error) {
 	err = v.call("nvim_buf_get_name", &name, buffer)
 	return name, err
 }
 
 // BufferName gets the full file name for the buffer.
+//
+// See: [nvim_buf_get_name()]
+//
+// [nvim_buf_get_name()]: https://neovim.io/doc/user/api.html#nvim_buf_get_name()
 func (b *Batch) BufferName(buffer Buffer, name *string) {
 	b.call("nvim_buf_get_name", name, buffer)
 }
 
 // SetBufferName sets the full file name for a buffer.
+//
+// See: [nvim_buf_set_name()]
+//
+// [nvim_buf_set_name()]: https://neovim.io/doc/user/api.html#nvim_buf_set_name()
 func (v *Nvim) SetBufferName(buffer Buffer, name string) error {
 	return v.call("nvim_buf_set_name", nil, buffer, name)
 }
 
 // SetBufferName sets the full file name for a buffer.
+//
+// See: [nvim_buf_set_name()]
+//
+// [nvim_buf_set_name()]: https://neovim.io/doc/user/api.html#nvim_buf_set_name()
 func (b *Batch) SetBufferName(buffer Buffer, name string) {
 	b.call("nvim_buf_set_name", nil, buffer, name)
 }
@@ -524,6 +708,10 @@ func (b *Batch) SetBufferName(buffer Buffer, name string) {
 // IsBufferLoaded checks if a buffer is valid and loaded.
 //
 // See |help api-buffer| for more info about unloaded buffers.
+//
+// See: [nvim_buf_is_loaded()]
+//
+// [nvim_buf_is_loaded()]: https://neovim.io/doc/user/api.html#nvim_buf_is_loaded()
 func (v *Nvim) IsBufferLoaded(buffer Buffer) (loaded bool, err error) {
 	err = v.call("nvim_buf_is_loaded", &loaded, buffer)
 	return loaded, err
@@ -532,6 +720,10 @@ func (v *Nvim) IsBufferLoaded(buffer Buffer) (loaded bool, err error) {
 // IsBufferLoaded checks if a buffer is valid and loaded.
 //
 // See |help api-buffer| for more info about unloaded buffers.
+//
+// See: [nvim_buf_is_loaded()]
+//
+// [nvim_buf_is_loaded()]: https://neovim.io/doc/user/api.html#nvim_buf_is_loaded()
 func (b *Batch) IsBufferLoaded(buffer Buffer, loaded *bool) {
 	b.call("nvim_buf_is_loaded", loaded, buffer)
 }
@@ -550,6 +742,10 @@ func (b *Batch) IsBufferLoaded(buffer Buffer, loaded *bool) {
 //	unload
 //
 // Unloaded only, do not delete. See |help :bunload|. bool type.
+//
+// See: [nvim_buf_delete()]
+//
+// [nvim_buf_delete()]: https://neovim.io/doc/user/api.html#nvim_buf_delete()
 func (v *Nvim) DeleteBuffer(buffer Buffer, opts map[string]bool) error {
 	return v.call("nvim_buf_delete", nil, buffer, opts)
 }
@@ -568,6 +764,10 @@ func (v *Nvim) DeleteBuffer(buffer Buffer, opts map[string]bool) error {
 //	unload
 //
 // Unloaded only, do not delete. See |help :bunload|. bool type.
+//
+// See: [nvim_buf_delete()]
+//
+// [nvim_buf_delete()]: https://neovim.io/doc/user/api.html#nvim_buf_delete()
 func (b *Batch) DeleteBuffer(buffer Buffer, opts map[string]bool) {
 	b.call("nvim_buf_delete", nil, buffer, opts)
 }
@@ -576,6 +776,10 @@ func (b *Batch) DeleteBuffer(buffer Buffer, opts map[string]bool) {
 //
 // Note: Even if a buffer is valid it may have been unloaded.
 // See |help api-buffer| for more info about unloaded buffers.
+//
+// See: [nvim_buf_is_valid()]
+//
+// [nvim_buf_is_valid()]: https://neovim.io/doc/user/api.html#nvim_buf_is_valid()
 func (v *Nvim) IsBufferValid(buffer Buffer) (valied bool, err error) {
 	err = v.call("nvim_buf_is_valid", &valied, buffer)
 	return valied, err
@@ -585,12 +789,20 @@ func (v *Nvim) IsBufferValid(buffer Buffer) (valied bool, err error) {
 //
 // Note: Even if a buffer is valid it may have been unloaded.
 // See |help api-buffer| for more info about unloaded buffers.
+//
+// See: [nvim_buf_is_valid()]
+//
+// [nvim_buf_is_valid()]: https://neovim.io/doc/user/api.html#nvim_buf_is_valid()
 func (b *Batch) IsBufferValid(buffer Buffer, valied *bool) {
 	b.call("nvim_buf_is_valid", valied, buffer)
 }
 
 // DeleteBufferMark deletes a named mark in the buffer.
 // See |help mark-motions|.
+//
+// See: [nvim_buf_del_mark()]
+//
+// [nvim_buf_del_mark()]: https://neovim.io/doc/user/api.html#nvim_buf_del_mark()
 func (v *Nvim) DeleteBufferMark(buffer Buffer, name string) (deleted bool, err error) {
 	err = v.call("nvim_buf_del_mark", &deleted, buffer, name)
 	return deleted, err
@@ -598,6 +810,10 @@ func (v *Nvim) DeleteBufferMark(buffer Buffer, name string) (deleted bool, err e
 
 // DeleteBufferMark deletes a named mark in the buffer.
 // See |help mark-motions|.
+//
+// See: [nvim_buf_del_mark()]
+//
+// [nvim_buf_del_mark()]: https://neovim.io/doc/user/api.html#nvim_buf_del_mark()
 func (b *Batch) DeleteBufferMark(buffer Buffer, name string, deleted *bool) {
 	b.call("nvim_buf_del_mark", deleted, buffer, name)
 }
@@ -609,6 +825,10 @@ func (b *Batch) DeleteBufferMark(buffer Buffer, name string, deleted *bool) {
 // line and col are (1,0)-indexed.
 //
 // opts is optional parameters. Reserved for future use.
+//
+// See: [nvim_buf_set_mark()]
+//
+// [nvim_buf_set_mark()]: https://neovim.io/doc/user/api.html#nvim_buf_set_mark()
 func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]interface{}) (set bool, err error) {
 	err = v.call("nvim_buf_set_mark", &set, buffer, name, line, col, opts)
 	return set, err
@@ -621,6 +841,10 @@ func (v *Nvim) SetBufferMark(buffer Buffer, name string, line int, col int, opts
 // line and col are (1,0)-indexed.
 //
 // opts is optional parameters. Reserved for future use.
+//
+// See: [nvim_buf_set_mark()]
+//
+// [nvim_buf_set_mark()]: https://neovim.io/doc/user/api.html#nvim_buf_set_mark()
 func (b *Batch) SetBufferMark(buffer Buffer, name string, line int, col int, opts map[string]interface{}, set *bool) {
 	b.call("nvim_buf_set_mark", set, buffer, name, line, col, opts)
 }
@@ -628,6 +852,10 @@ func (b *Batch) SetBufferMark(buffer Buffer, name string, line int, col int, opt
 // BufferMark return a tuple (row,col) representing the position of the named mark.
 //
 // Marks are (1,0)-indexed.
+//
+// See: [nvim_buf_get_mark()]
+//
+// [nvim_buf_get_mark()]: https://neovim.io/doc/user/api.html#nvim_buf_get_mark()
 func (v *Nvim) BufferMark(buffer Buffer, name string) (pos [2]int, err error) {
 	err = v.call("nvim_buf_get_mark", &pos, buffer, name)
 	return pos, err
@@ -636,6 +864,10 @@ func (v *Nvim) BufferMark(buffer Buffer, name string) (pos [2]int, err error) {
 // BufferMark return a tuple (row,col) representing the position of the named mark.
 //
 // Marks are (1,0)-indexed.
+//
+// See: [nvim_buf_get_mark()]
+//
+// [nvim_buf_get_mark()]: https://neovim.io/doc/user/api.html#nvim_buf_get_mark()
 func (b *Batch) BufferMark(buffer Buffer, name string, pos *[2]int) {
 	b.call("nvim_buf_get_mark", pos, buffer, name)
 }
@@ -796,6 +1028,10 @@ func (b *Batch) BufferMark(buffer Buffer, name string, pos *[2]int) {
 //	belowright
 //	topleft
 //	botright
+//
+// See: [nvim_parse_cmd()]
+//
+// [nvim_parse_cmd()]: https://neovim.io/doc/user/api.html#nvim_parse_cmd()
 func (v *Nvim) ParseCmd(str string, opts map[string]interface{}) (cmd *Cmd, err error) {
 	var result Cmd
 	err = v.call("nvim_parse_cmd", &result, str, opts)
@@ -958,6 +1194,10 @@ func (v *Nvim) ParseCmd(str string, opts map[string]interface{}) (cmd *Cmd, err 
 //	belowright
 //	topleft
 //	botright
+//
+// See: [nvim_parse_cmd()]
+//
+// [nvim_parse_cmd()]: https://neovim.io/doc/user/api.html#nvim_parse_cmd()
 func (b *Batch) ParseCmd(str string, opts map[string]interface{}, cmd *Cmd) {
 	b.call("nvim_parse_cmd", cmd, str, opts)
 }
@@ -981,6 +1221,10 @@ func (b *Batch) ParseCmd(str string, opts map[string]interface{}, cmd *Cmd) {
 //	output: (boolean, default false)
 //
 // Whether to return command output.
+//
+// See: [nvim_cmd()]
+//
+// [nvim_cmd()]: https://neovim.io/doc/user/api.html#nvim_cmd()
 func (v *Nvim) Cmd(cmd *Cmd, opts map[string]bool) (output string, err error) {
 	err = v.call("nvim_cmd", &output, cmd, opts)
 	return output, err
@@ -1005,6 +1249,10 @@ func (v *Nvim) Cmd(cmd *Cmd, opts map[string]bool) (output string, err error) {
 //	output: (boolean, default false)
 //
 // Whether to return command output.
+//
+// See: [nvim_cmd()]
+//
+// [nvim_cmd()]: https://neovim.io/doc/user/api.html#nvim_cmd()
 func (b *Batch) Cmd(cmd *Cmd, opts map[string]bool, output *string) {
 	b.call("nvim_cmd", output, cmd, opts)
 }
@@ -1029,6 +1277,10 @@ func (b *Batch) Cmd(cmd *Cmd, opts map[string]bool, output *string) {
 //	force (bool, default true)
 //
 // Override any previous definition.
+//
+// See: [nvim_create_user_command()]
+//
+// [nvim_create_user_command()]: https://neovim.io/doc/user/api.html#nvim_create_user_command()
 func (v *Nvim) CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) error {
 	return v.call("nvim_create_user_command", nil, name, command, opts)
 }
@@ -1053,16 +1305,28 @@ func (v *Nvim) CreateUserCommand(name string, command UserCommand, opts map[stri
 //	force (bool, default true)
 //
 // Override any previous definition.
+//
+// See: [nvim_create_user_command()]
+//
+// [nvim_create_user_command()]: https://neovim.io/doc/user/api.html#nvim_create_user_command()
 func (b *Batch) CreateUserCommand(name string, command UserCommand, opts map[string]interface{}) {
 	b.call("nvim_create_user_command", nil, name, command, opts)
 }
 
 // DeleteUserCommand delete a user-defined command.
+//
+// See: [nvim_del_user_command()]
+//
+// [nvim_del_user_command()]: https://neovim.io/doc/user/api.html#nvim_del_user_command()
 func (v *Nvim) DeleteUserCommand(name string) error {
 	return v.call("nvim_del_user_command", nil, name)
 }
 
 // DeleteUserCommand delete a user-defined command.
+//
+// See: [nvim_del_user_command()]
+//
+// [nvim_del_user_command()]: https://neovim.io/doc/user/api.html#nvim_del_user_command()
 func (b *Batch) DeleteUserCommand(name string) {
 	b.call("nvim_del_user_command", nil, name)
 }
@@ -1070,6 +1334,10 @@ func (b *Batch) DeleteUserCommand(name string) {
 // CreateBufferUserCommand create a new user command |user-commands| in the given buffer.
 //
 // Only commands created with |:command-buffer| or this function can be deleted with this function.
+//
+// See: [nvim_buf_create_user_command()]
+//
+// [nvim_buf_create_user_command()]: https://neovim.io/doc/user/api.html#nvim_buf_create_user_command()
 func (v *Nvim) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) error {
 	return v.call("nvim_buf_create_user_command", nil, buffer, name, command, opts)
 }
@@ -1077,6 +1345,10 @@ func (v *Nvim) CreateBufferUserCommand(buffer Buffer, name string, command UserC
 // CreateBufferUserCommand create a new user command |user-commands| in the given buffer.
 //
 // Only commands created with |:command-buffer| or this function can be deleted with this function.
+//
+// See: [nvim_buf_create_user_command()]
+//
+// [nvim_buf_create_user_command()]: https://neovim.io/doc/user/api.html#nvim_buf_create_user_command()
 func (b *Batch) CreateBufferUserCommand(buffer Buffer, name string, command UserCommand, opts map[string]interface{}) {
 	b.call("nvim_buf_create_user_command", nil, buffer, name, command, opts)
 }
@@ -1084,6 +1356,10 @@ func (b *Batch) CreateBufferUserCommand(buffer Buffer, name string, command User
 // DeleteBufferUserCommand create a new user command |user-commands| in the given buffer.
 //
 // Only commands created with |:command-buffer| or this function can be deleted with this function.
+//
+// See: [nvim_buf_del_user_command()]
+//
+// [nvim_buf_del_user_command()]: https://neovim.io/doc/user/api.html#nvim_buf_del_user_command()
 func (v *Nvim) DeleteBufferUserCommand(buffer Buffer, name string) error {
 	return v.call("nvim_buf_del_user_command", nil, buffer, name)
 }
@@ -1091,6 +1367,10 @@ func (v *Nvim) DeleteBufferUserCommand(buffer Buffer, name string) error {
 // DeleteBufferUserCommand create a new user command |user-commands| in the given buffer.
 //
 // Only commands created with |:command-buffer| or this function can be deleted with this function.
+//
+// See: [nvim_buf_del_user_command()]
+//
+// [nvim_buf_del_user_command()]: https://neovim.io/doc/user/api.html#nvim_buf_del_user_command()
 func (b *Batch) DeleteBufferUserCommand(buffer Buffer, name string) {
 	b.call("nvim_buf_del_user_command", nil, buffer, name)
 }
@@ -1101,6 +1381,10 @@ func (b *Batch) DeleteBufferUserCommand(buffer Buffer, name string) {
 // opts is optional parameters. Currently only supports:
 //
 //	{"builtin":false}
+//
+// See: [nvim_get_commands()]
+//
+// [nvim_get_commands()]: https://neovim.io/doc/user/api.html#nvim_get_commands()
 func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Command, err error) {
 	err = v.call("nvim_get_commands", &commands, opts)
 	return commands, err
@@ -1112,6 +1396,10 @@ func (v *Nvim) Commands(opts map[string]interface{}) (commands map[string]*Comma
 // opts is optional parameters. Currently only supports:
 //
 //	{"builtin":false}
+//
+// See: [nvim_get_commands()]
+//
+// [nvim_get_commands()]: https://neovim.io/doc/user/api.html#nvim_get_commands()
 func (b *Batch) Commands(opts map[string]interface{}, commands *map[string]*Command) {
 	b.call("nvim_get_commands", commands, opts)
 }
@@ -1119,6 +1407,10 @@ func (b *Batch) Commands(opts map[string]interface{}, commands *map[string]*Comm
 // BufferCommands gets a map of buffer-local user-commands.
 //
 // opts is optional parameters. Currently not used.
+//
+// See: [nvim_buf_get_commands()]
+//
+// [nvim_buf_get_commands()]: https://neovim.io/doc/user/api.html#nvim_buf_get_commands()
 func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[string]*Command, error) {
 	var result map[string]*Command
 	err := v.call("nvim_buf_get_commands", &result, buffer, opts)
@@ -1128,52 +1420,92 @@ func (v *Nvim) BufferCommands(buffer Buffer, opts map[string]interface{}) (map[s
 // BufferCommands gets a map of buffer-local user-commands.
 //
 // opts is optional parameters. Currently not used.
+//
+// See: [nvim_buf_get_commands()]
+//
+// [nvim_buf_get_commands()]: https://neovim.io/doc/user/api.html#nvim_buf_get_commands()
 func (b *Batch) BufferCommands(buffer Buffer, opts map[string]interface{}, result *map[string]*Command) {
 	b.call("nvim_buf_get_commands", result, buffer, opts)
 }
 
 // TabpageWindows gets the windows in a tabpage.
+//
+// See: [nvim_tabpage_list_wins()]
+//
+// [nvim_tabpage_list_wins()]: https://neovim.io/doc/user/api.html#nvim_tabpage_list_wins()
 func (v *Nvim) TabpageWindows(tabpage Tabpage) (windows []Window, err error) {
 	err = v.call("nvim_tabpage_list_wins", &windows, tabpage)
 	return windows, err
 }
 
 // TabpageWindows gets the windows in a tabpage.
+//
+// See: [nvim_tabpage_list_wins()]
+//
+// [nvim_tabpage_list_wins()]: https://neovim.io/doc/user/api.html#nvim_tabpage_list_wins()
 func (b *Batch) TabpageWindows(tabpage Tabpage, windows *[]Window) {
 	b.call("nvim_tabpage_list_wins", windows, tabpage)
 }
 
 // TabpageVar gets a tab-scoped (t:) variable.
+//
+// See: [nvim_tabpage_get_var()]
+//
+// [nvim_tabpage_get_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_get_var()
 func (v *Nvim) TabpageVar(tabpage Tabpage, name string, result interface{}) error {
 	return v.call("nvim_tabpage_get_var", result, tabpage, name)
 }
 
 // TabpageVar gets a tab-scoped (t:) variable.
+//
+// See: [nvim_tabpage_get_var()]
+//
+// [nvim_tabpage_get_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_get_var()
 func (b *Batch) TabpageVar(tabpage Tabpage, name string, result interface{}) {
 	b.call("nvim_tabpage_get_var", &result, tabpage, name)
 }
 
 // SetTabpageVar sets a tab-scoped (t:) variable.
+//
+// See: [nvim_tabpage_set_var()]
+//
+// [nvim_tabpage_set_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_set_var()
 func (v *Nvim) SetTabpageVar(tabpage Tabpage, name string, value interface{}) error {
 	return v.call("nvim_tabpage_set_var", nil, tabpage, name, value)
 }
 
 // SetTabpageVar sets a tab-scoped (t:) variable.
+//
+// See: [nvim_tabpage_set_var()]
+//
+// [nvim_tabpage_set_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_set_var()
 func (b *Batch) SetTabpageVar(tabpage Tabpage, name string, value interface{}) {
 	b.call("nvim_tabpage_set_var", nil, tabpage, name, value)
 }
 
 // DeleteTabpageVar removes a tab-scoped (t:) variable.
+//
+// See: [nvim_tabpage_del_var()]
+//
+// [nvim_tabpage_del_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_del_var()
 func (v *Nvim) DeleteTabpageVar(tabpage Tabpage, name string) error {
 	return v.call("nvim_tabpage_del_var", nil, tabpage, name)
 }
 
 // DeleteTabpageVar removes a tab-scoped (t:) variable.
+//
+// See: [nvim_tabpage_del_var()]
+//
+// [nvim_tabpage_del_var()]: https://neovim.io/doc/user/api.html#nvim_tabpage_del_var()
 func (b *Batch) DeleteTabpageVar(tabpage Tabpage, name string) {
 	b.call("nvim_tabpage_del_var", nil, tabpage, name)
 }
 
 // TabpageWindow gets the current window in a tabpage.
+//
+// See: [nvim_tabpage_get_win()]
+//
+// [nvim_tabpage_get_win()]: https://neovim.io/doc/user/api.html#nvim_tabpage_get_win()
 func (v *Nvim) TabpageWindow(tabpage Tabpage) (Window, error) {
 	var result Window
 	err := v.call("nvim_tabpage_get_win", &result, tabpage)
@@ -1181,28 +1513,48 @@ func (v *Nvim) TabpageWindow(tabpage Tabpage) (Window, error) {
 }
 
 // TabpageWindow gets the current window in a tabpage.
+//
+// See: [nvim_tabpage_get_win()]
+//
+// [nvim_tabpage_get_win()]: https://neovim.io/doc/user/api.html#nvim_tabpage_get_win()
 func (b *Batch) TabpageWindow(tabpage Tabpage, result *Window) {
 	b.call("nvim_tabpage_get_win", result, tabpage)
 }
 
 // TabpageNumber gets the tabpage number.
+//
+// See: [nvim_tabpage_get_number()]
+//
+// [nvim_tabpage_get_number()]: https://neovim.io/doc/user/api.html#nvim_tabpage_get_number()
 func (v *Nvim) TabpageNumber(tabpage Tabpage) (number int, err error) {
 	err = v.call("nvim_tabpage_get_number", &number, tabpage)
 	return number, err
 }
 
 // TabpageNumber gets the tabpage number.
+//
+// See: [nvim_tabpage_get_number()]
+//
+// [nvim_tabpage_get_number()]: https://neovim.io/doc/user/api.html#nvim_tabpage_get_number()
 func (b *Batch) TabpageNumber(tabpage Tabpage, number *int) {
 	b.call("nvim_tabpage_get_number", number, tabpage)
 }
 
 // IsTabpageValid checks if a tabpage is valid.
+//
+// See: [nvim_tabpage_is_valid()]
+//
+// [nvim_tabpage_is_valid()]: https://neovim.io/doc/user/api.html#nvim_tabpage_is_valid()
 func (v *Nvim) IsTabpageValid(tabpage Tabpage) (valid bool, err error) {
 	err = v.call("nvim_tabpage_is_valid", &valid, tabpage)
 	return valid, err
 }
 
 // IsTabpageValid checks if a tabpage is valid.
+//
+// See: [nvim_tabpage_is_valid()]
+//
+// [nvim_tabpage_is_valid()]: https://neovim.io/doc/user/api.html#nvim_tabpage_is_valid()
 func (b *Batch) IsTabpageValid(tabpage Tabpage, valid *bool) {
 	b.call("nvim_tabpage_is_valid", valid, tabpage)
 }
@@ -1217,6 +1569,10 @@ func (b *Batch) IsTabpageValid(tabpage Tabpage, valid *bool) {
 // namespace is created.
 //
 // The returns the namespace ID.
+//
+// See: [nvim_create_namespace()]
+//
+// [nvim_create_namespace()]: https://neovim.io/doc/user/api.html#nvim_create_namespace()
 func (v *Nvim) CreateNamespace(name string) (nsID int, err error) {
 	err = v.call("nvim_create_namespace", &nsID, name)
 	return nsID, err
@@ -1232,6 +1588,10 @@ func (v *Nvim) CreateNamespace(name string) (nsID int, err error) {
 // namespace is created.
 //
 // The returns the namespace ID.
+//
+// See: [nvim_create_namespace()]
+//
+// [nvim_create_namespace()]: https://neovim.io/doc/user/api.html#nvim_create_namespace()
 func (b *Batch) CreateNamespace(name string, nsID *int) {
 	b.call("nvim_create_namespace", nsID, name)
 }
@@ -1243,6 +1603,10 @@ func (b *Batch) CreateNamespace(name string, nsID *int) {
 //	details
 //
 // Whether to include the details dict. bool type.
+//
+// See: [nvim_buf_get_extmark_by_id()]
+//
+// [nvim_buf_get_extmark_by_id()]: https://neovim.io/doc/user/api.html#nvim_buf_get_extmark_by_id()
 func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}) (pos []int, err error) {
 	err = v.call("nvim_buf_get_extmark_by_id", &pos, buffer, nsID, id, opt)
 	return pos, err
@@ -1255,6 +1619,10 @@ func (v *Nvim) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string
 //	details
 //
 // Whether to include the details dict. bool type.
+//
+// See: [nvim_buf_get_extmark_by_id()]
+//
+// [nvim_buf_get_extmark_by_id()]: https://neovim.io/doc/user/api.html#nvim_buf_get_extmark_by_id()
 func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[string]interface{}, pos *[]int) {
 	b.call("nvim_buf_get_extmark_by_id", pos, buffer, nsID, id, opt)
 }
@@ -1284,6 +1652,10 @@ func (b *Batch) BufferExtmarkByID(buffer Buffer, nsID int, id int, opt map[strin
 //	details
 //
 // Whether to include the details dict. bool type.
+//
+// See: [nvim_buf_get_extmarks()]
+//
+// [nvim_buf_get_extmarks()]: https://neovim.io/doc/user/api.html#nvim_buf_get_extmarks()
 func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}) (marks []ExtMark, err error) {
 	err = v.call("nvim_buf_get_extmarks", &marks, buffer, nsID, start, end, opt)
 	return marks, err
@@ -1314,6 +1686,10 @@ func (v *Nvim) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end in
 //	details
 //
 // Whether to include the details dict. bool type.
+//
+// See: [nvim_buf_get_extmarks()]
+//
+// [nvim_buf_get_extmarks()]: https://neovim.io/doc/user/api.html#nvim_buf_get_extmarks()
 func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end interface{}, opt map[string]interface{}, marks *[]ExtMark) {
 	b.call("nvim_buf_get_extmarks", marks, buffer, nsID, start, end, opt)
 }
@@ -1414,6 +1790,10 @@ func (b *Batch) BufferExtmarks(buffer Buffer, nsID int, start interface{}, end i
 //	priority
 //
 // A priority value for the highlight group. For example treesitter highlighting uses a value of 100.
+//
+// See: [nvim_buf_set_extmark()]
+//
+// [nvim_buf_set_extmark()]: https://neovim.io/doc/user/api.html#nvim_buf_set_extmark()
 func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}) (id int, err error) {
 	err = v.call("nvim_buf_set_extmark", &id, buffer, nsID, line, col, opts)
 	return id, err
@@ -1515,6 +1895,10 @@ func (v *Nvim) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts
 //	priority
 //
 // A priority value for the highlight group. For example treesitter highlighting uses a value of 100.
+//
+// See: [nvim_buf_set_extmark()]
+//
+// [nvim_buf_set_extmark()]: https://neovim.io/doc/user/api.html#nvim_buf_set_extmark()
 func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opts map[string]interface{}, id *int) {
 	b.call("nvim_buf_set_extmark", id, buffer, nsID, line, col, opts)
 }
@@ -1522,6 +1906,10 @@ func (b *Batch) SetBufferExtmark(buffer Buffer, nsID int, line int, col int, opt
 // DeleteBufferExtmark removes an extmark.
 //
 // THe returns whether the extmark was found.
+//
+// See: [nvim_buf_del_extmark()]
+//
+// [nvim_buf_del_extmark()]: https://neovim.io/doc/user/api.html#nvim_buf_del_extmark()
 func (v *Nvim) DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int) (deleted bool, err error) {
 	err = v.call("nvim_buf_del_extmark", &deleted, buffer, nsID, extmarkID)
 	return deleted, err
@@ -1530,6 +1918,10 @@ func (v *Nvim) DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int) (dele
 // DeleteBufferExtmark removes an extmark.
 //
 // THe returns whether the extmark was found.
+//
+// See: [nvim_buf_del_extmark()]
+//
+// [nvim_buf_del_extmark()]: https://neovim.io/doc/user/api.html#nvim_buf_del_extmark()
 func (b *Batch) DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int, deleted *bool) {
 	b.call("nvim_buf_del_extmark", deleted, buffer, nsID, extmarkID)
 }
@@ -1553,6 +1945,10 @@ func (b *Batch) DeleteBufferExtmark(buffer Buffer, nsID int, extmarkID int, dele
 //
 // If hlGroup arg is the empty string, no highlight is added, but a new `nsID` is still returned.
 // This is supported for backwards compatibility, new code should use CreateNamespaceto create a new empty namespace.
+//
+// See: [nvim_buf_add_highlight()]
+//
+// [nvim_buf_add_highlight()]: https://neovim.io/doc/user/api.html#nvim_buf_add_highlight()
 func (v *Nvim) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, startCol int, endCol int) (id int, err error) {
 	err = v.call("nvim_buf_add_highlight", &id, buffer, srcID, hlGroup, line, startCol, endCol)
 	return id, err
@@ -1577,6 +1973,10 @@ func (v *Nvim) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line
 //
 // If hlGroup arg is the empty string, no highlight is added, but a new `nsID` is still returned.
 // This is supported for backwards compatibility, new code should use CreateNamespaceto create a new empty namespace.
+//
+// See: [nvim_buf_add_highlight()]
+//
+// [nvim_buf_add_highlight()]: https://neovim.io/doc/user/api.html#nvim_buf_add_highlight()
 func (b *Batch) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, line int, startCol int, endCol int, id *int) {
 	b.call("nvim_buf_add_highlight", id, buffer, srcID, hlGroup, line, startCol, endCol)
 }
@@ -1585,6 +1985,10 @@ func (b *Batch) AddBufferHighlight(buffer Buffer, srcID int, hlGroup string, lin
 // Lines are 0-indexed.
 //
 // To clear the namespace in the entire buffer, specify line_start=0 and line_end=-1.
+//
+// See: [nvim_buf_clear_namespace()]
+//
+// [nvim_buf_clear_namespace()]: https://neovim.io/doc/user/api.html#nvim_buf_clear_namespace()
 func (v *Nvim) ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lineEnd int) error {
 	return v.call("nvim_buf_clear_namespace", nil, buffer, nsID, lineStart, lineEnd)
 }
@@ -1593,6 +1997,10 @@ func (v *Nvim) ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, line
 // Lines are 0-indexed.
 //
 // To clear the namespace in the entire buffer, specify line_start=0 and line_end=-1.
+//
+// See: [nvim_buf_clear_namespace()]
+//
+// [nvim_buf_clear_namespace()]: https://neovim.io/doc/user/api.html#nvim_buf_clear_namespace()
 func (b *Batch) ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lineEnd int) {
 	b.call("nvim_buf_clear_namespace", nil, buffer, nsID, lineStart, lineEnd)
 }
@@ -1612,6 +2020,10 @@ func (b *Batch) ClearBufferNamespace(buffer Buffer, nsID int, lineStart int, lin
 //	scope
 //
 // Analogous to |:setglobal| and |:setlocal|, respectively.
+//
+// See: [nvim_get_option_value()]
+//
+// [nvim_get_option_value()]: https://neovim.io/doc/user/api.html#nvim_get_option_value()
 func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result interface{}) error {
 	return v.call("nvim_get_option_value", result, name, opts)
 }
@@ -1631,6 +2043,10 @@ func (v *Nvim) OptionValue(name string, opts map[string]OptionValueScope, result
 //	scope
 //
 // Analogous to |:setglobal| and |:setlocal|, respectively.
+//
+// See: [nvim_get_option_value()]
+//
+// [nvim_get_option_value()]: https://neovim.io/doc/user/api.html#nvim_get_option_value()
 func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, result interface{}) {
 	b.call("nvim_get_option_value", &result, name, opts)
 }
@@ -1645,6 +2061,10 @@ func (b *Batch) OptionValue(name string, opts map[string]OptionValueScope, resul
 //	scope
 //
 // Analogous to |:setglobal| and |:setlocal|, respectively.
+//
+// See: [nvim_set_option_value()]
+//
+// [nvim_set_option_value()]: https://neovim.io/doc/user/api.html#nvim_set_option_value()
 func (v *Nvim) SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) error {
 	return v.call("nvim_set_option_value", nil, name, value, opts)
 }
@@ -1659,6 +2079,10 @@ func (v *Nvim) SetOptionValue(name string, value interface{}, opts map[string]Op
 //	scope
 //
 // Analogous to |:setglobal| and |:setlocal|, respectively.
+//
+// See: [nvim_set_option_value()]
+//
+// [nvim_set_option_value()]: https://neovim.io/doc/user/api.html#nvim_set_option_value()
 func (b *Batch) SetOptionValue(name string, value interface{}, opts map[string]OptionValueScope) {
 	b.call("nvim_set_option_value", nil, name, value, opts)
 }
@@ -1717,6 +2141,10 @@ func (b *Batch) SetOptionValue(name string, value interface{}, opts map[string]O
 //	flaglist
 //
 // List of single char flags.
+//
+// See: [nvim_get_all_options_info()]
+//
+// [nvim_get_all_options_info()]: https://neovim.io/doc/user/api.html#nvim_get_all_options_info()
 func (v *Nvim) AllOptionsInfo() (opinfo *OptionInfo, err error) {
 	var result OptionInfo
 	err = v.call("nvim_get_all_options_info", &result)
@@ -1777,6 +2205,10 @@ func (v *Nvim) AllOptionsInfo() (opinfo *OptionInfo, err error) {
 //	flaglist
 //
 // List of single char flags.
+//
+// See: [nvim_get_all_options_info()]
+//
+// [nvim_get_all_options_info()]: https://neovim.io/doc/user/api.html#nvim_get_all_options_info()
 func (b *Batch) AllOptionsInfo(opinfo *OptionInfo) {
 	b.call("nvim_get_all_options_info", opinfo)
 }
@@ -1832,6 +2264,10 @@ func (b *Batch) AllOptionsInfo(opinfo *OptionInfo) {
 //	flaglist
 //
 // List of single char flags.
+//
+// See: [nvim_get_option_info2()]
+//
+// [nvim_get_option_info2()]: https://neovim.io/doc/user/api.html#nvim_get_option_info2()
 func (v *Nvim) OptionInfo(name string, opts map[string]interface{}) (opinfo *OptionInfo, err error) {
 	var result OptionInfo
 	err = v.call("nvim_get_option_info2", &result, name, opts)
@@ -1889,36 +2325,64 @@ func (v *Nvim) OptionInfo(name string, opts map[string]interface{}) (opinfo *Opt
 //	flaglist
 //
 // List of single char flags.
+//
+// See: [nvim_get_option_info2()]
+//
+// [nvim_get_option_info2()]: https://neovim.io/doc/user/api.html#nvim_get_option_info2()
 func (b *Batch) OptionInfo(name string, opts map[string]interface{}, opinfo *OptionInfo) {
 	b.call("nvim_get_option_info2", opinfo, name, opts)
 }
 
 // SetOption sets an option value.
+//
+// See: [nvim_set_option()]
+//
+// [nvim_set_option()]: https://neovim.io/doc/user/api.html#nvim_set_option()
 func (v *Nvim) SetOption(name string, value interface{}) error {
 	return v.call("nvim_set_option", nil, name, value)
 }
 
 // SetOption sets an option value.
+//
+// See: [nvim_set_option()]
+//
+// [nvim_set_option()]: https://neovim.io/doc/user/api.html#nvim_set_option()
 func (b *Batch) SetOption(name string, value interface{}) {
 	b.call("nvim_set_option", nil, name, value)
 }
 
 // Option gets an option value string.
+//
+// See: [nvim_get_option()]
+//
+// [nvim_get_option()]: https://neovim.io/doc/user/api.html#nvim_get_option()
 func (v *Nvim) Option(name string, result interface{}) error {
 	return v.call("nvim_get_option", result, name)
 }
 
 // Option gets an option value string.
+//
+// See: [nvim_get_option()]
+//
+// [nvim_get_option()]: https://neovim.io/doc/user/api.html#nvim_get_option()
 func (b *Batch) Option(name string, result interface{}) {
 	b.call("nvim_get_option", &result, name)
 }
 
 // BufferOption gets a buffer option value.
+//
+// See: [nvim_buf_get_option()]
+//
+// [nvim_buf_get_option()]: https://neovim.io/doc/user/api.html#nvim_buf_get_option()
 func (v *Nvim) BufferOption(buffer Buffer, name string, result interface{}) error {
 	return v.call("nvim_buf_get_option", result, buffer, name)
 }
 
 // BufferOption gets a buffer option value.
+//
+// See: [nvim_buf_get_option()]
+//
+// [nvim_buf_get_option()]: https://neovim.io/doc/user/api.html#nvim_buf_get_option()
 func (b *Batch) BufferOption(buffer Buffer, name string, result interface{}) {
 	b.call("nvim_buf_get_option", &result, buffer, name)
 }
@@ -1926,6 +2390,10 @@ func (b *Batch) BufferOption(buffer Buffer, name string, result interface{}) {
 // SetBufferOption sets a buffer option value.
 //
 // Passing nil as value arg to deletes the option (only works if there's a global fallback).
+//
+// See: [nvim_buf_set_option()]
+//
+// [nvim_buf_set_option()]: https://neovim.io/doc/user/api.html#nvim_buf_set_option()
 func (v *Nvim) SetBufferOption(buffer Buffer, name string, value interface{}) error {
 	return v.call("nvim_buf_set_option", nil, buffer, name, value)
 }
@@ -1933,26 +2401,46 @@ func (v *Nvim) SetBufferOption(buffer Buffer, name string, value interface{}) er
 // SetBufferOption sets a buffer option value.
 //
 // Passing nil as value arg to deletes the option (only works if there's a global fallback).
+//
+// See: [nvim_buf_set_option()]
+//
+// [nvim_buf_set_option()]: https://neovim.io/doc/user/api.html#nvim_buf_set_option()
 func (b *Batch) SetBufferOption(buffer Buffer, name string, value interface{}) {
 	b.call("nvim_buf_set_option", nil, buffer, name, value)
 }
 
 // WindowOption gets a window option value.
+//
+// See: [nvim_win_get_option()]
+//
+// [nvim_win_get_option()]: https://neovim.io/doc/user/api.html#nvim_win_get_option()
 func (v *Nvim) WindowOption(window Window, name string, result interface{}) error {
 	return v.call("nvim_win_get_option", result, window, name)
 }
 
 // WindowOption gets a window option value.
+//
+// See: [nvim_win_get_option()]
+//
+// [nvim_win_get_option()]: https://neovim.io/doc/user/api.html#nvim_win_get_option()
 func (b *Batch) WindowOption(window Window, name string, result interface{}) {
 	b.call("nvim_win_get_option", &result, window, name)
 }
 
 // SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
+//
+// See: [nvim_win_set_option()]
+//
+// [nvim_win_set_option()]: https://neovim.io/doc/user/api.html#nvim_win_set_option()
 func (v *Nvim) SetWindowOption(window Window, name string, value interface{}) error {
 	return v.call("nvim_win_set_option", nil, window, name, value)
 }
 
 // SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
+//
+// See: [nvim_win_set_option()]
+//
+// [nvim_win_set_option()]: https://neovim.io/doc/user/api.html#nvim_win_set_option()
 func (b *Batch) SetWindowOption(window Window, name string, value interface{}) {
 	b.call("nvim_win_set_option", nil, window, name, value)
 }
@@ -1970,6 +2458,10 @@ func (b *Batch) SetWindowOption(window Window, name string, value interface{}) {
 //	        // handle update
 //	    }
 //	})
+//
+// See: [nvim_ui_attach()]
+//
+// [nvim_ui_attach()]: https://neovim.io/doc/user/api.html#nvim_ui_attach()
 func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) error {
 	return v.call("nvim_ui_attach", nil, width, height, options)
 }
@@ -1987,48 +2479,84 @@ func (v *Nvim) AttachUI(width int, height int, options map[string]interface{}) e
 //	        // handle update
 //	    }
 //	})
+//
+// See: [nvim_ui_attach()]
+//
+// [nvim_ui_attach()]: https://neovim.io/doc/user/api.html#nvim_ui_attach()
 func (b *Batch) AttachUI(width int, height int, options map[string]interface{}) {
 	b.call("nvim_ui_attach", nil, width, height, options)
 }
 
 // SetFocusUI tells the nvim server if focus was gained or lost by the GUI.
+//
+// See: [nvim_ui_set_focus()]
+//
+// [nvim_ui_set_focus()]: https://neovim.io/doc/user/api.html#nvim_ui_set_focus()
 func (v *Nvim) SetFocusUI(gained bool) error {
 	return v.call("nvim_ui_set_focus", nil, gained)
 }
 
 // SetFocusUI tells the nvim server if focus was gained or lost by the GUI.
+//
+// See: [nvim_ui_set_focus()]
+//
+// [nvim_ui_set_focus()]: https://neovim.io/doc/user/api.html#nvim_ui_set_focus()
 func (b *Batch) SetFocusUI(gained bool) {
 	b.call("nvim_ui_set_focus", nil, gained)
 }
 
 // DetachUI unregisters the client as a remote UI.
+//
+// See: [nvim_ui_detach()]
+//
+// [nvim_ui_detach()]: https://neovim.io/doc/user/api.html#nvim_ui_detach()
 func (v *Nvim) DetachUI() error {
 	return v.call("nvim_ui_detach", nil)
 }
 
 // DetachUI unregisters the client as a remote UI.
+//
+// See: [nvim_ui_detach()]
+//
+// [nvim_ui_detach()]: https://neovim.io/doc/user/api.html#nvim_ui_detach()
 func (b *Batch) DetachUI() {
 	b.call("nvim_ui_detach", nil)
 }
 
 // TryResizeUI notifies Nvim that the client window has resized. If possible,
 // Nvim will send a redraw request to resize.
+//
+// See: [nvim_ui_try_resize()]
+//
+// [nvim_ui_try_resize()]: https://neovim.io/doc/user/api.html#nvim_ui_try_resize()
 func (v *Nvim) TryResizeUI(width int, height int) error {
 	return v.call("nvim_ui_try_resize", nil, width, height)
 }
 
 // TryResizeUI notifies Nvim that the client window has resized. If possible,
 // Nvim will send a redraw request to resize.
+//
+// See: [nvim_ui_try_resize()]
+//
+// [nvim_ui_try_resize()]: https://neovim.io/doc/user/api.html#nvim_ui_try_resize()
 func (b *Batch) TryResizeUI(width int, height int) {
 	b.call("nvim_ui_try_resize", nil, width, height)
 }
 
 // SetUIOption sets a UI option.
+//
+// See: [nvim_ui_set_option()]
+//
+// [nvim_ui_set_option()]: https://neovim.io/doc/user/api.html#nvim_ui_set_option()
 func (v *Nvim) SetUIOption(name string, value interface{}) error {
 	return v.call("nvim_ui_set_option", nil, name, value)
 }
 
 // SetUIOption sets a UI option.
+//
+// See: [nvim_ui_set_option()]
+//
+// [nvim_ui_set_option()]: https://neovim.io/doc/user/api.html#nvim_ui_set_option()
 func (b *Batch) SetUIOption(name string, value interface{}) {
 	b.call("nvim_ui_set_option", nil, name, value)
 }
@@ -2037,6 +2565,10 @@ func (b *Batch) SetUIOption(name string, value interface{}) {
 // grid size or the maximum size if it exceeds size limits.
 //
 // On invalid grid handle, fails with error.
+//
+// See: [nvim_ui_try_resize_grid()]
+//
+// [nvim_ui_try_resize_grid()]: https://neovim.io/doc/user/api.html#nvim_ui_try_resize_grid()
 func (v *Nvim) TryResizeUIGrid(grid int, width int, height int) error {
 	return v.call("nvim_ui_try_resize_grid", nil, grid, width, height)
 }
@@ -2045,6 +2577,10 @@ func (v *Nvim) TryResizeUIGrid(grid int, width int, height int) error {
 // grid size or the maximum size if it exceeds size limits.
 //
 // On invalid grid handle, fails with error.
+//
+// See: [nvim_ui_try_resize_grid()]
+//
+// [nvim_ui_try_resize_grid()]: https://neovim.io/doc/user/api.html#nvim_ui_try_resize_grid()
 func (b *Batch) TryResizeUIGrid(grid int, width int, height int) {
 	b.call("nvim_ui_try_resize_grid", nil, grid, width, height)
 }
@@ -2053,6 +2589,10 @@ func (b *Batch) TryResizeUIGrid(grid int, width int, height int) {
 // <PageUp> and <PageDown> movement.
 //
 // height is popupmenu height, must be greater than zero.
+//
+// See: [nvim_ui_pum_set_height()]
+//
+// [nvim_ui_pum_set_height()]: https://neovim.io/doc/user/api.html#nvim_ui_pum_set_height()
 func (v *Nvim) SetPumHeight(height int) error {
 	return v.call("nvim_ui_pum_set_height", nil, height)
 }
@@ -2061,6 +2601,10 @@ func (v *Nvim) SetPumHeight(height int) error {
 // <PageUp> and <PageDown> movement.
 //
 // height is popupmenu height, must be greater than zero.
+//
+// See: [nvim_ui_pum_set_height()]
+//
+// [nvim_ui_pum_set_height()]: https://neovim.io/doc/user/api.html#nvim_ui_pum_set_height()
 func (b *Batch) SetPumHeight(height int) {
 	b.call("nvim_ui_pum_set_height", nil, height)
 }
@@ -2075,6 +2619,10 @@ func (b *Batch) SetPumHeight(height int) {
 //
 // Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
 // numbers to the popup menu geometry.
+//
+// See: [nvim_ui_pum_set_bounds()]
+//
+// [nvim_ui_pum_set_bounds()]: https://neovim.io/doc/user/api.html#nvim_ui_pum_set_bounds()
 func (v *Nvim) SetPumBounds(width float64, height float64, row float64, col float64) error {
 	return v.call("nvim_ui_pum_set_bounds", nil, width, height, row, col)
 }
@@ -2089,6 +2637,10 @@ func (v *Nvim) SetPumBounds(width float64, height float64, row float64, col floa
 //
 // Floats need not use the same font size, nor be anchored to exact grid corners, so one can set floating-point
 // numbers to the popup menu geometry.
+//
+// See: [nvim_ui_pum_set_bounds()]
+//
+// [nvim_ui_pum_set_bounds()]: https://neovim.io/doc/user/api.html#nvim_ui_pum_set_bounds()
 func (b *Batch) SetPumBounds(width float64, height float64, row float64, col float64) {
 	b.call("nvim_ui_pum_set_bounds", nil, width, height, row, col)
 }
@@ -2098,6 +2650,10 @@ func (b *Batch) SetPumBounds(width float64, height float64, row float64, col flo
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
+//
+// See: [nvim_exec2()]
+//
+// [nvim_exec2()]: https://neovim.io/doc/user/api.html#nvim_exec2()
 func (v *Nvim) Exec(src string, opts map[string]interface{}) (out map[string]interface{}, err error) {
 	err = v.call("nvim_exec2", &out, src, opts)
 	return out, err
@@ -2108,6 +2664,10 @@ func (v *Nvim) Exec(src string, opts map[string]interface{}) (out map[string]int
 // Unlike Command, this function supports heredocs, script-scope (s:), etc.
 //
 // When fails with VimL error, does not update "v:errmsg".
+//
+// See: [nvim_exec2()]
+//
+// [nvim_exec2()]: https://neovim.io/doc/user/api.html#nvim_exec2()
 func (b *Batch) Exec(src string, opts map[string]interface{}, out *map[string]interface{}) {
 	b.call("nvim_exec2", out, src, opts)
 }
@@ -2115,6 +2675,10 @@ func (b *Batch) Exec(src string, opts map[string]interface{}, out *map[string]in
 // Command executes an ex-command.
 //
 // When fails with VimL error, does not update "v:errmsg".
+//
+// See: [nvim_command()]
+//
+// [nvim_command()]: https://neovim.io/doc/user/api.html#nvim_command()
 func (v *Nvim) Command(cmd string) error {
 	return v.call("nvim_command", nil, cmd)
 }
@@ -2122,17 +2686,29 @@ func (v *Nvim) Command(cmd string) error {
 // Command executes an ex-command.
 //
 // When fails with VimL error, does not update "v:errmsg".
+//
+// See: [nvim_command()]
+//
+// [nvim_command()]: https://neovim.io/doc/user/api.html#nvim_command()
 func (b *Batch) Command(cmd string) {
 	b.call("nvim_command", nil, cmd)
 }
 
 // ParseExpression parse a VimL expression.
+//
+// See: [nvim_parse_expression()]
+//
+// [nvim_parse_expression()]: https://neovim.io/doc/user/api.html#nvim_parse_expression()
 func (v *Nvim) ParseExpression(expr string, flags string, highlight bool) (expression map[string]interface{}, err error) {
 	err = v.call("nvim_parse_expression", &expression, expr, flags, highlight)
 	return expression, err
 }
 
 // ParseExpression parse a VimL expression.
+//
+// See: [nvim_parse_expression()]
+//
+// [nvim_parse_expression()]: https://neovim.io/doc/user/api.html#nvim_parse_expression()
 func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expression *map[string]interface{}) {
 	b.call("nvim_parse_expression", expression, expr, flags, highlight)
 }
@@ -2156,6 +2732,10 @@ func (b *Batch) ParseExpression(expr string, flags string, highlight bool, expre
 // Show linked group name instead of effective definition.
 //
 // The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+//
+// See: [nvim_get_hl()]
+//
+// [nvim_get_hl()]: https://neovim.io/doc/user/api.html#nvim_get_hl()
 func (v *Nvim) HL(nsID int, opts map[string]interface{}) (highlight *HLAttrs, err error) {
 	var result HLAttrs
 	err = v.call("nvim_get_hl", &result, nsID, opts)
@@ -2181,6 +2761,10 @@ func (v *Nvim) HL(nsID int, opts map[string]interface{}) (highlight *HLAttrs, er
 // Show linked group name instead of effective definition.
 //
 // The returned HLAttrs highlight groups as a map from group name to a highlight definition map as in SetHighlight, or only a single highlight definition map if requested by name or id.
+//
+// See: [nvim_get_hl()]
+//
+// [nvim_get_hl()]: https://neovim.io/doc/user/api.html#nvim_get_hl()
 func (b *Batch) HL(nsID int, opts map[string]interface{}, highlight *HLAttrs) {
 	b.call("nvim_get_hl", highlight, nsID, opts)
 }
@@ -2192,6 +2776,10 @@ func (b *Batch) HL(nsID int, opts map[string]interface{}, highlight *HLAttrs) {
 // The returns hlID is the highlight id.
 //
 // This function similar to HLByID, but allocates a new ID if not present.
+//
+// See: [nvim_get_hl_id_by_name()]
+//
+// [nvim_get_hl_id_by_name()]: https://neovim.io/doc/user/api.html#nvim_get_hl_id_by_name()
 func (v *Nvim) HLIDByName(name string) (hlID int, err error) {
 	err = v.call("nvim_get_hl_id_by_name", &hlID, name)
 	return hlID, err
@@ -2204,6 +2792,10 @@ func (v *Nvim) HLIDByName(name string) (hlID int, err error) {
 // The returns hlID is the highlight id.
 //
 // This function similar to HLByID, but allocates a new ID if not present.
+//
+// See: [nvim_get_hl_id_by_name()]
+//
+// [nvim_get_hl_id_by_name()]: https://neovim.io/doc/user/api.html#nvim_get_hl_id_by_name()
 func (b *Batch) HLIDByName(name string, hlID *int) {
 	b.call("nvim_get_hl_id_by_name", hlID, name)
 }
@@ -2221,6 +2813,10 @@ func (b *Batch) HLIDByName(name string, hlID *int) {
 //	default
 //
 // don't override existing definition, like "hi default".
+//
+// See: [nvim_set_hl()]
+//
+// [nvim_set_hl()]: https://neovim.io/doc/user/api.html#nvim_set_hl()
 func (v *Nvim) SetHighlight(nsID int, name string, val *HLAttrs) error {
 	return v.call("nvim_set_hl", nil, nsID, name, val)
 }
@@ -2238,6 +2834,10 @@ func (v *Nvim) SetHighlight(nsID int, name string, val *HLAttrs) error {
 //	default
 //
 // don't override existing definition, like "hi default".
+//
+// See: [nvim_set_hl()]
+//
+// [nvim_set_hl()]: https://neovim.io/doc/user/api.html#nvim_set_hl()
 func (b *Batch) SetHighlight(nsID int, name string, val *HLAttrs) {
 	b.call("nvim_set_hl", nil, nsID, name, val)
 }
@@ -2245,6 +2845,10 @@ func (b *Batch) SetHighlight(nsID int, name string, val *HLAttrs) {
 // SetHighlightNamespace set active namespace for highlights. This can be set for a single window,
 //
 // See SetWindowHeightNamespace.
+//
+// See: [nvim_set_hl_ns()]
+//
+// [nvim_set_hl_ns()]: https://neovim.io/doc/user/api.html#nvim_set_hl_ns()
 func (v *Nvim) SetHighlightNamespace(nsID int) error {
 	return v.call("nvim_set_hl_ns", nil, nsID)
 }
@@ -2252,6 +2856,10 @@ func (v *Nvim) SetHighlightNamespace(nsID int) error {
 // SetHighlightNamespace set active namespace for highlights. This can be set for a single window,
 //
 // See SetWindowHeightNamespace.
+//
+// See: [nvim_set_hl_ns()]
+//
+// [nvim_set_hl_ns()]: https://neovim.io/doc/user/api.html#nvim_set_hl_ns()
 func (b *Batch) SetHighlightNamespace(nsID int) {
 	b.call("nvim_set_hl_ns", nil, nsID)
 }
@@ -2261,6 +2869,10 @@ func (b *Batch) SetHighlightNamespace(nsID int) {
 // This function meant to be called while redrawing, primarily from
 // nvim_set_decoration_provider on_win and on_line callbacks, which
 // are allowed to change the namespace during a redraw cycle.
+//
+// See: [nvim_set_hl_ns_fast()]
+//
+// [nvim_set_hl_ns_fast()]: https://neovim.io/doc/user/api.html#nvim_set_hl_ns_fast()
 func (v *Nvim) SetFastHighlightNamespace(nsID int) error {
 	return v.call("nvim_set_hl_ns_fast", nil, nsID)
 }
@@ -2270,6 +2882,10 @@ func (v *Nvim) SetFastHighlightNamespace(nsID int) error {
 // This function meant to be called while redrawing, primarily from
 // nvim_set_decoration_provider on_win and on_line callbacks, which
 // are allowed to change the namespace during a redraw cycle.
+//
+// See: [nvim_set_hl_ns_fast()]
+//
+// [nvim_set_hl_ns_fast()]: https://neovim.io/doc/user/api.html#nvim_set_hl_ns_fast()
 func (b *Batch) SetFastHighlightNamespace(nsID int) {
 	b.call("nvim_set_hl_ns_fast", nil, nsID)
 }
@@ -2299,6 +2915,10 @@ func (b *Batch) SetFastHighlightNamespace(nsID int) {
 // This matters for undo, opening folds, etc.
 //
 // escapeCSI is whether the escape K_SPECIAL/CSI bytes in keys.
+//
+// See: [nvim_feedkeys()]
+//
+// [nvim_feedkeys()]: https://neovim.io/doc/user/api.html#nvim_feedkeys()
 func (v *Nvim) FeedKeys(keys string, mode string, escapeCSI bool) error {
 	return v.call("nvim_feedkeys", nil, keys, mode, escapeCSI)
 }
@@ -2328,6 +2948,10 @@ func (v *Nvim) FeedKeys(keys string, mode string, escapeCSI bool) error {
 // This matters for undo, opening folds, etc.
 //
 // escapeCSI is whether the escape K_SPECIAL/CSI bytes in keys.
+//
+// See: [nvim_feedkeys()]
+//
+// [nvim_feedkeys()]: https://neovim.io/doc/user/api.html#nvim_feedkeys()
 func (b *Batch) FeedKeys(keys string, mode string, escapeCSI bool) {
 	b.call("nvim_feedkeys", nil, keys, mode, escapeCSI)
 }
@@ -2347,6 +2971,10 @@ func (b *Batch) FeedKeys(keys string, mode string, escapeCSI bool) {
 //
 // The returned written is number of bytes actually written (can be fewer than
 // requested if the buffer becomes full).
+//
+// See: [nvim_input()]
+//
+// [nvim_input()]: https://neovim.io/doc/user/api.html#nvim_input()
 func (v *Nvim) Input(keys string) (written int, err error) {
 	err = v.call("nvim_input", &written, keys)
 	return written, err
@@ -2367,6 +2995,10 @@ func (v *Nvim) Input(keys string) (written int, err error) {
 //
 // The returned written is number of bytes actually written (can be fewer than
 // requested if the buffer becomes full).
+//
+// See: [nvim_input()]
+//
+// [nvim_input()]: https://neovim.io/doc/user/api.html#nvim_input()
 func (b *Batch) Input(keys string, written *int) {
 	b.call("nvim_input", written, keys)
 }
@@ -2406,6 +3038,10 @@ func (b *Batch) Input(keys string, written *int) {
 // row is mouse row-position (zero-based, like redraw events).
 //
 // col is mouse column-position (zero-based, like redraw events).
+//
+// See: [nvim_input_mouse()]
+//
+// [nvim_input_mouse()]: https://neovim.io/doc/user/api.html#nvim_input_mouse()
 func (v *Nvim) InputMouse(button string, action string, modifier string, grid int, row int, col int) error {
 	return v.call("nvim_input_mouse", nil, button, action, modifier, grid, row, col)
 }
@@ -2445,6 +3081,10 @@ func (v *Nvim) InputMouse(button string, action string, modifier string, grid in
 // row is mouse row-position (zero-based, like redraw events).
 //
 // col is mouse column-position (zero-based, like redraw events).
+//
+// See: [nvim_input_mouse()]
+//
+// [nvim_input_mouse()]: https://neovim.io/doc/user/api.html#nvim_input_mouse()
 func (b *Batch) InputMouse(button string, action string, modifier string, grid int, row int, col int) {
 	b.call("nvim_input_mouse", nil, button, action, modifier, grid, row, col)
 }
@@ -2468,6 +3108,10 @@ func (b *Batch) InputMouse(button string, action string, modifier string, grid i
 //	<up>  -> '\x80ku'
 //
 // The returned sequences can be used as input to feedkeys.
+//
+// See: [nvim_replace_termcodes()]
+//
+// [nvim_replace_termcodes()]: https://neovim.io/doc/user/api.html#nvim_replace_termcodes()
 func (v *Nvim) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool) (input string, err error) {
 	err = v.call("nvim_replace_termcodes", &input, str, fromPart, doLT, special)
 	return input, err
@@ -2492,6 +3136,10 @@ func (v *Nvim) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bo
 //	<up>  -> '\x80ku'
 //
 // The returned sequences can be used as input to feedkeys.
+//
+// See: [nvim_replace_termcodes()]
+//
+// [nvim_replace_termcodes()]: https://neovim.io/doc/user/api.html#nvim_replace_termcodes()
 func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special bool, input *string) {
 	b.call("nvim_replace_termcodes", input, str, fromPart, doLT, special)
 }
@@ -2505,6 +3153,10 @@ func (b *Batch) ReplaceTermcodes(str string, fromPart bool, doLT bool, special b
 // expr is VimL expression string.
 //
 //	:help expression
+//
+// See: [nvim_eval()]
+//
+// [nvim_eval()]: https://neovim.io/doc/user/api.html#nvim_eval()
 func (v *Nvim) Eval(expr string, result interface{}) error {
 	return v.call("nvim_eval", result, expr)
 }
@@ -2518,6 +3170,10 @@ func (v *Nvim) Eval(expr string, result interface{}) error {
 // expr is VimL expression string.
 //
 //	:help expression
+//
+// See: [nvim_eval()]
+//
+// [nvim_eval()]: https://neovim.io/doc/user/api.html#nvim_eval()
 func (b *Batch) Eval(expr string, result interface{}) {
 	b.call("nvim_eval", &result, expr)
 }
@@ -2525,6 +3181,10 @@ func (b *Batch) Eval(expr string, result interface{}) {
 // StringWidth calculates the number of display cells occupied by "text".
 //
 // "<Tab>" counts as one cell.
+//
+// See: [nvim_strwidth()]
+//
+// [nvim_strwidth()]: https://neovim.io/doc/user/api.html#nvim_strwidth()
 func (v *Nvim) StringWidth(s string) (width int, err error) {
 	err = v.call("nvim_strwidth", &width, s)
 	return width, err
@@ -2533,17 +3193,29 @@ func (v *Nvim) StringWidth(s string) (width int, err error) {
 // StringWidth calculates the number of display cells occupied by "text".
 //
 // "<Tab>" counts as one cell.
+//
+// See: [nvim_strwidth()]
+//
+// [nvim_strwidth()]: https://neovim.io/doc/user/api.html#nvim_strwidth()
 func (b *Batch) StringWidth(s string, width *int) {
 	b.call("nvim_strwidth", width, s)
 }
 
 // RuntimePaths gets the paths contained in "runtimepath".
+//
+// See: [nvim_list_runtime_paths()]
+//
+// [nvim_list_runtime_paths()]: https://neovim.io/doc/user/api.html#nvim_list_runtime_paths()
 func (v *Nvim) RuntimePaths() (paths []string, err error) {
 	err = v.call("nvim_list_runtime_paths", &paths)
 	return paths, err
 }
 
 // RuntimePaths gets the paths contained in "runtimepath".
+//
+// See: [nvim_list_runtime_paths()]
+//
+// [nvim_list_runtime_paths()]: https://neovim.io/doc/user/api.html#nvim_list_runtime_paths()
 func (b *Batch) RuntimePaths(paths *[]string) {
 	b.call("nvim_list_runtime_paths", paths)
 }
@@ -2567,6 +3239,10 @@ func (b *Batch) RuntimePaths(paths *[]string) {
 // Without the slash it would instead look for an ordinary file called "rplugin/python".
 //
 // all is whether to return all matches or only the first.
+//
+// See: [nvim_get_runtime_file()]
+//
+// [nvim_get_runtime_file()]: https://neovim.io/doc/user/api.html#nvim_get_runtime_file()
 func (v *Nvim) RuntimeFiles(name string, all bool) (files []string, err error) {
 	err = v.call("nvim_get_runtime_file", &files, name, all)
 	return files, err
@@ -2591,97 +3267,173 @@ func (v *Nvim) RuntimeFiles(name string, all bool) (files []string, err error) {
 // Without the slash it would instead look for an ordinary file called "rplugin/python".
 //
 // all is whether to return all matches or only the first.
+//
+// See: [nvim_get_runtime_file()]
+//
+// [nvim_get_runtime_file()]: https://neovim.io/doc/user/api.html#nvim_get_runtime_file()
 func (b *Batch) RuntimeFiles(name string, all bool, files *[]string) {
 	b.call("nvim_get_runtime_file", files, name, all)
 }
 
 // SetCurrentDirectory changes the global working directory.
+//
+// See: [nvim_set_current_dir()]
+//
+// [nvim_set_current_dir()]: https://neovim.io/doc/user/api.html#nvim_set_current_dir()
 func (v *Nvim) SetCurrentDirectory(dir string) error {
 	return v.call("nvim_set_current_dir", nil, dir)
 }
 
 // SetCurrentDirectory changes the global working directory.
+//
+// See: [nvim_set_current_dir()]
+//
+// [nvim_set_current_dir()]: https://neovim.io/doc/user/api.html#nvim_set_current_dir()
 func (b *Batch) SetCurrentDirectory(dir string) {
 	b.call("nvim_set_current_dir", nil, dir)
 }
 
 // CurrentLine gets the current line.
+//
+// See: [nvim_get_current_line()]
+//
+// [nvim_get_current_line()]: https://neovim.io/doc/user/api.html#nvim_get_current_line()
 func (v *Nvim) CurrentLine() (line []byte, err error) {
 	err = v.call("nvim_get_current_line", &line)
 	return line, err
 }
 
 // CurrentLine gets the current line.
+//
+// See: [nvim_get_current_line()]
+//
+// [nvim_get_current_line()]: https://neovim.io/doc/user/api.html#nvim_get_current_line()
 func (b *Batch) CurrentLine(line *[]byte) {
 	b.call("nvim_get_current_line", line)
 }
 
 // SetCurrentLine sets the current line.
+//
+// See: [nvim_set_current_line()]
+//
+// [nvim_set_current_line()]: https://neovim.io/doc/user/api.html#nvim_set_current_line()
 func (v *Nvim) SetCurrentLine(line []byte) error {
 	return v.call("nvim_set_current_line", nil, line)
 }
 
 // SetCurrentLine sets the current line.
+//
+// See: [nvim_set_current_line()]
+//
+// [nvim_set_current_line()]: https://neovim.io/doc/user/api.html#nvim_set_current_line()
 func (b *Batch) SetCurrentLine(line []byte) {
 	b.call("nvim_set_current_line", nil, line)
 }
 
 // DeleteCurrentLine deletes the current line.
+//
+// See: [nvim_del_current_line()]
+//
+// [nvim_del_current_line()]: https://neovim.io/doc/user/api.html#nvim_del_current_line()
 func (v *Nvim) DeleteCurrentLine() error {
 	return v.call("nvim_del_current_line", nil)
 }
 
 // DeleteCurrentLine deletes the current line.
+//
+// See: [nvim_del_current_line()]
+//
+// [nvim_del_current_line()]: https://neovim.io/doc/user/api.html#nvim_del_current_line()
 func (b *Batch) DeleteCurrentLine() {
 	b.call("nvim_del_current_line", nil)
 }
 
 // Var gets a global (g:) variable.
+//
+// See: [nvim_get_var()]
+//
+// [nvim_get_var()]: https://neovim.io/doc/user/api.html#nvim_get_var()
 func (v *Nvim) Var(name string, result interface{}) error {
 	return v.call("nvim_get_var", result, name)
 }
 
 // Var gets a global (g:) variable.
+//
+// See: [nvim_get_var()]
+//
+// [nvim_get_var()]: https://neovim.io/doc/user/api.html#nvim_get_var()
 func (b *Batch) Var(name string, result interface{}) {
 	b.call("nvim_get_var", &result, name)
 }
 
 // SetVar sets a global (g:) variable.
+//
+// See: [nvim_set_var()]
+//
+// [nvim_set_var()]: https://neovim.io/doc/user/api.html#nvim_set_var()
 func (v *Nvim) SetVar(name string, value interface{}) error {
 	return v.call("nvim_set_var", nil, name, value)
 }
 
 // SetVar sets a global (g:) variable.
+//
+// See: [nvim_set_var()]
+//
+// [nvim_set_var()]: https://neovim.io/doc/user/api.html#nvim_set_var()
 func (b *Batch) SetVar(name string, value interface{}) {
 	b.call("nvim_set_var", nil, name, value)
 }
 
 // DeleteVar removes a global (g:) variable.
+//
+// See: [nvim_del_var()]
+//
+// [nvim_del_var()]: https://neovim.io/doc/user/api.html#nvim_del_var()
 func (v *Nvim) DeleteVar(name string) error {
 	return v.call("nvim_del_var", nil, name)
 }
 
 // DeleteVar removes a global (g:) variable.
+//
+// See: [nvim_del_var()]
+//
+// [nvim_del_var()]: https://neovim.io/doc/user/api.html#nvim_del_var()
 func (b *Batch) DeleteVar(name string) {
 	b.call("nvim_del_var", nil, name)
 }
 
 // VVar gets a v: variable.
+//
+// See: [nvim_get_vvar()]
+//
+// [nvim_get_vvar()]: https://neovim.io/doc/user/api.html#nvim_get_vvar()
 func (v *Nvim) VVar(name string, result interface{}) error {
 	return v.call("nvim_get_vvar", result, name)
 }
 
 // VVar gets a v: variable.
+//
+// See: [nvim_get_vvar()]
+//
+// [nvim_get_vvar()]: https://neovim.io/doc/user/api.html#nvim_get_vvar()
 func (b *Batch) VVar(name string, result interface{}) {
 	b.call("nvim_get_vvar", &result, name)
 }
 
 // SetVVar sets a v: variable, if it is not readonly.
+//
+// See: [nvim_set_vvar()]
+//
+// [nvim_set_vvar()]: https://neovim.io/doc/user/api.html#nvim_set_vvar()
 func (v *Nvim) SetVVar(name string, value interface{}) error {
 	return v.call("nvim_set_vvar", nil, name, value)
 }
 
 // SetVVar sets a v: variable, if it is not readonly.
+//
+// See: [nvim_set_vvar()]
+//
+// [nvim_set_vvar()]: https://neovim.io/doc/user/api.html#nvim_set_vvar()
 func (b *Batch) SetVVar(name string, value interface{}) {
 	b.call("nvim_set_vvar", nil, name, value)
 }
@@ -2694,6 +3446,10 @@ func (b *Batch) SetVVar(name string, value interface{}) {
 // If history is true, add to "message-history".
 //
 // opts is optional parameters. Reserved for future use.
+//
+// See: [nvim_echo()]
+//
+// [nvim_echo()]: https://neovim.io/doc/user/api.html#nvim_echo()
 func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) error {
 	return v.call("nvim_echo", nil, chunks, history, opts)
 }
@@ -2706,6 +3462,10 @@ func (v *Nvim) Echo(chunks []TextChunk, history bool, opts map[string]interface{
 // If history is true, add to "message-history".
 //
 // opts is optional parameters. Reserved for future use.
+//
+// See: [nvim_echo()]
+//
+// [nvim_echo()]: https://neovim.io/doc/user/api.html#nvim_echo()
 func (b *Batch) Echo(chunks []TextChunk, history bool, opts map[string]interface{}) {
 	b.call("nvim_echo", nil, chunks, history, opts)
 }
@@ -2713,6 +3473,10 @@ func (b *Batch) Echo(chunks []TextChunk, history bool, opts map[string]interface
 // WriteOut writes a message to the Vim output buffer.
 //
 // Does not append "\n", the message is buffered (won't display) until a linefeed is written.
+//
+// See: [nvim_out_write()]
+//
+// [nvim_out_write()]: https://neovim.io/doc/user/api.html#nvim_out_write()
 func (v *Nvim) WriteOut(str string) error {
 	return v.call("nvim_out_write", nil, str)
 }
@@ -2720,6 +3484,10 @@ func (v *Nvim) WriteOut(str string) error {
 // WriteOut writes a message to the Vim output buffer.
 //
 // Does not append "\n", the message is buffered (won't display) until a linefeed is written.
+//
+// See: [nvim_out_write()]
+//
+// [nvim_out_write()]: https://neovim.io/doc/user/api.html#nvim_out_write()
 func (b *Batch) WriteOut(str string) {
 	b.call("nvim_out_write", nil, str)
 }
@@ -2727,6 +3495,10 @@ func (b *Batch) WriteOut(str string) {
 // WriteErr writes a message to the Vim error buffer.
 //
 // Does not append "\n", the message is buffered (won't display) until a linefeed is written.
+//
+// See: [nvim_err_write()]
+//
+// [nvim_err_write()]: https://neovim.io/doc/user/api.html#nvim_err_write()
 func (v *Nvim) WriteErr(str string) error {
 	return v.call("nvim_err_write", nil, str)
 }
@@ -2734,6 +3506,10 @@ func (v *Nvim) WriteErr(str string) error {
 // WriteErr writes a message to the Vim error buffer.
 //
 // Does not append "\n", the message is buffered (won't display) until a linefeed is written.
+//
+// See: [nvim_err_write()]
+//
+// [nvim_err_write()]: https://neovim.io/doc/user/api.html#nvim_err_write()
 func (b *Batch) WriteErr(str string) {
 	b.call("nvim_err_write", nil, str)
 }
@@ -2741,6 +3517,10 @@ func (b *Batch) WriteErr(str string) {
 // WritelnErr writes a message to the Vim error buffer.
 //
 // Appends "\n", so the buffer is flushed and displayed.
+//
+// See: [nvim_err_writeln()]
+//
+// [nvim_err_writeln()]: https://neovim.io/doc/user/api.html#nvim_err_writeln()
 func (v *Nvim) WritelnErr(str string) error {
 	return v.call("nvim_err_writeln", nil, str)
 }
@@ -2748,6 +3528,10 @@ func (v *Nvim) WritelnErr(str string) error {
 // WritelnErr writes a message to the Vim error buffer.
 //
 // Appends "\n", so the buffer is flushed and displayed.
+//
+// See: [nvim_err_writeln()]
+//
+// [nvim_err_writeln()]: https://neovim.io/doc/user/api.html#nvim_err_writeln()
 func (b *Batch) WritelnErr(str string) {
 	b.call("nvim_err_writeln", nil, str)
 }
@@ -2755,6 +3539,10 @@ func (b *Batch) WritelnErr(str string) {
 // Buffers gets the current list of buffer handles.
 //
 // Includes unlisted (unloaded/deleted) buffers, like ":ls!". Use IsBufferLoaded to check if a buffer is loaded.
+//
+// See: [nvim_list_bufs()]
+//
+// [nvim_list_bufs()]: https://neovim.io/doc/user/api.html#nvim_list_bufs()
 func (v *Nvim) Buffers() (buffers []Buffer, err error) {
 	err = v.call("nvim_list_bufs", &buffers)
 	return buffers, err
@@ -2763,59 +3551,103 @@ func (v *Nvim) Buffers() (buffers []Buffer, err error) {
 // Buffers gets the current list of buffer handles.
 //
 // Includes unlisted (unloaded/deleted) buffers, like ":ls!". Use IsBufferLoaded to check if a buffer is loaded.
+//
+// See: [nvim_list_bufs()]
+//
+// [nvim_list_bufs()]: https://neovim.io/doc/user/api.html#nvim_list_bufs()
 func (b *Batch) Buffers(buffers *[]Buffer) {
 	b.call("nvim_list_bufs", buffers)
 }
 
 // CurrentBuffer gets the current buffer.
+//
+// See: [nvim_get_current_buf()]
+//
+// [nvim_get_current_buf()]: https://neovim.io/doc/user/api.html#nvim_get_current_buf()
 func (v *Nvim) CurrentBuffer() (buffer Buffer, err error) {
 	err = v.call("nvim_get_current_buf", &buffer)
 	return buffer, err
 }
 
 // CurrentBuffer gets the current buffer.
+//
+// See: [nvim_get_current_buf()]
+//
+// [nvim_get_current_buf()]: https://neovim.io/doc/user/api.html#nvim_get_current_buf()
 func (b *Batch) CurrentBuffer(buffer *Buffer) {
 	b.call("nvim_get_current_buf", buffer)
 }
 
 // SetCurrentBuffer sets the current buffer.
+//
+// See: [nvim_set_current_buf()]
+//
+// [nvim_set_current_buf()]: https://neovim.io/doc/user/api.html#nvim_set_current_buf()
 func (v *Nvim) SetCurrentBuffer(buffer Buffer) error {
 	return v.call("nvim_set_current_buf", nil, buffer)
 }
 
 // SetCurrentBuffer sets the current buffer.
+//
+// See: [nvim_set_current_buf()]
+//
+// [nvim_set_current_buf()]: https://neovim.io/doc/user/api.html#nvim_set_current_buf()
 func (b *Batch) SetCurrentBuffer(buffer Buffer) {
 	b.call("nvim_set_current_buf", nil, buffer)
 }
 
 // Windows gets the current list of window handles.
+//
+// See: [nvim_list_wins()]
+//
+// [nvim_list_wins()]: https://neovim.io/doc/user/api.html#nvim_list_wins()
 func (v *Nvim) Windows() (windows []Window, err error) {
 	err = v.call("nvim_list_wins", &windows)
 	return windows, err
 }
 
 // Windows gets the current list of window handles.
+//
+// See: [nvim_list_wins()]
+//
+// [nvim_list_wins()]: https://neovim.io/doc/user/api.html#nvim_list_wins()
 func (b *Batch) Windows(windows *[]Window) {
 	b.call("nvim_list_wins", windows)
 }
 
 // CurrentWindow gets the current window.
+//
+// See: [nvim_get_current_win()]
+//
+// [nvim_get_current_win()]: https://neovim.io/doc/user/api.html#nvim_get_current_win()
 func (v *Nvim) CurrentWindow() (window Window, err error) {
 	err = v.call("nvim_get_current_win", &window)
 	return window, err
 }
 
 // CurrentWindow gets the current window.
+//
+// See: [nvim_get_current_win()]
+//
+// [nvim_get_current_win()]: https://neovim.io/doc/user/api.html#nvim_get_current_win()
 func (b *Batch) CurrentWindow(window *Window) {
 	b.call("nvim_get_current_win", window)
 }
 
 // SetCurrentWindow sets the current window.
+//
+// See: [nvim_set_current_win()]
+//
+// [nvim_set_current_win()]: https://neovim.io/doc/user/api.html#nvim_set_current_win()
 func (v *Nvim) SetCurrentWindow(window Window) error {
 	return v.call("nvim_set_current_win", nil, window)
 }
 
 // SetCurrentWindow sets the current window.
+//
+// See: [nvim_set_current_win()]
+//
+// [nvim_set_current_win()]: https://neovim.io/doc/user/api.html#nvim_set_current_win()
 func (b *Batch) SetCurrentWindow(window Window) {
 	b.call("nvim_set_current_win", nil, window)
 }
@@ -2830,6 +3662,10 @@ func (b *Batch) SetCurrentWindow(window Window) {
 //	buftype=nofile
 //	noswapfile
 //	nomodeline
+//
+// See: [nvim_create_buf()]
+//
+// [nvim_create_buf()]: https://neovim.io/doc/user/api.html#nvim_create_buf()
 func (v *Nvim) CreateBuffer(listed bool, scratch bool) (buffer Buffer, err error) {
 	err = v.call("nvim_create_buf", &buffer, listed, scratch)
 	return buffer, err
@@ -2845,6 +3681,10 @@ func (v *Nvim) CreateBuffer(listed bool, scratch bool) (buffer Buffer, err error
 //	buftype=nofile
 //	noswapfile
 //	nomodeline
+//
+// See: [nvim_create_buf()]
+//
+// [nvim_create_buf()]: https://neovim.io/doc/user/api.html#nvim_create_buf()
 func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
 	b.call("nvim_create_buf", buffer, listed, scratch)
 }
@@ -2866,6 +3706,10 @@ func (b *Batch) CreateBuffer(listed bool, scratch bool, buffer *Buffer) {
 // buffer is the buffer to use (expected to be empty).
 //
 // opts is optional parameters. Reserved for future use.
+//
+// See: [nvim_open_term()]
+//
+// [nvim_open_term()]: https://neovim.io/doc/user/api.html#nvim_open_term()
 func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]interface{}) (channel int, err error) {
 	err = v.call("nvim_open_term", &channel, buffer, opts)
 	return channel, err
@@ -2888,6 +3732,10 @@ func (v *Nvim) OpenTerm(buffer Buffer, opts map[string]interface{}) (channel int
 // buffer is the buffer to use (expected to be empty).
 //
 // opts is optional parameters. Reserved for future use.
+//
+// See: [nvim_open_term()]
+//
+// [nvim_open_term()]: https://neovim.io/doc/user/api.html#nvim_open_term()
 func (b *Batch) OpenTerm(buffer Buffer, opts map[string]interface{}, channel *int) {
 	b.call("nvim_open_term", channel, buffer, opts)
 }
@@ -2918,6 +3766,10 @@ func (b *Batch) OpenTerm(buffer Buffer, opts map[string]interface{}, channel *in
 // The builtin implementation truncates values so floats are fully within the main screen grid.
 // External GUIs could let floats hover outside of the main window like a tooltip, but
 // this should not be used to specify arbitrary WM screen positions.
+//
+// See: [nvim_open_win()]
+//
+// [nvim_open_win()]: https://neovim.io/doc/user/api.html#nvim_open_win()
 func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *WindowConfig) (window Window, err error) {
 	err = v.call("nvim_open_win", &window, buffer, enter, config)
 	return window, err
@@ -2949,38 +3801,66 @@ func (v *Nvim) OpenWindow(buffer Buffer, enter bool, config *WindowConfig) (wind
 // The builtin implementation truncates values so floats are fully within the main screen grid.
 // External GUIs could let floats hover outside of the main window like a tooltip, but
 // this should not be used to specify arbitrary WM screen positions.
+//
+// See: [nvim_open_win()]
+//
+// [nvim_open_win()]: https://neovim.io/doc/user/api.html#nvim_open_win()
 func (b *Batch) OpenWindow(buffer Buffer, enter bool, config *WindowConfig, window *Window) {
 	b.call("nvim_open_win", window, buffer, enter, config)
 }
 
 // Tabpages gets the current list of tabpage handles.
+//
+// See: [nvim_list_tabpages()]
+//
+// [nvim_list_tabpages()]: https://neovim.io/doc/user/api.html#nvim_list_tabpages()
 func (v *Nvim) Tabpages() (tabpages []Tabpage, err error) {
 	err = v.call("nvim_list_tabpages", &tabpages)
 	return tabpages, err
 }
 
 // Tabpages gets the current list of tabpage handles.
+//
+// See: [nvim_list_tabpages()]
+//
+// [nvim_list_tabpages()]: https://neovim.io/doc/user/api.html#nvim_list_tabpages()
 func (b *Batch) Tabpages(tabpages *[]Tabpage) {
 	b.call("nvim_list_tabpages", tabpages)
 }
 
 // CurrentTabpage gets the current tabpage.
+//
+// See: [nvim_get_current_tabpage()]
+//
+// [nvim_get_current_tabpage()]: https://neovim.io/doc/user/api.html#nvim_get_current_tabpage()
 func (v *Nvim) CurrentTabpage() (tabpage Tabpage, err error) {
 	err = v.call("nvim_get_current_tabpage", &tabpage)
 	return tabpage, err
 }
 
 // CurrentTabpage gets the current tabpage.
+//
+// See: [nvim_get_current_tabpage()]
+//
+// [nvim_get_current_tabpage()]: https://neovim.io/doc/user/api.html#nvim_get_current_tabpage()
 func (b *Batch) CurrentTabpage(tabpage *Tabpage) {
 	b.call("nvim_get_current_tabpage", tabpage)
 }
 
 // SetCurrentTabpage sets the current tabpage.
+//
+// See: [nvim_set_current_tabpage()]
+//
+// [nvim_set_current_tabpage()]: https://neovim.io/doc/user/api.html#nvim_set_current_tabpage()
 func (v *Nvim) SetCurrentTabpage(tabpage Tabpage) error {
 	return v.call("nvim_set_current_tabpage", nil, tabpage)
 }
 
 // SetCurrentTabpage sets the current tabpage.
+//
+// See: [nvim_set_current_tabpage()]
+//
+// [nvim_set_current_tabpage()]: https://neovim.io/doc/user/api.html#nvim_set_current_tabpage()
 func (b *Batch) SetCurrentTabpage(tabpage Tabpage) {
 	b.call("nvim_set_current_tabpage", nil, tabpage)
 }
@@ -2988,6 +3868,10 @@ func (b *Batch) SetCurrentTabpage(tabpage Tabpage) {
 // Namespaces gets existing, non-anonymous namespaces.
 //
 // The return dict that maps from names to namespace ids.
+//
+// See: [nvim_get_namespaces()]
+//
+// [nvim_get_namespaces()]: https://neovim.io/doc/user/api.html#nvim_get_namespaces()
 func (v *Nvim) Namespaces() (namespaces map[string]int, err error) {
 	err = v.call("nvim_get_namespaces", &namespaces)
 	return namespaces, err
@@ -2996,6 +3880,10 @@ func (v *Nvim) Namespaces() (namespaces map[string]int, err error) {
 // Namespaces gets existing, non-anonymous namespaces.
 //
 // The return dict that maps from names to namespace ids.
+//
+// See: [nvim_get_namespaces()]
+//
+// [nvim_get_namespaces()]: https://neovim.io/doc/user/api.html#nvim_get_namespaces()
 func (b *Batch) Namespaces(namespaces *map[string]int) {
 	b.call("nvim_get_namespaces", namespaces)
 }
@@ -3045,6 +3933,10 @@ func (b *Batch) Namespaces(namespaces *map[string]int) {
 //	false
 //
 // Client must cancel the paste.
+//
+// See: [nvim_paste()]
+//
+// [nvim_paste()]: https://neovim.io/doc/user/api.html#nvim_paste()
 func (v *Nvim) Paste(data string, crlf bool, phase int) (state bool, err error) {
 	err = v.call("nvim_paste", &state, data, crlf, phase)
 	return state, err
@@ -3095,6 +3987,10 @@ func (v *Nvim) Paste(data string, crlf bool, phase int) (state bool, err error) 
 //	false
 //
 // Client must cancel the paste.
+//
+// See: [nvim_paste()]
+//
+// [nvim_paste()]: https://neovim.io/doc/user/api.html#nvim_paste()
 func (b *Batch) Paste(data string, crlf bool, phase int, state *bool) {
 	b.call("nvim_paste", state, data, crlf, phase)
 }
@@ -3120,6 +4016,10 @@ func (b *Batch) Paste(data string, crlf bool, phase int, state *bool) {
 // After is insert after cursor (like `p`), or before (like `P`).
 //
 // follow arg is place cursor at end of inserted text.
+//
+// See: [nvim_put()]
+//
+// [nvim_put()]: https://neovim.io/doc/user/api.html#nvim_put()
 func (v *Nvim) Put(lines []string, typ string, after bool, follow bool) error {
 	return v.call("nvim_put", nil, lines, typ, after, follow)
 }
@@ -3145,26 +4045,46 @@ func (v *Nvim) Put(lines []string, typ string, after bool, follow bool) error {
 // After is insert after cursor (like `p`), or before (like `P`).
 //
 // follow arg is place cursor at end of inserted text.
+//
+// See: [nvim_put()]
+//
+// [nvim_put()]: https://neovim.io/doc/user/api.html#nvim_put()
 func (b *Batch) Put(lines []string, typ string, after bool, follow bool) {
 	b.call("nvim_put", nil, lines, typ, after, follow)
 }
 
 // Subscribe subscribes to event broadcasts.
+//
+// See: [nvim_subscribe()]
+//
+// [nvim_subscribe()]: https://neovim.io/doc/user/api.html#nvim_subscribe()
 func (v *Nvim) Subscribe(event string) error {
 	return v.call("nvim_subscribe", nil, event)
 }
 
 // Subscribe subscribes to event broadcasts.
+//
+// See: [nvim_subscribe()]
+//
+// [nvim_subscribe()]: https://neovim.io/doc/user/api.html#nvim_subscribe()
 func (b *Batch) Subscribe(event string) {
 	b.call("nvim_subscribe", nil, event)
 }
 
 // Unsubscribe unsubscribes to event broadcasts.
+//
+// See: [nvim_unsubscribe()]
+//
+// [nvim_unsubscribe()]: https://neovim.io/doc/user/api.html#nvim_unsubscribe()
 func (v *Nvim) Unsubscribe(event string) error {
 	return v.call("nvim_unsubscribe", nil, event)
 }
 
 // Unsubscribe unsubscribes to event broadcasts.
+//
+// See: [nvim_unsubscribe()]
+//
+// [nvim_unsubscribe()]: https://neovim.io/doc/user/api.html#nvim_unsubscribe()
 func (b *Batch) Unsubscribe(event string) {
 	b.call("nvim_unsubscribe", nil, event)
 }
@@ -3175,6 +4095,10 @@ func (b *Batch) Unsubscribe(event string) {
 //
 //	ColorByName("Pink")
 //	ColorByName("#cbcbcb")
+//
+// See: [nvim_get_color_by_name()]
+//
+// [nvim_get_color_by_name()]: https://neovim.io/doc/user/api.html#nvim_get_color_by_name()
 func (v *Nvim) ColorByName(name string) (color int, err error) {
 	err = v.call("nvim_get_color_by_name", &color, name)
 	return color, err
@@ -3186,6 +4110,10 @@ func (v *Nvim) ColorByName(name string) (color int, err error) {
 //
 //	ColorByName("Pink")
 //	ColorByName("#cbcbcb")
+//
+// See: [nvim_get_color_by_name()]
+//
+// [nvim_get_color_by_name()]: https://neovim.io/doc/user/api.html#nvim_get_color_by_name()
 func (b *Batch) ColorByName(name string, color *int) {
 	b.call("nvim_get_color_by_name", color, name)
 }
@@ -3195,6 +4123,10 @@ func (b *Batch) ColorByName(name string, color *int) {
 // Keys are color names (e.g. "Aqua") and values are 24-bit RGB color values (e.g. 65535).
 //
 // The returns map is color names and RGB values.
+//
+// See: [nvim_get_color_map()]
+//
+// [nvim_get_color_map()]: https://neovim.io/doc/user/api.html#nvim_get_color_map()
 func (v *Nvim) ColorMap() (colorMap map[string]int, err error) {
 	err = v.call("nvim_get_color_map", &colorMap)
 	return colorMap, err
@@ -3205,6 +4137,10 @@ func (v *Nvim) ColorMap() (colorMap map[string]int, err error) {
 // Keys are color names (e.g. "Aqua") and values are 24-bit RGB color values (e.g. 65535).
 //
 // The returns map is color names and RGB values.
+//
+// See: [nvim_get_color_map()]
+//
+// [nvim_get_color_map()]: https://neovim.io/doc/user/api.html#nvim_get_color_map()
 func (b *Batch) ColorMap(colorMap *map[string]int) {
 	b.call("nvim_get_color_map", colorMap)
 }
@@ -3223,6 +4159,10 @@ func (b *Batch) ColorMap(colorMap *map[string]int) {
 //	gvars
 //	funcs
 //	sfuncs
+//
+// See: [nvim_get_context()]
+//
+// [nvim_get_context()]: https://neovim.io/doc/user/api.html#nvim_get_context()
 func (v *Nvim) Context(opts map[string][]string) (context map[string]interface{}, err error) {
 	err = v.call("nvim_get_context", &context, opts)
 	return context, err
@@ -3242,16 +4182,28 @@ func (v *Nvim) Context(opts map[string][]string) (context map[string]interface{}
 //	gvars
 //	funcs
 //	sfuncs
+//
+// See: [nvim_get_context()]
+//
+// [nvim_get_context()]: https://neovim.io/doc/user/api.html#nvim_get_context()
 func (b *Batch) Context(opts map[string][]string, context *map[string]interface{}) {
 	b.call("nvim_get_context", context, opts)
 }
 
 // LoadContext Sets the current editor state from the given context map.
+//
+// See: [nvim_load_context()]
+//
+// [nvim_load_context()]: https://neovim.io/doc/user/api.html#nvim_load_context()
 func (v *Nvim) LoadContext(context map[string]interface{}, result interface{}) error {
 	return v.call("nvim_load_context", result, context)
 }
 
 // LoadContext Sets the current editor state from the given context map.
+//
+// See: [nvim_load_context()]
+//
+// [nvim_load_context()]: https://neovim.io/doc/user/api.html#nvim_load_context()
 func (b *Batch) LoadContext(context map[string]interface{}, result interface{}) {
 	b.call("nvim_load_context", &result, context)
 }
@@ -3259,6 +4211,10 @@ func (b *Batch) LoadContext(context map[string]interface{}, result interface{}) 
 // Mode gets the current mode.
 //
 // |mode()| "blocking" is true if Nvim is waiting for input.
+//
+// See: [nvim_get_mode()]
+//
+// [nvim_get_mode()]: https://neovim.io/doc/user/api.html#nvim_get_mode()
 func (v *Nvim) Mode() (mode *Mode, err error) {
 	var result Mode
 	err = v.call("nvim_get_mode", &result)
@@ -3268,6 +4224,10 @@ func (v *Nvim) Mode() (mode *Mode, err error) {
 // Mode gets the current mode.
 //
 // |mode()| "blocking" is true if Nvim is waiting for input.
+//
+// See: [nvim_get_mode()]
+//
+// [nvim_get_mode()]: https://neovim.io/doc/user/api.html#nvim_get_mode()
 func (b *Batch) Mode(mode *Mode) {
 	b.call("nvim_get_mode", mode)
 }
@@ -3275,6 +4235,10 @@ func (b *Batch) Mode(mode *Mode) {
 // KeyMap gets a list of global (non-buffer-local) |mapping| definitions.
 //
 // The mode arg is the mode short-name, like "n", "i", "v" or etc.
+//
+// See: [nvim_get_keymap()]
+//
+// [nvim_get_keymap()]: https://neovim.io/doc/user/api.html#nvim_get_keymap()
 func (v *Nvim) KeyMap(mode string) (maps []*Mapping, err error) {
 	err = v.call("nvim_get_keymap", &maps, mode)
 	return maps, err
@@ -3283,6 +4247,10 @@ func (v *Nvim) KeyMap(mode string) (maps []*Mapping, err error) {
 // KeyMap gets a list of global (non-buffer-local) |mapping| definitions.
 //
 // The mode arg is the mode short-name, like "n", "i", "v" or etc.
+//
+// See: [nvim_get_keymap()]
+//
+// [nvim_get_keymap()]: https://neovim.io/doc/user/api.html#nvim_get_keymap()
 func (b *Batch) KeyMap(mode string, maps *[]*Mapping) {
 	b.call("nvim_get_keymap", maps, mode)
 }
@@ -3311,6 +4279,10 @@ func (b *Batch) KeyMap(mode string, maps *[]*Mapping) {
 //
 // Optional parameters map. Accepts all ":map-arguments" as keys excluding "buffer" but including "noremap".
 // Values are Booleans. Unknown key is an error.
+//
+// See: [nvim_set_keymap()]
+//
+// [nvim_set_keymap()]: https://neovim.io/doc/user/api.html#nvim_set_keymap()
 func (v *Nvim) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bool) error {
 	return v.call("nvim_set_keymap", nil, mode, lhs, rhs, opts)
 }
@@ -3339,6 +4311,10 @@ func (v *Nvim) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bo
 //
 // Optional parameters map. Accepts all ":map-arguments" as keys excluding "buffer" but including "noremap".
 // Values are Booleans. Unknown key is an error.
+//
+// See: [nvim_set_keymap()]
+//
+// [nvim_set_keymap()]: https://neovim.io/doc/user/api.html#nvim_set_keymap()
 func (b *Batch) SetKeyMap(mode string, lhs string, rhs string, opts map[string]bool) {
 	b.call("nvim_set_keymap", nil, mode, lhs, rhs, opts)
 }
@@ -3347,9 +4323,9 @@ func (b *Batch) SetKeyMap(mode string, lhs string, rhs string, opts map[string]b
 //
 // To unmap a buffer-local mapping, use DeleteBufferKeyMap().
 //
-// See:
+// See: [nvim_del_keymap()]
 //
-//	:help nvim_set_keymap()
+// [nvim_del_keymap()]: https://neovim.io/doc/user/api.html#nvim_del_keymap()
 func (v *Nvim) DeleteKeyMap(mode string, lhs string) error {
 	return v.call("nvim_del_keymap", nil, mode, lhs)
 }
@@ -3358,9 +4334,9 @@ func (v *Nvim) DeleteKeyMap(mode string, lhs string) error {
 //
 // To unmap a buffer-local mapping, use DeleteBufferKeyMap().
 //
-// See:
+// See: [nvim_del_keymap()]
 //
-//	:help nvim_set_keymap()
+// [nvim_del_keymap()]: https://neovim.io/doc/user/api.html#nvim_del_keymap()
 func (b *Batch) DeleteKeyMap(mode string, lhs string) {
 	b.call("nvim_del_keymap", nil, mode, lhs)
 }
@@ -3369,6 +4345,10 @@ func (b *Batch) DeleteKeyMap(mode string, lhs string) {
 // 1 is the "api-metadata" map (Dictionary).
 //
 // Returns 2-tuple [{channel-id}, {api-metadata}].
+//
+// See: [nvim_get_api_info()]
+//
+// [nvim_get_api_info()]: https://neovim.io/doc/user/api.html#nvim_get_api_info()
 func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
 	err = v.call("nvim_get_api_info", &apiInfo)
 	return apiInfo, err
@@ -3378,6 +4358,10 @@ func (v *Nvim) APIInfo() (apiInfo []interface{}, err error) {
 // 1 is the "api-metadata" map (Dictionary).
 //
 // Returns 2-tuple [{channel-id}, {api-metadata}].
+//
+// See: [nvim_get_api_info()]
+//
+// [nvim_get_api_info()]: https://neovim.io/doc/user/api.html#nvim_get_api_info()
 func (b *Batch) APIInfo(apiInfo *[]interface{}) {
 	b.call("nvim_get_api_info", apiInfo)
 }
@@ -3390,6 +4374,10 @@ func (b *Batch) APIInfo(apiInfo *[]interface{}) {
 // Can be called more than once; the caller should merge old info if
 // appropriate. Example: library first identifies the channel, then a plugin
 // using that library later identifies itself.
+//
+// See: [nvim_set_client_info()]
+//
+// [nvim_set_client_info()]: https://neovim.io/doc/user/api.html#nvim_set_client_info()
 func (v *Nvim) SetClientInfo(name string, version ClientVersion, typ ClientType, methods map[string]*ClientMethod, attributes ClientAttributes) error {
 	return v.call("nvim_set_client_info", nil, name, version, typ, methods, attributes)
 }
@@ -3402,6 +4390,10 @@ func (v *Nvim) SetClientInfo(name string, version ClientVersion, typ ClientType,
 // Can be called more than once; the caller should merge old info if
 // appropriate. Example: library first identifies the channel, then a plugin
 // using that library later identifies itself.
+//
+// See: [nvim_set_client_info()]
+//
+// [nvim_set_client_info()]: https://neovim.io/doc/user/api.html#nvim_set_client_info()
 func (b *Batch) SetClientInfo(name string, version ClientVersion, typ ClientType, methods map[string]*ClientMethod, attributes ClientAttributes) {
 	b.call("nvim_set_client_info", nil, name, version, typ, methods, attributes)
 }
@@ -3460,6 +4452,10 @@ func (b *Batch) SetClientInfo(name string, version ClientVersion, typ ClientType
 //	client
 //
 // Information about the client on the other end of the RPC channel, if it has added it using SetClientInfo() (optional).
+//
+// See: [nvim_get_chan_info()]
+//
+// [nvim_get_chan_info()]: https://neovim.io/doc/user/api.html#nvim_get_chan_info()
 func (v *Nvim) ChannelInfo(channelID int) (channel *Channel, err error) {
 	var result Channel
 	err = v.call("nvim_get_chan_info", &result, channelID)
@@ -3520,50 +4516,86 @@ func (v *Nvim) ChannelInfo(channelID int) (channel *Channel, err error) {
 //	client
 //
 // Information about the client on the other end of the RPC channel, if it has added it using SetClientInfo() (optional).
+//
+// See: [nvim_get_chan_info()]
+//
+// [nvim_get_chan_info()]: https://neovim.io/doc/user/api.html#nvim_get_chan_info()
 func (b *Batch) ChannelInfo(channelID int, channel *Channel) {
 	b.call("nvim_get_chan_info", channel, channelID)
 }
 
 // Channels get information about all open channels.
+//
+// See: [nvim_list_chans()]
+//
+// [nvim_list_chans()]: https://neovim.io/doc/user/api.html#nvim_list_chans()
 func (v *Nvim) Channels() (channels []*Channel, err error) {
 	err = v.call("nvim_list_chans", &channels)
 	return channels, err
 }
 
 // Channels get information about all open channels.
+//
+// See: [nvim_list_chans()]
+//
+// [nvim_list_chans()]: https://neovim.io/doc/user/api.html#nvim_list_chans()
 func (b *Batch) Channels(channels *[]*Channel) {
 	b.call("nvim_list_chans", channels)
 }
 
 // UIs gets a list of dictionaries representing attached UIs.
+//
+// See: [nvim_list_uis()]
+//
+// [nvim_list_uis()]: https://neovim.io/doc/user/api.html#nvim_list_uis()
 func (v *Nvim) UIs() (uis []*UI, err error) {
 	err = v.call("nvim_list_uis", &uis)
 	return uis, err
 }
 
 // UIs gets a list of dictionaries representing attached UIs.
+//
+// See: [nvim_list_uis()]
+//
+// [nvim_list_uis()]: https://neovim.io/doc/user/api.html#nvim_list_uis()
 func (b *Batch) UIs(uis *[]*UI) {
 	b.call("nvim_list_uis", uis)
 }
 
 // ProcChildren gets the immediate children of process `pid`.
+//
+// See: [nvim_get_proc_children()]
+//
+// [nvim_get_proc_children()]: https://neovim.io/doc/user/api.html#nvim_get_proc_children()
 func (v *Nvim) ProcChildren(pid int) (processes []uint, err error) {
 	err = v.call("nvim_get_proc_children", &processes, pid)
 	return processes, err
 }
 
 // ProcChildren gets the immediate children of process `pid`.
+//
+// See: [nvim_get_proc_children()]
+//
+// [nvim_get_proc_children()]: https://neovim.io/doc/user/api.html#nvim_get_proc_children()
 func (b *Batch) ProcChildren(pid int, processes *[]uint) {
 	b.call("nvim_get_proc_children", processes, pid)
 }
 
 // Proc gets info describing process "pid".
+//
+// See: [nvim_get_proc()]
+//
+// [nvim_get_proc()]: https://neovim.io/doc/user/api.html#nvim_get_proc()
 func (v *Nvim) Proc(pid int) (process Process, err error) {
 	err = v.call("nvim_get_proc", &process, pid)
 	return process, err
 }
 
 // Proc gets info describing process "pid".
+//
+// See: [nvim_get_proc()]
+//
+// [nvim_get_proc()]: https://neovim.io/doc/user/api.html#nvim_get_proc()
 func (b *Batch) Proc(pid int, process *Process) {
 	b.call("nvim_get_proc", process, pid)
 }
@@ -3576,6 +4608,10 @@ func (b *Batch) Proc(pid int, process *Process) {
 // ensure the mapping doesn't end completion mode.
 //
 // opts optional parameters. Reserved for future use.
+//
+// See: [nvim_select_popupmenu_item()]
+//
+// [nvim_select_popupmenu_item()]: https://neovim.io/doc/user/api.html#nvim_select_popupmenu_item()
 func (v *Nvim) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]interface{}) error {
 	return v.call("nvim_select_popupmenu_item", nil, item, insert, finish, opts)
 }
@@ -3588,12 +4624,20 @@ func (v *Nvim) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[
 // ensure the mapping doesn't end completion mode.
 //
 // opts optional parameters. Reserved for future use.
+//
+// See: [nvim_select_popupmenu_item()]
+//
+// [nvim_select_popupmenu_item()]: https://neovim.io/doc/user/api.html#nvim_select_popupmenu_item()
 func (b *Batch) SelectPopupmenuItem(item int, insert bool, finish bool, opts map[string]interface{}) {
 	b.call("nvim_select_popupmenu_item", nil, item, insert, finish, opts)
 }
 
 // DeleteMark deletes a uppercase/file named mark.
 // See |help mark-motions|.
+//
+// See: [nvim_del_mark()]
+//
+// [nvim_del_mark()]: https://neovim.io/doc/user/api.html#nvim_del_mark()
 func (v *Nvim) DeleteMark(name string) (deleted bool, err error) {
 	err = v.call("nvim_del_mark", &deleted, name)
 	return deleted, err
@@ -3601,6 +4645,10 @@ func (v *Nvim) DeleteMark(name string) (deleted bool, err error) {
 
 // DeleteMark deletes a uppercase/file named mark.
 // See |help mark-motions|.
+//
+// See: [nvim_del_mark()]
+//
+// [nvim_del_mark()]: https://neovim.io/doc/user/api.html#nvim_del_mark()
 func (b *Batch) DeleteMark(name string, deleted *bool) {
 	b.call("nvim_del_mark", deleted, name)
 }
@@ -3610,6 +4658,10 @@ func (b *Batch) DeleteMark(name string, deleted *bool) {
 // See |help mark-motions|.
 //
 // opts is optional parameters. Reserved for future use.
+//
+// See: [nvim_get_mark()]
+//
+// [nvim_get_mark()]: https://neovim.io/doc/user/api.html#nvim_get_mark()
 func (v *Nvim) Mark(name string, opts map[string]interface{}) (mark *Mark, err error) {
 	var result Mark
 	err = v.call("nvim_get_mark", &result, name, opts)
@@ -3621,6 +4673,10 @@ func (v *Nvim) Mark(name string, opts map[string]interface{}) (mark *Mark, err e
 // See |help mark-motions|.
 //
 // opts is optional parameters. Reserved for future use.
+//
+// See: [nvim_get_mark()]
+//
+// [nvim_get_mark()]: https://neovim.io/doc/user/api.html#nvim_get_mark()
 func (b *Batch) Mark(name string, opts map[string]interface{}, mark *Mark) {
 	b.call("nvim_get_mark", mark, name, opts)
 }
@@ -3648,6 +4704,10 @@ func (b *Batch) Mark(name string, opts map[string]interface{}, mark *Mark) {
 //	use_tabline (bool)
 //
 // Evaluate tabline instead of statusline. When true, {winid} is ignored.
+//
+// See: [nvim_eval_statusline()]
+//
+// [nvim_eval_statusline()]: https://neovim.io/doc/user/api.html#nvim_eval_statusline()
 func (v *Nvim) EvalStatusLine(name string, opts map[string]interface{}) (statusline map[string]interface{}, err error) {
 	err = v.call("nvim_eval_statusline", &statusline, name, opts)
 	return statusline, err
@@ -3676,164 +4736,288 @@ func (v *Nvim) EvalStatusLine(name string, opts map[string]interface{}) (statusl
 //	use_tabline (bool)
 //
 // Evaluate tabline instead of statusline. When true, {winid} is ignored.
+//
+// See: [nvim_eval_statusline()]
+//
+// [nvim_eval_statusline()]: https://neovim.io/doc/user/api.html#nvim_eval_statusline()
 func (b *Batch) EvalStatusLine(name string, opts map[string]interface{}, statusline *map[string]interface{}) {
 	b.call("nvim_eval_statusline", statusline, name, opts)
 }
 
 // WindowBuffer gets the current buffer in a window.
+//
+// See: [nvim_win_get_buf()]
+//
+// [nvim_win_get_buf()]: https://neovim.io/doc/user/api.html#nvim_win_get_buf()
 func (v *Nvim) WindowBuffer(window Window) (buffer Buffer, err error) {
 	err = v.call("nvim_win_get_buf", &buffer, window)
 	return buffer, err
 }
 
 // WindowBuffer gets the current buffer in a window.
+//
+// See: [nvim_win_get_buf()]
+//
+// [nvim_win_get_buf()]: https://neovim.io/doc/user/api.html#nvim_win_get_buf()
 func (b *Batch) WindowBuffer(window Window, buffer *Buffer) {
 	b.call("nvim_win_get_buf", buffer, window)
 }
 
 // SetBufferToWindow Sets the current buffer in a window, without side-effects.
+//
+// See: [nvim_win_set_buf()]
+//
+// [nvim_win_set_buf()]: https://neovim.io/doc/user/api.html#nvim_win_set_buf()
 func (v *Nvim) SetBufferToWindow(window Window, buffer Buffer) error {
 	return v.call("nvim_win_set_buf", nil, window, buffer)
 }
 
 // SetBufferToWindow Sets the current buffer in a window, without side-effects.
+//
+// See: [nvim_win_set_buf()]
+//
+// [nvim_win_set_buf()]: https://neovim.io/doc/user/api.html#nvim_win_set_buf()
 func (b *Batch) SetBufferToWindow(window Window, buffer Buffer) {
 	b.call("nvim_win_set_buf", nil, window, buffer)
 }
 
 // WindowCursor gets the (1,0)-indexed cursor position in the window.
+//
+// See: [nvim_win_get_cursor()]
+//
+// [nvim_win_get_cursor()]: https://neovim.io/doc/user/api.html#nvim_win_get_cursor()
 func (v *Nvim) WindowCursor(window Window) (pos [2]int, err error) {
 	err = v.call("nvim_win_get_cursor", &pos, window)
 	return pos, err
 }
 
 // WindowCursor gets the (1,0)-indexed cursor position in the window.
+//
+// See: [nvim_win_get_cursor()]
+//
+// [nvim_win_get_cursor()]: https://neovim.io/doc/user/api.html#nvim_win_get_cursor()
 func (b *Batch) WindowCursor(window Window, pos *[2]int) {
 	b.call("nvim_win_get_cursor", pos, window)
 }
 
 // SetWindowCursor sets the (1,0)-indexed cursor position in the window.
+//
+// See: [nvim_win_set_cursor()]
+//
+// [nvim_win_set_cursor()]: https://neovim.io/doc/user/api.html#nvim_win_set_cursor()
 func (v *Nvim) SetWindowCursor(window Window, pos [2]int) error {
 	return v.call("nvim_win_set_cursor", nil, window, pos)
 }
 
 // SetWindowCursor sets the (1,0)-indexed cursor position in the window.
+//
+// See: [nvim_win_set_cursor()]
+//
+// [nvim_win_set_cursor()]: https://neovim.io/doc/user/api.html#nvim_win_set_cursor()
 func (b *Batch) SetWindowCursor(window Window, pos [2]int) {
 	b.call("nvim_win_set_cursor", nil, window, pos)
 }
 
 // WindowHeight returns the window height.
+//
+// See: [nvim_win_get_height()]
+//
+// [nvim_win_get_height()]: https://neovim.io/doc/user/api.html#nvim_win_get_height()
 func (v *Nvim) WindowHeight(window Window) (height int, err error) {
 	err = v.call("nvim_win_get_height", &height, window)
 	return height, err
 }
 
 // WindowHeight returns the window height.
+//
+// See: [nvim_win_get_height()]
+//
+// [nvim_win_get_height()]: https://neovim.io/doc/user/api.html#nvim_win_get_height()
 func (b *Batch) WindowHeight(window Window, height *int) {
 	b.call("nvim_win_get_height", height, window)
 }
 
 // SetWindowHeight Sets the window height. This will only succeed if the screen is split horizontally.
+//
+// See: [nvim_win_set_height()]
+//
+// [nvim_win_set_height()]: https://neovim.io/doc/user/api.html#nvim_win_set_height()
 func (v *Nvim) SetWindowHeight(window Window, height int) error {
 	return v.call("nvim_win_set_height", nil, window, height)
 }
 
 // SetWindowHeight Sets the window height. This will only succeed if the screen is split horizontally.
+//
+// See: [nvim_win_set_height()]
+//
+// [nvim_win_set_height()]: https://neovim.io/doc/user/api.html#nvim_win_set_height()
 func (b *Batch) SetWindowHeight(window Window, height int) {
 	b.call("nvim_win_set_height", nil, window, height)
 }
 
 // WindowWidth returns the window width.
+//
+// See: [nvim_win_get_width()]
+//
+// [nvim_win_get_width()]: https://neovim.io/doc/user/api.html#nvim_win_get_width()
 func (v *Nvim) WindowWidth(window Window) (width int, err error) {
 	err = v.call("nvim_win_get_width", &width, window)
 	return width, err
 }
 
 // WindowWidth returns the window width.
+//
+// See: [nvim_win_get_width()]
+//
+// [nvim_win_get_width()]: https://neovim.io/doc/user/api.html#nvim_win_get_width()
 func (b *Batch) WindowWidth(window Window, width *int) {
 	b.call("nvim_win_get_width", width, window)
 }
 
 // SetWindowWidth Sets the window width. This will only succeed if the screen is split vertically.
+//
+// See: [nvim_win_set_width()]
+//
+// [nvim_win_set_width()]: https://neovim.io/doc/user/api.html#nvim_win_set_width()
 func (v *Nvim) SetWindowWidth(window Window, width int) error {
 	return v.call("nvim_win_set_width", nil, window, width)
 }
 
 // SetWindowWidth Sets the window width. This will only succeed if the screen is split vertically.
+//
+// See: [nvim_win_set_width()]
+//
+// [nvim_win_set_width()]: https://neovim.io/doc/user/api.html#nvim_win_set_width()
 func (b *Batch) SetWindowWidth(window Window, width int) {
 	b.call("nvim_win_set_width", nil, window, width)
 }
 
 // WindowVar gets a window-scoped (w:) variable.
+//
+// See: [nvim_win_get_var()]
+//
+// [nvim_win_get_var()]: https://neovim.io/doc/user/api.html#nvim_win_get_var()
 func (v *Nvim) WindowVar(window Window, name string, result interface{}) error {
 	return v.call("nvim_win_get_var", result, window, name)
 }
 
 // WindowVar gets a window-scoped (w:) variable.
+//
+// See: [nvim_win_get_var()]
+//
+// [nvim_win_get_var()]: https://neovim.io/doc/user/api.html#nvim_win_get_var()
 func (b *Batch) WindowVar(window Window, name string, result interface{}) {
 	b.call("nvim_win_get_var", &result, window, name)
 }
 
 // SetWindowVar sets a window-scoped (w:) variable.
+//
+// See: [nvim_win_set_var()]
+//
+// [nvim_win_set_var()]: https://neovim.io/doc/user/api.html#nvim_win_set_var()
 func (v *Nvim) SetWindowVar(window Window, name string, value interface{}) error {
 	return v.call("nvim_win_set_var", nil, window, name, value)
 }
 
 // SetWindowVar sets a window-scoped (w:) variable.
+//
+// See: [nvim_win_set_var()]
+//
+// [nvim_win_set_var()]: https://neovim.io/doc/user/api.html#nvim_win_set_var()
 func (b *Batch) SetWindowVar(window Window, name string, value interface{}) {
 	b.call("nvim_win_set_var", nil, window, name, value)
 }
 
 // DeleteWindowVar removes a window-scoped (w:) variable.
+//
+// See: [nvim_win_del_var()]
+//
+// [nvim_win_del_var()]: https://neovim.io/doc/user/api.html#nvim_win_del_var()
 func (v *Nvim) DeleteWindowVar(window Window, name string) error {
 	return v.call("nvim_win_del_var", nil, window, name)
 }
 
 // DeleteWindowVar removes a window-scoped (w:) variable.
+//
+// See: [nvim_win_del_var()]
+//
+// [nvim_win_del_var()]: https://neovim.io/doc/user/api.html#nvim_win_del_var()
 func (b *Batch) DeleteWindowVar(window Window, name string) {
 	b.call("nvim_win_del_var", nil, window, name)
 }
 
 // WindowPosition gets the window position in display cells. First position is zero.
+//
+// See: [nvim_win_get_position()]
+//
+// [nvim_win_get_position()]: https://neovim.io/doc/user/api.html#nvim_win_get_position()
 func (v *Nvim) WindowPosition(window Window) (pos [2]int, err error) {
 	err = v.call("nvim_win_get_position", &pos, window)
 	return pos, err
 }
 
 // WindowPosition gets the window position in display cells. First position is zero.
+//
+// See: [nvim_win_get_position()]
+//
+// [nvim_win_get_position()]: https://neovim.io/doc/user/api.html#nvim_win_get_position()
 func (b *Batch) WindowPosition(window Window, pos *[2]int) {
 	b.call("nvim_win_get_position", pos, window)
 }
 
 // WindowTabpage gets the window tabpage.
+//
+// See: [nvim_win_get_tabpage()]
+//
+// [nvim_win_get_tabpage()]: https://neovim.io/doc/user/api.html#nvim_win_get_tabpage()
 func (v *Nvim) WindowTabpage(window Window) (tabpage Tabpage, err error) {
 	err = v.call("nvim_win_get_tabpage", &tabpage, window)
 	return tabpage, err
 }
 
 // WindowTabpage gets the window tabpage.
+//
+// See: [nvim_win_get_tabpage()]
+//
+// [nvim_win_get_tabpage()]: https://neovim.io/doc/user/api.html#nvim_win_get_tabpage()
 func (b *Batch) WindowTabpage(window Window, tabpage *Tabpage) {
 	b.call("nvim_win_get_tabpage", tabpage, window)
 }
 
 // WindowNumber gets the window number.
+//
+// See: [nvim_win_get_number()]
+//
+// [nvim_win_get_number()]: https://neovim.io/doc/user/api.html#nvim_win_get_number()
 func (v *Nvim) WindowNumber(window Window) (number int, err error) {
 	err = v.call("nvim_win_get_number", &number, window)
 	return number, err
 }
 
 // WindowNumber gets the window number.
+//
+// See: [nvim_win_get_number()]
+//
+// [nvim_win_get_number()]: https://neovim.io/doc/user/api.html#nvim_win_get_number()
 func (b *Batch) WindowNumber(window Window, number *int) {
 	b.call("nvim_win_get_number", number, window)
 }
 
 // IsWindowValid checks if a window is valid.
+//
+// See: [nvim_win_is_valid()]
+//
+// [nvim_win_is_valid()]: https://neovim.io/doc/user/api.html#nvim_win_is_valid()
 func (v *Nvim) IsWindowValid(window Window) (valid bool, err error) {
 	err = v.call("nvim_win_is_valid", &valid, window)
 	return valid, err
 }
 
 // IsWindowValid checks if a window is valid.
+//
+// See: [nvim_win_is_valid()]
+//
+// [nvim_win_is_valid()]: https://neovim.io/doc/user/api.html#nvim_win_is_valid()
 func (b *Batch) IsWindowValid(window Window, valid *bool) {
 	b.call("nvim_win_is_valid", valid, window)
 }
@@ -3845,6 +5029,10 @@ func (b *Batch) IsWindowValid(window Window, valid *bool) {
 // changed. "row"/"col" and "relative" must be reconfigured together.
 //
 // See documentation at OpenWindow, for the meaning of parameters.
+//
+// See: [nvim_win_set_config()]
+//
+// [nvim_win_set_config()]: https://neovim.io/doc/user/api.html#nvim_win_set_config()
 func (v *Nvim) SetWindowConfig(window Window, config *WindowConfig) error {
 	return v.call("nvim_win_set_config", nil, window, config)
 }
@@ -3856,6 +5044,10 @@ func (v *Nvim) SetWindowConfig(window Window, config *WindowConfig) error {
 // changed. "row"/"col" and "relative" must be reconfigured together.
 //
 // See documentation at OpenWindow, for the meaning of parameters.
+//
+// See: [nvim_win_set_config()]
+//
+// [nvim_win_set_config()]: https://neovim.io/doc/user/api.html#nvim_win_set_config()
 func (b *Batch) SetWindowConfig(window Window, config *WindowConfig) {
 	b.call("nvim_win_set_config", nil, window, config)
 }
@@ -3865,6 +5057,10 @@ func (b *Batch) SetWindowConfig(window Window, config *WindowConfig) {
 // The returned value may be given to OpenWindow.
 //
 // Relative will be an empty string for normal windows.
+//
+// See: [nvim_win_get_config()]
+//
+// [nvim_win_get_config()]: https://neovim.io/doc/user/api.html#nvim_win_get_config()
 func (v *Nvim) WindowConfig(window Window) (config *WindowConfig, err error) {
 	var result WindowConfig
 	err = v.call("nvim_win_get_config", &result, window)
@@ -3876,6 +5072,10 @@ func (v *Nvim) WindowConfig(window Window) (config *WindowConfig, err error) {
 // The returned value may be given to OpenWindow.
 //
 // Relative will be an empty string for normal windows.
+//
+// See: [nvim_win_get_config()]
+//
+// [nvim_win_get_config()]: https://neovim.io/doc/user/api.html#nvim_win_get_config()
 func (b *Batch) WindowConfig(window Window, config *WindowConfig) {
 	b.call("nvim_win_get_config", config, window)
 }
@@ -3886,6 +5086,10 @@ func (b *Batch) WindowConfig(window Window, config *WindowConfig) {
 // Like ":hide" the buffer becomes hidden unless another window is editing it,
 // or "bufhidden" is "unload", "delete" or "wipe" as opposed to ":close" or
 // CloseWindow, which will close the buffer.
+//
+// See: [nvim_win_hide()]
+//
+// [nvim_win_hide()]: https://neovim.io/doc/user/api.html#nvim_win_hide()
 func (v *Nvim) HideWindow(window Window) error {
 	return v.call("nvim_win_hide", nil, window)
 }
@@ -3896,16 +5100,28 @@ func (v *Nvim) HideWindow(window Window) error {
 // Like ":hide" the buffer becomes hidden unless another window is editing it,
 // or "bufhidden" is "unload", "delete" or "wipe" as opposed to ":close" or
 // CloseWindow, which will close the buffer.
+//
+// See: [nvim_win_hide()]
+//
+// [nvim_win_hide()]: https://neovim.io/doc/user/api.html#nvim_win_hide()
 func (b *Batch) HideWindow(window Window) {
 	b.call("nvim_win_hide", nil, window)
 }
 
 // CloseWindow Closes the window (like ":close" with a window-ID).
+//
+// See: [nvim_win_close()]
+//
+// [nvim_win_close()]: https://neovim.io/doc/user/api.html#nvim_win_close()
 func (v *Nvim) CloseWindow(window Window, force bool) error {
 	return v.call("nvim_win_close", nil, window, force)
 }
 
 // CloseWindow Closes the window (like ":close" with a window-ID).
+//
+// See: [nvim_win_close()]
+//
+// [nvim_win_close()]: https://neovim.io/doc/user/api.html#nvim_win_close()
 func (b *Batch) CloseWindow(window Window, force bool) {
 	b.call("nvim_win_close", nil, window, force)
 }
@@ -3914,6 +5130,10 @@ func (b *Batch) CloseWindow(window Window, force bool) {
 // this namespace, but fall back to global highlights (ns=0) when missing.
 //
 // This takes predecence over the 'winhighlight' option.
+//
+// See: [nvim_win_set_hl_ns()]
+//
+// [nvim_win_set_hl_ns()]: https://neovim.io/doc/user/api.html#nvim_win_set_hl_ns()
 func (v *Nvim) SetWindowHeightNamespace(window Window, nsID int) error {
 	return v.call("nvim_win_set_hl_ns", nil, window, nsID)
 }
@@ -3922,6 +5142,10 @@ func (v *Nvim) SetWindowHeightNamespace(window Window, nsID int) error {
 // this namespace, but fall back to global highlights (ns=0) when missing.
 //
 // This takes predecence over the 'winhighlight' option.
+//
+// See: [nvim_win_set_hl_ns()]
+//
+// [nvim_win_set_hl_ns()]: https://neovim.io/doc/user/api.html#nvim_win_set_hl_ns()
 func (b *Batch) SetWindowHeightNamespace(window Window, nsID int) {
 	b.call("nvim_win_set_hl_ns", nil, window, nsID)
 }

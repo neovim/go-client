@@ -186,19 +186,11 @@ func BufferKeyMap(buffer Buffer, mode string) []*Mapping {
 }
 
 // SetBufferKeyMap sets a buffer-local mapping for the given mode.
-//
-// See:
-//
-//	:help nvim_set_keymap()
 func SetBufferKeyMap(buffer Buffer, mode, lhs, rhs string, opts map[string]bool) {
 	name(nvim_buf_set_keymap)
 }
 
 // DeleteBufferKeyMap unmaps a buffer-local mapping for the given mode.
-//
-// See:
-//
-//	:help nvim_del_keymap()
 func DeleteBufferKeyMap(buffer Buffer, mode, lhs string) {
 	name(nvim_buf_del_keymap)
 }
@@ -1712,10 +1704,6 @@ func SetKeyMap(mode, lhs, rhs string, opts map[string]bool) {
 // DeleteKeyMap unmaps a global mapping for the given mode.
 //
 // To unmap a buffer-local mapping, use DeleteBufferKeyMap().
-//
-// See:
-//
-//	:help nvim_set_keymap()
 func DeleteKeyMap(mode, lhs string) {
 	name(nvim_del_keymap)
 }

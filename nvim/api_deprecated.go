@@ -71,6 +71,10 @@ func (b *Batch) ExecuteLua(code string, result interface{}, args ...interface{})
 // BufferNumber gets a buffer's number.
 //
 // Deprecated: Use int(buffer) to get the buffer's number as an integer.
+//
+// See: [nvim_buf_get_number()]
+//
+// [nvim_buf_get_number()]: https://neovim.io/doc/user/api.html#nvim_buf_get_number()
 func (v *Nvim) BufferNumber(buffer Buffer) (number int, err error) {
 	err = v.call("nvim_buf_get_number", &number, buffer)
 	return number, err
@@ -79,6 +83,10 @@ func (v *Nvim) BufferNumber(buffer Buffer) (number int, err error) {
 // BufferNumber gets a buffer's number.
 //
 // Deprecated: Use int(buffer) to get the buffer's number as an integer.
+//
+// See: [nvim_buf_get_number()]
+//
+// [nvim_buf_get_number()]: https://neovim.io/doc/user/api.html#nvim_buf_get_number()
 func (b *Batch) BufferNumber(buffer Buffer, number *int) {
 	b.call("nvim_buf_get_number", number, buffer)
 }
@@ -93,6 +101,10 @@ func (b *Batch) BufferNumber(buffer Buffer, number *int) {
 // The end of range is exclusive. Specify -1 to clear to the end of the file.
 //
 // Deprecated: Use ClearBufferNamespace instead.
+//
+// See: [nvim_buf_clear_highlight()]
+//
+// [nvim_buf_clear_highlight()]: https://neovim.io/doc/user/api.html#nvim_buf_clear_highlight()
 func (v *Nvim) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) error {
 	return v.call("nvim_buf_clear_highlight", nil, buffer, srcID, startLine, endLine)
 }
@@ -107,6 +119,10 @@ func (v *Nvim) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, end
 // The end of range is exclusive. Specify -1 to clear to the end of the file.
 //
 // Deprecated: Use ClearBufferNamespace instead.
+//
+// See: [nvim_buf_clear_highlight()]
+//
+// [nvim_buf_clear_highlight()]: https://neovim.io/doc/user/api.html#nvim_buf_clear_highlight()
 func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, endLine int) {
 	b.call("nvim_buf_clear_highlight", nil, buffer, srcID, startLine, endLine)
 }
@@ -132,6 +148,10 @@ func (b *Batch) ClearBufferHighlight(buffer Buffer, srcID int, startLine int, en
 // The opts arg is reserved for future use.
 //
 // Deprecated: Use SetBufferExtmark instead.
+//
+// See: [nvim_buf_set_virtual_text()]
+//
+// [nvim_buf_set_virtual_text()]: https://neovim.io/doc/user/api.html#nvim_buf_set_virtual_text()
 func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}) (id int, err error) {
 	err = v.call("nvim_buf_set_virtual_text", &id, buffer, nsID, line, chunks, opts)
 	return id, err
@@ -158,6 +178,10 @@ func (v *Nvim) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []
 // The opts arg is reserved for future use.
 //
 // Deprecated: Use SetBufferExtmark instead.
+//
+// See: [nvim_buf_set_virtual_text()]
+//
+// [nvim_buf_set_virtual_text()]: https://neovim.io/doc/user/api.html#nvim_buf_set_virtual_text()
 func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks []TextChunk, opts map[string]interface{}, id *int) {
 	b.call("nvim_buf_set_virtual_text", id, buffer, nsID, line, chunks, opts)
 }
@@ -169,6 +193,10 @@ func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks [
 // rgb is the whether the export RGB colors.
 //
 // The returned highlight is the highlight definition.
+//
+// See: [nvim_get_hl_by_id()]
+//
+// [nvim_get_hl_by_id()]: https://neovim.io/doc/user/api.html#nvim_get_hl_by_id()
 func (v *Nvim) HLByID(hlID int, rgb bool) (highlight *HLAttrs, err error) {
 	var result HLAttrs
 	err = v.call("nvim_get_hl_by_id", &result, hlID, rgb)
@@ -182,6 +210,10 @@ func (v *Nvim) HLByID(hlID int, rgb bool) (highlight *HLAttrs, err error) {
 // rgb is the whether the export RGB colors.
 //
 // The returned highlight is the highlight definition.
+//
+// See: [nvim_get_hl_by_id()]
+//
+// [nvim_get_hl_by_id()]: https://neovim.io/doc/user/api.html#nvim_get_hl_by_id()
 func (b *Batch) HLByID(hlID int, rgb bool, highlight *HLAttrs) {
 	b.call("nvim_get_hl_by_id", highlight, hlID, rgb)
 }
@@ -193,6 +225,10 @@ func (b *Batch) HLByID(hlID int, rgb bool, highlight *HLAttrs) {
 // rgb is whether the export RGB colors.
 //
 // The returned highlight is the highlight definition.
+//
+// See: [nvim_get_hl_by_name()]
+//
+// [nvim_get_hl_by_name()]: https://neovim.io/doc/user/api.html#nvim_get_hl_by_name()
 func (v *Nvim) HLByName(name string, rgb bool) (highlight *HLAttrs, err error) {
 	var result HLAttrs
 	err = v.call("nvim_get_hl_by_name", &result, name, rgb)
@@ -206,6 +242,10 @@ func (v *Nvim) HLByName(name string, rgb bool) (highlight *HLAttrs, err error) {
 // rgb is whether the export RGB colors.
 //
 // The returned highlight is the highlight definition.
+//
+// See: [nvim_get_hl_by_name()]
+//
+// [nvim_get_hl_by_name()]: https://neovim.io/doc/user/api.html#nvim_get_hl_by_name()
 func (b *Batch) HLByName(name string, rgb bool, highlight *HLAttrs) {
 	b.call("nvim_get_hl_by_name", highlight, name, rgb)
 }
@@ -213,6 +253,10 @@ func (b *Batch) HLByName(name string, rgb bool, highlight *HLAttrs) {
 // CommandOutput executes a single ex command and returns the output.
 //
 // Deprecated: Use Exec instead.
+//
+// See: [nvim_command_output()]
+//
+// [nvim_command_output()]: https://neovim.io/doc/user/api.html#nvim_command_output()
 func (v *Nvim) CommandOutput(cmd string) (out string, err error) {
 	err = v.call("nvim_command_output", &out, cmd)
 	return out, err
@@ -221,6 +265,10 @@ func (v *Nvim) CommandOutput(cmd string) (out string, err error) {
 // CommandOutput executes a single ex command and returns the output.
 //
 // Deprecated: Use Exec instead.
+//
+// See: [nvim_command_output()]
+//
+// [nvim_command_output()]: https://neovim.io/doc/user/api.html#nvim_command_output()
 func (b *Batch) CommandOutput(cmd string, out *string) {
 	b.call("nvim_command_output", out, cmd)
 }
