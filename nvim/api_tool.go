@@ -199,57 +199,65 @@ func parseAPIDef() ([]*Function, []*Function, error) {
 
 const genTemplate = `
 
+{{define "doc" -}}
+{{.Doc}}
+//
+// See: [{{.Name}}()]
+// 
+// [{{.Name}}()]: https://neovim.io/doc/user/api.html#{{.Name}}()
+{{- end}}
+
 {{range .Functions}}
 {{if eq "interface{}" .ReturnType}}
-{{.Doc}}
+{{template "doc" .}}
 func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result interface{}) error {
     return v.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
 }
 
-{{.Doc}}
+{{template "doc" .}}
 func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result interface{}) {
     b.call("{{.Name}}", &result, {{range .Parameters}}{{.Name}},{{end}})
 }
 
 {{else if and .ReturnName .ReturnPtr}}
-{{.Doc}}
+{{template "doc" .}}
 func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{.ReturnName}} *{{.ReturnType}}, err error) {
 	var result {{.ReturnType}}
 	err = v.call("{{.Name}}", &result, {{range .Parameters}}{{.Name}},{{end}})
 	return &result, err
 }
-{{.Doc}}
+{{template "doc" .}}
 func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} {{.ReturnName}} *{{.ReturnType}}) {
     b.call("{{.Name}}", {{.ReturnName}}, {{range .Parameters}}{{.Name}},{{end}})
 }
 
 {{else if and (.ReturnName) (not .ReturnPtr)}}
-{{.Doc}}
+{{template "doc" .}}
 func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{.ReturnName}} {{.ReturnType}}, err error) {
 	err = v.call("{{.Name}}", &{{.ReturnName}}, {{range .Parameters}}{{.Name}},{{end}})
 	return {{.ReturnName}}, err
 }
-{{.Doc}}
+{{template "doc" .}}
 func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} {{.ReturnName}} *{{.ReturnType}}) {
     b.call("{{.Name}}", {{.ReturnName}}, {{range .Parameters}}{{.Name}},{{end}})
 }
 {{else if .ReturnType}}
-{{.Doc}}
+{{template "doc" .}}
 func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) ({{if .ReturnPtr}}*{{end}}{{.ReturnType}}, error) {
     var result {{.ReturnType}}
     err := v.call("{{.Name}}", &result, {{range .Parameters}}{{.Name}},{{end}})
     return {{if .ReturnPtr}}&{{end}}result, err
 }
-{{.Doc}}
+{{template "doc" .}}
 func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}} result *{{.ReturnType}}) {
     b.call("{{.Name}}", result, {{range .Parameters}}{{.Name}},{{end}})
 }
 {{else}}
-{{.Doc}}
+{{template "doc" .}}
 func (v *Nvim) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) error {
     return v.call("{{.Name}}", nil, {{range .Parameters}}{{.Name}},{{end}})
 }
-{{.Doc}}
+{{template "doc" .}}
 func (b *Batch) {{.GoName}}({{range .Parameters}}{{.Name}} {{.Type}},{{end}}) {
     b.call("{{.Name}}", nil, {{range .Parameters}}{{.Name}},{{end}})
 }
