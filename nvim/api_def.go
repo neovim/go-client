@@ -252,7 +252,7 @@ func DeleteBuffer(buffer Buffer, opts map[string]bool) {
 //
 // Note: Even if a buffer is valid it may have been unloaded.
 // See |help api-buffer| for more info about unloaded buffers.
-func IsBufferValid(buffer Buffer) (valied bool) {
+func IsBufferValid(buffer Buffer) (valid bool) {
 	name(nvim_buf_is_valid)
 }
 
