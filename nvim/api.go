@@ -780,9 +780,9 @@ func (b *Batch) DeleteBuffer(buffer Buffer, opts map[string]bool) {
 // See: [nvim_buf_is_valid()]
 //
 // [nvim_buf_is_valid()]: https://neovim.io/doc/user/api.html#nvim_buf_is_valid()
-func (v *Nvim) IsBufferValid(buffer Buffer) (valied bool, err error) {
-	err = v.call("nvim_buf_is_valid", &valied, buffer)
-	return valied, err
+func (v *Nvim) IsBufferValid(buffer Buffer) (valid bool, err error) {
+	err = v.call("nvim_buf_is_valid", &valid, buffer)
+	return valid, err
 }
 
 // IsBufferValid returns whether the buffer is valid.
@@ -793,8 +793,8 @@ func (v *Nvim) IsBufferValid(buffer Buffer) (valied bool, err error) {
 // See: [nvim_buf_is_valid()]
 //
 // [nvim_buf_is_valid()]: https://neovim.io/doc/user/api.html#nvim_buf_is_valid()
-func (b *Batch) IsBufferValid(buffer Buffer, valied *bool) {
-	b.call("nvim_buf_is_valid", valied, buffer)
+func (b *Batch) IsBufferValid(buffer Buffer, valid *bool) {
+	b.call("nvim_buf_is_valid", valid, buffer)
 }
 
 // DeleteBufferMark deletes a named mark in the buffer.
