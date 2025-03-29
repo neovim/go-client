@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      # TODO: don't add this in the pr
-      - fix-tests
   pull_request:
   release:
     types:
@@ -23,11 +21,11 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
-          # - macos-13      # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
-          # - windows-2022  # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
+          - macos-13      # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
+          - windows-2022  # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
         go-version:
-          # - 1.18.x
-          # - 1.19.x
+          - 1.18.x
+          - 1.19.x
           - 1.20.x
         neovim-version:
           - v0.9.1

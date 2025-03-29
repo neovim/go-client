@@ -2250,8 +2250,19 @@ func testCommand(v *Nvim) func(*testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if len(cmds) > 0 {
-					t.Fatalf("expected 0 length but got %#v", cmds)
+
+				var want int
+				switch nvimVersion.Minor {
+				case 9:
+					want = 0
+				case 10:
+					want = 3
+				default:
+					want = 4
+				}
+
+				if len(cmds) > want {
+					t.Fatalf("expected %d length but got %#v", want, cmds)
 				}
 			})
 
@@ -2266,8 +2277,17 @@ func testCommand(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				if len(cmds) > 0 {
-					t.Fatalf("expected 0 length but got %#v", cmds)
+				var want int
+				switch nvimVersion.Minor {
+				case 9:
+					want = 0
+				case 10:
+					want = 3
+				default:
+					want = 4
+				}
+				if len(cmds) > want {
+					t.Fatalf("expected %d length but got %#v", want, cmds)
 				}
 			})
 		})
