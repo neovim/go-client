@@ -321,6 +321,8 @@ func stringDecoder(ds *decodeState, v reflect.Value) {
 	var x string
 
 	switch ds.Type() {
+	case Nil:
+		x = ""
 	case Binary, String:
 		x = ds.String()
 	default:

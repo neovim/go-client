@@ -2250,8 +2250,19 @@ func testCommand(v *Nvim) func(*testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if len(cmds) > 0 {
-					t.Fatalf("expected 0 length but got %#v", cmds)
+
+				var want int
+				switch nvimVersion.Minor {
+				case 9:
+					want = 0
+				case 10:
+					want = 3
+				default:
+					want = 4
+				}
+
+				if len(cmds) > want {
+					t.Fatalf("expected %d length but got %#v", want, cmds)
 				}
 			})
 
@@ -2266,8 +2277,17 @@ func testCommand(v *Nvim) func(*testing.T) {
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				if len(cmds) > 0 {
-					t.Fatalf("expected 0 length but got %#v", cmds)
+				var want int
+				switch nvimVersion.Minor {
+				case 9:
+					want = 0
+				case 10:
+					want = 3
+				default:
+					want = 4
+				}
+				if len(cmds) > want {
+					t.Fatalf("expected %d length but got %#v", want, cmds)
 				}
 			})
 		})
@@ -3015,195 +3035,49 @@ func testKey(v *Nvim) func(*testing.T) {
 				skipBetweenVersion(t, "v0.7.0", "v0.8.0")
 
 				mode := "n"
-				if err := v.SetKeyMap(mode, "y", "yy", make(map[string]bool)); err != nil {
-					t.Fatal(err)
-				}
-
-				var wantMaps []*Mapping
-				wantMapsLen := 0
-				switch nvimVersion.Minor {
-				case 6:
-					wantMaps = []*Mapping{
-						{
-							LHS:     "<C-L>",
-							RHS:     "<Cmd>nohlsearch|diffupdate<CR><C-L>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-						{
-							LHS:     "Y",
-							RHS:     "y$",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-						{
-							LHS:     "y",
-							RHS:     "yy",
-							Silent:  0,
-							NoRemap: 0,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-					}
-					wantMapsLen = 2
-				case 7:
-					wantMaps = []*Mapping{
-						{
-							LHS:     "<C-L>",
-							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-						{
-							LHS:     "Y",
-							RHS:     "y$",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-						{
-							LHS:     "y",
-							RHS:     "yy",
-							Silent:  0,
-							NoRemap: 0,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -9,
-							NoWait:  0,
-						},
-					}
-					wantMapsLen = 2
-				case 8:
-					wantMaps = []*Mapping{
-						{
-							LHS:     "&",
-							RHS:     ":&&<CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-						{
-							LHS:     "Y",
-							RHS:     "y$",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-						{
-							LHS:     "y",
-							RHS:     "yy",
-							Silent:  0,
-							NoRemap: 0,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -9,
-							NoWait:  0,
-						},
-						{
-							LHS:     "<C-L>",
-							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-					}
-					wantMapsLen = 3
-				default:
-					wantMaps = []*Mapping{
-						{
-							LHS:     "&",
-							RHS:     ":&&<CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-						{
-							LHS:     "Y",
-							RHS:     "y$",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-						{
-							LHS:     "y",
-							RHS:     "yy",
-							Silent:  0,
-							NoRemap: 0,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -9,
-							NoWait:  0,
-						},
-						{
-							LHS:     "<C-L>",
-							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-					}
-					wantMapsLen = 3
-				}
-
-				got, err := v.KeyMap(mode)
+				original, err := v.KeyMap(mode)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !reflect.DeepEqual(got, wantMaps) {
-					for i, gotmap := range got {
-						t.Logf(" got[%d]: %#v", i, gotmap)
-					}
-					for i, wantmap := range wantMaps {
-						t.Logf("want[%d]: %#v", i, wantmap)
-					}
-					t.Fatalf("KeyMap(%s) = %#v, want: %#v", mode, got, wantMaps)
-				}
 
-				if err := v.DeleteKeyMap(mode, "y"); err != nil {
+				lhs := "y"
+				rhs := "yy"
+				if err := v.SetKeyMap(mode, lhs, rhs, make(map[string]bool)); err != nil {
 					t.Fatal(err)
 				}
 
-				got2, err := v.KeyMap(mode)
+				added, err := v.KeyMap(mode)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if len(got2) != wantMapsLen {
-					t.Fatalf("expected %d but got %#v", wantMapsLen, got2)
+
+				if len(added) != len(original)+1 {
+					t.Fatalf("want %d but got %d", len(original)+1, len(added))
+				}
+
+				var keymap *Mapping
+				for _, m := range added {
+					if m.LHS == "y" {
+						keymap = m
+						break
+					}
+				}
+
+				if keymap.LHS != lhs && keymap.RHS != rhs {
+					t.Fatalf("want { LHS = %s, RHS = %s } but got { LHS = %s, RHS = %s }", lhs, rhs, keymap.LHS, keymap.RHS)
+				}
+
+				if err := v.DeleteKeyMap(mode, lhs); err != nil {
+					t.Fatal(err)
+				}
+
+				deleted, err := v.KeyMap(mode)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if len(deleted) != len(original) {
+					t.Fatalf("want %d but got %d", len(original), len(added))
 				}
 			})
 
@@ -3398,202 +3272,58 @@ func testKey(v *Nvim) func(*testing.T) {
 			t.Run("KeyMap", func(t *testing.T) {
 				skipBetweenVersion(t, "v0.7.0", "v0.8.0")
 
+				mode := "n"
 				b := v.NewBatch()
 
-				mode := "n"
-				b.SetKeyMap(mode, "y", "yy", make(map[string]bool))
+				var original []*Mapping
+				b.KeyMap(mode, &original)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
 
-				var wantMaps []*Mapping
-				wantMapsLen := 0
-				switch nvimVersion.Minor {
-				case 6:
-					wantMaps = []*Mapping{
-						{
-							LHS:     "<C-L>",
-							RHS:     "<Cmd>nohlsearch|diffupdate<CR><C-L>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-						{
-							LHS:     "Y",
-							RHS:     "y$",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-						{
-							LHS:     "y",
-							RHS:     "yy",
-							Silent:  0,
-							NoRemap: 0,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-					}
-					wantMapsLen = 2
-				case 7:
-					wantMaps = []*Mapping{
-						{
-							LHS:     "<C-L>",
-							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-						{
-							LHS:     "Y",
-							RHS:     "y$",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     0,
-							NoWait:  0,
-						},
-						{
-							LHS:     "y",
-							RHS:     "yy",
-							Silent:  0,
-							NoRemap: 0,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -9,
-							NoWait:  0,
-						},
-					}
-					wantMapsLen = 2
-				case 8:
-					wantMaps = []*Mapping{
-						{
-							LHS:     "&",
-							RHS:     ":&&<CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-						{
-							LHS:     "Y",
-							RHS:     "y$",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-						{
-							LHS:     "y",
-							RHS:     "yy",
-							Silent:  0,
-							NoRemap: 0,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -9,
-							NoWait:  0,
-						},
-						{
-							LHS:     "<C-L>",
-							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-					}
-					wantMapsLen = 3
-				default:
-					wantMaps = []*Mapping{
-						{
-							LHS:     "&",
-							RHS:     ":&&<CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-						{
-							LHS:     "Y",
-							RHS:     "y$",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-						{
-							LHS:     "y",
-							RHS:     "yy",
-							Silent:  0,
-							NoRemap: 0,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -9,
-							NoWait:  0,
-						},
-						{
-							LHS:     "<C-L>",
-							RHS:     "<Cmd>nohlsearch|diffupdate|normal! <C-L><CR>",
-							Silent:  0,
-							NoRemap: 1,
-							Expr:    0,
-							Buffer:  0,
-							SID:     -8,
-							NoWait:  0,
-						},
-					}
-					wantMapsLen = 3
-				}
+				lhs := "y"
+				rhs := "yy"
 
-				var got []*Mapping
-				b.KeyMap(mode, &got)
-				if err := b.Execute(); err != nil {
-					t.Fatal(err)
-				}
-				if !reflect.DeepEqual(got, wantMaps) {
-					for i, gotmap := range got {
-						t.Logf(" got[%d]: %#v", i, gotmap)
-					}
-					for i, wantmap := range wantMaps {
-						t.Logf("want[%d]: %#v", i, wantmap)
-					}
-					t.Fatalf("KeyMap(%s) = %#v, want: %#v", mode, got, wantMaps)
-				}
-
-				b.DeleteKeyMap(mode, "y")
+				b.SetKeyMap(mode, lhs, rhs, make(map[string]bool))
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
 
-				var got2 []*Mapping
-				b.KeyMap(mode, &got2)
+				var added []*Mapping
+				b.KeyMap(mode, &added)
 				if err := b.Execute(); err != nil {
 					t.Fatal(err)
 				}
-				if len(got2) != wantMapsLen {
-					t.Fatalf("expected %d but got %#v", wantMapsLen, got2)
+
+				if len(added) != len(original)+1 {
+					t.Fatalf("want %d but got %d", len(original)+1, len(added))
+				}
+
+				var keymap *Mapping
+				for _, m := range added {
+					if m.LHS == "y" {
+						keymap = m
+						break
+					}
+				}
+
+				if keymap.LHS != lhs && keymap.RHS != rhs {
+					t.Fatalf("want { LHS = %s, RHS = %s } but got { LHS = %s, RHS = %s }", lhs, rhs, keymap.LHS, keymap.RHS)
+				}
+
+				b.DeleteKeyMap(mode, lhs)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				var deleted []*Mapping
+				b.KeyMap(mode, &deleted)
+				if err := b.Execute(); err != nil {
+					t.Fatal(err)
+				}
+
+				if len(deleted) != len(original) {
+					t.Fatalf("want %d but got %d", len(original), len(added))
 				}
 			})
 
@@ -3840,8 +3570,8 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			const testHLName = `Test`
 			testHLAttrs := &HLAttrs{
 				Bold:            true,
-				CtermForeground: cm[`Red`],
-				CtermBackground: cm[`Yellow`],
+				CtermForeground: 12,
+				CtermBackground: 14,
 			}
 			if err := v.SetHighlight(nsID, testHLName, testHLAttrs); err != nil {
 				t.Fatal(err)
@@ -3917,8 +3647,8 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			const testHLName = `Test`
 			testHLAttrs := &HLAttrs{
 				Bold:            true,
-				CtermForeground: cm[`Red`],
-				CtermBackground: cm[`Yellow`],
+				CtermForeground: 12,
+				CtermBackground: 14,
 			}
 			b.SetHighlight(nsID, testHLName, testHLAttrs)
 			if err := b.Execute(); err != nil {

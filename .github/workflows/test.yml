@@ -11,6 +11,10 @@ on:
       - created
       - edited
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
@@ -20,15 +24,17 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04  # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
-          - macos-13      # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
-          - windows-2022  # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
+          - ubuntu-24.04  # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
+          - macos-15      # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md
+          - windows-2025  # https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md
         go-version:
-          - 1.18.x
-          - 1.19.x
-          - 1.20.x
+          - 1.22.x
+          - 1.23.x
+          - 1.24.x
         neovim-version:
           - v0.9.1
+          - v0.10.4
+          - v0.11.0
           - nightly
       fail-fast: false
 
@@ -42,12 +48,12 @@ jobs:
         echo "NVIM_VERSION=$(if [ ${{ matrix.neovim-version }} != 'nightly' ]; then echo 'stable'; else echo 'nightly'; fi)" >> $GITHUB_ENV
 
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
 
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install neovim binary
       uses: rhysd/action-setup-vim@v1
@@ -59,8 +65,8 @@ jobs:
       run: |
         go test -race -count=1 -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v5
       with:
-        file: coverage.out
+        files: coverage.out
         flags: ${{ env.OS }}-${{ env.GO_VERSION }}-${{ env.NVIM_VERSION }}
         env_vars: OS,GO_VERSION,NVIM_VERSION

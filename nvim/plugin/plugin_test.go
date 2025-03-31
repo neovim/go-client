@@ -386,6 +386,22 @@ func TestSubscribe(t *testing.T) {
 	t.Parallel()
 
 	p := plugin.New(nvimtest.NewChildProcess(t))
+	apiInfo, err := p.Nvim.APIInfo()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(apiInfo) != 2 {
+		t.Fatalf("unknown APIInfo: %#v", apiInfo)
+	}
+
+	info, ok := apiInfo[1].(map[string]any)
+	if !ok {
+		t.Fatalf("apiInfo[1] is not map[string]any type: %T", apiInfo[1])
+	}
+	version := info["version"].(map[string]any)
+	if version["minor"].(int64) > 10 {
+		t.Skip("Since Neovim 0.11.0, rpcnotify(0) broadcasts to all channels, not just subscribed channels.")
+	}
 
 	const event1 = "event1"
 	eventFn1 := func(t *testing.T, v *nvim.Nvim) error {

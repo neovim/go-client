@@ -964,6 +964,16 @@ func Test_stringDecoder(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
+		"Nil": {
+			ds: &decodeState{
+				Decoder: &Decoder{
+					p: nil,
+					t: Nil,
+				},
+			},
+			want: string(""),
+			wantErr: false,
+		},
 		"Binary": {
 			ds: &decodeState{
 				Decoder: &Decoder{
