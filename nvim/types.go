@@ -152,7 +152,7 @@ type HLAttrs struct {
 
 	// Cterm is cterm attribute map. Sets attributed for cterm colors.
 	//
-	// Note thet by default cterm attributes are same as attributes of gui color.
+	// Note that by default cterm attributes are same as attributes of gui color.
 	//
 	// This value is used only SetHighlight.
 	Cterm *HLAttrs `msgpack:"cterm,omitempty"`

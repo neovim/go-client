@@ -3570,8 +3570,8 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			const testHLName = `Test`
 			testHLAttrs := &HLAttrs{
 				Bold:            true,
-				CtermForeground: cm[`Red`],
-				CtermBackground: cm[`Yellow`],
+				CtermForeground: 12,
+				CtermBackground: 14,
 			}
 			if err := v.SetHighlight(nsID, testHLName, testHLAttrs); err != nil {
 				t.Fatal(err)
@@ -3647,8 +3647,8 @@ func testHighlight(v *Nvim) func(*testing.T) {
 			const testHLName = `Test`
 			testHLAttrs := &HLAttrs{
 				Bold:            true,
-				CtermForeground: cm[`Red`],
-				CtermBackground: cm[`Yellow`],
+				CtermForeground: 12,
+				CtermBackground: 14,
 			}
 			b.SetHighlight(nsID, testHLName, testHLAttrs)
 			if err := b.Execute(); err != nil {
