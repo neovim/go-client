@@ -61,6 +61,6 @@ jobs:
 
     - uses: codecov/codecov-action@v5
       with:
-        file: coverage.out
+        files: coverage.out
         flags: ${{ env.OS }}-${{ env.GO_VERSION }}-${{ env.NVIM_VERSION }}
         env_vars: OS,GO_VERSION,NVIM_VERSION
