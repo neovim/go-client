@@ -186,6 +186,118 @@ func (b *Batch) SetBufferVirtualText(buffer Buffer, nsID int, line int, chunks [
 	b.call("nvim_buf_set_virtual_text", id, buffer, nsID, line, chunks, opts)
 }
 
+// SetOption sets an option value.
+//
+// See: [nvim_set_option()]
+//
+// [nvim_set_option()]: https://neovim.io/doc/user/api.html#nvim_set_option()
+func (v *Nvim) SetOption(name string, value any) error {
+	return v.call("nvim_set_option", nil, name, value)
+}
+
+// SetOption sets an option value.
+//
+// See: [nvim_set_option()]
+//
+// [nvim_set_option()]: https://neovim.io/doc/user/api.html#nvim_set_option()
+func (b *Batch) SetOption(name string, value any) {
+	b.call("nvim_set_option", nil, name, value)
+}
+
+// Option gets an option value string.
+//
+// See: [nvim_get_option()]
+//
+// [nvim_get_option()]: https://neovim.io/doc/user/api.html#nvim_get_option()
+func (v *Nvim) Option(name string, result any) error {
+	return v.call("nvim_get_option", result, name)
+}
+
+// Option gets an option value string.
+//
+// See: [nvim_get_option()]
+//
+// [nvim_get_option()]: https://neovim.io/doc/user/api.html#nvim_get_option()
+func (b *Batch) Option(name string, result any) {
+	b.call("nvim_get_option", &result, name)
+}
+
+// BufferOption gets a buffer option value.
+//
+// See: [nvim_buf_get_option()]
+//
+// [nvim_buf_get_option()]: https://neovim.io/doc/user/api.html#nvim_buf_get_option()
+func (v *Nvim) BufferOption(buffer Buffer, name string, result any) error {
+	return v.call("nvim_buf_get_option", result, buffer, name)
+}
+
+// BufferOption gets a buffer option value.
+//
+// See: [nvim_buf_get_option()]
+//
+// [nvim_buf_get_option()]: https://neovim.io/doc/user/api.html#nvim_buf_get_option()
+func (b *Batch) BufferOption(buffer Buffer, name string, result any) {
+	b.call("nvim_buf_get_option", &result, buffer, name)
+}
+
+// SetBufferOption sets a buffer option value.
+//
+// Passing nil as value arg to deletes the option (only works if there's a global fallback).
+//
+// See: [nvim_buf_set_option()]
+//
+// [nvim_buf_set_option()]: https://neovim.io/doc/user/api.html#nvim_buf_set_option()
+func (v *Nvim) SetBufferOption(buffer Buffer, name string, value any) error {
+	return v.call("nvim_buf_set_option", nil, buffer, name, value)
+}
+
+// SetBufferOption sets a buffer option value.
+//
+// Passing nil as value arg to deletes the option (only works if there's a global fallback).
+//
+// See: [nvim_buf_set_option()]
+//
+// [nvim_buf_set_option()]: https://neovim.io/doc/user/api.html#nvim_buf_set_option()
+func (b *Batch) SetBufferOption(buffer Buffer, name string, value any) {
+	b.call("nvim_buf_set_option", nil, buffer, name, value)
+}
+
+// WindowOption gets a window option value.
+//
+// See: [nvim_win_get_option()]
+//
+// [nvim_win_get_option()]: https://neovim.io/doc/user/api.html#nvim_win_get_option()
+func (v *Nvim) WindowOption(window Window, name string, result any) error {
+	return v.call("nvim_win_get_option", result, window, name)
+}
+
+// WindowOption gets a window option value.
+//
+// See: [nvim_win_get_option()]
+//
+// [nvim_win_get_option()]: https://neovim.io/doc/user/api.html#nvim_win_get_option()
+func (b *Batch) WindowOption(window Window, name string, result any) {
+	b.call("nvim_win_get_option", &result, window, name)
+}
+
+// SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
+//
+// See: [nvim_win_set_option()]
+//
+// [nvim_win_set_option()]: https://neovim.io/doc/user/api.html#nvim_win_set_option()
+func (v *Nvim) SetWindowOption(window Window, name string, value any) error {
+	return v.call("nvim_win_set_option", nil, window, name, value)
+}
+
+// SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
+//
+// See: [nvim_win_set_option()]
+//
+// [nvim_win_set_option()]: https://neovim.io/doc/user/api.html#nvim_win_set_option()
+func (b *Batch) SetWindowOption(window Window, name string, value any) {
+	b.call("nvim_win_set_option", nil, window, name, value)
+}
+
 // HLByID gets a highlight definition by name.
 //
 // hlID is the highlight id as returned by HLIDByName.

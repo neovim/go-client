@@ -6,6 +6,23 @@
 
 Neovim/go-client is a [Neovim](https://neovim.io/) client for [Go](https://golang.org/).
 
+Update API
+----------
+
+The API can be updated with the api tool.
+
+```sh
+cd nvim
+
+# The compare command indicates what functions need to be changed. The results
+# should be added to `api_def.go`.
+go run api_tool.go -compare
+
+# After applying the chages from compare to `api_def.go`, generate the `api.go`
+# and `api_deprecated.go` files.
+go generate
+```
+
 Release
 -------
 

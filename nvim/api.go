@@ -1501,6 +1501,24 @@ func (b *Batch) DeleteTabpageVar(tabpage Tabpage, name string) {
 	b.call("nvim_tabpage_del_var", nil, tabpage, name)
 }
 
+// TabpageSetWindow sets the current window in a tabpage.
+//
+// See: [nvim_tabpage_set_win()]
+//
+// [nvim_tabpage_set_win()]: https://neovim.io/doc/user/api.html#nvim_tabpage_set_win()
+func (v *Nvim) TabpageSetWindow(tabpage Tabpage, win Window) error {
+	return v.call("nvim_tabpage_set_win", nil, tabpage, win)
+}
+
+// TabpageSetWindow sets the current window in a tabpage.
+//
+// See: [nvim_tabpage_set_win()]
+//
+// [nvim_tabpage_set_win()]: https://neovim.io/doc/user/api.html#nvim_tabpage_set_win()
+func (b *Batch) TabpageSetWindow(tabpage Tabpage, win Window) {
+	b.call("nvim_tabpage_set_win", nil, tabpage, win)
+}
+
 // TabpageWindow gets the current window in a tabpage.
 //
 // See: [nvim_tabpage_get_win()]
@@ -2333,118 +2351,6 @@ func (b *Batch) OptionInfo(name string, opts map[string]any, opinfo *OptionInfo)
 	b.call("nvim_get_option_info2", opinfo, name, opts)
 }
 
-// SetOption sets an option value.
-//
-// See: [nvim_set_option()]
-//
-// [nvim_set_option()]: https://neovim.io/doc/user/api.html#nvim_set_option()
-func (v *Nvim) SetOption(name string, value any) error {
-	return v.call("nvim_set_option", nil, name, value)
-}
-
-// SetOption sets an option value.
-//
-// See: [nvim_set_option()]
-//
-// [nvim_set_option()]: https://neovim.io/doc/user/api.html#nvim_set_option()
-func (b *Batch) SetOption(name string, value any) {
-	b.call("nvim_set_option", nil, name, value)
-}
-
-// Option gets an option value string.
-//
-// See: [nvim_get_option()]
-//
-// [nvim_get_option()]: https://neovim.io/doc/user/api.html#nvim_get_option()
-func (v *Nvim) Option(name string, result any) error {
-	return v.call("nvim_get_option", result, name)
-}
-
-// Option gets an option value string.
-//
-// See: [nvim_get_option()]
-//
-// [nvim_get_option()]: https://neovim.io/doc/user/api.html#nvim_get_option()
-func (b *Batch) Option(name string, result any) {
-	b.call("nvim_get_option", &result, name)
-}
-
-// BufferOption gets a buffer option value.
-//
-// See: [nvim_buf_get_option()]
-//
-// [nvim_buf_get_option()]: https://neovim.io/doc/user/api.html#nvim_buf_get_option()
-func (v *Nvim) BufferOption(buffer Buffer, name string, result any) error {
-	return v.call("nvim_buf_get_option", result, buffer, name)
-}
-
-// BufferOption gets a buffer option value.
-//
-// See: [nvim_buf_get_option()]
-//
-// [nvim_buf_get_option()]: https://neovim.io/doc/user/api.html#nvim_buf_get_option()
-func (b *Batch) BufferOption(buffer Buffer, name string, result any) {
-	b.call("nvim_buf_get_option", &result, buffer, name)
-}
-
-// SetBufferOption sets a buffer option value.
-//
-// Passing nil as value arg to deletes the option (only works if there's a global fallback).
-//
-// See: [nvim_buf_set_option()]
-//
-// [nvim_buf_set_option()]: https://neovim.io/doc/user/api.html#nvim_buf_set_option()
-func (v *Nvim) SetBufferOption(buffer Buffer, name string, value any) error {
-	return v.call("nvim_buf_set_option", nil, buffer, name, value)
-}
-
-// SetBufferOption sets a buffer option value.
-//
-// Passing nil as value arg to deletes the option (only works if there's a global fallback).
-//
-// See: [nvim_buf_set_option()]
-//
-// [nvim_buf_set_option()]: https://neovim.io/doc/user/api.html#nvim_buf_set_option()
-func (b *Batch) SetBufferOption(buffer Buffer, name string, value any) {
-	b.call("nvim_buf_set_option", nil, buffer, name, value)
-}
-
-// WindowOption gets a window option value.
-//
-// See: [nvim_win_get_option()]
-//
-// [nvim_win_get_option()]: https://neovim.io/doc/user/api.html#nvim_win_get_option()
-func (v *Nvim) WindowOption(window Window, name string, result any) error {
-	return v.call("nvim_win_get_option", result, window, name)
-}
-
-// WindowOption gets a window option value.
-//
-// See: [nvim_win_get_option()]
-//
-// [nvim_win_get_option()]: https://neovim.io/doc/user/api.html#nvim_win_get_option()
-func (b *Batch) WindowOption(window Window, name string, result any) {
-	b.call("nvim_win_get_option", &result, window, name)
-}
-
-// SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
-//
-// See: [nvim_win_set_option()]
-//
-// [nvim_win_set_option()]: https://neovim.io/doc/user/api.html#nvim_win_set_option()
-func (v *Nvim) SetWindowOption(window Window, name string, value any) error {
-	return v.call("nvim_win_set_option", nil, window, name, value)
-}
-
-// SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
-//
-// See: [nvim_win_set_option()]
-//
-// [nvim_win_set_option()]: https://neovim.io/doc/user/api.html#nvim_win_set_option()
-func (b *Batch) SetWindowOption(window Window, name string, value any) {
-	b.call("nvim_win_set_option", nil, window, name, value)
-}
-
 // AttachUI registers the client as a remote UI. After this method is called,
 // the client will receive redraw notifications.
 //
@@ -2541,6 +2447,24 @@ func (v *Nvim) TryResizeUI(width int, height int) error {
 // [nvim_ui_try_resize()]: https://neovim.io/doc/user/api.html#nvim_ui_try_resize()
 func (b *Batch) TryResizeUI(width int, height int) {
 	b.call("nvim_ui_try_resize", nil, width, height)
+}
+
+// UITermEvent sends a terminal event to the UI.
+//
+// See: [nvim_ui_term_event()]
+//
+// [nvim_ui_term_event()]: https://neovim.io/doc/user/api.html#nvim_ui_term_event()
+func (v *Nvim) UITermEvent(event string, value any) error {
+	return v.call("nvim_ui_term_event", nil, event, value)
+}
+
+// UITermEvent sends a terminal event to the UI.
+//
+// See: [nvim_ui_term_event()]
+//
+// [nvim_ui_term_event()]: https://neovim.io/doc/user/api.html#nvim_ui_term_event()
+func (b *Batch) UITermEvent(event string, value any) {
+	b.call("nvim_ui_term_event", nil, event, value)
 }
 
 // SetUIOption sets a UI option.
@@ -2798,6 +2722,25 @@ func (v *Nvim) HLIDByName(name string) (hlID int, err error) {
 // [nvim_get_hl_id_by_name()]: https://neovim.io/doc/user/api.html#nvim_get_hl_id_by_name()
 func (b *Batch) HLIDByName(name string, hlID *int) {
 	b.call("nvim_get_hl_id_by_name", hlID, name)
+}
+
+// GetHighlightNamespace gets highlight namespace.
+//
+// See: [nvim_get_hl_ns()]
+//
+// [nvim_get_hl_ns()]: https://neovim.io/doc/user/api.html#nvim_get_hl_ns()
+func (v *Nvim) GetHighlightNamespace(opts map[string]any) (ns int, err error) {
+	err = v.call("nvim_get_hl_ns", &ns, opts)
+	return ns, err
+}
+
+// GetHighlightNamespace gets highlight namespace.
+//
+// See: [nvim_get_hl_ns()]
+//
+// [nvim_get_hl_ns()]: https://neovim.io/doc/user/api.html#nvim_get_hl_ns()
+func (b *Batch) GetHighlightNamespace(opts map[string]any, ns *int) {
+	b.call("nvim_get_hl_ns", ns, opts)
 }
 
 // SetHighlight sets a highlight group.
@@ -4890,6 +4833,25 @@ func (v *Nvim) SetWindowWidth(window Window, width int) error {
 // [nvim_win_set_width()]: https://neovim.io/doc/user/api.html#nvim_win_set_width()
 func (b *Batch) SetWindowWidth(window Window, width int) {
 	b.call("nvim_win_set_width", nil, window, width)
+}
+
+// WindowTextHeight calculates the height of window text.
+//
+// See: [nvim_win_text_height()]
+//
+// [nvim_win_text_height()]: https://neovim.io/doc/user/api.html#nvim_win_text_height()
+func (v *Nvim) WindowTextHeight(window Window, opts map[string]any) (result map[string]any, err error) {
+	err = v.call("nvim_win_text_height", &result, window, opts)
+	return result, err
+}
+
+// WindowTextHeight calculates the height of window text.
+//
+// See: [nvim_win_text_height()]
+//
+// [nvim_win_text_height()]: https://neovim.io/doc/user/api.html#nvim_win_text_height()
+func (b *Batch) WindowTextHeight(window Window, opts map[string]any, result *map[string]any) {
+	b.call("nvim_win_text_height", result, window, opts)
 }
 
 // WindowVar gets a window-scoped (w:) variable.

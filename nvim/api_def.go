@@ -589,6 +589,11 @@ func DeleteTabpageVar(tabpage Tabpage, name string) {
 	name(nvim_tabpage_del_var)
 }
 
+// TabpageSetWindow sets the current window in a tabpage.
+func TabpageSetWindow(tabpage Tabpage, win Window) {
+	name(nvim_tabpage_set_win)
+}
+
 // TabpageWindow gets the current window in a tabpage.
 func TabpageWindow(tabpage Tabpage) Window {
 	name(nvim_tabpage_get_win)
@@ -951,16 +956,19 @@ func OptionInfo(name string, opts map[string]any) (opinfo OptionInfo) {
 // SetOption sets an option value.
 func SetOption(name string, value any) {
 	name(nvim_set_option)
+	deprecatedSince(11)
 }
 
 // Option gets an option value string.
 func Option(name string) (option any) {
 	name(nvim_get_option)
+	deprecatedSince(11)
 }
 
 // BufferOption gets a buffer option value.
 func BufferOption(buffer Buffer, name string) (value any) {
 	name(nvim_buf_get_option)
+	deprecatedSince(11)
 }
 
 // SetBufferOption sets a buffer option value.
@@ -968,16 +976,19 @@ func BufferOption(buffer Buffer, name string) (value any) {
 // Passing nil as value arg to deletes the option (only works if there's a global fallback).
 func SetBufferOption(buffer Buffer, name string, value any) {
 	name(nvim_buf_set_option)
+	deprecatedSince(11)
 }
 
 // WindowOption gets a window option value.
 func WindowOption(window Window, name string) (value any) {
 	name(nvim_win_get_option)
+	deprecatedSince(11)
 }
 
 // SetWindowOption sets a window option value. Passing "nil" as value deletes the option(only works if there's a global fallback).
 func SetWindowOption(window Window, name string, value any) {
 	name(nvim_win_set_option)
+	deprecatedSince(11)
 }
 
 // ui.c
@@ -1013,6 +1024,11 @@ func DetachUI() {
 // Nvim will send a redraw request to resize.
 func TryResizeUI(width, height int) {
 	name(nvim_ui_try_resize)
+}
+
+// UITermEvent sends a terminal event to the UI.
+func UITermEvent(event string, value any) {
+	name(nvim_ui_term_event)
 }
 
 // SetUIOption sets a UI option.
@@ -1135,6 +1151,12 @@ func HLByName(name string, rgb bool) (highlight HLAttrs) {
 	returnPtr()
 	deprecatedSince(9)
 }
+
+// GetHighlightNamespace gets highlight namespace.
+func GetHighlightNamespace(opts map[string]any) (ns int) {
+	name(nvim_get_hl_ns)
+}
+
 
 // SetHighlight sets a highlight group.
 //
@@ -1902,6 +1924,11 @@ func WindowWidth(window Window) (width int) {
 // SetWindowWidth Sets the window width. This will only succeed if the screen is split vertically.
 func SetWindowWidth(window Window, width int) {
 	name(nvim_win_set_width)
+}
+
+// WindowTextHeight calculates the height of window text.
+func WindowTextHeight(window Window, opts map[string]any) (result map[string]any) {
+	name(nvim_win_text_height)
 }
 
 // WindowVar gets a window-scoped (w:) variable.
